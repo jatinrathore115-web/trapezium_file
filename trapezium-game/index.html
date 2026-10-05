@@ -24,8 +24,8 @@
 <img src="assets/images/ice-panel.webp" alt="" style="position: absolute; left: 108px; top: 78px; width: 1064px; height: 561px; pointer-events: none">
 
 <sc-if value="{{isLesson}}" hint-placeholder-val="{{ true }}">
-<svg class="{{fadeCls}}" viewBox="0 0 520 420" width="520" height="420" style="position: absolute; left: 640px; top: 104px; overflow: visible; touch-action: none" aria-label="Trapezium ABCD">
-<polygon sc-camel-points="{{g.poly}}" fill="rgba(160,212,246,0.6)" stroke="none"></polygon>
+<svg class="{{fadeCls}}" viewBox="0 0 520 420" width="520" height="420" style="position: absolute; left: 640px; top: 104px; overflow: visible; touch-action: none; transform-origin: 0px 0px; transition: transform 0.7s cubic-bezier(0.22, 0.8, 0.3, 1); transform: {{boardTf}}" aria-label="Trapezium ABCD">
+<polygon class="shape-fill {{spotFill}}" sc-camel-points="{{g.poly}}" fill="rgba(160,212,246,0.6)" stroke="none"></polygon>
 <line sc-camel-x1="{{g.dA.x1}}" sc-camel-y1="{{g.dA.y1}}" sc-camel-x2="{{g.dA.x2}}" sc-camel-y2="{{g.dA.y2}}" sc-camel-display="{{g.dA.d}}" class="dashp" stroke="#e8643c" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round"></line>
 <line sc-camel-x1="{{g.dB.x1}}" sc-camel-y1="{{g.dB.y1}}" sc-camel-x2="{{g.dB.x2}}" sc-camel-y2="{{g.dB.y2}}" sc-camel-display="{{g.dB.d}}" class="dashp" stroke="#e8643c" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round"></line>
 <line sc-camel-x1="{{g.xA.x1}}" sc-camel-y1="{{g.xA.y1}}" sc-camel-x2="{{g.xA.x2}}" sc-camel-y2="{{g.xA.y2}}" sc-camel-display="{{g.xA.d}}" stroke="#e8643c" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round"></line>
@@ -64,7 +64,7 @@
 <circle sc-camel-cx="{{g.kC.x}}" sc-camel-cy="{{g.kC.y}}" r="28" data-qa="vtx-C" sc-camel-display="{{g.kC.d}}" class="{{g.kC.cls}}" onClick="{{g.kC.click}}" onPointerDown="{{g.kC.down}}" fill="rgba(0,0,0,0.001)" style="cursor: {{g.kC.cur}}"></circle>
 <circle sc-camel-cx="{{g.kD.x}}" sc-camel-cy="{{g.kD.y}}" r="28" data-qa="vtx-D" sc-camel-display="{{g.kD.d}}" class="{{g.kD.cls}}" onClick="{{g.kD.click}}" onPointerDown="{{g.kD.down}}" fill="rgba(0,0,0,0.001)" style="cursor: {{g.kD.cur}}"></circle>
 </svg>
-<div class="{{fadeCls}}" style="position: absolute; left: 640px; top: 104px; width: 520px; height: 420px; pointer-events: none">
+<div class="{{fadeCls}} board" style="position: absolute; left: 640px; top: 104px; width: 520px; height: 420px; pointer-events: none; transform: {{boardTf}}">
 <sc-for list="{{tags}}" as="tg" hint-placeholder-count="4">
 <div class="tag {{tg.cls}}" style="left: {{tg.x}}px; top: {{tg.y}}px">{{tg.t}}</div>
 </sc-for>
@@ -179,11 +179,11 @@
 </sc-for>
 </div>
 
-<div class="swiftee" style="position: absolute; left: 130px; top: 401px; width: 259px; height: 259px; pointer-events: none">
+<div class="{{swCls}}" style="position: absolute; top: 401px; width: 259px; height: 259px; pointer-events: none">
 <img class="{{birdCls}} swiftee-still" src="assets/images/swiftee.webp" alt="Swiftee the bird" style="position: absolute; left: 42px; top: 29px; width: 180px; height: 198px">
 <canvas class="swiftee-sprite" width="256" height="256" aria-hidden="true" style="position: absolute; left: 0px; top: 0px; width: 259px; height: 259px"></canvas>
 </div>
-<div class="bubble {{bubCls}}" style="position: absolute; left: 240px; bottom: 322px; pointer-events: none">
+<div class="bubble {{bubCls}} {{bubHide}}" style="position: absolute; left: 240px; bottom: 322px; pointer-events: none">
 <div aria-live="polite" class="bubble-text" style="font-size: {{wordSize}}px" data-qa="bubble">
 <sc-for list="{{words}}" as="wd" hint-placeholder-count="6">
 <span class="w {{wd.cls}}">{{wd.t}}</span>

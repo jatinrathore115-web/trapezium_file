@@ -65,6 +65,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   // what Swiftee does when nobody is talking
   restPose() {
     const C = CONFIG.swiftee, st = this.cur();
+    if (st.pose) return st.pose;
     if (st.end) return C.done;
     if (st.cfu && !this.state.done) return C.waiting;
     return C.idle;
@@ -361,6 +362,8 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       moved: false, dragging: null, picks: {}, cfuFirst: true, bird: '', hand: null, line: '', reveal: 0, ruler: this.rulerHome(), rulerDrag: false,
       c4: { at: { iso: null, right: null, scal: null }, locked: {}, sel: null, drag: null, checking: false }
     });
+    if (this.sw) this.sw.setFlip(st.layout === 'spotlight'); // on the right, Swiftee faces left toward the shape
+    this.pose(this.restPose());
     this.playLines(st.lines, () => {});
   }
   navLocked() { return Date.now() - (this.navAt || 0) < CONFIG.timing.navLockMs; }
@@ -764,9 +767,10 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     g.poly = [A, B, C, D].map((p) => r1(p.x) + ',' + r1(p.y)).join(' ');
     g.dA = seg(A, lerp(A, apex, 0.6), !!f.legHint);
     g.dB = seg(B, lerp(B, apex, 0.6), !!f.legHint);
-    g.xA = seg(A, lerp(A, apex, s.ext.DA), task === 'extLegs' && s.ext.DA > 0);
-    g.xB = seg(B, lerp(B, apex, s.ext.BC), task === 'extLegs' && s.ext.BC > 0);
-    g.apex = { x: r1(apex.x - 6.5), y: r1(apex.y - 6.5), d: dsp(task === 'extLegs' && s.done) };
+    const met = !!f.met;
+    g.xA = seg(A, lerp(A, apex, met ? 1 : s.ext.DA), (task === 'extLegs' && s.ext.DA > 0) || met);
+    g.xB = seg(B, lerp(B, apex, met ? 1 : s.ext.BC), (task === 'extLegs' && s.ext.BC > 0) || met);
+    g.apex = { x: r1(apex.x - 6.5), y: r1(apex.y - 6.5), d: dsp((task === 'extLegs' && s.done) || met) };
     const be = (key, p, q) => {
       const t = f.baseExt ? 1 : (task === 'extBases' ? s.ext[key] : 0);
       return seg({ x: p.x - (p.x + 10) * t, y: p.y }, { x: q.x + (530 - q.x) * t, y: q.y }, t > 0);
@@ -953,6 +957,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     else if (st.cfu) progressLabel = 'Check ' + st.cfu + ' / 5';
     else progressLabel = 'Step ' + (s.step + 1) + ' / ' + lessonCount;
     const isLastCfu = st.cfu === 5;
+    const spot = st.layout === 'spotlight';
     return {
       rootMove: (e) => this.rootMove(e),
       rootUp: (e) => this.rootUp(e),
@@ -987,6 +992,11 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       nextDisabled: !s.done,
       nextCls: s.done && !s.talking ? 'ready' : '',
       nextLabel: isLastCfu ? 'Finish' : 'Next',
+      // spotlight: the board (shape + its labels) glides to centre stage and grows; Swiftee moves right; no bubble
+      boardTf: spot ? 'translate(' + CONFIG.spotlight.tx + 'px, ' + CONFIG.spotlight.ty + 'px) scale(' + CONFIG.spotlight.scale + ')' : 'none',
+      spotFill: spot ? 'spot' : '',
+      swCls: spot ? 'swiftee spot' : 'swiftee',
+      bubHide: !s.line ? 'gone' : '',
       // hand: fingertip lands on (x, y); drags travel (dx, dy). key restarts the animation on each showing
       handOn: !!(s.hand && s.hand.kind !== 'opts'),
       hand: s.hand && s.hand.kind !== 'opts'

@@ -5,7 +5,8 @@
 //   task:  what the learner must do before Next unlocks (extLegs, extBases, tapBases, tapLegs, measure,
 //          dragB, tapAngles, dragD90, tapAD, dragD, dragC); hint = how-to Swiftee says if the learner stalls (unless idle is set)
 //   after: lines played once the task is done; autoNext: advance by itself after `after`
-//   f:     board display flags (legHint, baseExt, par, legsPurple, legLen, ticks, arcs, right, eq)
+//   layout: 'spotlight' centres and enlarges the shape, moves Swiftee to the right (pose = held expression)
+//   f:     board display flags (met = legs extended to where they meet, legHint, baseExt, par, legsPurple, legLen, ticks, arcs, right, eq)
 //   cfu:   check number; opts (ok / fb feedback), ok = praise line
 // =====================================================================
 const LESSON = {
@@ -14,6 +15,8 @@ const LESSON = {
     { id: 'meet', lines: [{ m: 'thinking', t: "Hmm… these sides look like they'll meet." }], f: { legHint: 1 } },
     { id: 'extend', lines: [{ m: 'curious', t: "Let's extend them and check!" }], task: 'extLegs', hint: 'Tap each slanted side to extend it',
       after: [{ m: 'surprised', t: 'They meet!' }] },
+    // spotlight: no words. The shape moves to centre stage and glows; Swiftee, on the right, leans in and points at it
+    { id: 'spot', lines: [], layout: 'spotlight', pose: 'curious', f: { met: 1 } },
     { id: 'other', lines: [{ m: 'curious', t: 'What about the other pair?' }], task: 'extBases', hint: 'Tap the top and bottom sides to extend them' },
     { id: 'parallel', lines: [{ m: 'surprised', t: "They don't meet. They're parallel!" }], f: { baseExt: 1 } },
     { id: 'abcd', lines: [{ t: 'So, AB is parallel to CD.', chips: [{ t: 'AB ∥ CD', k: 'white' }] }], f: { par: 1 } },

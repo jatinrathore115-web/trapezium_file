@@ -46,6 +46,8 @@ window.SwifteeMascot = class SwifteeMascot {
     this.target = state;
     if (this.m) this.preload(state);
   }
+  // mirror horizontally (the art faces right; on the right of the screen Swiftee should face left)
+  setFlip(on) { this.flip = !!on; this.cv = null; }
   // fetch sheets ahead of time so a reaction never waits on the network
   warm(states) { if (!this.m) { this.pending = states; return; } states.forEach((s) => this.preload(s)); }
 
@@ -163,6 +165,7 @@ window.SwifteeMascot = class SwifteeMascot {
     const cell = sh.info.cell, cols = sh.info.cols;
     const sx = (f % cols) * cell, sy = Math.floor(f / cols) * cell;
     ctx.globalAlpha = alpha;
+    ctx.setTransform(this.flip ? -1 : 1, 0, 0, 1, this.flip ? ctx.canvas.width : 0, 0);
     ctx.drawImage(sh.img, sx, sy, cell, cell, 0, 0, ctx.canvas.width, ctx.canvas.height);
     return true;
   }
@@ -175,6 +178,7 @@ window.SwifteeMascot = class SwifteeMascot {
       this.ctx = cv.getContext('2d');
     }
     const ctx = this.ctx, c = this.cur;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, cv.width, cv.height);
     let a = 1;
     if (this.fade) {
@@ -185,8 +189,9 @@ window.SwifteeMascot = class SwifteeMascot {
     }
     if (this.blit(ctx, c.anim, this.frameOf(c), a) && !this.drawn) {
       this.drawn = true;
-      if (this.root) this.root.classList.add('live');
+      if (this.root) this.root.setAttribute('data-live', '');
     }
     ctx.globalAlpha = 1;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 };

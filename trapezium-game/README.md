@@ -174,3 +174,10 @@ fingertip on each press. Any touch hides it; it returns only if the learner is i
 `CONFIG.hand.maxShows` times per step). On checks it never points at an answer: the open options glow together,
 and on the labelling check it only presses a label. Targets are read from the page (`data-qa`), so the hand
 stays on target if the layout changes.
+
+## Spotlight screen
+
+Right after "They meet!" (step `spot` in `js/lesson-data.js`, `layout: 'spotlight'`), a wordless moment: the shape
+glides to centre stage, grows, and its fill gently glows; Swiftee hops to the right of the panel, mirrored so she leans
+in and points at the shape (`pose: 'curious'`). Position and size are `CONFIG.spotlight` in `js/config.js`.
+The canvas copy (`canvas-source/`) does not include this screen.

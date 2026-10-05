@@ -86,8 +86,8 @@ a{color:#123b63}a:hover{color:#0b2742}
 .startbtn{height:68px;padding:0 40px;border-radius:999px;border:0;background:#d9640a;color:#fff;font-family:'Baloo 2',system-ui,sans-serif;font-weight:800;font-size:30px;display:flex;align-items:center;gap:12px;box-shadow:0 6px 0 #a54a05;cursor:pointer;animation:ready 1.8s ease-in-out infinite}
 /* Swiftee: sprite canvas over a still fallback; the still hides once the first frame is drawn */
 .swiftee-sprite{opacity:0;transition:opacity .2s ease}
-.swiftee.live .swiftee-sprite{opacity:1}
-.swiftee.live .swiftee-still{opacity:0;transition:opacity .2s ease}
+.swiftee[data-live] .swiftee-sprite{opacity:1}
+.swiftee[data-live] .swiftee-still{opacity:0;transition:opacity .2s ease}
 /* Hand nudge: the wrapper sits exactly on the target; the fingertip (25px, 22px into the 64x90 hand) lands on it.
    Each showing fades in, presses a few times (or demonstrates a drag), then fades out. */
 .hand-nudge{position:absolute;width:0;height:0;pointer-events:none;z-index:20;animation:handLife 4.4s linear forwards}
@@ -114,3 +114,15 @@ a{color:#123b63}a:hover{color:#0b2742}
 .hand-nudge.down .hand-move img{transform:rotate(180deg);transform-origin:25px 22px}
 .hand-nudge.down.tap .hand-move{animation-name:handTapDown}
 @keyframes handTapDown{0%{transform:translate(-14px,-20px)}38%{transform:translate(0,0) scale(1)}48%{transform:translate(0,0) scale(.88)}60%{transform:translate(0,0) scale(1)}100%{transform:translate(-14px,-20px)}}
+/* Spotlight screen. The board glides to centre stage and grows; its fill breathes with a soft glow.
+   Swiftee hops between home (left) and spotlight (right) with a short fade-and-rise rather than sliding across the board. */
+.board{transform-origin:0 0;transition:transform .7s cubic-bezier(.22,.8,.3,1)}
+/* (the board <svg> takes its transform-origin/transition inline: the runtime does not bind class on the svg root) */
+.shape-fill.spot{animation:shapePulse 2.4s ease-in-out .7s infinite}
+@keyframes shapePulse{0%,100%{fill:rgba(160,212,246,.6);filter:drop-shadow(0 0 0 rgba(43,123,214,0))}50%{fill:rgba(126,192,240,.8);filter:drop-shadow(0 0 14px rgba(43,123,214,.45))}}
+.swiftee{left:130px;animation:swHome .45s ease-out}
+.swiftee.spot{left:900px;animation:swSpot .5s ease-out}
+@keyframes swHome{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes swSpot{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.bubble.gone{display:none}
+@media (prefers-reduced-motion: reduce){.board{transition:none}.shape-fill.spot,.swiftee,.swiftee.spot{animation:none}}
