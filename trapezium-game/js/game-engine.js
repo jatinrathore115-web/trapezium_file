@@ -31,7 +31,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       ext: { DA: 0, BC: 0, AB: 0, CD: 0 }, tap: {}, ang: {}, chips: [], toast: null,
       moved: false, dragging: null, picks: {}, cfuFirst: true, results: {},
       c4: { at: { iso: null, right: null, scal: null }, locked: {}, sel: null, drag: null, checking: false },
-      ruler: this.rulerHome(), rulerDrag: false, nudge: ''
+      ruler: this.rulerHome(), rulerDrag: false, hand: null
     };
   }
   steps() { return LESSON.steps; }
@@ -47,8 +47,34 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     return id;
   }
   clearT() { this.T.forEach((id) => clearTimeout(id)); this.T.clear(); }
-  componentDidMount() { this.start(); }
-  componentWillUnmount() { this.clearT(); this.cancelSpeech(); }
+  componentDidMount() {
+    const C = CONFIG.swiftee;
+    if (window.SwifteeMascot) {
+      this.sw = new window.SwifteeMascot({ base: C.base, idle: C.idle, minHoldMs: C.minHoldMs, find: () => document.querySelector('.swiftee') });
+      // every expression the lesson can ask for, so reactions never wait on the network
+      const want = [C.talk, C.waiting, C.praise, C.correct, C.wrong, C.nudge, C.done];
+      LESSON.steps.forEach((st) => (st.lines || []).concat(st.after || []).forEach((L) => { if (L.m) want.push(L.m); }));
+      this.sw.warm(want.filter((x, i) => want.indexOf(x) === i));
+    }
+    this.start();
+  }
+  componentWillUnmount() { this.clearT(); this.cancelSpeech(); if (this.sw) this.sw.destroy(); }
+
+  // ---------- Swiftee ----------
+  pose(state) { if (this.sw) this.sw.play(state); }
+  // what Swiftee does when nobody is talking
+  restPose() {
+    const C = CONFIG.swiftee, st = this.cur();
+    if (st.end) return C.done;
+    if (st.cfu && !this.state.done) return C.waiting;
+    return C.idle;
+  }
+  // a short reaction that settles back on its own unless a line takes over
+  react(state, ms) {
+    this.pose(state);
+    const tok = this.narrTok;
+    this.tm(() => { if (tok === this.narrTok && !this.state.talking) this.pose(this.restPose()); }, ms || 1800);
+  }
 
   // ---------- audio ----------
   synth() { try { return (typeof window !== 'undefined' && window.speechSynthesis) ? window.speechSynthesis : null; } catch (e) { return null; } }
@@ -109,16 +135,20 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const text = L.t;
     const sp = L.s || this.speechOf(text);
     const words = this.toWords(text);
-    const tok = ++this.narrTok;
+    const tok = ++this.narrTok, t0 = Date.now();
     this.curLine = L;
     this.cancelSpeech();
     this.setState({ line: text, reveal: 0, talking: true, bub: this.state.bub === 'bubA' ? 'bubB' : 'bubA' });
+    this.pose(L.m || CONFIG.swiftee.talk);
     let i = 0, rDone = false, sDone = false, fin = false, bMode = false, spoke = false;
     const live = () => tok === this.narrTok;
     const finish = () => {
       if (!live() || fin || !rDone || !sDone) return;
       fin = true;
       this.setState({ talking: false, reveal: words.length });
+      // Swiftee keeps the line's expression about as long as it takes to read it, even when no voice plays
+      const readMs = Math.min(3500, 0.7 * words.reduce((t, w) => t + pace(w), 0));
+      this.tm(() => { if (live()) this.pose(this.restPose()); }, Math.max(0, readMs - (Date.now() - t0)));
       this.tm(() => { if (live() && done) done(); }, 420);
     };
     const revealAll = () => { if (!live()) return; i = words.length; this.setState({ reveal: i }); rDone = true; };
@@ -209,6 +239,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     return this.state.started && !this.state.done && !!(st.task || st.cfu);
   }
   armIdle() {
+    this.armHand();
     if (this.idleId) { clearTimeout(this.idleId); this.T.delete(this.idleId); this.idleId = null; }
     if (!this.needsInput()) return;
     const tok = this.stepTok;
@@ -219,12 +250,78 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       if ((this.idleCount || 0) >= CONFIG.timing.idleMaxHints) return;
       this.idleCount = (this.idleCount || 0) + 1;
       const st = this.cur();
-      this.setState({ nudge: this.state.nudge === 'bumpA' ? 'bumpB' : 'bumpA', bird: 'cheer' });
-      this.tm(() => this.setState({ bird: '' }), 700);
-      this.interject({ t: st.idle || (st.hint + '.') });
+      this.interject({ m: CONFIG.swiftee.nudge, t: st.idle || (st.hint + '.') });
     }, CONFIG.timing.idleMs);
   }
-  poke() { this.idleCount = 0; this.armIdle(); }
+  poke() { this.idleCount = 0; this.hideHand(); this.armIdle(); }
+
+  // ---------- hand nudge ----------
+  // After CONFIG.hand.idleMs with no touch while a tap or drag is expected, a hand shows exactly where
+  // (and, for drags, which way). Any touch hides it and restarts the wait. On checks it never points at an
+  // answer: the open options pulse together instead.
+  handTarget() {
+    const st = this.cur(), s = this.state, P = s.P;
+    if (!s.started || st.end) return null;
+    if (!s.done) {
+      const first = (ks, skip) => ks.find((k) => !skip(k));
+      const t = st.task;
+      let k;
+      if (t === 'extLegs') k = first(['DA', 'BC'], (x) => s.ext[x] > 0);
+      if (t === 'extBases') k = first(['AB', 'CD'], (x) => s.ext[x] > 0);
+      if (t === 'tapBases') k = first(['AB', 'CD'], (x) => s.tap[x]);
+      if (t === 'tapLegs' || t === 'measure') k = first(['DA', 'BC'], (x) => s.tap[x]);
+      if (k) return { qa: 'edge-' + k, kind: 'tap' };
+      if (t === 'tapAngles') k = first(['A', 'B', 'C', 'D'], (x) => s.ang[x]);
+      if (t === 'tapAD') k = first(['A', 'D'], (x) => s.ang[x]);
+      if (k) return { qa: 'vtx-' + k, kind: 'tap' };
+      // drags: slide toward the goal (equal legs, a right angle) or, when any change will do, inward
+      const clamp = (v) => (Math.abs(v) < 12 ? 0 : Math.max(-70, Math.min(70, v)));
+      if (t === 'dragB') return { qa: 'vtx-B', kind: 'drag', dx: clamp(P.C.x - (P.A.x - P.D.x) - P.B.x) || 60, dy: 0 };
+      if (t === 'dragD90') return { qa: 'vtx-D', kind: 'drag', dx: clamp(P.A.x - P.D.x) || 60, dy: 0 };
+      if (t === 'dragD') return { qa: 'vtx-D', kind: 'drag', dx: 60, dy: 0 };
+      if (t === 'dragC') return { qa: 'vtx-C', kind: 'drag', dx: -60, dy: 0 };
+      if (st.cfu === 4) {
+        const c4 = s.c4, lab = this.labsDef().find((l) => !c4.locked[l.id] && !c4.at[l.id]);
+        // press the label only: sliding it anywhere would hint at an answer
+        return lab ? { qa: 'lab-' + lab.id, kind: 'tap' } : null;
+      }
+      if (st.cfu) return { kind: 'opts' };
+      return null;
+    }
+    if (this.state.step < this.steps().length - 1) return { qa: 'next', kind: 'tap' };
+    return null;
+  }
+  hideHand() { if (this.state.hand) this.setState({ hand: null }); }
+  armHand() {
+    if (this.state.hand) return; // already showing: only a touch (poke) or its own timer takes it down
+    if (this.handId) { clearTimeout(this.handId); this.T.delete(this.handId); this.handId = null; }
+    if (!this.handTarget() || (this.handShown || 0) >= CONFIG.hand.maxShows) return;
+    const tok = this.stepTok;
+    this.handId = this.tm(() => {
+      this.handId = null;
+      if (tok !== this.stepTok) return;
+      // wait for Swiftee to finish and for hands to be off the board
+      if (this.state.talking || this.drag || this.ld || this.rd || this.rulerBusy || this.state.c4.checking) { this.armHand(); return; }
+      const T = this.handTarget();
+      if (!T) return;
+      let hand = { kind: T.kind, x: 0, y: 0, dx: T.dx || 0, dy: T.dy || 0, n: (this.handShown || 0) };
+      if (T.qa) {
+        if (typeof document === 'undefined') return;
+        const el = document.querySelector('[data-qa="' + T.qa + '"]'), stage = document.querySelector('.stage');
+        if (!el || !stage) return;
+        const r = el.getBoundingClientRect(), sr = stage.getBoundingClientRect(), sc = sr.width / 1280 || 1;
+        if (!r.width && !r.height) return;
+        hand.x = Math.round((r.left + r.width / 2 - sr.left) / sc);
+        hand.y = Math.round((r.top + r.height / 2 - sr.top) / sc);
+        // near the bottom edge the hand would run off the stage: point down onto the target's top instead
+        if (hand.y + 75 > 715) { hand.down = true; hand.y = Math.round((r.top - sr.top) / sc) + 8; }
+      }
+      this.handShown = (this.handShown || 0) + 1;
+      this.setState({ hand: hand });
+      // a few presses, then step back; it returns only if the learner is still idle
+      this.handId = this.tm(() => { this.handId = null; if (tok === this.stepTok) { this.setState({ hand: null }, () => this.armHand()); } }, CONFIG.hand.showMs);
+    }, CONFIG.hand.idleMs);
+  }
   // Browsers only allow audio after a user gesture, so the first tap unlocks it.
   rootDown() { this.unlockAudio(); if (this.state.started) this.poke(); }
   unlockAudio() {
@@ -251,7 +348,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const st = this.steps()[i];
     if (!st) return;
     this.clearT();
-    this.idleId = null; this.idleCount = 0;
+    this.idleId = null; this.idleCount = 0; this.handId = null; this.handShown = 0;
     this.stepTok++; this.narrTok++;
     this.q = null;
     this.cancelSpeech();
@@ -261,7 +358,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     else P = this.clone(this.snaps[i]);
     this.setState({
       step: i, P: P, done: !st.task && !st.cfu, ext: { DA: 0, BC: 0, AB: 0, CD: 0 }, tap: {}, ang: {}, chips: [], toast: null,
-      moved: false, dragging: null, picks: {}, cfuFirst: true, bird: '', line: '', reveal: 0, ruler: this.rulerHome(), rulerDrag: false,
+      moved: false, dragging: null, picks: {}, cfuFirst: true, bird: '', hand: null, line: '', reveal: 0, ruler: this.rulerHome(), rulerDrag: false,
       c4: { at: { iso: null, right: null, scal: null }, locked: {}, sel: null, drag: null, checking: false }
     });
     this.playLines(st.lines, () => {});
@@ -287,12 +384,11 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (st.after) this.playLines(st.after, () => this.tm(go, 250));
     else if (st.autoNext) this.tm(go, CONFIG.timing.autoNextMs);
   }
-  cheer() { this.setState({ bird: 'cheer' }); this.tm(() => this.setState({ bird: '' }), 1300); }
+  cheer() { this.react(CONFIG.swiftee.praise); }
   oops(text) {
     this.sfx('bad');
-    this.setState({ bird: 'sad', toast: text });
-    this.tm(() => this.setState({ bird: '' }), 600);
-    this.interject({ t: text });
+    this.setState({ toast: text });
+    this.interject({ m: CONFIG.swiftee.wrong, t: text });
     const tok = this.stepTok;
     if (this.toastId) { clearTimeout(this.toastId); this.T.delete(this.toastId); }
     this.toastId = this.tm(() => { if (tok === this.stepTok) this.setState({ toast: null }); }, 4200);
@@ -555,15 +651,14 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       picks[o.id] = 'good';
       const results = Object.assign({}, s.results);
       if (results[st.id] === undefined) results[st.id] = s.cfuFirst;
-      this.setState({ picks: picks, done: true, results: results, chips: [{ t: 'Correct!', k: 'good' }] });
+      this.setState({ picks: picks, done: true, results: results });
       this.sfx('good'); this.cheer();
-      this.interject({ t: st.ok });
+      this.interject({ m: CONFIG.swiftee.correct, t: st.ok });
     } else {
       picks[o.id] = 'bad';
-      this.setState({ picks: picks, cfuFirst: false, chips: [{ t: 'Not quite. Try again!', k: 'bad' }], bird: 'sad' });
-      this.tm(() => this.setState({ bird: '' }), 600);
+      this.setState({ picks: picks, cfuFirst: false });
       this.sfx('bad');
-      this.interject({ t: o.fb });
+      this.interject({ m: CONFIG.swiftee.wrong, t: o.fb });
       this.poke();
     }
   }
@@ -642,14 +737,13 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (all) {
       const results = Object.assign({}, s.results);
       if (results[st.id] === undefined) results[st.id] = s.cfuFirst;
-      this.setState({ done: true, results: results, chips: [{ t: 'Correct!', k: 'good' }] });
+      this.setState({ done: true, results: results });
       this.sfx('good'); this.cheer();
-      this.interject({ t: st.ok });
+      this.interject({ m: CONFIG.swiftee.correct, t: st.ok });
     } else {
-      this.setState({ cfuFirst: false, chips: [{ t: 'Not quite. Try again!', k: 'bad' }], bird: 'sad' });
-      this.tm(() => this.setState({ bird: '' }), 600);
+      this.setState({ cfuFirst: false });
       this.sfx('bad');
-      this.interject({ t: 'Some labels went back. Look for the marks: equal legs, right angles, or neither.' });
+      this.interject({ m: CONFIG.swiftee.wrong, t: 'Some labels went back. Look for the marks: equal legs, right angles, or neither.' });
       this.poke();
     }
   }
@@ -832,13 +926,9 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (isLesson && f.eq === 'AD') chips = [{ t: G.V.A + '° + ' + G.V.D + '° = 180°', k: 'white' }];
     if (isLesson && f.eq === 'BC') chips = [{ t: G.V.B + '° + ' + G.V.C + '° = 180°', k: 'white' }];
     if (st.id === 'add' && s.done) chips = [{ t: G.V.A + '° + ' + G.V.D + '° = 180°', k: 'gold' }];
-    // hint
-    let hintText = '', hintCls = '';
-    if (s.toast) { hintText = 'Not that one. Try again!'; hintCls = 'warn'; }
-    else if (st.cfu) { hintText = st.hint; hintCls = 'cfu'; }
-    else if (st.task && !s.done) { hintText = st.hint; }
     // cfu options
-    const mk = (o) => ({ id: o.id, t: o.t || o.id, cls: s.picks[o.id] || '', dis: !!s.picks[o.id] || s.done, pick: () => this.pick(o) });
+    const optPulse = s.hand && s.hand.kind === 'opts';
+    const mk = (o) => ({ id: o.id, t: o.t || o.id, cls: s.picks[o.id] || (optPulse && !s.done ? 'nudged' : ''), dis: !!s.picks[o.id] || s.done, pick: () => this.pick(o) });
     const c1 = {};
     if (st.cfu === 1) st.opts.forEach((o) => { c1[o.id] = mk(o); });
     const hasOpts = !!(st.cfu && st.cfu !== 1 && st.opts);
@@ -882,9 +972,8 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       bubCls: s.bub,
       // lesson steps share one board, so it only fades in when it first appears; each check fades in fresh
       fadeCls: st.cfu || st.end ? (s.step % 2 ? 'fadeA' : 'fadeB') : 'fadeA',
-      birdCls: 'bird', // Swiftee stays static; feedback comes from chips, hints and narration
+      birdCls: 'bird', // Swiftee's expressions are driven by pose() (js/swiftee.js), not by re-rendering
       chips: chips.map((c) => ({ t: c.t, k: c.k + (c.t.length > 20 ? ' long' : '') })),
-      hintShow: !!hintText && s.started, hintText: hintText, hintCls: hintCls + (s.nudge ? ' ' + s.nudge : ''),
       rootDown: () => this.rootDown(),
       wordSize: words.length > 15 ? 22 : 24,
       c1: c1, hasOpts: hasOpts, opts: opts, optTop: st.optTop || 376,
@@ -897,7 +986,12 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       backDisabled: s.step === 0,
       nextDisabled: !s.done,
       nextCls: s.done && !s.talking ? 'ready' : '',
-      nextLabel: isLastCfu ? 'Finish' : 'Next'
+      nextLabel: isLastCfu ? 'Finish' : 'Next',
+      // hand: fingertip lands on (x, y); drags travel (dx, dy). key restarts the animation on each showing
+      handOn: !!(s.hand && s.hand.kind !== 'opts'),
+      hand: s.hand && s.hand.kind !== 'opts'
+        ? { cls: 'hand-nudge ' + s.hand.kind + (s.hand.down ? ' down' : ''), x: s.hand.x, y: s.hand.y, dx: s.hand.dx, dy: s.hand.dy }
+        : { cls: 'hand-nudge', x: 0, y: 0, dx: 0, dy: 0 }
     };
   }
 };

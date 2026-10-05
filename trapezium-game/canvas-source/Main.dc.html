@@ -64,7 +64,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 .alab.d1{animation-delay:.25s}
 .alab.d2{animation-delay:.4s}
 .alab.d3{animation-delay:.55s}
-.hint{animation:fade .3s ease-out}
 @keyframes arcIn{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
 .fadein{animation:fade .35s ease-out}
 @keyframes fade{from{opacity:0}to{opacity:1}}
@@ -72,10 +71,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 .fadeB{animation:fadeB .3s ease-out}
 @keyframes fadeA{from{opacity:0}to{opacity:1}}
 @keyframes fadeB{from{opacity:0}to{opacity:1}}
-.hint{font-weight:800;font-size:17px;padding:7px 18px;border-radius:999px;background:rgba(255,255,255,.92);color:#123b63;border:2px solid #bfe0f5;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(18,59,99,.1)}
-.hint.warn{background:#fff3e4;border-color:#f6b66b;color:#8a4307}
-.hint.cfu{background:#123b63;color:#fff;border-color:#123b63}
-.dot{width:10px;height:10px;border-radius:50%;background:#f08a24;animation:dashp 1.2s ease-in-out infinite}
 .next{height:54px;padding:0 26px 0 30px;border-radius:999px;border:0;background:#d9640a;color:#fff;font-family:'Baloo 2',system-ui,sans-serif;font-weight:800;font-size:24px;display:flex;align-items:center;gap:8px;box-shadow:0 5px 0 #a54a05;cursor:pointer}
 .next:disabled{background:#9fb3c4;box-shadow:0 5px 0 #7d92a4;cursor:not-allowed}
 .next.ready{animation:ready 1.8s ease-in-out infinite}
@@ -88,8 +83,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 .opt.bad{background:#fde6e3;border-color:#d94a35;box-shadow:0 4px 0 #ad3523;animation:shake .4s ease}
 .opt:disabled{cursor:default}
 .opt:disabled:hover{transform:none}
-.hint.bumpA{animation:bumpA .6s ease}
-.hint.bumpB{animation:bumpB .6s ease}
 @keyframes bumpA{0%,100%{transform:scale(1)}40%{transform:scale(1.12)}}
 @keyframes bumpB{0%,100%{transform:scale(1)}40%{transform:scale(1.12)}}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
@@ -265,12 +258,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 </sc-for>
 </div>
 
-<sc-if value="{{hintShow}}" hint-placeholder-val="{{ false }}">
-<div style="position: absolute; left: 640px; top: 84px; width: 520px; display: flex; justify-content: center; pointer-events: none">
-<div class="hint {{hintCls}}" data-qa="hint"><span class="dot"></span>{{hintText}}</div>
-</div>
-</sc-if>
-
 <img class="{{birdCls}}" src="assets/images/swiftee.webp" alt="Swiftee the bird" style="position: absolute; left: 172px; top: 430px; width: 180px; height: 198px; pointer-events: none">
 <div class="bubble {{bubCls}}" style="position: absolute; left: 240px; bottom: 322px; pointer-events: none">
 <div aria-live="polite" class="bubble-text" style="font-size: {{wordSize}}px" data-qa="bubble">
@@ -322,7 +309,7 @@ const LESSON = {
     { id: 'intro', lines: [{ t: "Let's take a closer look at what Popo caught." }] },
     { id: 'meet', lines: [{ t: "Hmm… these sides look like they'll meet." }], f: { legHint: 1 } },
     { id: 'extend', lines: [{ t: "Let's extend them and check!" }], task: 'extLegs', hint: 'Tap each slanted side to extend it',
-      after: [{ t: 'They meet!', chips: [{ t: 'They meet!', k: 'white' }] }] },
+      after: [{ t: 'They meet!' }] },
     { id: 'other', lines: [{ t: 'What about the other pair?' }], task: 'extBases', hint: 'Tap the top and bottom sides to extend them' },
     { id: 'parallel', lines: [{ t: "They don't meet. They're parallel!" }], f: { baseExt: 1 } },
     { id: 'abcd', lines: [{ t: 'So, AB is parallel to CD.', chips: [{ t: 'AB ∥ CD', k: 'white' }] }], f: { par: 1 } },
@@ -426,7 +413,7 @@ class Component extends DCLogic {
       ext: { DA: 0, BC: 0, AB: 0, CD: 0 }, tap: {}, ang: {}, chips: [], toast: null,
       moved: false, dragging: null, picks: {}, cfuFirst: true, results: {},
       c4: { at: { iso: null, right: null, scal: null }, locked: {}, sel: null, drag: null, checking: false },
-      ruler: this.rulerHome(), rulerDrag: false, nudge: ''
+      ruler: this.rulerHome(), rulerDrag: false
     };
   }
   steps() { return LESSON.steps; }
@@ -614,7 +601,7 @@ class Component extends DCLogic {
       if ((this.idleCount || 0) >= CONFIG.timing.idleMaxHints) return;
       this.idleCount = (this.idleCount || 0) + 1;
       const st = this.cur();
-      this.setState({ nudge: this.state.nudge === 'bumpA' ? 'bumpB' : 'bumpA', bird: 'cheer' });
+      this.setState({ bird: 'cheer' });
       this.tm(() => this.setState({ bird: '' }), 700);
       this.interject({ t: st.idle || (st.hint + '.') });
     }, CONFIG.timing.idleMs);
@@ -950,12 +937,12 @@ class Component extends DCLogic {
       picks[o.id] = 'good';
       const results = Object.assign({}, s.results);
       if (results[st.id] === undefined) results[st.id] = s.cfuFirst;
-      this.setState({ picks: picks, done: true, results: results, chips: [{ t: 'Correct!', k: 'good' }] });
+      this.setState({ picks: picks, done: true, results: results });
       this.sfx('good'); this.cheer();
       this.interject({ t: st.ok });
     } else {
       picks[o.id] = 'bad';
-      this.setState({ picks: picks, cfuFirst: false, chips: [{ t: 'Not quite. Try again!', k: 'bad' }], bird: 'sad' });
+      this.setState({ picks: picks, cfuFirst: false, bird: 'sad' });
       this.tm(() => this.setState({ bird: '' }), 600);
       this.sfx('bad');
       this.interject({ t: o.fb });
@@ -1037,11 +1024,11 @@ class Component extends DCLogic {
     if (all) {
       const results = Object.assign({}, s.results);
       if (results[st.id] === undefined) results[st.id] = s.cfuFirst;
-      this.setState({ done: true, results: results, chips: [{ t: 'Correct!', k: 'good' }] });
+      this.setState({ done: true, results: results });
       this.sfx('good'); this.cheer();
       this.interject({ t: st.ok });
     } else {
-      this.setState({ cfuFirst: false, chips: [{ t: 'Not quite. Try again!', k: 'bad' }], bird: 'sad' });
+      this.setState({ cfuFirst: false, bird: 'sad' });
       this.tm(() => this.setState({ bird: '' }), 600);
       this.sfx('bad');
       this.interject({ t: 'Some labels went back. Look for the marks: equal legs, right angles, or neither.' });
@@ -1227,11 +1214,6 @@ class Component extends DCLogic {
     if (isLesson && f.eq === 'AD') chips = [{ t: G.V.A + '° + ' + G.V.D + '° = 180°', k: 'white' }];
     if (isLesson && f.eq === 'BC') chips = [{ t: G.V.B + '° + ' + G.V.C + '° = 180°', k: 'white' }];
     if (st.id === 'add' && s.done) chips = [{ t: G.V.A + '° + ' + G.V.D + '° = 180°', k: 'gold' }];
-    // hint
-    let hintText = '', hintCls = '';
-    if (s.toast) { hintText = 'Not that one. Try again!'; hintCls = 'warn'; }
-    else if (st.cfu) { hintText = st.hint; hintCls = 'cfu'; }
-    else if (st.task && !s.done) { hintText = st.hint; }
     // cfu options
     const mk = (o) => ({ id: o.id, t: o.t || o.id, cls: s.picks[o.id] || '', dis: !!s.picks[o.id] || s.done, pick: () => this.pick(o) });
     const c1 = {};
@@ -1279,7 +1261,6 @@ class Component extends DCLogic {
       fadeCls: st.cfu || st.end ? (s.step % 2 ? 'fadeA' : 'fadeB') : 'fadeA',
       birdCls: 'bird', // Swiftee stays static; feedback comes from chips, hints and narration
       chips: chips.map((c) => ({ t: c.t, k: c.k + (c.t.length > 20 ? ' long' : '') })),
-      hintShow: !!hintText && s.started, hintText: hintText, hintCls: hintCls + (s.nudge ? ' ' + s.nudge : ''),
       rootDown: () => this.rootDown(),
       wordSize: words.length > 15 ? 22 : 24,
       c1: c1, hasOpts: hasOpts, opts: opts, optTop: st.optTop || 376,

@@ -53,7 +53,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 .alab.d1{animation-delay:.25s}
 .alab.d2{animation-delay:.4s}
 .alab.d3{animation-delay:.55s}
-.hint{animation:fade .3s ease-out}
 @keyframes arcIn{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
 .fadein{animation:fade .35s ease-out}
 @keyframes fade{from{opacity:0}to{opacity:1}}
@@ -61,10 +60,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 .fadeB{animation:fadeB .3s ease-out}
 @keyframes fadeA{from{opacity:0}to{opacity:1}}
 @keyframes fadeB{from{opacity:0}to{opacity:1}}
-.hint{font-weight:800;font-size:17px;padding:7px 18px;border-radius:999px;background:rgba(255,255,255,.92);color:#123b63;border:2px solid #bfe0f5;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(18,59,99,.1)}
-.hint.warn{background:#fff3e4;border-color:#f6b66b;color:#8a4307}
-.hint.cfu{background:#123b63;color:#fff;border-color:#123b63}
-.dot{width:10px;height:10px;border-radius:50%;background:#f08a24;animation:dashp 1.2s ease-in-out infinite}
 .next{height:54px;padding:0 26px 0 30px;border-radius:999px;border:0;background:#d9640a;color:#fff;font-family:'Baloo 2',system-ui,sans-serif;font-weight:800;font-size:24px;display:flex;align-items:center;gap:8px;box-shadow:0 5px 0 #a54a05;cursor:pointer}
 .next:disabled{background:#9fb3c4;box-shadow:0 5px 0 #7d92a4;cursor:not-allowed}
 .next.ready{animation:ready 1.8s ease-in-out infinite}
@@ -77,8 +72,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 .opt.bad{background:#fde6e3;border-color:#d94a35;box-shadow:0 4px 0 #ad3523;animation:shake .4s ease}
 .opt:disabled{cursor:default}
 .opt:disabled:hover{transform:none}
-.hint.bumpA{animation:bumpA .6s ease}
-.hint.bumpB{animation:bumpB .6s ease}
 @keyframes bumpA{0%,100%{transform:scale(1)}40%{transform:scale(1.12)}}
 @keyframes bumpB{0%,100%{transform:scale(1)}40%{transform:scale(1.12)}}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
@@ -91,3 +84,33 @@ a{color:#123b63}a:hover{color:#0b2742}
 .star{color:#c9d6e0}
 .star.on{color:#f2b51c}
 .startbtn{height:68px;padding:0 40px;border-radius:999px;border:0;background:#d9640a;color:#fff;font-family:'Baloo 2',system-ui,sans-serif;font-weight:800;font-size:30px;display:flex;align-items:center;gap:12px;box-shadow:0 6px 0 #a54a05;cursor:pointer;animation:ready 1.8s ease-in-out infinite}
+/* Swiftee: sprite canvas over a still fallback; the still hides once the first frame is drawn */
+.swiftee-sprite{opacity:0;transition:opacity .2s ease}
+.swiftee.live .swiftee-sprite{opacity:1}
+.swiftee.live .swiftee-still{opacity:0;transition:opacity .2s ease}
+/* Hand nudge: the wrapper sits exactly on the target; the fingertip (25px, 22px into the 64x90 hand) lands on it.
+   Each showing fades in, presses a few times (or demonstrates a drag), then fades out. */
+.hand-nudge{position:absolute;width:0;height:0;pointer-events:none;z-index:20;animation:handLife 4.4s linear forwards}
+.hand-move{position:absolute;left:-25px;top:-22px;width:64px;height:90px;transform-origin:25px 22px;filter:drop-shadow(0 4px 6px rgba(18,59,99,.28))}
+.hand-move img{display:block;width:100%;height:100%}
+.hand-ring{position:absolute;left:-26px;top:-26px;width:52px;height:52px;border-radius:50%;border:3px solid #f08a24;background:rgba(240,138,36,.16);box-sizing:border-box;opacity:0}
+.hand-nudge.tap .hand-move{animation:handTap 1.4s cubic-bezier(.45,0,.3,1) infinite}
+.hand-nudge.tap .hand-ring{animation:handRing 1.4s ease-out infinite}
+.hand-nudge.drag .hand-move{animation:handDrag 2.1s cubic-bezier(.45,0,.3,1) infinite}
+.hand-nudge.drag .hand-ring{animation:handRingDrag 2.1s ease-out infinite}
+@keyframes handLife{0%{opacity:0}7%{opacity:1}92%{opacity:1}100%{opacity:0}}
+@keyframes handTap{0%{transform:translate(14px,20px)}38%{transform:translate(0,0) scale(1)}48%{transform:translate(0,0) scale(.88)}60%{transform:translate(0,0) scale(1)}100%{transform:translate(14px,20px)}}
+@keyframes handRing{0%,44%{transform:scale(.35);opacity:0}52%{opacity:.9}100%{transform:scale(1.45);opacity:0}}
+@keyframes handDrag{0%{transform:translate(12px,18px);opacity:0}12%{transform:translate(0,0);opacity:1}22%{transform:translate(0,0) scale(.88)}66%{transform:translate(var(--dx),var(--dy)) scale(.88);opacity:1}76%{transform:translate(var(--dx),var(--dy)) scale(1);opacity:1}92%,100%{transform:translate(var(--dx),var(--dy)) scale(1);opacity:0}}
+@keyframes handRingDrag{0%,14%{transform:scale(.35);opacity:0}22%{opacity:.9}50%,100%{transform:scale(1.45);opacity:0}}
+/* checks: never point at an answer; the open options glow together instead */
+.opt.nudged{animation:optNudge 1.5s ease-in-out 3}
+@keyframes optNudge{0%,100%{box-shadow:0 4px 0 #9ccbe8,0 0 0 0 rgba(240,138,36,0)}50%{box-shadow:0 4px 0 #9ccbe8,0 0 0 6px rgba(240,138,36,.35)}}
+@media (prefers-reduced-motion: reduce){
+  .hand-nudge,.hand-nudge .hand-move,.hand-nudge .hand-ring,.opt.nudged{animation:none}
+  .hand-nudge .hand-ring{opacity:.6}
+}
+/* pointing down from above (targets at the bottom edge, e.g. Next): the hand is turned about its fingertip */
+.hand-nudge.down .hand-move img{transform:rotate(180deg);transform-origin:25px 22px}
+.hand-nudge.down.tap .hand-move{animation-name:handTapDown}
+@keyframes handTapDown{0%{transform:translate(-14px,-20px)}38%{transform:translate(0,0) scale(1)}48%{transform:translate(0,0) scale(.88)}60%{transform:translate(0,0) scale(1)}100%{transform:translate(-14px,-20px)}}

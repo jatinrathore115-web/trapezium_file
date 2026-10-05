@@ -11,6 +11,8 @@
 <script src="js/vendor/dc-runtime.js"></script>
 <script src="js/config.js"></script>
 <script src="js/lesson-data.js"></script>
+<script src="js/swiftee-manifest.js"></script>
+<script src="js/swiftee.js"></script>
 <script src="js/game-engine.js"></script>
 </head>
 <body>
@@ -177,13 +179,10 @@
 </sc-for>
 </div>
 
-<sc-if value="{{hintShow}}" hint-placeholder-val="{{ false }}">
-<div style="position: absolute; left: 640px; top: 84px; width: 520px; display: flex; justify-content: center; pointer-events: none">
-<div class="hint {{hintCls}}" data-qa="hint"><span class="dot"></span>{{hintText}}</div>
+<div class="swiftee" style="position: absolute; left: 130px; top: 401px; width: 259px; height: 259px; pointer-events: none">
+<img class="{{birdCls}} swiftee-still" src="assets/images/swiftee.webp" alt="Swiftee the bird" style="position: absolute; left: 42px; top: 29px; width: 180px; height: 198px">
+<canvas class="swiftee-sprite" width="256" height="256" aria-hidden="true" style="position: absolute; left: 0px; top: 0px; width: 259px; height: 259px"></canvas>
 </div>
-</sc-if>
-
-<img class="{{birdCls}}" src="assets/images/swiftee.webp" alt="Swiftee the bird" style="position: absolute; left: 172px; top: 430px; width: 180px; height: 198px; pointer-events: none">
 <div class="bubble {{bubCls}}" style="position: absolute; left: 240px; bottom: 322px; pointer-events: none">
 <div aria-live="polite" class="bubble-text" style="font-size: {{wordSize}}px" data-qa="bubble">
 <sc-for list="{{words}}" as="wd" hint-placeholder-count="6">
@@ -200,6 +199,13 @@
 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
 </button>
 <button class="next {{nextCls}}" data-qa="next" disabled="{{nextDisabled}}" onClick="{{next}}">{{nextLabel}}<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
+</div>
+</sc-if>
+
+<sc-if value="{{handOn}}" hint-placeholder-val="{{ false }}">
+<div class="{{hand.cls}}" style="left: {{hand.x}}px; top: {{hand.y}}px; --dx: {{hand.dx}}px; --dy: {{hand.dy}}px" aria-hidden="true">
+<span class="hand-ring"></span>
+<span class="hand-move"><img src="assets/images/hand-nudge.webp" alt=""></span>
 </div>
 </sc-if>
 

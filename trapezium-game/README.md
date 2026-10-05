@@ -11,10 +11,12 @@ trapezium-game/
 ├── index.html                  page + game markup (layout with {{bindings}}, no logic)
 ├── assets/
 │   └── images/
-│       ├── swiftee.webp            Swiftee (companion character)
-│       ├── speech-bubble.webp      dialogue bubble
+│       ├── swiftee.webp            Swiftee still (shown until the animated sprite is ready)
+│       ├── speech-bubble.webp      (unused: the bubble is now drawn in CSS)
 │       ├── ice-panel.webp          glass board panel
 │       └── snow-background.webp    snowy background
+├── swiftee-assets/             Swiftee sprite sheets + manifest (the game reads atlas/swiftee.manifest.json
+│                               and spritesheets/1x|2x; see swiftee-assets/README.md)
 ├── css/
 │   ├── stage.css               page shell: letterboxes the 1920×1080 stage
 │   └── game.css                game styles: bubble, Swiftee, board, labels, chips, buttons, CFUs, animations
@@ -23,8 +25,12 @@ trapezium-game/
 │   │   └── dc-runtime.js       template + rendering runtime (from the Design canvas; bundles React 18)
 │   ├── config.js               CONFIG: scale, starting shape, drag limits, snapping, timings, stars
 │   ├── lesson-data.js          LESSON: every learning state and CFU, in play order (content as data)
+│   ├── swiftee-manifest.js     GENERATED trimmed copy of the Swiftee manifest (works from file://)
+│   ├── swiftee.js              Swiftee mascot: plays start → loop → stop expressions on a canvas
 │   ├── game-engine.js          the game: narration, geometry, drags, ruler, CFUs, scoring, render values
 │   └── stage-fit.js            scales the stage to the window
+├── tools/
+│   └── build-swiftee-manifest.js   regenerates js/swiftee-manifest.js after the sheets change
 ├── canvas-source/
 │   ├── Main.dc.html            same game as one file, for re-importing into a Claude Design canvas
 │   └── canvas.json
@@ -36,7 +42,7 @@ trapezium-game/
     └── fake-speech.js · no-speech.js · native-speech.js   speech modes for the tests
 ```
 
-Script load order (in `index.html`): `dc-runtime.js` → `config.js` → `lesson-data.js` → `game-engine.js`,
+Script load order (in `index.html`): `dc-runtime.js` → `config.js` → `lesson-data.js` → `swiftee-manifest.js` → `swiftee.js` → `game-engine.js`,
 then `stage-fit.js` at the end of the body.
 
 ## Run it
@@ -54,6 +60,8 @@ Mouse, touch and pen all work.
 
 - **Words, lines, hints, feedback, CFU answers** → `js/lesson-data.js`
 - **Snapping, drag limits, pacing, idle hints, stars** → `js/config.js`
+- **Swiftee's expression on a line** → the line's `m` in `js/lesson-data.js` (default `talking`)
+- **Swiftee's reactions** (idle, thinking time, praise, correct, wrong, idle hint, end) → `CONFIG.swiftee` in `js/config.js`
 - **Colours, sizes, animations** → `css/game.css`
 - **Layout / positions of screen elements** → `index.html` (inside `<x-dc>`)
 - **Behaviour** → `js/game-engine.js` (sections: timers · audio · narration · idle hints · flow · ruler ·
@@ -131,3 +139,38 @@ python3 qa/make-debug.py && node qa/geometry-sweep.js
 - Fonts (Baloo 2, Nunito) load from Google Fonts; offline, system fonts are used and the layout still fits.
 - Voice quality depends on the device's installed voices.
 - `js/vendor/dc-runtime.js` bundles React; the game's own code (config, lesson data, engine) is plain JavaScript.
+
+## Swiftee
+
+Swiftee reacts to what is being said. Each narration line can name an expression (`m`); everything else comes from `CONFIG.swiftee`:
+
+| Moment | Expression |
+|---|---|
+| Greeting | `waving` |
+| Explaining | `talking` |
+| Asking the learner to do something, asking a check question | `curious` |
+| "Hmm…" / wondering aloud, check question open | `thinking` |
+| A discovery ("They meet!", "They're parallel!") | `surprised` |
+| Task done, praise | `happy` |
+| Check answered correctly, lesson complete | `celebrating` |
+| Wrong answer or tap | `confused` (encouraging) |
+| Idle hint | `curious` |
+| Nobody talking | `blinking` |
+
+Every expression plays its start once, loops, then plays its stop before the next one, so changes never jump.
+An expression stays at least `minHoldMs` and about as long as the line takes to read, even with the sound off.
+Sheets load from `swiftee-assets/` (@2x only when Swiftee is drawn larger than 300 device pixels), and
+`prefers-reduced-motion` shows still poses. If the sheets can't load, the still image stays.
+After replacing the sheets, run `node tools/build-swiftee-manifest.js`.
+
+`canvas-source/Main.dc.html` keeps the still Swiftee: the canvas copy can't load the sprite sheets.
+
+## Hand nudge
+
+When a tap or drag is expected and nothing is touched for `CONFIG.hand.idleMs` (8 s) after Swiftee stops talking,
+a hand (`assets/images/hand-nudge.webp`) shows exactly where: the next side or corner to tap, the point to drag
+(sliding the way that reaches the goal), or the Next button once a step is finished. A soft ring pulses from the
+fingertip on each press. Any touch hides it; it returns only if the learner is idle again (at most
+`CONFIG.hand.maxShows` times per step). On checks it never points at an answer: the open options glow together,
+and on the labelling check it only presses a label. Targets are read from the page (`data-qa`), so the hand
+stays on target if the layout changes.

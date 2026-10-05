@@ -11,7 +11,7 @@ const { chromium } = require('playwright');
     const R=e=>{const r=e.getBoundingClientRect(); return {l:r.left,t:r.top,r:r.right,b:r.bottom};};
     const items=[];
     const add=(sel,kind)=>document.querySelectorAll(sel).forEach(e=>{ if(vis(e)) items.push({kind, txt:(e.textContent||'').trim().slice(0,18), ...R(e)}); });
-    add('.tag:not(.off)','tag'); add('.chip','chip'); add('[data-qa="hint"]','hint'); add('.opt','opt'); add('.lab','lab'); add('[data-qa="next"]','nav'); add('[data-qa="back"]','nav');
+    add('.tag:not(.off)','tag'); add('.chip','chip'); add('.opt','opt'); add('.lab','lab'); add('[data-qa="next"]','nav'); add('[data-qa="back"]','nav');
     const bub=document.querySelector('[data-qa="bubble"]').parentElement; items.push({kind:'bubble',txt:'',...R(bub)});
     const bird=document.querySelector('img.bird'); if(bird) items.push({kind:'bird',txt:'',...R(bird)});
     const out=[]; const ov=(a,b,m=2)=>a.l<b.r-m&&b.l<a.r-m&&a.t<b.b-m&&b.t<a.b-m;

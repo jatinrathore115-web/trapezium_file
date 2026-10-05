@@ -36,7 +36,6 @@ const results=[]; const ok=(c,m)=>{results.push((c?'PASS ':'FAIL ')+m); if(!c) c
   const chips=async()=>p.evaluate(()=>[...document.querySelectorAll('.chip')].map(c=>c.textContent));
   const tags=async()=>p.evaluate(()=>[...document.querySelectorAll('.tag:not(.vlab):not(.off)')].map(c=>c.textContent));
   const nextEnabled=async()=>p.locator(Q('next')).isEnabled();
-  const hint=async()=>p.locator(Q('hint')).first().innerText().catch(()=>'');
   const waitNext=async(ms=12000)=>{const t0=Date.now(); while(Date.now()-t0<ms){ if(await nextEnabled()) return true; await p.waitForTimeout(100);} return false;};
   const waitTalk=async(ms=15000)=>{const t0=Date.now(); while(Date.now()-t0<ms){ const talking=await p.evaluate(()=>!!document.querySelector('[data-qa="bubble"] .w.cur')); const sp=await p.evaluate(()=>!!(window.speechSynthesis&&speechSynthesis.speaking)); if(!talking&&!sp) return; await p.waitForTimeout(100);} };
 
@@ -46,7 +45,7 @@ const results=[]; const ok=(c,m)=>{results.push((c?'PASS ':'FAIL ')+m); if(!c) c
     const R=e=>{const r=e.getBoundingClientRect(); return {l:r.left,t:r.top,r:r.right,b:r.bottom};};
     const items=[];
     const add=(sel,kind)=>document.querySelectorAll(sel).forEach(e=>{ if(vis(e)) items.push({kind, txt:(e.textContent||'').trim().slice(0,18), ...R(e)}); });
-    add('.tag:not(.off)','tag'); add('.chip','chip'); add('[data-qa="hint"]','hint'); add('.opt','opt'); add('.lab','lab'); add('[data-qa="next"]','nav'); add('[data-qa="back"]','nav');
+    add('.tag:not(.off)','tag'); add('.chip','chip'); add('.opt','opt'); add('.lab','lab'); add('[data-qa="next"]','nav'); add('[data-qa="back"]','nav');
     const bub=document.querySelector('[data-qa="bubble"]').parentElement; items.push({kind:'bubble',txt:'',...R(bub)});
     const bird=document.querySelector('img.bird'); if(bird) items.push({kind:'bird',txt:'',...R(bird)});
     const out=[]; const ov=(a,b,m=2)=>a.l<b.r-m&&b.l<a.r-m&&a.t<b.b-m&&b.t<a.b-m;
@@ -97,7 +96,7 @@ const results=[]; const ok=(c,m)=>{results.push((c?'PASS ':'FAIL ')+m); if(!c) c
   // ---- step 3 extend legs ----
   ok(!(await nextEnabled()), 'Next locked until task done');
   await tap('edge-AB'); await p.waitForTimeout(300);
-  ok((await hint()).includes('Not that one'), 'wrong tap shows warning');
+  ok((await bubble()).startsWith('Try a slanted side'), 'wrong tap: Swiftee explains in the bubble');
   await tap('edge-DA'); await tap('edge-DA'); await tap('edge-BC'); await p.waitForTimeout(1300);
   ok((await chips()).includes('They meet!'), 'legs meet chip');
   ok(await nextEnabled(), 'Next unlocked after extend');
@@ -159,7 +158,7 @@ const results=[]; const ok=(c,m)=>{results.push((c?'PASS ':'FAIL ')+m); if(!c) c
   ok(await waitLabel('Step 16 '),'auto-advance to right trapezium');
   ok(await waitChip('Right trapezium'),'right chip'); await shot('right');
   await next(); // add
-  await tap('vtx-B'); await p.waitForTimeout(150); ok((await hint()).includes('Not that one'),'wrong corner warned');
+  await tap('vtx-B'); await p.waitForTimeout(150); ok((await bubble()).startsWith('Tap the angles at A and D'),'wrong corner: Swiftee explains in the bubble');
   await tap('vtx-A'); await tap('vtx-D'); await p.waitForTimeout(500);
   ok((await chips()).includes('90° + 90° = 180°'),'sum chip'); await shot('add');
   await next(); // change D
@@ -206,7 +205,7 @@ const results=[]; const ok=(c,m)=>{results.push((c?'PASS ':'FAIL ')+m); if(!c) c
   // idle hint
   await next(); await next(); // extend step
   await waitTalk(); const before=await bubble(); await p.waitForTimeout(9800);
-  ok((await bubble())!==before && (await p.getAttribute(Q('hint'),'class')).match(/bump/), 'idle hint after 9s: '+await bubble());
+  ok((await bubble())!==before, 'idle hint after 9s: '+await bubble());
   ok(errs.length===0,'no page errors: '+errs.join(' | '));
   console.log('AUDIT', audits.length? '\n  '+audits.join('\n  ') : 'clean');
   fs.writeFileSync(`qa-shots/report-${MODE}-${SPEECH}-${VP[0]}.txt`, results.join('\n'));
