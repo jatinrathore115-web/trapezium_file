@@ -73,11 +73,9 @@ const results=[]; const ok=(c,m)=>{results.push((c?'PASS ':'FAIL ')+m); if(!c) c
   const waitLabel=async(pre,ms=5000)=>{const t0=Date.now(); while(Date.now()-t0<ms){ if((await label()).startsWith(pre)) return true; await p.waitForTimeout(100);} return false;};
   const next=async()=>{ await p.waitForTimeout(500); await tap('next'); await p.waitForTimeout(250); };
 
-  // ---- start (double-click protection on Start) ----
+  // ---- lesson starts on load (no Start screen) ----
   await shot('start');
-  if(MODE==='mouse'){ const c=await box('start'); await p.mouse.dblclick(c.x,c.y); } else await tap('start');
-  await p.waitForTimeout(200);
-  ok((await label()).startsWith('Step 1 '), 'start lands on step 1: '+await label());
+  ok((await label()).startsWith('Step 1 '), 'loads straight into step 1: '+await label());
   // word-by-word timing vs fake voice boundaries
   const samples=[]; for(let i=0;i<14;i++){ samples.push([await shown(), await p.evaluate(()=>__speech.log.filter(l=>l.text.includes('Popo')).length)]); await p.waitForTimeout(150);} 
   okS(samples.every(([w,bd])=>w<=bd+1), 'words never run >1 ahead of voice: '+JSON.stringify(samples));
@@ -209,10 +207,6 @@ const results=[]; const ok=(c,m)=>{results.push((c?'PASS ':'FAIL ')+m); if(!c) c
   await next(); await next(); // extend step
   await waitTalk(); const before=await bubble(); await p.waitForTimeout(9800);
   ok((await bubble())!==before && (await p.getAttribute(Q('hint'),'class')).match(/bump/), 'idle hint after 9s: '+await bubble());
-  // mute
-  const sp0=await p.evaluate(()=>__speech.spoken.length);
-  await p.locator('[aria-label="Turn sound off"]').click(); await tap('replay').catch(()=>{}); await p.locator('[aria-label="Replay narration"]').click(); await p.waitForTimeout(400);
-  ok((await p.evaluate(()=>__speech.spoken.length))===sp0,'muted replay does not speak'); ok((await shown())>0,'muted replay still reveals words');
   ok(errs.length===0,'no page errors: '+errs.join(' | '));
   console.log('AUDIT', audits.length? '\n  '+audits.join('\n  ') : 'clean');
   fs.writeFileSync(`qa-shots/report-${MODE}-${SPEECH}-${VP[0]}.txt`, results.join('\n'));

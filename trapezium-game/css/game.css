@@ -8,6 +8,12 @@ a{color:#123b63}a:hover{color:#0b2742}
 .w.cur{opacity:1;color:#c95a00;transition:opacity .18s ease,color .25s ease}
 .bubA{animation:bubA .26s ease-out}
 .bubB{animation:bubB .26s ease-out}
+/* Narrator speech bubble: hugs its text and grows upward from a fixed anchor, so the tail always meets Swiftee */
+.bubble{width:max-content;min-width:150px;max-width:380px;box-sizing:border-box;padding:14px 24px 15px;background:#fdf6e4;border:3px solid #2a9a8c;border-radius:20px;box-shadow:0 6px 16px rgba(18,59,99,.14);transform-origin:26px 100%}
+.bubble-text{display:flex;flex-wrap:wrap;justify-content:center;column-gap:.28em;font-family:'Nunito',system-ui,sans-serif;font-weight:800;line-height:1.25;color:#123b63;text-align:center}
+/* Tail sits on the inner edge of the bottom border: its fill opens the border, its edges run straight out of it,
+   and anything above the border is clipped, so the outline reads as one continuous line */
+.bubble-tail{position:absolute;left:26px;top:100%;display:block;overflow:hidden;filter:drop-shadow(0 4px 4px rgba(18,59,99,.10))}
 @keyframes bubA{from{transform:scale(.97);opacity:.8}to{transform:scale(1);opacity:1}}
 @keyframes bubB{from{transform:scale(.97);opacity:.8}to{transform:scale(1);opacity:1}}
 /* Swiftee is intentionally static on every screen: fixed position, no idle, talk or reaction motion */

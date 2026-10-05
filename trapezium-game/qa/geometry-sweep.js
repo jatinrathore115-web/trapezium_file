@@ -5,7 +5,6 @@ const { chromium } = require('playwright');
   const b=await chromium.launch(); const ctx=await b.newContext({viewport:{width:1920,height:1080}});
   await ctx.addInitScript({path:'qa/no-speech.js'}); const p=await ctx.newPage();
   await p.goto('http://localhost:8765/qa/debug.html'); await p.waitForTimeout(1200);
-  await p.click('[data-qa="start"]',{force:true}); await p.waitForTimeout(300);
   const audits=[];
   const audit=async(name)=>{ const r=await p.evaluate(()=>{
     const vis=e=>{ const cs=getComputedStyle(e); if(cs.display==='none'||cs.visibility==='hidden') return false; const r=e.getBoundingClientRect(); return r.width>0&&r.height>0; };

@@ -47,6 +47,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     return id;
   }
   clearT() { this.T.forEach((id) => clearTimeout(id)); this.T.clear(); }
+  componentDidMount() { this.start(); }
   componentWillUnmount() { this.clearT(); this.cancelSpeech(); }
 
   // ---------- audio ----------
@@ -169,8 +170,8 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   }
   // Step narration queue. Interjections (feedback, idle hints, replay) play over it and then
   // the queue carries on with its next line, so a step's later lines and chips are never lost.
-  // keep a number and its unit on one line ("5 cm" never splits)
-  toWords(t) { return t.replace(/(\d) (cm)\b/g, '$1\u00a0$2').split(/[ \t\n]+/).filter(Boolean); }
+  // keep a number and its unit, and short equations, on one line ("5 cm", "AB = 6 cm" never split)
+  toWords(t) { return t.replace(/(\d) (cm)\b/g, '$1\u00a0$2').replace(/ ([=+\u2212]) /g, '\u00a0$1\u00a0').split(/[ \t\n]+/).filter(Boolean); }
   playLines(lines, done) {
     this.q = { lines: lines || [], i: 0, done: done, tok: this.stepTok };
     this.qNext();
@@ -224,16 +225,20 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     }, CONFIG.timing.idleMs);
   }
   poke() { this.idleCount = 0; this.armIdle(); }
-  rootDown() { if (this.state.started) this.poke(); }
-
-  // ---------- flow ----------
-  start() {
-    if (this.state.started && this.state.step === 0 && Date.now() - (this.navAt || 0) < 800) return;
+  // Browsers only allow audio after a user gesture, so the first tap unlocks it.
+  rootDown() { this.unlockAudio(); if (this.state.started) this.poke(); }
+  unlockAudio() {
     try {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (AC && !this.actx) this.actx = new AC();
       if (this.actx && this.actx.state === 'suspended') this.actx.resume();
     } catch (e) {}
+  }
+
+  // ---------- flow ----------
+  start() {
+    if (this.state.started && this.state.step === 0 && Date.now() - (this.navAt || 0) < 800) return;
+    this.unlockAudio();
     const s = this.synth();
     if (s) { this.pickVoice(); try { s.onvoiceschanged = () => this.pickVoice(); } catch (e) {} }
     this.snaps = {};
@@ -881,7 +886,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       chips: chips.map((c) => ({ t: c.t, k: c.k + (c.t.length > 20 ? ' long' : '') })),
       hintShow: !!hintText && s.started, hintText: hintText, hintCls: hintCls + (s.nudge ? ' ' + s.nudge : ''),
       rootDown: () => this.rootDown(),
-      wordSize: words.length > 15 ? 22 : (words.length > 11 ? 24 : 26),
+      wordSize: words.length > 15 ? 22 : 24,
       c1: c1, hasOpts: hasOpts, opts: opts, optTop: st.optTop || 376,
       labs: labs, slots: slots,
       stars: [0, 1, 2].map((i) => ({ cls: i < nStars ? 'on' : '' })),

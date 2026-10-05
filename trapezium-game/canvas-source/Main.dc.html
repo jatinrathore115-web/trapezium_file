@@ -19,6 +19,12 @@ a{color:#123b63}a:hover{color:#0b2742}
 .w.cur{opacity:1;color:#c95a00;transition:opacity .18s ease,color .25s ease}
 .bubA{animation:bubA .26s ease-out}
 .bubB{animation:bubB .26s ease-out}
+/* Narrator speech bubble: hugs its text and grows upward from a fixed anchor, so the tail always meets Swiftee */
+.bubble{width:max-content;min-width:150px;max-width:380px;box-sizing:border-box;padding:14px 24px 15px;background:#fdf6e4;border:3px solid #2a9a8c;border-radius:20px;box-shadow:0 6px 16px rgba(18,59,99,.14);transform-origin:26px 100%}
+.bubble-text{display:flex;flex-wrap:wrap;justify-content:center;column-gap:.28em;font-family:'Nunito',system-ui,sans-serif;font-weight:800;line-height:1.25;color:#123b63;text-align:center}
+/* Tail sits on the inner edge of the bottom border: its fill opens the border, its edges run straight out of it,
+   and anything above the border is clipped, so the outline reads as one continuous line */
+.bubble-tail{position:absolute;left:26px;top:100%;display:block;overflow:hidden;filter:drop-shadow(0 4px 4px rgba(18,59,99,.10))}
 @keyframes bubA{from{transform:scale(.97);opacity:.8}to{transform:scale(1);opacity:1}}
 @keyframes bubB{from{transform:scale(.97);opacity:.8}to{transform:scale(1);opacity:1}}
 /* Swiftee is intentionally static on every screen: fixed position, no idle, talk or reaction motion */
@@ -265,18 +271,16 @@ a{color:#123b63}a:hover{color:#0b2742}
 </div>
 </sc-if>
 
-<img class="{{birdCls}}" src="/_blob/512ee354e8b68c148a0ae041f6dd8f0e" alt="Swiftee the bird" style="position: absolute; left: 44px; top: 452px; width: 212px; height: 234px; pointer-events: none">
-<div class="{{bubCls}}" style="position: absolute; left: 172px; top: 214px; width: 446px; height: 220px; transform-origin: 11% 100%; pointer-events: none">
-<img src="/_blob/3bea45704802bf93785c811c78ab525e" alt="" style="position: absolute; left: 0px; top: 0px; width: 446px; height: 220px">
-<div aria-live="polite" style="position: absolute; left: 26px; top: 14px; width: 394px; height: 146px; display: flex; flex-wrap: wrap; align-content: center; justify-content: center; column-gap: 7px; row-gap: 0px; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: {{wordSize}}px; line-height: 1.2; color: #123b63; text-align: center" data-qa="bubble">
+<img class="{{birdCls}}" src="assets/images/swiftee.webp" alt="Swiftee the bird" style="position: absolute; left: 172px; top: 430px; width: 180px; height: 198px; pointer-events: none">
+<div class="bubble {{bubCls}}" style="position: absolute; left: 240px; bottom: 322px; pointer-events: none">
+<div aria-live="polite" class="bubble-text" style="font-size: {{wordSize}}px" data-qa="bubble">
 <sc-for list="{{words}}" as="wd" hint-placeholder-count="6">
 <span class="w {{wd.cls}}">{{wd.t}}</span>
 </sc-for>
 </div>
+<svg class="bubble-tail" width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path d="M2,-1 L7.5,25 L26,-1" fill="#fdf6e4" stroke="#2a9a8c" stroke-width="3" stroke-linejoin="round" stroke-linecap="butt"></path></svg>
+
 </div>
-<button class="ibtn" aria-label="Replay narration" onClick="{{replay}}" style="position: absolute; left: 588px; top: 200px">
-<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3z"></path><path d="M16 9a4 4 0 0 1 0 6"></path><path d="M18.5 6.5a8 8 0 0 1 0 11"></path></svg>
-</button>
 
 <sc-if value="{{showNav}}" hint-placeholder-val="{{ true }}">
 <div style="position: absolute; left: 860px; top: 652px; width: 312px; height: 60px; display: flex; justify-content: flex-end; align-items: center; gap: 14px">
@@ -287,16 +291,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 </div>
 </sc-if>
 
-<sc-if value="{{notStarted}}" hint-placeholder-val="{{ true }}">
-<div style="position: absolute; left: 0px; top: 0px; width: 1280px; height: 720px; background: rgba(18,59,99,0.28); display: flex; align-items: center; justify-content: center">
-<div style="width: 560px; padding: 36px 40px 40px; border-radius: 32px; background: rgba(255,255,255,0.95); border: 3px solid #cfe6f7; display: flex; flex-direction: column; align-items: center; gap: 14px; box-shadow: 0 18px 40px rgba(18,59,99,0.25)">
-<div style="font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 800; font-size: 54px; line-height: 1; color: #123b63">Trapeziums</div>
-<div style="font-weight: 800; font-size: 20px; color: #35597a; text-align: center">Extend sides, drag corners and discover what makes a trapezium special.</div>
-<button class="startbtn" data-qa="start" onClick="{{start}}" style="margin-top: 8px"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5l13 7.5-13 7.5z" fill="currentColor"></path></svg>Start</button>
-<div style="font-weight: 700; font-size: 15px; color: #4f6f8c">Turn your sound on to hear the narration.</div>
-</div>
-</div>
-</sc-if>
 </div>
 </div>
 </x-dc>
@@ -448,6 +442,7 @@ class Component extends DCLogic {
     return id;
   }
   clearT() { this.T.forEach((id) => clearTimeout(id)); this.T.clear(); }
+  componentDidMount() { this.start(); }
   componentWillUnmount() { this.clearT(); this.cancelSpeech(); }
 
   // ---------- audio ----------
@@ -570,8 +565,8 @@ class Component extends DCLogic {
   }
   // Step narration queue. Interjections (feedback, idle hints, replay) play over it and then
   // the queue carries on with its next line, so a step's later lines and chips are never lost.
-  // keep a number and its unit on one line ("5 cm" never splits)
-  toWords(t) { return t.replace(/(\d) (cm)\b/g, '$1\u00a0$2').split(/[ \t\n]+/).filter(Boolean); }
+  // keep a number and its unit, and short equations, on one line ("5 cm", "AB = 6 cm" never split)
+  toWords(t) { return t.replace(/(\d) (cm)\b/g, '$1\u00a0$2').replace(/ ([=+\u2212]) /g, '\u00a0$1\u00a0').split(/[ \t\n]+/).filter(Boolean); }
   playLines(lines, done) {
     this.q = { lines: lines || [], i: 0, done: done, tok: this.stepTok };
     this.qNext();
@@ -625,16 +620,20 @@ class Component extends DCLogic {
     }, CONFIG.timing.idleMs);
   }
   poke() { this.idleCount = 0; this.armIdle(); }
-  rootDown() { if (this.state.started) this.poke(); }
-
-  // ---------- flow ----------
-  start() {
-    if (this.state.started && this.state.step === 0 && Date.now() - (this.navAt || 0) < 800) return;
+  // Browsers only allow audio after a user gesture, so the first tap unlocks it.
+  rootDown() { this.unlockAudio(); if (this.state.started) this.poke(); }
+  unlockAudio() {
     try {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (AC && !this.actx) this.actx = new AC();
       if (this.actx && this.actx.state === 'suspended') this.actx.resume();
     } catch (e) {}
+  }
+
+  // ---------- flow ----------
+  start() {
+    if (this.state.started && this.state.step === 0 && Date.now() - (this.navAt || 0) < 800) return;
+    this.unlockAudio();
     const s = this.synth();
     if (s) { this.pickVoice(); try { s.onvoiceschanged = () => this.pickVoice(); } catch (e) {} }
     this.snaps = {};
@@ -1282,7 +1281,7 @@ class Component extends DCLogic {
       chips: chips.map((c) => ({ t: c.t, k: c.k + (c.t.length > 20 ? ' long' : '') })),
       hintShow: !!hintText && s.started, hintText: hintText, hintCls: hintCls + (s.nudge ? ' ' + s.nudge : ''),
       rootDown: () => this.rootDown(),
-      wordSize: words.length > 15 ? 22 : (words.length > 11 ? 24 : 26),
+      wordSize: words.length > 15 ? 22 : 24,
       c1: c1, hasOpts: hasOpts, opts: opts, optTop: st.optTop || 376,
       labs: labs, slots: slots,
       stars: [0, 1, 2].map((i) => ({ cls: i < nStars ? 'on' : '' })),
