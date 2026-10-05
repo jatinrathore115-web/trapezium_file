@@ -178,6 +178,8 @@ window.SwifteeMascot = class SwifteeMascot {
       this.ctx = cv.getContext('2d');
     }
     const ctx = this.ctx, c = this.cur;
+    // the next clip's sheet is still loading: keep the last frame on screen rather than going blank
+    if (!this.ready(c)) return;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, cv.width, cv.height);
     let a = 1;
@@ -185,7 +187,7 @@ window.SwifteeMascot = class SwifteeMascot {
       if (this.fade.t0 === null) this.fade.t0 = now;
       const t = (now - this.fade.t0) / this.fadeMs;
       if (t >= 1) this.fade = null;
-      else { this.blit(ctx, this.fade.anim, this.fade.f, 1 - t); a = t; }
+      else this.blit(ctx, this.fade.anim, this.fade.f, 1 - t); // old frame fades out under the new one, drawn at full strength: the body never turns see-through
     }
     if (this.blit(ctx, c.anim, this.frameOf(c), a) && !this.drawn) {
       this.drawn = true;

@@ -76,7 +76,7 @@ const results=[]; const ok=(c,m)=>{results.push((c?'PASS ':'FAIL ')+m); if(!c) c
   await shot('start');
   ok((await label()).startsWith('Step 1 '), 'loads straight into step 1: '+await label());
   // word-by-word timing vs fake voice boundaries
-  const samples=[]; for(let i=0;i<14;i++){ samples.push([await shown(), await p.evaluate(()=>__speech.log.filter(l=>l.text.includes('Popo')).length)]); await p.waitForTimeout(150);} 
+  const samples=[]; for(let i=0;i<14;i++){ samples.push([await shown(), await p.evaluate(()=>__speech.log.filter(l=>l.text.includes('quadrilateral')).length)]); await p.waitForTimeout(150);} 
   okS(samples.every(([w,bd])=>w<=bd+1), 'words never run >1 ahead of voice: '+JSON.stringify(samples));
   ok(samples[samples.length-1][0]>=5, 'words progress during VO');
   await waitTalk(); ok((await shown())===(await bubble()).split(' ').length, 'all words shown after VO');
@@ -92,13 +92,13 @@ const results=[]; const ok=(c,m)=>{results.push((c?'PASS ':'FAIL ')+m); if(!c) c
   ok((await bubble()).startsWith("Let's extend"), 'new line replaces old after interrupt: '+await bubble());
   okS((await p.evaluate(()=>__speech.cancels))>cancelsBefore, 'speech cancelled on step change');
   await p.waitForTimeout(1200);
-  ok(!(await bubble()).includes('Hmm'), 'old line never comes back');
+  ok(!(await bubble()).includes('look like they will meet'), 'old line never comes back');
   // ---- step 3 extend legs ----
   ok(!(await nextEnabled()), 'Next locked until task done');
   await tap('edge-AB'); await p.waitForTimeout(300);
   ok((await bubble()).startsWith('Try a slanted side'), 'wrong tap: Swiftee explains in the bubble');
   await tap('edge-DA'); await tap('edge-DA'); await tap('edge-BC'); await p.waitForTimeout(1300);
-  ok((await chips()).includes('They meet!'), 'legs meet chip');
+  ok((await bubble()).startsWith('Woah! The sides meet.'), 'legs meet line');
   ok(await nextEnabled(), 'Next unlocked after extend');
   await shot('extended');
   await next();
@@ -110,12 +110,9 @@ const results=[]; const ok=(c,m)=>{results.push((c?'PASS ':'FAIL ')+m); if(!c) c
   await next(); await shot('parallel'); await next(); ok((await chips()).includes('AB ∥ CD'),'AB ∥ CD chip'); await shot('abcd');
   await next(); ok((await chips()).includes('Trapezium'),'Trapezium chip');
   await next(); // bases
-  await tap('edge-BC'); await p.waitForTimeout(150); ok(!(await nextEnabled()), 'leg tap does not complete bases');
-  await tap('edge-AB'); await tap('edge-CD'); await p.waitForTimeout(500);
-  ok((await tags()).filter(t=>t==='Base').length===2 && await nextEnabled(), 'bases tagged'); await shot('bases');
+  await p.waitForTimeout(1500); await shot('bases'); // explanation only (Base callout), no tapping
   await next(); // legs
-  await tap('edge-CD'); await tap('edge-DA'); await tap('edge-BC'); await p.waitForTimeout(500);
-  ok((await tags()).filter(t=>t==='Leg').length===2 && await nextEnabled(), 'legs tagged'); await shot('legs');
+  await p.waitForTimeout(1500); await shot('legs'); // explanation only (Legs callout), no tapping
   await next(); // measure with ruler
   o=await svgOrigin(); let v=await V();
   const rb=await p.locator(Q('ruler')).boundingBox();

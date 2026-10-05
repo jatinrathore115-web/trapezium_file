@@ -76,15 +76,15 @@ measure, dragB, tapAngles, dragD90, tapAD, dragD, dragC), `hint`, `idle`, `after
 | # | State | Learner does | PDF page |
 |---|---|---|---|
 | 1 | Let's take a closer look at what Popo caught | — | 1–2 (same line; merged) |
-| 2 | These sides look like they'll meet | — (hint dashes) | 3 |
-| 3 | Let's extend them and check! | tap both legs → lines meet, "They meet!" | 4 |
-| 4 | What about the other pair? | tap both bases → lines extend | 5 |
-| 5 | They don't meet. They're parallel! | — | 6 |
-| 6 | So, AB is parallel to CD | — ("AB ∥ CD") | 7 |
+| 2 | These two sides look like they will meet | — (hint dashes) | 3 |
+| 3 | Let's extend them. | tap both legs → lines meet, "Woah! The sides meet." | 4 |
+| 4 | Let's check the other pair of sides. | tap both bases → lines extend | 5 |
+| 5 | They do not meet. | — (shape shifted 45 px left) | 6 |
+| 6 | This means the sides are parallel to each other. | then "AB ∥ CD" card + voice "AB is parallel to CD" (card appears and AB, CD pulse yellow as the voice starts) | 7 |
 | 7 | Definition: trapezium | — ("Trapezium") | 8 |
-| 8 | The parallel sides are the bases | tap both bases | 9 |
-| 9 | The other two sides are the legs | tap both legs | 10 |
-| 10 | Let's measure the legs | drag the ruler onto a leg, or tap a leg | 11 |
+| 8 | The parallel sides are called bases. | — (AB, CD pulse yellow + "Base" callout) | 9 |
+| 9 | And the non-parallel sides are called legs. | — (AD, BC pulse yellow on "legs" + "Legs" callout) | 10 |
+| 10 | Let's measure the sides of this trapezium | drag the ruler onto a leg, or tap a leg | 11 |
 | 11 | Different lengths → scalene trapezium | — | 12 |
 | 12 | Make both legs equal | drag B (snaps at equal legs, auto-advances) | 13 |
 | 13 | Legs equal → isosceles trapezium | — | 14 |
@@ -149,8 +149,8 @@ Swiftee reacts to what is being said. Each narration line can name an expression
 | Greeting | `waving` |
 | Explaining | `talking` |
 | Asking the learner to do something, asking a check question | `curious` |
-| "Hmm…" / wondering aloud, check question open | `thinking` |
-| A discovery ("They meet!", "They're parallel!") | `surprised` |
+| Wondering aloud ("What happens if we add…?"), check question open | `thinking` |
+| A discovery ("Woah! The sides meet.", "They do not meet.") | `surprised` |
 | Task done, praise | `happy` |
 | Check answered correctly, lesson complete | `celebrating` |
 | Wrong answer or tap | `confused` (encouraging) |
@@ -175,9 +175,43 @@ fingertip on each press. Any touch hides it; it returns only if the learner is i
 and on the labelling check it only presses a label. Targets are read from the page (`data-qa`), so the hand
 stays on target if the layout changes.
 
-## Spotlight screen
+## Spotlight layout (not used in the lesson)
 
-Right after "They meet!" (step `spot` in `js/lesson-data.js`, `layout: 'spotlight'`), a wordless moment: the shape
-glides to centre stage, grows, and its fill gently glows; Swiftee hops to the right of the panel, mirrored so she leans
-in and points at the shape (`pose: 'curious'`). Position and size are `CONFIG.spotlight` in `js/config.js`.
-The canvas copy (`canvas-source/`) does not include this screen.
+`layout: 'spotlight'` on a step centres and enlarges the shape with a soft glow and moves Swiftee (mirrored, `pose`) to the
+right. It was removed from the flow after "Woah! The sides meet." but is kept for reuse; position and size are `CONFIG.spotlight`.
+
+## Focus screen
+
+"Let's extend them." is its own instruction-only screen (`extendSay`: `autoAdvance`, `locked`: no Next, no Back) that moves on
+as soon as the voice-over ends. The tapping screen that follows (`extend`, `layout: 'focus'`, no line of its own) opens with that
+bubble fading out while the shape glides to centre stage. Back skips over screens that move on by themselves. The two sides to tap carry a pulsing yellow band (off once tapped); after 5 s with no
+touch the hand presses the next side. Whenever Swiftee speaks again on this screen ("Woah! The sides meet.", a wrong-tap tip) the shape
+steps back to make room for the bubble, then returns to centre when it fades. Spoken idle reminders are skipped here: the
+hand guides instead. Timings and position: `CONFIG.focus` in `js/config.js`.
+
+## Screen flow (no Next button)
+
+There is no Next button for now (`CONFIG.flow.showNext: false` in `js/config.js` brings it back). A finished screen moves on
+by itself `CONFIG.flow.advanceMs` (2.5 s) after its last line and voice-over end:
+
+- narration screens: 2.5 s after Swiftee finishes;
+- tasks: once done, after the praise line ("Woah! The sides meet.", "Perfect!") + 2.5 s;
+- checks: after the correct answer and Swiftee's explanation + 2.5 s (a wrong answer never moves on);
+- "Let's extend them." (`autoAdvance: 1`): immediately; a step's `autoAdvance` (ms) overrides the wait;
+- lesson complete: stays (Play again).
+
+If Swiftee starts talking again before the move (a tip, a hint), the wait restarts when that line ends. There is no Back button
+either (`CONFIG.flow.showBack`); when shown, it skips instruction-only (`locked`) screens. The hand nudge only points at Next when the button is shown.
+
+## Top navigation
+
+Every screen has **Back** and **Next** in the top-right corner (`.topnav` in `index.html`, `.navbtn` in `css/game.css`), alongside
+the automatic move-on. Back is greyed out on the first screen and skips instruction-only (`locked`) screens; Next is greyed out
+on Lesson complete. Next works even before a task is done; skipping an unfinished drag task applies its result first (equal
+legs, a right angle at A), so the screens after it still match the shape (`navNext()` in `js/game-engine.js`).
+
+## Screen list
+
+**Screens · N** (top-left) opens a panel of snapshots of every screen; tap one to open that screen directly (the shape is
+rebuilt as if the earlier screens were done, see `jumpTo()`). The lesson does not move on while the panel is open.
+Snapshots live in `assets/thumbs/NN.webp`; after changing screens run `node tools/build-thumbs.js` (needs Chrome or Edge).

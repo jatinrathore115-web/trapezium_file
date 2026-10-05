@@ -1,51 +1,85 @@
 // =====================================================================
 // LESSON — every learning state and check, in play order.
-//   lines: narration (t = on-screen text, s = optional spoken text, chips = labels shown with the line,
+//   lines: narration (t = on-screen text, \n = line break in the bubble, s = optional spoken text (keep: 1 + s = voice only, the bubble keeps the previous line;
+//          glow = sides that pulse yellow while the line is spoken, e.g. ['AB', 'CD'];
+//          pulse: 1 = the shape pulses once when the line's voice-over ends;
+//          glowAt: 'word' = glow/callout wait until that word is said (yellow then lingers ~1.5 s);
+//          callout: 'bases' | 'legs' = a "Base"/"Legs" label with arrows to AB and CD appears as the voice starts and stays), chips = labels shown with the line,
 //          m = Swiftee's expression while saying it; default talking. reactions in CONFIG.swiftee)
 //   task:  what the learner must do before Next unlocks (extLegs, extBases, tapBases, tapLegs, measure,
-//          dragB, tapAngles, dragD90, tapAD, dragD, dragC); hint = how-to Swiftee says if the learner stalls (unless idle is set)
-//   after: lines played once the task is done; autoNext: advance by itself after `after`
-//   layout: 'spotlight' centres and enlarges the shape, moves Swiftee to the right (pose = held expression)
-//   f:     board display flags (met = legs extended to where they meet, legHint, baseExt, par, legsPurple, legLen, ticks, arcs, right, eq)
+//          dragA, dragAny (any corner, until the legs differ), dragFree (any corner, any move), drag90 (any corner to a right angle), tapAngles, dragD90, tapAD, dragD, dragC); hint = how-to Swiftee says if the learner stalls (unless idle is set)
+//   every finished screen moves on by itself CONFIG.flow.advanceMs after its last line; autoAdvance overrides that wait (ms)
+//   locked: no Back either (an instruction-only screen with nothing to do)
+//   after: lines played once the task is done
+//   boardShift: px to slide the shape left (-) or right (+) on that screen (glides there and back)
+//   layout: 'focus' = after the line the bubble fades (focusHold ms after the voice-over, default CONFIG.focus.holdMs)
+//           and the shape moves to centre stage; the shape can only be tapped once it is there;
+//           'top' = Swiftee small at top-left, bubble beside her at the top, shape large in the centre;
+//           'spotlight' centres and enlarges the shape, moves Swiftee to the right (pose = held expression)
+//   f:     board display flags (met = legs extended to where they meet, legGlow = legs highlighted, sideLen = base lengths shown too, baseExt, par, legsPurple, legLen, ticks, arcs, right, eq)
+//   practice: a quick question with opts / ok / okChips that is not scored; noBoard: no shape; layout 'recap': the recap card
 //   cfu:   check number; opts (ok / fb feedback), ok = praise line
 // =====================================================================
 const LESSON = {
   steps: [
-    { id: 'intro', lines: [{ m: 'waving', t: "Let's take a closer look at what Popo caught." }] },
-    { id: 'meet', lines: [{ m: 'thinking', t: "Hmm… these sides look like they'll meet." }], f: { legHint: 1 } },
-    { id: 'extend', lines: [{ m: 'curious', t: "Let's extend them and check!" }], task: 'extLegs', hint: 'Tap each slanted side to extend it',
-      after: [{ m: 'surprised', t: 'They meet!' }] },
-    // spotlight: no words. The shape moves to centre stage and glows; Swiftee, on the right, leans in and points at it
-    { id: 'spot', lines: [], layout: 'spotlight', pose: 'curious', f: { met: 1 } },
-    { id: 'other', lines: [{ m: 'curious', t: 'What about the other pair?' }], task: 'extBases', hint: 'Tap the top and bottom sides to extend them' },
-    { id: 'parallel', lines: [{ m: 'surprised', t: "They don't meet. They're parallel!" }], f: { baseExt: 1 } },
-    { id: 'abcd', lines: [{ t: 'So, AB is parallel to CD.', chips: [{ t: 'AB ∥ CD', k: 'white' }] }], f: { par: 1 } },
-    { id: 'def', lines: [{ t: 'A quadrilateral with one pair of parallel sides is called a trapezium.', chips: [{ t: 'Trapezium', k: 'gold' }] }], f: { par: 1 } },
-    { id: 'bases', lines: [{ t: 'The parallel sides are called the bases.' }], task: 'tapBases', hint: 'Tap the two parallel sides',
-      after: [{ m: 'happy', t: 'Yes! These are the bases.' }], f: { par: 1 } },
-    { id: 'legs', lines: [{ t: 'The other two sides are called the legs.' }], task: 'tapLegs', hint: 'Tap the two legs',
-      after: [{ m: 'happy', t: 'Well done! These are the legs.' }], f: { par: 1 } },
-    { id: 'measure', lines: [{ m: 'curious', t: "Let's measure the legs." }], task: 'measure', hint: 'Drag the ruler onto a leg, or tap a leg', idle: 'Drag the yellow ruler onto a slanted side, or just tap a leg.', f: { par: 1, legsPurple: 1 } },
-    { id: 'scalene', lines: [{ t: 'The legs have different lengths.' }, { t: 'This is a scalene trapezium.', chips: [{ t: 'Scalene trapezium', k: 'gold' }] }],
-      f: { par: 1, legsPurple: 1, legLen: 1 } },
-    { id: 'equal', lines: [{ m: 'curious', t: 'Can you change it so both legs are equal?' }], task: 'dragB', hint: 'Drag point B along the top side', after: [{ m: 'happy', t: 'Perfect! Both legs are equal.' }], autoNext: 1,
-      f: { par: 1, legsPurple: 1, legLen: 1 } },
-    { id: 'iso', lines: [{ m: 'happy', t: 'Now the legs are equal!' }, { t: 'This is an isosceles trapezium.', chips: [{ t: 'Isosceles trapezium', k: 'gold' }] }],
-      f: { par: 1, legsPurple: 1, legLen: 1, ticks: 1 } },
-    { id: 'angles', lines: [{ m: 'curious', t: "Now, let's measure its angles." }], task: 'tapAngles', hint: 'Tap each corner to measure its angle', f: { par: 1, ticks: 1 } },
-    { id: 'make90', lines: [{ m: 'curious', t: 'Can you make ∠A exactly 90°?' }], task: 'dragD90', hint: 'Drag point D along the bottom side', after: [{ m: 'happy', t: 'Perfect! ∠A is exactly 90°.' }], autoNext: 1, f: { par: 1, arcs: 'A' } },
-    { id: 'right', lines: [{ m: 'surprised', t: 'Look! We made another right angle too!' }, { t: 'This is a right trapezium.', chips: [{ t: 'Right trapezium', k: 'gold' }] }],
+    { id: 'intro', lines: [{ m: 'waving', t: "Let's take a look at this quadrilateral and see what makes it special." }] },
+    { id: 'meet', lines: [{ m: 'curious', t: 'These two sides look like they will meet.' }], f: { legGlow: 1 } },
+    // instruction only: nothing to tap, no Next/Back; moves on as soon as the voice-over ends
+    { id: 'extendSay', autoAdvance: 1, locked: 1, lines: [{ m: 'curious', t: "Let's extend them." }], f: { legGlow: 1 } },
+    // the tapping screen opens wordless: the bubble fades as the shape glides to centre stage
+    { id: 'extend', layout: 'focus', lines: [], task: 'extLegs', hint: 'Tap each slanted side to extend it',
+      after: [{ m: 'surprised', t: 'Woah! The sides meet.', s: 'Whoa! The sides meet.' }] },
+    { id: 'other', layout: 'focus', focusHold: 2500, lines: [{ m: 'curious', t: "Let's check the other\npair of sides." }], task: 'extBases', hint: 'Tap the top and bottom sides to extend them' },
+    { id: 'parallel', boardShift: -45, lines: [{ m: 'surprised', t: 'They do not meet.' }], f: { baseExt: 1 } },
+    { id: 'abcd', lines: [{ t: 'This means the sides are parallel to each other.' },
+      { keep: 1, s: 'A B is parallel to C D.', glow: ['AB', 'CD'], chips: [{ t: 'AB ∥ CD', k: 'white' }] }], f: { par: 1 } },
+    { id: 'onePair', lines: [{ t: "So this quadrilateral has\none pair of parallel sides.", chips: [{ t: 'AB ∥ CD', k: 'white' }] }], f: { par: 1 } },
+    { id: 'def', lines: [{ t: 'We call this a trapezium.', pulse: 1, chips: [{ t: 'Trapezium', k: 'gold' }] }], f: { par: 1 } },
+    { id: 'defFull', lines: [{ t: 'A quadrilateral with at least\none pair of parallel sides\nis called a trapezium.', chips: [{ t: 'Trapezium', k: 'gold' }] }], f: { par: 1 } },
+    { id: 'bases', boardShift: -40, lines: [{ t: 'The parallel sides\nare called bases.', glow: ['AB', 'CD'], callout: 'bases' }], f: { par: 1 } },
+    { id: 'legs', boardShift: -40, lines: [{ t: 'And the non-parallel sides\nare called legs.', glow: ['DA', 'BC'], glowAt: 'legs', callout: 'legs' }], f: { par: 1 } },
+    { id: 'measure', lines: [{ m: 'curious', t: "Let's measure the sides\nof this trapezium." }], task: 'measure', hint: 'Tap the glowing side to measure it', idle: 'Tap the glowing side, or drag the ruler onto it.', f: { par: 1, legsPurple: 1 } },
+    { id: 'scalene', lines: [{ m: 'surprised', t: 'Woah! All the sides of\nthis trapezium are of\ndifferent lengths.', s: 'Whoa! All the sides of this trapezium are of different lengths.' }, { t: 'This type of trapezium which\nhas sides of different lengths\nis called a scalene trapezium.', chips: [{ t: 'Scalene trapezium', k: 'gold' }] }],
+      f: { par: 1, legsPurple: 1, legLen: 1, sideLen: 1 } },
+    { id: 'equal', lines: [{ m: 'curious', t: "Let's change its\nshape a little." }], f: { par: 1, legsPurple: 1, legLen: 1, sideLen: 1 } },
+    // the drag itself: Swiftee and the bubble move to the top, the shape takes centre stage
+    { id: 'equalDrag', layout: 'top', lines: [{ m: 'curious', t: 'Drag vertex A so that both\nthe legs are of equal length.' }],
+      task: 'dragA', hint: 'Drag point A along the top side', after: [{ m: 'happy', t: 'Perfect! Both legs are equal.' }],
+      f: { par: 1, legsPurple: 1, legLen: 1, sideLen: 1 } },
+    { id: 'iso', lines: [{ m: 'happy', t: 'Yay! Now the legs are of same lengths.' }, { t: 'A trapezium where legs are\nof same length is called\nan isosceles trapezium.', chips: [{ t: 'Isosceles trapezium', k: 'gold' }] }],
+      f: { par: 1, legsPurple: 1, legLen: 1, ticks: 1, sideLen: 1 } },
+    // try it back: any corner may move; done once the legs differ again
+    { id: 'scalDrag', layout: 'top', lines: [{ m: 'curious', t: 'Drag any vertex to make\nthis a scalene trapezium.' }],
+      task: 'dragAny', hint: 'Drag any corner along its side', idle: 'Drag any corner so the legs are no longer equal.',
+      after: [{ m: 'happy', t: 'Yes! Now it is a scalene trapezium.', chips: [{ t: 'Scalene trapezium', k: 'gold' }] }],
+      f: { par: 1, legsPurple: 1, legLen: 1, sideLen: 1 } },
+    { id: 'sidesDone', lines: [{ m: 'happy', t: 'We know all about the sides\nof a trapezium.', chips: [{ t: 'Trapezium', k: 'gold' }] }], f: { par: 1 } },
+    { id: 'angles', lines: [{ m: 'curious', t: "Let's look at its angles." }], f: { par: 1, arcs: 'ABCD' } },
+    { id: 'notice', lines: [{ m: 'thinking', t: 'Did you notice something?' }], f: { par: 1, arcs: 'ABCD' } },
+    { id: 'sumAD', lines: [{ m: 'surprised', t: '∠A and ∠D add up to 180°.', glow: ['DA'], chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
+    { id: 'supp', lines: [{ m: 'happy', t: 'That means they are\nsupplementary angles.', chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
+    // quick practice question (not scored): pick the sum of ∠B and ∠C
+    { id: 'askBC', practice: 1, optTop: 432, chipTop: 540, boardShiftY: -62, idle: 'Add ∠B and ∠C. They sit on the same leg, BC.',
+      lines: [{ m: 'curious', t: 'What about ∠B and ∠C?', glow: ['BC'], chips: [{ t: '∠B + ∠C = ?', k: 'white' }] }],
+      ok: 'Correct! ∠B and ∠C are\nsupplementary angles too.', okChips: [{ t: '∠B + ∠C = 180°', k: 'gold' }],
+      opts: [
+        { id: '90', t: '90°', fb: 'Not quite. Add the two angles on leg BC.' },
+        { id: '180', t: '180°', ok: true },
+        { id: '360', t: '360°', fb: '360° is all four angles. Just add ∠B and ∠C.' }
+      ], f: { par: 1, arcs: 'ABCD' } },
+    { id: 'whatIf', lines: [{ m: 'curious', t: 'What if we change the shape\nof this trapezium?' }], f: { par: 1, arcs: 'ABCD' } },
+    { id: 'dragSum', layout: 'top', lines: [{ m: 'curious', t: 'Drag any vertex to change the angles.\nNotice the sum of angles.' }],
+      task: 'dragFree', hint: 'Drag any corner and watch the sums', idle: 'Drag any corner and watch the two sums.',
+      after: [{ m: 'surprised', t: 'The angles changed, but\neach sum is still 180°!' }], f: { par: 1, arcs: 'ABCD', sums: 1 } },
+    { id: 'always', lines: [{ m: 'happy', t: 'No matter the shape, the angles\nalways add up to 180°.', chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }, { t: '∠B + ∠C = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
+    { id: 'rule', lines: [{ t: 'So in any trapezium, angles on the\nsame leg always add up to 180°.', chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }, { t: '∠B + ∠C = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
+    { id: 'make90', layout: 'top', lines: [{ m: 'curious', t: 'Drag any vertex to make any angle 90°.' }],
+      task: 'drag90', hint: 'Drag a corner until an angle is 90°', idle: 'Drag a corner slowly and stop when an angle shows 90°.',
+      after: [{ m: 'happy', t: 'Great job! One of the angles\nis a right angle.' }], f: { par: 1, arcs: 'ABCD' } },
+    { id: 'right', lines: [{ t: 'This type of trapezium where\none of the angles is a right angle\nis called a right angled trapezium.', chips: [{ t: 'Right trapezium', k: 'gold' }] }],
       f: { par: 1, right: 1 } },
-    { id: 'add', lines: [{ m: 'thinking', t: 'What happens if we add these two angles?' }], task: 'tapAD', hint: 'Tap ∠A and ∠D to add them',
-      after: [{ m: 'surprised', t: 'They add up to 180°!' }], f: { par: 1, right: 1, arcs: 'AD' } },
-    { id: 'change', lines: [{ m: 'curious', t: 'What if we change the shape?' }], task: 'dragD', hint: 'Drag point D and watch the angles',
-      after: [{ m: 'surprised', t: 'The angles changed… but their sum is still 180°!' }], f: { par: 1, arcs: 'AD', eq: 'AD' } },
-    { id: 'otherleg', lines: [{ m: 'thinking', t: 'Does the same thing happen on the other leg?' }], task: 'dragC', hint: 'Drag point C and watch the angles',
-      after: [{ m: 'happy', t: 'This pair also adds up to 180°!' }], f: { par: 1, arcs: 'BC', eq: 'BC' } },
-    { id: 'rule', lines: [{ t: 'Angles on the same leg of a trapezium add up to 180°.', chips: [{ t: '∠A + ∠D = 180°    ∠B + ∠C = 180°', k: 'gold' }] }],
-      f: { par: 1, arcs: 'ABCD' } },
-    { id: 'total', lines: [{ t: 'A trapezium is a quadrilateral, so the sum of all its angles is 360°.',
-      chips: [{ t: '180° + 180° = 360°', k: 'white' }, { t: '∠A + ∠B + ∠C + ∠D = 360°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
+    { id: 'wellDone', noBoard: 1, lines: [{ m: 'celebrating', t: 'Great job! Now you know\nall about trapeziums.' }] },
+    { id: 'recap', noBoard: 1, layout: 'recap', lines: [{ m: 'happy', t: "Let's recall what\nwe learnt today." }] },
     { id: 'cfu1', cfu: 1, idle: 'Look for the shape with exactly one pair of parallel sides.', hint: 'Check 1 of 5 · Which one is a trapezium?',
       lines: [{ m: 'curious', t: 'Which of these quadrilaterals is a trapezium? Look for one pair of parallel sides.' }],
       ok: 'Yes! Shape A has exactly one pair of parallel sides.',

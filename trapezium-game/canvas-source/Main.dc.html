@@ -95,6 +95,8 @@ a{color:#123b63}a:hover{color:#0b2742}
 .star{color:#c9d6e0}
 .star.on{color:#f2b51c}
 .startbtn{height:68px;padding:0 40px;border-radius:999px;border:0;background:#d9640a;color:#fff;font-family:'Baloo 2',system-ui,sans-serif;font-weight:800;font-size:30px;display:flex;align-items:center;gap:12px;box-shadow:0 6px 0 #a54a05;cursor:pointer;animation:ready 1.8s ease-in-out infinite}
+.leg-glow{stroke-opacity:.9;animation:legGlow 1.8s ease-in-out infinite}
+@keyframes legGlow{0%,100%{stroke-opacity:.78;stroke-width:20px}50%{stroke-opacity:1;stroke-width:25px}}
 </style>
 </helmet>
 <div style="position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #8fd0fb">
@@ -105,8 +107,8 @@ a{color:#123b63}a:hover{color:#0b2742}
 <sc-if value="{{isLesson}}" hint-placeholder-val="{{ true }}">
 <svg class="{{fadeCls}}" viewBox="0 0 520 420" width="520" height="420" style="position: absolute; left: 640px; top: 104px; overflow: visible; touch-action: none" aria-label="Trapezium ABCD">
 <polygon sc-camel-points="{{g.poly}}" fill="rgba(160,212,246,0.6)" stroke="none"></polygon>
-<line sc-camel-x1="{{g.dA.x1}}" sc-camel-y1="{{g.dA.y1}}" sc-camel-x2="{{g.dA.x2}}" sc-camel-y2="{{g.dA.y2}}" sc-camel-display="{{g.dA.d}}" class="dashp" stroke="#e8643c" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round"></line>
-<line sc-camel-x1="{{g.dB.x1}}" sc-camel-y1="{{g.dB.y1}}" sc-camel-x2="{{g.dB.x2}}" sc-camel-y2="{{g.dB.y2}}" sc-camel-display="{{g.dB.d}}" class="dashp" stroke="#e8643c" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round"></line>
+<line sc-camel-x1="{{g.hDA.x1}}" sc-camel-y1="{{g.hDA.y1}}" sc-camel-x2="{{g.hDA.x2}}" sc-camel-y2="{{g.hDA.y2}}" sc-camel-display="{{g.hDA.d}}" class="leg-glow" stroke="#f5d32e" stroke-width="22" stroke-linecap="round"></line>
+<line sc-camel-x1="{{g.hBC.x1}}" sc-camel-y1="{{g.hBC.y1}}" sc-camel-x2="{{g.hBC.x2}}" sc-camel-y2="{{g.hBC.y2}}" sc-camel-display="{{g.hBC.d}}" class="leg-glow" stroke="#f5d32e" stroke-width="22" stroke-linecap="round"></line>
 <line sc-camel-x1="{{g.xA.x1}}" sc-camel-y1="{{g.xA.y1}}" sc-camel-x2="{{g.xA.x2}}" sc-camel-y2="{{g.xA.y2}}" sc-camel-display="{{g.xA.d}}" stroke="#e8643c" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round"></line>
 <line sc-camel-x1="{{g.xB.x1}}" sc-camel-y1="{{g.xB.y1}}" sc-camel-x2="{{g.xB.x2}}" sc-camel-y2="{{g.xB.y2}}" sc-camel-display="{{g.xB.d}}" stroke="#e8643c" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round"></line>
 <line sc-camel-x1="{{g.xAB.x1}}" sc-camel-y1="{{g.xAB.y1}}" sc-camel-x2="{{g.xAB.x2}}" sc-camel-y2="{{g.xAB.y2}}" sc-camel-display="{{g.xAB.d}}" stroke="#e8643c" stroke-width="3" stroke-dasharray="10 8" stroke-linecap="round"></line>
@@ -306,24 +308,24 @@ const CONFIG = {
 // =====================================================================
 const LESSON = {
   steps: [
-    { id: 'intro', lines: [{ t: "Let's take a closer look at what Popo caught." }] },
-    { id: 'meet', lines: [{ t: "Hmm… these sides look like they'll meet." }], f: { legHint: 1 } },
-    { id: 'extend', lines: [{ t: "Let's extend them and check!" }], task: 'extLegs', hint: 'Tap each slanted side to extend it',
-      after: [{ t: 'They meet!' }] },
-    { id: 'other', lines: [{ t: 'What about the other pair?' }], task: 'extBases', hint: 'Tap the top and bottom sides to extend them' },
-    { id: 'parallel', lines: [{ t: "They don't meet. They're parallel!" }], f: { baseExt: 1 } },
-    { id: 'abcd', lines: [{ t: 'So, AB is parallel to CD.', chips: [{ t: 'AB ∥ CD', k: 'white' }] }], f: { par: 1 } },
-    { id: 'def', lines: [{ t: 'A quadrilateral with one pair of parallel sides is called a trapezium.', chips: [{ t: 'Trapezium', k: 'gold' }] }], f: { par: 1 } },
-    { id: 'bases', lines: [{ t: 'The parallel sides are called the bases.' }], task: 'tapBases', hint: 'Tap the two parallel sides',
-      after: [{ t: 'Yes! These are the bases.' }], f: { par: 1 } },
-    { id: 'legs', lines: [{ t: 'The other two sides are called the legs.' }], task: 'tapLegs', hint: 'Tap the two legs',
-      after: [{ t: 'Well done! These are the legs.' }], f: { par: 1 } },
-    { id: 'measure', lines: [{ t: "Let's measure the legs." }], task: 'measure', hint: 'Drag the ruler onto a leg, or tap a leg', idle: 'Drag the yellow ruler onto a slanted side, or just tap a leg.', f: { par: 1, legsPurple: 1 } },
-    { id: 'scalene', lines: [{ t: 'The legs have different lengths.' }, { t: 'This is a scalene trapezium.', chips: [{ t: 'Scalene trapezium', k: 'gold' }] }],
+    { id: 'intro', lines: [{ t: "Let's take a look at this quadrilateral and see what makes it special." }] },
+    { id: 'meet', lines: [{ t: 'These two sides look like they will meet.' }], f: { legGlow: 1 } },
+    { id: 'extend', lines: [{ t: "Let's extend them." }], task: 'extLegs', hint: 'Tap each slanted side to extend it',
+      after: [{ t: 'Woah! The sides meet.' }] },
+    { id: 'other', lines: [{ t: "Let's check the other\npair of sides." }], task: 'extBases', hint: 'Tap the top and bottom sides to extend them' },
+    { id: 'parallel', lines: [{ t: 'They do not meet.' }], f: { baseExt: 1 } },
+    { id: 'abcd', lines: [{ t: 'This means the sides are parallel to each other.', chips: [{ t: 'AB ∥ CD', k: 'white' }] }], f: { par: 1 } },
+    { id: 'onePair', lines: [{ t: "So this quadrilateral has\none pair of parallel sides.", chips: [{ t: 'AB ∥ CD', k: 'white' }] }], f: { par: 1 } },
+    { id: 'def', lines: [{ t: 'We call this a trapezium.', chips: [{ t: 'Trapezium', k: 'gold' }] }], f: { par: 1 } },
+    { id: 'defFull', lines: [{ t: 'A quadrilateral with at least\none pair of parallel sides\nis called a trapezium.', chips: [{ t: 'Trapezium', k: 'gold' }] }], f: { par: 1 } },
+    { id: 'bases', lines: [{ t: 'The parallel sides\nare called bases.' }], f: { par: 1 } },
+    { id: 'legs', lines: [{ t: 'And the non-parallel sides\nare called legs.' }], f: { par: 1 } },
+    { id: 'measure', lines: [{ t: "Let's measure the sides\nof this trapezium." }], task: 'measure', hint: 'Drag the ruler onto a leg, or tap a leg', idle: 'Drag the yellow ruler onto a slanted side, or just tap a leg.', f: { par: 1, legsPurple: 1 } },
+    { id: 'scalene', lines: [{ t: 'Woah! All the sides of\nthis trapezium are of\ndifferent lengths.' }, { t: 'This type of trapezium which\nhas sides of different lengths\nis called a scalene trapezium.', chips: [{ t: 'Scalene trapezium', k: 'gold' }] }],
       f: { par: 1, legsPurple: 1, legLen: 1 } },
-    { id: 'equal', lines: [{ t: 'Can you change it so both legs are equal?' }], task: 'dragB', hint: 'Drag point B along the top side', after: [{ t: 'Perfect! Both legs are equal.' }], autoNext: 1,
+    { id: 'equal', lines: [{ t: "Let's change its\nshape a little." }], task: 'dragB', hint: 'Drag point B along the top side', after: [{ t: 'Perfect! Both legs are equal.' }], autoNext: 1,
       f: { par: 1, legsPurple: 1, legLen: 1 } },
-    { id: 'iso', lines: [{ t: 'Now the legs are equal!' }, { t: 'This is an isosceles trapezium.', chips: [{ t: 'Isosceles trapezium', k: 'gold' }] }],
+    { id: 'iso', lines: [{ t: 'Yay! Now the legs are of same lengths.' }, { t: 'This is an isosceles trapezium.', chips: [{ t: 'Isosceles trapezium', k: 'gold' }] }],
       f: { par: 1, legsPurple: 1, legLen: 1, ticks: 1 } },
     { id: 'angles', lines: [{ t: "Now, let's measure its angles." }], task: 'tapAngles', hint: 'Tap each corner to measure its angle', f: { par: 1, ticks: 1 } },
     { id: 'make90', lines: [{ t: 'Can you make ∠A exactly 90°?' }], task: 'dragD90', hint: 'Drag point D along the bottom side', after: [{ t: 'Perfect! ∠A is exactly 90°.' }], autoNext: 1, f: { par: 1, arcs: 'A' } },
@@ -1050,8 +1052,8 @@ class Component extends DCLogic {
     g.move = (e) => this.move(e);
     g.up = (e) => this.up(e);
     g.poly = [A, B, C, D].map((p) => r1(p.x) + ',' + r1(p.y)).join(' ');
-    g.dA = seg(A, lerp(A, apex, 0.6), !!f.legHint);
-    g.dB = seg(B, lerp(B, apex, 0.6), !!f.legHint);
+    g.hDA = seg(D, A, !!f.legGlow);
+    g.hBC = seg(B, C, !!f.legGlow);
     g.xA = seg(A, lerp(A, apex, s.ext.DA), task === 'extLegs' && s.ext.DA > 0);
     g.xB = seg(B, lerp(B, apex, s.ext.BC), task === 'extLegs' && s.ext.BC > 0);
     g.apex = { x: r1(apex.x - 6.5), y: r1(apex.y - 6.5), d: dsp(task === 'extLegs' && s.done) };
