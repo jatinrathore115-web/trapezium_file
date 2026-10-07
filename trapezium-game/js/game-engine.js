@@ -215,6 +215,18 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     });
     return cues;
   }
+  // a corner letter arrives (letters line): it flies in from its own corner (Motion.letterIn) and, as it lands,
+  // its corner dot gives a soft grow. Letters never land closer than CONFIG.letters.minGapMs apart, so A -> B -> C -> D
+  // keeps its rhythm even when several cues come at once (a voice cut short, or no voice at all)
+  revealLetter(k) {
+    const now = Date.now(), at = Math.max(now, (this.letterAt || 0) + CONFIG.letters.minGapMs);
+    this.letterAt = at;
+    const go = () => {
+      this.setState({ vIn: Object.assign({}, this.state.vIn, { [k]: 1 }) });
+      Motion.letterIn(k, () => this.emphasize(['v' + k]));
+    };
+    if (at > now) Motion.wait((at - now) / 1000, go); else go();
+  }
   // grow -> brief hold -> back (CSS transitions do the easing; same timing everywhere)
   emphasize(parts) {
     const tok = this.stepTok;
@@ -282,19 +294,34 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       if (!keep) this.setState({ reveal: n });
       if (atIdx >= 0 && n >= atIdx + 1) highlight();
       if (pAt >= 0 && n >= pAt + 1) firePulse();
+      if (gAt >= 0 && n >= gAt + 1) fireGrow();
       emphCues.forEach((c) => { if (!c.done && n >= c.i + 1) { c.done = true; if (tok === this.narrTok) this.emphasize(c.parts); } });
     };
     // a part of the shape named in the line (∠A, AB, "A B", vertex A, legs, bases) grows briefly as the voice says it
     const emphCues = this.partCues(words);
+    // letters: 1 - each corner letter spoken on its own ("A, B, C, D" in s) flies in exactly as the voice says it:
+    // word-boundary events give the precise moment; voices without them get a paced estimate; all are in by the end
+    const letterCues = [];
+    if (L.letters) sp.replace(/\b([A-D])\b/g, (m, k, at) => { letterCues.push({ k: k, at: at, done: false }); return m; });
+    const fireLetter = (c) => { if (!c.done && tok === this.narrTok) { c.done = true; this.revealLetter(c.k); } };
     // pulse: the shape zooms once and returns to its size - on the pulseAt word as the voice says it, else as the line ends
     // (the last time the word is said: the name usually comes at the end, e.g. "...is called a right angled trapezium")
     const pAt = L.pulse && L.pulseAt ? words.map((w) => w.toLowerCase().replace(/[^a-z-]/g, '').indexOf(L.pulseAt) === 0).lastIndexOf(true) : -1;
+    // growAt: the shape comes forward once (Motion.growIn) as that word is said - else as the line ends
+    const gAt = L.growAt ? words.map((w) => w.toLowerCase().replace(/[^a-z-]/g, '').indexOf(L.growAt) === 0).indexOf(true) : -1;
+    let grown = false;
+    const fireGrow = () => {
+      if (!L.growAt || grown || tok !== this.narrTok) return;
+      grown = true;
+      const P = this.state.P;
+      Motion.growIn((P.A.x + P.B.x + P.C.x + P.D.x) / 4, (P.A.y + P.B.y + P.C.y + P.D.y) / 4);
+    };
     let pulsed = false;
     const firePulse = () => {
       if (!L.pulse || pulsed || tok !== this.narrTok) return;
       pulsed = true;
-      this.setState({ pulse: true });
-      this.tm(() => { if (tok === this.narrTok) this.setState({ pulse: false }); }, 950);
+      const P = this.state.P;
+      Motion.pop((P.A.x + P.B.x + P.C.x + P.D.x) / 4, (P.A.y + P.B.y + P.C.y + P.D.y) / 4);
     };
     let cardShown = !(keep && L.chips); // (glow and callout below apply to any line)
     let glowOn = false;
@@ -328,9 +355,11 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       fin = true;
       mouth(false);
       highlight(); // in case the word was never reached (voice cut short)
+      letterCues.forEach(fireLetter); // likewise every corner letter is in by the time the line ends
       this.setState(Object.assign(keep ? { talking: false } : { talking: false, reveal: words.length }, L.glow && atIdx < 0 ? { glow: null } : {}));
       if (L.glow && atIdx >= 0) this.tm(() => { if (live()) this.setState({ glow: null }); }, 1500); // the word was the end: let it linger
       firePulse(); // no-op if the pulseAt word already fired it
+      fireGrow(); // likewise for growAt
       // after speaking, Swiftee reacts with the line's expression for a beat, then settles
       if (L.m) this.tm(() => { if (live()) this.pose(this.restPose()); }, CONFIG.swiftee.reactMs);
       this.tm(() => { if (live() && done) done(); }, 420);
@@ -370,6 +399,11 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       if (!live() || started) return;
       started = true; tStart = performance.now();
       showCard(); mouth(true);
+      if (L.labelsIn) Motion.labelsIn(); // the corner letters come back as this line starts
+      if (letterCues.length) { // paced estimate for voices without word boundaries (precise boundaries win if they come)
+        const est = words.reduce((t, w) => t + nominal(w), 0) * (this.paceK || 1.18);
+        letterCues.forEach((c) => this.tm(() => { if (!bMode) fireLetter(c); }, est * c.at / Math.max(1, sp.length)));
+      }
       tick();
     };
     const s = this.synth();
@@ -393,13 +427,14 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
           const ratio = (performance.now() - tStart) / Math.max(1, words.reduce((t, w) => t + nominal(w), 0));
           if (ratio > 0.4 && ratio < 3) this.paceK = Math.max(0.6, 0.5 * (this.paceK || 1.18) + 0.5 * ratio * 1.06);
         }
-        sDone = true; begin(); mouth(false); revealAll(); finish();
+        sDone = true; begin(); mouth(false); letterCues.forEach(fireLetter); revealAll(); finish();
       };
       u.onstart = () => { spoke = true; begin(); };
       u.onend = end; u.onerror = end;
       u.onboundary = (ev) => {
         if (!live() || (ev.name && ev.name !== 'word')) return;
         bMode = true; begin();
+        letterCues.forEach((c) => { if ((ev.charIndex || 0) >= c.at) fireLetter(c); });
         const k = wordAt(ev.charIndex || 0);
         if (k > i) { i = k; setReveal(i); }
       };
@@ -587,7 +622,8 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const st = this.steps()[i];
     if (!st) return;
     this.clearT();
-    this.idleId = null; this.idleCount = 0; this.handId = null; this.handShown = 0; this.touched = false; this.overWig = false;
+    Motion.clear(); // the previous screen's animations stop and leave no inline styles behind
+    this.idleId = null; this.idleCount = 0; this.handId = null; this.handShown = 0; this.touched = false; this.overWig = false; this.letterAt = 0;
     this.prevLine = this.state.line;
     if (this.wk) this.wk.hide();
     this.stepTok++; this.narrTok++;
@@ -599,7 +635,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     else P = this.clone(this.snaps[i]);
     this.setState({
       step: i, P: P, done: !st.task && !st.cfu && !st.opts, ext: { DA: 0, BC: 0, AB: 0, CD: 0 }, tap: {}, ang: {}, chips: [], toast: null,
-      moved: false, dragging: null, picks: {}, cfuFirst: true, bird: '', hand: null, bubOff: false, centered: false, glow: null, pulse: false, callout: null, emph: {}, qc: false, flash: null, wig: null, measuring: null, tape: null, swAway: false, line: '', reveal: 0, ruler: this.rulerHome(), rulerDrag: false,
+      moved: false, dragging: null, picks: {}, cfuFirst: true, bird: '', hand: null, bubOff: false, centered: false, glow: null, pulse: false, callout: null, emph: {}, qc: false, trace: null, build: null, vIn: {}, flash: null, wig: null, measuring: null, tape: null, swAway: false, line: '', reveal: 0, ruler: this.rulerHome(), rulerDrag: false,
       c4: { at: { iso: null, right: null, scal: null }, locked: {}, sel: null, drag: null, checking: false }
     });
     if (this.sw) this.sw.setFlip(st.layout === 'spotlight'); // on the right, Swiftee faces left toward the shape
@@ -608,12 +644,15 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       this.focusAt = Date.now();
     }
     this.pose(this.restPose());
-    this.playLines(st.lines, () => {
+    this.setState({}, () => this.stepMotion(st)); // once the new screen is drawn
+    const lines = () => this.playLines(st.lines, () => {
       if (st.task === 'measure' && st.auto) this.tm(() => this.autoMeasure(), 400);
       else if (st.task === 'extLegs' && st.auto) this.autoExtend(['DA', 'BC']);
       else if (st.task === 'extBases' && st.auto) this.autoExtend(['AB', 'CD']);
       else this.maybeAdvance(true);
     });
+    // voiceDelay (ms): Swiftee waits for the screen's opening animation before she speaks (screen 4: the assembly)
+    if (st.voiceDelay) this.tm(lines, st.voiceDelay); else lines();
   }
   navLocked() { return Date.now() - (this.navAt || 0) < CONFIG.timing.navLockMs; }
   next() {
@@ -665,14 +704,18 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   maybeAdvance(afterLine) {
     if (this.advId) { clearTimeout(this.advId); this.T.delete(this.advId); this.advId = null; }
     const st = this.cur(), i = this.state.step, tok = this.stepTok;
-    if (!CONFIG.flow.autoAdvance) return; // manual navigation: only the Next / Back buttons change the screen
+    // manual navigation: only Next / Back change the screen - except a step with autoNext (ms), which flows straight
+    // on to the next screen that long after its last line (screen 1 -> 2: one continuous intro)
+    if (!CONFIG.flow.autoAdvance && st.autoNext == null) return;
     if (!this.state.done || st.end || i >= this.steps().length - 1) return;
-    const wait = st.autoAdvance != null ? st.autoAdvance : CONFIG.flow.advanceMs;
+    const wait = st.autoNext != null ? st.autoNext : st.autoAdvance != null ? st.autoAdvance : CONFIG.flow.advanceMs;
     this.advId = this.tm(() => {
       this.advId = null;
       // someone is talking again (a tip, a hint): that line's end schedules the move afresh
       if (tok !== this.stepTok || this.state.talking || this.drag || this.ld || this.rd) return;
       if (this.state.navOpen) { this.maybeAdvance(false); return; } // screen list open: wait until it closes
+      const bd = this.state.build; // a building shape (screen 1) finishes its outline glow and fill fade first
+      if (st.build && !(bd && bd.done && !bd.settle)) { this.maybeAdvance(false); return; }
       this.goTo(i + 1, true);
     }, Math.max(0, wait - (afterLine ? 420 : 0))); // a finished line has already paused 420 ms
   }
@@ -747,7 +790,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     return pt.matrixTransform(svg.getScreenCTM().inverse());
   }
   // screen 13: measure all four sides by herself, one after another
-  // screens 4 and 5: each side flashes pink once, then its dotted extension draws, one side after the other
+  // screens 4 and 5: one side after the other, a glowing line draws along the side, then its dotted extension draws on
   // (legs AD then BC, or bases AB then CD). Starts once the shape has settled at centre stage.
   autoExtend(keys) {
     const tok = this.stepTok, live = () => tok === this.stepTok && !this.state.done;
@@ -757,17 +800,64 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       const wait = (this.focusAt || 0) + CONFIG.focus.moveMs + 300 - Date.now();
       if (wait > 0) { this.tm(() => this.autoExtend(keys), wait); return; }
     }
-    const leg = (k, then) => {
+    const isLegs = this.cur().task === 'extLegs';
+    // Screens 4 and 5 share one animation system, one side at a time:
+    //   legs  (4): D->A glow -> dotted on from A toward the meeting point, then C->B glow -> dotted on from B
+    //   bases (5): AB glows from its middle out to A and B -> dotted outward from both ends, then DC the same way
+    // A soft glowing pink line draws on along the side and stops exactly at its end corner; at that instant the
+    // dotted extension starts drawing on while the glow fades off the side. One speed for everything
+    // (CONFIG.trace.pxPerMs): the glow eases in (sine) and the dotted line eases out (sine), so the motion runs
+    // through the corner without a stop or a jump.
+    const sp = CONFIG.trace.pxPerMs;
+    const run = (ms, ease, set, done) => Motion.value(0, 1, ms / 1000, ease, (e) => { if (live()) set(e); }, () => { if (live()) done(); });
+    const trace = (k, then) => {
       if (!live()) return;
-      this.setState({ flash: k });
-      this.tm(() => {
-        if (!live()) return;
-        this.setState({ flash: null });
-        this.sfx('tap');
-        this.anim(k, () => this.tm(then, 350));
-      }, 800);
+      const P = this.state.P;
+      const ends = { DA: [P.D, P.A], BC: [P.C, P.B], AB: [P.A, P.B], CD: [P.D, P.C] }[k], from = ends[0], to = ends[1];
+      let extLen;
+      if (isLegs) {
+        const ap = this.inter(P.A, P.D, P.B, P.C) || { x: (P.A.x + P.B.x) / 2, y: P.A.y - 60 };
+        extLen = this.dist(to, ap);
+      } else extLen = Math.max(from.x + 10, 530 - to.x); // bases run out to both board edges (see be())
+      this.sfx('tap');
+      // 1. the glowing line: legs draw from corner to corner; bases grow from the middle out to both ends at once
+      const mid = !isLegs, glowLen = this.dist(from, to) * (mid ? 0.5 : 1);
+      run(Math.max(350, glowLen / sp), 'sine.in', (e) => this.setState({ trace: { from: from, to: to, t: e, out: false, mid: mid } }), () => {
+        // 2. at the end corner(s): the glow fades off the side as the dotted line draws on (bases: out of both ends together)
+        this.setState({ trace: { from: from, to: to, t: 1, out: true, mid: mid } });
+        run(Math.max(250, extLen / sp), 'sine.out', (e) => {
+          const ext = Object.assign({}, this.state.ext); ext[k] = Math.max(e, 0.001);
+          this.setState({ ext: ext });
+        }, () => { this.setState({ trace: null }); Motion.wait(CONFIG.trace.gapMs / 1000, then); });
+      });
     };
-    leg(keys[0], () => leg(keys[1], () => { if (live()) { if (this.cur().task === 'extLegs') this.sfx('snap'); this.finishTask(); } }));
+    trace(keys[0], () => trace(keys[1], () => { if (live()) { if (isLegs) this.sfx('snap'); this.finishTask(); } }));
+  }
+  // screen 1 build: one continuous pen stroke round the outline (D->A->B->C->D) at a steady pace, eased in at the
+  // start and out at the end only, so it runs through the corners without stopping. Then the outline glow settles
+  // and the fill fades in.
+  runBuild() {
+    const tok = this.stepTok, P = this.state.P, Bc = CONFIG.build;
+    const total = this.dist(P.D, P.A) + this.dist(P.A, P.B) + this.dist(P.B, P.C) + this.dist(P.C, P.D);
+    Motion.value(0.001, total, total / Bc.pxPerMs / 1000, 'sine.inOut', (d) => {
+      if (tok === this.stepTok) this.setState({ build: { d: d, done: false } });
+    }, () => {
+      if (tok !== this.stepTok) return;
+      this.setState({ build: { d: total, done: true, settle: true, fill: true }, trace: null }, () => Motion.settle());
+      this.tm(() => { if (tok === this.stepTok) this.setState({ build: { d: total, done: true, settle: false, fill: true } }); }, Bc.settleMs);
+    });
+  }
+  // what a screen animates once it is on screen (GSAP, js/motion.js)
+  stepMotion(st) {
+    if (st !== this.cur()) return;
+    if (st.build) { Motion.hideFill(); this.tm(() => this.runBuild(), CONFIG.build.delayMs); }
+    if (st.sideNums) Motion.sideNums((i) => this.emphasize([['AB', 'BC', 'CD', 'DA'][i]]));
+    if (st.letterIn) Motion.fadeOut('.tag.snum, .tag.vlab'); // numbers and old letters leave softly; letters return on cue
+    if (st.assemble) {
+      const P = this.state.P;
+      Motion.holdSmall((P.A.x + P.B.x + P.C.x + P.D.x) / 4, (P.A.y + P.B.y + P.C.y + P.D.y) / 4);
+      Motion.assemble();
+    }
   }
   autoMeasure() {
     const tok = this.stepTok;
@@ -981,11 +1071,9 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (!W || !start || this.state.done) return;
     const over = x - start[k].x > W.cm * this.S;
     if (over && !this.overWig && Date.now() - (this.wigAt || 0) > CONFIG.drag.wrongGapMs) {
-      const tok = this.stepTok;
       this.wigAt = Date.now();
       this.sfx('bad');
-      this.setState({ wig: W.side });
-      this.tm(() => { if (tok === this.stepTok) this.setState({ wig: null }); }, 520);
+      Motion.wiggle(W.side);
     }
     this.overWig = over;
   }
@@ -1178,15 +1266,19 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     g.move = (e) => this.move(e);
     g.up = (e) => this.up(e);
     g.poly = [A, B, C, D].map((p) => r1(p.x) + ',' + r1(p.y)).join(' ');
-    // legGlow: AD and BC get a pulsing yellow band, so the learner knows which two sides "will meet"
+    // legGlow: AD and BC are emphasised (bolder in their own colour), so the learner knows which two sides "will meet"
     const waitFocusG = st.layout === 'focus' && !s.centered;
     const said = (k) => !!(s.glow && s.glow.indexOf(k) >= 0);
     const glowLeg = (k) => !!f.legGlow || said(k) || (task === 'extLegs' && !st.auto && !s.done && !waitFocusG && !(s.ext[k] > 0));
     const act = task === 'measure' ? this.activeSide() : null;
     const meas = (k) => task === 'measure' && (!!s.tap[k] || s.measuring === k);
-    const band = (k, p, q, on) => st.auto
-      ? seg(p, q, on, { cls: 'leg-glow' }) // the tape itself is the highlight
-      : seg(p, q, on || act === k || meas(k), { cls: 'leg-glow' + (meas(k) && !on ? ' done' : '') });
+    // No yellow bands on the figure, ever: a side that would have been highlighted ("lit": legGlow, a line's
+    // glow, the side being measured / tapped) is drawn a little bolder in its own colour instead (.edge.lit)
+    const lit = {};
+    const band = (k, p, q, on) => {
+      lit[k] = st.auto ? on : (on || act === k || meas(k));
+      return seg(p, q, false, { cls: 'leg-glow' });
+    };
     g.hDA = band('DA', D, A, glowLeg('DA'));
     g.hBC = band('BC', B, C, glowLeg('BC'));
     const glowBase = (k) => said(k) || (task === 'extBases' && !st.auto && !s.done && !waitFocusG && !(s.ext[k] > 0));
@@ -1207,15 +1299,17 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
           tk += 'M' + r1(q.x - nx * len) + ',' + r1(q.y - ny * len) + ' L' + r1(q.x + nx * len) + ',' + r1(q.y + ny * len) + ' ';
         }
         g.tapeTk = { p: tk || 'M0,0', d: 'inline' };
-        this.tapeNums = { p0: p0, ux: ux, uy: uy, nx: nx, ny: ny, n: Math.floor(L * tp.t / this.S + 0.001) };
       } else {
-        g.tape = { p: 'M0,0', d: 'none' }; g.tapeTk = { p: 'M0,0', d: 'none' }; this.tapeNums = null;
+        g.tape = { p: 'M0,0', d: 'none' }; g.tapeTk = { p: 'M0,0', d: 'none' };
       }
     }
     const met = !!f.met;
     g.xA = seg(A, lerp(A, apex, met ? 1 : s.ext.DA), (task === 'extLegs' && s.ext.DA > 0) || met);
     g.xB = seg(B, lerp(B, apex, met ? 1 : s.ext.BC), (task === 'extLegs' && s.ext.BC > 0) || met);
     g.apex = { x: r1(apex.x - 6.5), y: r1(apex.y - 6.5), d: dsp((task === 'extLegs' && s.done) || met) };
+    // screens 4-5: the glowing line being drawn along a side (from -> to) before its dotted extension draws on
+    const tr = s.trace, tm = tr && tr.mid ? lerp(tr.from, tr.to, 0.5) : null; // centre-out (bases): both ends grow from the middle
+    g.trace = tr ? seg(tm ? lerp(tm, tr.from, tr.t) : tr.from, lerp(tm || tr.from, tr.to, tr.t), true, { cls: 'trace' + (tr.out ? ' out' : '') }) : seg(D, D, false, { cls: 'trace' });
     const be = (key, p, q) => {
       const t = f.baseExt ? 1 : (task === 'extBases' ? s.ext[key] : 0);
       return seg({ x: p.x - (p.x + 10) * t, y: p.y }, { x: q.x + (530 - q.x) * t, y: q.y }, t > 0);
@@ -1228,24 +1322,37 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const baseCol = (k) => (st.id === 'bases' && s.tap[k] ? OR : NAVY);
     const legCol = (k) => ((st.id === 'legs' && s.tap[k]) || f.legsPurple ? PU : NAVY);
     // flash (auto extend), wiggle (wrong-way drag), emph (named in the voice-over)
-    const eCls = (k) => (s.flash === k ? 'flash' : '') + (s.wig === k ? ' wiggle' : '') + (s.emph && s.emph[k] ? ' emph' : '');
-    g.eAB = seg(A, B, true, { c: baseCol('AB'), cls: eCls('AB') });
-    g.eCD = seg(C, D, true, { c: baseCol('CD'), cls: eCls('CD') });
-    g.eBC = seg(B, C, true, { c: legCol('BC'), cls: eCls('BC') });
-    g.eDA = seg(D, A, true, { c: legCol('DA'), cls: eCls('DA') });
+    const eCls = (k) => 'e' + k + ' ' + (s.flash === k ? 'flash' : '') + (s.wig === k ? ' wiggle' : '') + (s.emph && s.emph[k] ? ' emph' : '') + (lit[k] ? ' lit' : '');
+    // build (screen 1): the shape draws itself while Swiftee talks - empty panel, then a glowing pink pen runs
+    // D->A->B->C->D in one continuous stroke, leaving each finished edge behind; corners (dot + letter) appear as
+    // the pen reaches them. Then a soft glow settles round the outline and the fill fades in (s.build, runBuild).
+    const bd = st.build ? (s.build || { d: 0 }) : null, building = !!(bd && !bd.done);
+    const bOrder = [['DA', D, A], ['AB', A, B], ['BC', B, C], ['CD', C, D]], bAt = {};
+    { let acc = 0; bOrder.forEach((e) => { const L = this.dist(e[1], e[2]); bAt[e[0]] = { s: acc, L: L, p: e[1], q: e[2] }; acc += L; }); }
+    const edgeOn = (k) => !building || bd.d >= bAt[k].s + bAt[k].L - 0.01;
+    const vOn = (k) => !building || (k === 'D' ? bd.d > 0 : bd.d >= bAt[{ A: 'AB', B: 'BC', C: 'CD' }[k]].s - 0.01);
+    if (building && bd.d > 0) {
+      const cur = bOrder.map((e) => bAt[e[0]]).find((e) => bd.d < e.s + e.L) || bAt.CD;
+      g.trace = seg(cur.p, lerp(cur.p, cur.q, Math.min(1, (bd.d - cur.s) / cur.L)), true, { cls: 'trace' });
+    }
+    g.ol = { d: dsp(!!(bd && bd.settle) || !!st.assemble) };
+    g.eAB = seg(A, B, edgeOn('AB'), { c: baseCol('AB'), cls: eCls('AB') });
+    g.eCD = seg(C, D, edgeOn('CD'), { c: baseCol('CD'), cls: eCls('CD') });
+    g.eBC = seg(B, C, edgeOn('BC'), { c: legCol('BC'), cls: eCls('BC') });
+    g.eDA = seg(D, A, edgeOn('DA'), { c: legCol('DA'), cls: eCls('DA') });
     // bases callout: hidden again once the learner taps a base (the tapped sides get their own "Base" tags)
     {
       const legs = s.callout === 'legs';
       const show = (s.callout === 'bases' && !s.tap.AB && !s.tap.CD) || (legs && !s.tap.DA && !s.tap.BC);
-      // one pill label per side (reference style): a soft rounded pill just outside the side's midpoint, joined
-      // to it by a short dotted stem that ends in a small dot. Bases: above AB / below CD. Legs: out from each leg.
+      // one pill label per side: a soft rounded pill just outside the side's midpoint, joined to it by a short solid
+      // tail in the pill's own border colour (no dot). Bases: above AB / below CD. Legs: out from each leg.
       // First pill yellow, second lilac; both appear together and follow the shape.
       const W = legs ? 64 : 78, H = 32, cx0 = (A.x + B.x + C.x + D.x) / 4, cy0 = (A.y + B.y + C.y + D.y) / 4;
       const pill = (p, q, vert) => {
         const m = { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 }, L = this.dist(p, q) || 1;
         let nx = vert ? 0 : -(q.y - p.y) / L, ny = vert ? (m.y < cy0 ? -1 : 1) : (q.x - p.x) / L;
         if (!vert && nx * (m.x - cx0) + ny * (m.y - cy0) < 0) { nx = -nx; ny = -ny; }
-        const ext = (W / 2) * Math.abs(nx) + (H / 2) * Math.abs(ny), dot = 8, gap = 18;
+        const ext = (W / 2) * Math.abs(nx) + (H / 2) * Math.abs(ny), dot = 10, gap = 12; // tail starts clear of the stroke + parallel arrows
         const c = { x: m.x + nx * (dot + gap + ext), y: m.y + ny * (dot + gap + ext) };
         const d0 = { x: m.x + nx * dot, y: m.y + ny * dot }, e = { x: c.x - nx * ext, y: c.y - ny * ext };
         return { x: r1(c.x - W / 2), y: r1(c.y - H / 2), tx: r1(c.x), ty: r1(c.y + 6), dx: r1(d0.x), dy: r1(d0.y),
@@ -1305,7 +1412,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const dk = this.dragKey();
     ['A', 'B', 'C', 'D'].forEach((k) => {
       const anyV = this.anyCorner(), Vk = P[k], drag = dk === k || anyV;
-      g['v' + k] = { x: r1(Vk.x), y: r1(Vk.y), r: (drag ? 11 : 7) + (em['v' + k] ? 4 : 0), c: drag ? PU : NAVY, w: drag ? 4 : 3 };
+      g['v' + k] = { x: r1(Vk.x), y: r1(Vk.y), r: vOn(k) ? (drag ? 11 : 7) + (em['v' + k] ? 4 : 0) : 0, c: drag ? PU : NAVY, w: drag ? 4 : 3 };
       const tapV = (task === 'tapAngles' || task === 'tapAD') && !s.done;
       const pulse = tapV && !s.ang[k] && (task === 'tapAngles' || k === 'A' || k === 'D');
       g['k' + k] = {
@@ -1354,7 +1461,9 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const tags = [];
     ['A', 'B', 'C', 'D'].forEach((k) => {
       const Vk = P[k]; let dx = Vk.x - cx, dy = Vk.y - cy; const L = Math.hypot(dx, dy) || 1;
-      tags.push({ t: k, x: r1(Vk.x + dx / L * 25), y: r1(Vk.y + dy / L * 25), cls: 'vlab' });
+      // letterIn (screen 3): each corner letter stays hidden until the voice says it, then flies in from its corner
+      const lin = st.letterIn ? ' vin c' + k : '';
+      tags.push({ t: k, x: r1(Vk.x + dx / L * 25), y: r1(Vk.y + dy / L * 25), cls: 'vlab' + (vOn(k) ? '' : ' off') + lin });
     });
     ['A', 'B', 'C', 'D'].forEach((k) => tags.push(aTag[k]));
     // a tag beside a side, pushed out along the side's outward normal far enough that its box clears the line
@@ -1393,11 +1502,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       tags.push({ t: tL, x: r1(xL), y: r1(yS), cls: 'mtag sum' + (on ? '' : ' off') });
       tags.push({ t: tR, x: r1(xR), y: r1(yS), cls: 'mtag sum' + (on ? '' : ' off') });
     }
-    for (let n = 0; n <= 10; n++) { // tape numbers (fixed slots)
-      const T = this.tapeNums, on = !!(T && n <= T.n);
-      const q = on ? { x: T.p0.x + T.ux * n * this.S + T.nx * 16, y: T.p0.y + T.uy * n * this.S + T.ny * 16 } : { x: 0, y: 0 };
-      tags.push({ t: String(n), x: r1(q.x), y: r1(q.y), cls: 'tnum' + (on ? '' : ' off') });
-    }
+    // (the measuring tape carries tick marks only - no numbers; each side's length is shown once, outside the shape)
     const isB = st.id === 'bases', isL = st.id === 'legs', isM = st.id === 'measure';
     tags.push(side(A, B, 'Base', 'btag', isB && !!s.tap.AB));
     tags.push(side(D, C, 'Base', 'btag', isB && !!s.tap.CD));
@@ -1406,14 +1511,22 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     tags.push(side(D, A, this.cm(ad), 'mtag', isM && !!s.tap.DA)); // values only, no side names
     tags.push(side(B, C, this.cm(bc), 'mtag', isM && !!s.tap.BC));
     tags.push(side(A, B, this.cm(this.dist(A, B)), 'mtag', isM && !!s.tap.AB));
-    tags.push(side(D, C, this.cm(this.dist(D, C)), 'mtag', isM && !!s.tap.CD));
-    if (isM && st.auto) { const t = tags[tags.length - 2]; t.y = r1(A.y + 30); } // AB label: inside, below the top side
+    tags.push(side(D, C, this.cm(this.dist(D, C)), 'mtag', isM && !!s.tap.CD)); // all four outside their sides
     const near = Math.abs(ad - bc) < CONFIG.snap.equalLegsCm * this.S;
     const eqCls = 'mtag' + ((task === 'dragA' && near) || (task === 'dragAny' && near) || st.id === 'iso' ? ' eq' : '');
     tags.push(side(D, A, this.cm(ad), eqCls, !!f.legLen));
     tags.push(side(B, C, this.cm(bc), eqCls, !!f.legLen));
     tags.push(side(A, B, this.cm(this.dist(A, B)), 'mtag', !!f.sideLen));
     tags.push(side(D, C, this.cm(this.dist(D, C)), 'mtag', !!f.sideLen));
+    // sideNums (screen 2): the four sides numbered 1 top, 2 right, 3 bottom, 4 left - each number flies in from its
+    // own side's direction, one after another (CSS .snum: ease-out, slight overshoot, 90% -> 100% scale)
+    {
+      const on = !!(st.sideNums || st.letterIn), gone = ''; // kept on screen 3 so they can fade out (Motion.fadeOut)
+      tags.push(side(A, B, '1', 'snum n1 from-top' + gone, on));
+      tags.push(side(B, C, '2', 'snum n2 from-right' + gone, on));
+      tags.push(side(D, C, '3', 'snum n3 from-bottom' + gone, on));
+      tags.push(side(D, A, '4', 'snum n4 from-left' + gone, on));
+    }
     return { g: g, tags: tags, V: V };
   }
 
@@ -1440,6 +1553,9 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const c1 = {};
     if (st.cfu === 1) st.opts.forEach((o) => { c1[o.id] = mk(o); });
     // qFocus: the answers stay hidden until the question shape has reached the centre, then come in one by one
+    // screen-change fade class; combined classes below are built here because the template runtime drops a class
+    // attribute that starts with a binding and holds two bindings ("{{a}} {{b}}")
+    const fadeV = st.cfu || st.end ? (s.step % 2 ? 'fadeA' : 'fadeB') : 'fadeA';
     const hasOpts = !!(st.opts && st.cfu !== 1) && (!st.qFocus || s.qc);
     const opts = hasOpts ? st.opts.map(mk) : [];
     // cfu4
@@ -1506,7 +1622,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       // a line with its own breaks keeps exactly those lines: the bubble widens instead of wrapping again
       bubCls: s.bub + ((s.line || '').indexOf('\n') >= 0 ? ' manual' : ''),
       // lesson steps share one board, so it only fades in when it first appears; each check fades in fresh
-      fadeCls: st.cfu || st.end ? (s.step % 2 ? 'fadeA' : 'fadeB') : 'fadeA',
+      fadeCls: fadeV,
       birdCls: 'bird', // Swiftee's expressions are driven by pose() (js/swiftee.js), not by re-rendering
       chips: chips.map((c) => ({ t: c.t, k: c.k + (c.t.length > 20 ? ' long' : '') })),
       rootDown: () => this.rootDown(),
@@ -1514,7 +1630,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       c1: c1, hasOpts: hasOpts, opts: opts,
       // qFocus: shape centred in the panel with the answers in a row under it (CONFIG.qFocus); otherwise the usual right column
       optTop: st.qFocus && s.qc ? CONFIG.qFocus.optTop : st.optTop || 376, optLeft: st.qFocus && s.qc ? CONFIG.qFocus.cx - CONFIG.qFocus.optW / 2 : scene ? CONFIG.scene.chipLeft + 8 : 650,
-      optW: st.qFocus && s.qc ? CONFIG.qFocus.optW : 504, optCls: st.qFocus ? "opts-in" : "",
+      optW: st.qFocus && s.qc ? CONFIG.qFocus.optW : 504, optCls: fadeV + (st.qFocus ? ' opts-in' : ''),
       qx: CONFIG.qFocus.cx - 250, qy: s.qc ? CONFIG.qFocus.shapeTop : CONFIG.qFocus.shapeTop0, chipTop: st.chipTop || (scene ? CONFIG.scene.chipTop : 528), chipLeft: scene ? CONFIG.scene.chipLeft : 602, // answers centred under the shape
       celebrate: st.id === 'wellDone',
       labs: labs, slots: slots,
@@ -1531,9 +1647,10 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       // spotlight: the board (shape + its labels) glides to centre stage and grows; Swiftee moves right; no bubble
       sceneCls: scene ? 'scene' : '',
       boardTf: scene ? 'translate(' + CONFIG.scene.boardX + 'px, ' + (st.boardShiftY || 0) + 'px)' : spot ? tf(CONFIG.spotlight) : (st.layout === 'focus' && s.centered ? tf(CONFIG.focus) : (st.layout === 'top' ? tf(CONFIG.topLayout) : (st.boardShift || st.boardShiftY ? 'translate(' + (st.boardShift || 0) + 'px, ' + (st.boardShiftY || 0) + 'px)' : 'none'))),
-      spotFill: spot ? 'spot' : '',
+      boardCls: fadeV + (st.assemble ? ' asm' : ''), // fade class + assemble (screen 4): the four sides fly in and form the shape - all in CSS (.asm)
+      spotFill: spot ? 'spot' : '', // (screen 1 build: Motion hides the fill and fades it in last)
       // pulse: the whole shape (and its labels) zooms once about its own centre (no fill glow)
-      popCls: s.pulse ? 'pop' : '',
+      popCls: '', // (the zoom itself is Motion.pop)
       popO: s.P ? Math.round((s.P.A.x + s.P.B.x + s.P.C.x + s.P.D.x) / 4) + 'px ' + Math.round((s.P.A.y + s.P.B.y + s.P.C.y + s.P.D.y) / 4) + 'px' : 'center',
       swCls: s.swAway ? 'swiftee away' : scene ? 'swiftee' : spot ? 'swiftee spot' : (st.layout === 'top' ? 'swiftee top' : 'swiftee'),
       bubHide: (!s.line || s.swAway ? 'gone' : (s.bubOff ? 'away' : '')) + (st.layout === 'top' && !scene ? ' top' : ''),

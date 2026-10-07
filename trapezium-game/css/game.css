@@ -40,15 +40,12 @@ a{color:#123b63}a:hover{color:#0b2742}
 .alab{animation:fade .3s ease-out}
 .chip{font-family:'Baloo 2',system-ui,sans-serif;font-weight:700;font-size:27px;line-height:1.1;padding:9px 28px 7px;border-radius:14px;border:2px solid #cfe6f7;background:#fff;color:#123b63;box-shadow:0 4px 12px rgba(18,59,99,.14);animation:chipIn .34s cubic-bezier(.2,1.25,.5,1);white-space:pre}
 .chip.long{font-size:23px;padding:8px 22px 6px}
-.chip.gold{background:#fdf0c4;color:#6e4210;border-color:#efcb6e}
-/* shape-name label (k: 'name'): glossy ice-blue box - bright blue rim with a deeper bottom lip, pale inner face,
-   a soft shine at the top-left, heavy rounded navy type */
-.chip.name{position:relative;font-family:'Nunito',system-ui,sans-serif;font-weight:900;font-size:28px;line-height:1.15;letter-spacing:.2px;
-  color:#0e3a7c;padding:9px 36px 10px;border-radius:24px;border:2px solid #f2faff;
-  background:linear-gradient(180deg,#f7fcff 0%,#e3f2fd 55%,#cfe8fb 100%);
-  box-shadow:0 0 0 5px #3ba7f5,0 5px 0 5px #1e86de,0 10px 18px 4px rgba(18,70,140,.28),inset 0 -3px 0 rgba(43,123,214,.12)}
-.chip.name::before{content:'';position:absolute;left:12px;top:5px;width:26px;height:9px;border-radius:50%;background:rgba(255,255,255,.9);transform:rotate(-24deg);pointer-events:none}
-.chip.name.long{font-size:24px;padding:8px 28px 9px}
+/* shape-name (k: 'name') and angle-sum (k: 'gold') labels share one reference style: warm cream face, a clean teal
+   border, deep-teal heavy rounded type, generous rounding. Flat and calm - no gloss, lip or glow */
+.chip.name,.chip.gold{font-family:'Nunito',system-ui,sans-serif;font-weight:900;font-size:28px;line-height:1.15;letter-spacing:.2px;
+  color:#0b5b70;background:#fbf8ee;border:4px solid #5cc6cf;border-radius:22px;padding:8px 34px 9px;
+  box-shadow:0 4px 12px rgba(11,91,112,.10)}
+.chip.name.long,.chip.gold.long{font-size:24px;padding:8px 28px 9px}
 .chip.good{background:#e2f7e6;color:#1d6b35;border-color:#8fd3a1}
 .chip.bad{background:#fde6e2;color:#9b2c1f;border-color:#f2a99d}
 @keyframes chipIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
@@ -57,10 +54,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 .edge.flash{animation:edgeFlash .8s ease-in-out}
 @keyframes edgeFlash{0%,100%{stroke-width:5px;filter:none}50%{stroke-width:9px;filter:drop-shadow(0 0 6px rgba(232,40,122,.75))}}
 @media (prefers-reduced-motion: reduce){.edge.flash{animation:none;stroke-width:8px}}
-/* screen 16: dragged too far -> the leg gives one short, small wiggle about its middle */
-.edge.wiggle{transform-box:fill-box;transform-origin:center;animation:edgeWiggle .5s ease-in-out}
-@keyframes edgeWiggle{0%,100%{transform:rotate(0)}20%{transform:rotate(1.6deg)}40%{transform:rotate(-1.4deg)}60%{transform:rotate(.9deg)}80%{transform:rotate(-.4deg)}}
-@media (prefers-reduced-motion: reduce){.edge.wiggle{animation:none}}
 .arc{stroke-dasharray:100 100;animation:arcIn .5s ease-out backwards}
 .d1{animation-delay:.15s}
 .d2{animation-delay:.3s}
@@ -190,10 +183,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 .leg-glow{animation:legGlowIn .35s ease-out,legGlow 1.8s ease-in-out .35s infinite}
 @keyframes legGlowIn{from{stroke-opacity:0;stroke-width:12px}to{stroke-opacity:.78;stroke-width:20px}}
 @media (prefers-reduced-motion: reduce){.leg-glow{animation:none}}
-/* pulse: 1 - the shape (with its labels) zooms up once about its centre, then eases back to its own size. No glow, no second beat */
-.pop-g.pop{animation:shapePop .7s ease-in-out 1}
-@keyframes shapePop{0%{transform:scale(1)}40%{transform:scale(1.07)}100%{transform:scale(1)}}
-@media (prefers-reduced-motion: reduce){.pop-g.pop{animation:none}}
 /* Base / Leg pill labels (screens 11-12): both pills of a pair fade and drop in together with the voice */
 .callout{animation:calloutIn .4s ease-out;filter:drop-shadow(0 3px 6px rgba(18,59,99,.16))}
 @keyframes calloutIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
@@ -262,7 +251,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 .swiftee.away{opacity:0;transition:opacity .15s ease}
 .tape{filter:drop-shadow(0 1px 1px rgba(122,90,16,.35))}
 /* tape-measure numbers (screen 13) */
-.tag.tnum{font-size:11px;font-weight:900;color:#6b4c0c;background:#ffe27a;border:1px solid #c9961e;padding:0 4px;border-radius:4px;box-shadow:none;line-height:15px;animation:none}
 /* home Swiftee fades out/in as the walker takes over, so the hand-off has no pop */
 .swiftee{transition:opacity .2s ease}
 /* check 1: a wrongly picked shape traces its sides one by one, so the learner sees no pair runs the same way */
@@ -292,3 +280,21 @@ a{color:#123b63}a:hover{color:#0b2742}
 .opts-in .opt.bad{animation:shake .4s ease}
 @media (prefers-reduced-motion: reduce){.qshape{transition:none}.opts-in .opt{animation:none}}
 .opts-in .opt.nudged{animation:optNudge 1.5s ease-in-out 3}
+/* emphasised side (no yellow band anywhere): the side itself goes a little bolder in its own colour */
+.edge.lit{stroke-width:8px}
+.edge.lit.emph{stroke-width:10px}
+/* screen 4 leg trace: a soft pink glow drawn on along the leg (D->A, C->B); at the corner it fades off the side while
+   the dotted extension (xleg) draws on from the corner */
+.trace{opacity:.95;filter:drop-shadow(0 0 4px rgba(232,40,122,.45));transition:opacity .35s ease}
+.trace.out{opacity:0}
+.xleg{animation:xlegIn .2s ease both}
+@keyframes xlegIn{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion: reduce){.xleg{animation:none}.trace{transition:none}}
+/* settling glow round a finished outline (screens 1 and 4) */
+.outline-settle{opacity:0;filter:drop-shadow(0 0 7px rgba(232,40,122,.55))} /* faded in/out by GSAP (js/motion.js) */
+/* screen 2 side numbers: bold plain numerals (no box); their entrance is GSAP (Motion.sideNums) */
+.tag.snum{background:none;box-shadow:none;padding:0;font-family:'Nunito',system-ui,sans-serif;font-weight:900;font-size:26px;color:#123b63}
+
+/* Choreographed motion (screen 1 build glow + fill, side numbers, corner letters, shape assembly, shape zoom,
+   wrong-way wiggle, leg/base traces) runs on GSAP in js/motion.js; this sheet keeps the static looks and the small
+   hover / state transitions. */

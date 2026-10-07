@@ -30,7 +30,7 @@ const chrome = spawn(chromePath, ['--headless=new', '--disable-gpu', '--remote-d
   await send('Page.addScriptToEvaluateOnNewDocument', { source: `Object.defineProperty(window,'TrapeziumGame',{configurable:true,set(v){const o=v.prototype.componentDidMount;v.prototype.componentDidMount=function(){window.__g=this;return o.call(this)};this.__tg=v},get(){return this.__tg}})` });
   await send('Page.navigate', { url: 'http://localhost:' + PORT + '/' });
   for (let i = 0; i < 40 && (await ev('typeof __g')) !== 'object'; i++) await sleep(250);
-  await ev(`document.body.classList.add('thumbs-capture'); CONFIG.flow.advanceMs = 1e9;`);
+  await ev(`document.body.classList.add('thumbs-capture'); CONFIG.flow.advanceMs = 1e9; LESSON.steps.forEach((s) => { delete s.autoNext; });`);
   const n = await ev('__g.steps().length');
   fs.mkdirSync(OUT, { recursive: true });
   for (let i = 0; i < n; i++) {

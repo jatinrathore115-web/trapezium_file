@@ -4,6 +4,7 @@
 //          glow = sides that pulse yellow while the line is spoken, e.g. ['AB', 'CD'];
 //          pulse: 1 = the shape zooms up once and returns to its size when the line's voice-over ends,
 //          or as the pulseAt word is spoken (e.g. pulseAt: 'trapezium');
+//          growAt: 'word' = the shape (held small by assemble) comes forward once to full size as that word is said;
 //          glowAt: 'word' = glow/callout wait until that word is said (yellow then lingers ~1.5 s);
 //          callout: 'bases' | 'legs' = a "Base"/"Legs" label with arrows to AB and CD appears as the voice starts and stays), chips = labels shown with the line,
 //          m = Swiftee's expression while saying it; default talking. reactions in CONFIG.swiftee)
@@ -13,6 +14,12 @@
 //   screen moves on CONFIG.flow.advanceMs after its last line; autoAdvance overrides that wait (ms)
 //   handOnce: a single demo hand gesture as the screen opens, never repeated; wrongRight: { cm, side } = dragging the
 //          corner right more than cm from its start wiggles that side once with the incorrect sound
+//   assemble: 1 = the shape fades out and re-forms from its four sides, each flying in from its own direction
+//          (top, right, bottom, left), then a settling glow, dots and fill (CSS .asm)
+//   build: 1 = the panel starts empty and the shape draws itself (glowing pen D->A->B->C->D, then a settling glow and
+//          the fill fading in) as the screen's first line starts (CONFIG.build)
+//   labelsIn: 1 on a line = the corner letters (hidden by assemble) fade back in, A to D, as the line starts
+//   voiceDelay: ms Swiftee waits before speaking, so an opening animation can finish first
 //   locked: no Back either (an instruction-only screen with nothing to do)
 //   after: lines played once the task is done
 //   boardShift: px to slide the shape left (-) or right (+) on that screen (glides there and back)
@@ -22,22 +29,35 @@
 //           'spotlight' centres and enlarges the shape, moves Swiftee to the right (pose = held expression)
 //   f:     board display flags (met = legs extended to where they meet, legGlow = legs highlighted, sideLen = base lengths shown too, baseExt, par, legsPurple, legLen, ticks, arcs, right, eq)
 //   auto: 1 on the measure step = Swiftee measures every side by herself (no taps);
-//         on extLegs / extBases = each side flashes pink once, then its dotted extension draws, one after the other (no taps)
+//         on extLegs / extBases = one side at a time, a glowing pink line draws along it, then its dotted extension draws on (no taps)
 //   practice: a quick question with opts / ok / okChips that is not scored; noBoard: no shape; layout 'recap': the recap card
 //   cfu:   check number; opts (ok / fb feedback), ok = praise line; qFocus: after the question the bubble fades,
 //          the shape glides to the centre and the answers come in one by one below it
 // =====================================================================
 const LESSON = {
   steps: [
-    { id: 'intro', lines: [{ m: 'waving', t: "Let's take a look at this quadrilateral and see what makes it special." }] },
+    // build: the shape draws itself edge by edge while Swiftee talks, then its fill fades in (screen 1);
+    // autoNext: once she has finished, it flows straight on to the next screen (screens 1-3: one continuous intro)
+    { id: 'intro', build: 1, autoNext: 900, lines: [{ m: 'waving', t: 'Remember we learnt about\nquadrilaterals earlier.' }] },
+    // sideNums: the four sides get numbers 1-4 (top, right, bottom, left), each flying in from its own side
+    { id: 'quadSides', sideNums: 1, autoNext: 900, lines: [{ m: 'happy', t: 'Any polygon with 4 sides\nis called a quadrilateral.' }] },
+    // letterIn: the corner letters start hidden; letters: 1 on the line = each one flies in from its own corner exactly
+    // as the voice says it (spoken "A, B, C, D", shown "ABCD")
+    { id: 'quadName', letterIn: 1, autoNext: 900, lines: [{ m: 'happy', t: 'We can call it\nquadrilateral ABCD.', s: 'We can call it quadrilateral, A, B, C, D.', letters: 1 }] },
+    // assemble: the shape re-forms from its four sides - top, right, bottom, left - each flying in from its own side
+    // voiceDelay: she speaks once the outline has closed; growAt: on "special" the shape (held at 88% while it
+    // assembled) comes forward once to full size with a soft glow; labelsIn: as the next line starts, A B C D fade
+    // softly back in one by one
+    { id: 'special', assemble: 1, voiceDelay: 3000, lines: [{ m: 'happy', t: 'This is a special type\nof quadrilateral.', growAt: 'special' },
+      { m: 'curious', t: "Let's see what\nmakes it special.", labelsIn: 1 }] },
     { id: 'meet', lines: [{ m: 'curious', t: 'These two sides look like they will meet.' }], f: { legGlow: 1 } },
     // instruction only: nothing to tap, no Next/Back; moves on as soon as the voice-over ends
     { id: 'extendSay', autoAdvance: 1, locked: 1, lines: [{ m: 'curious', t: "Let's extend them." }], f: { legGlow: 1 } },
-    // opens wordless with the shape at centre stage; no taps: each slanted side flashes pink once, then
-    // its dotted extension draws (AD, then BC) and both stay
+    // opens wordless with the shape at centre stage; no taps: D->A glows, then extends dotted past A; then
+    // C->B the same way; both dotted lines stay
     { id: 'extend', layout: 'focus', lines: [], task: 'extLegs', auto: 1,
       after: [{ m: 'surprised', t: 'Woah! The sides meet.', s: 'Whoa! The sides meet.' }] },
-    { id: 'other', layout: 'focus', focusHold: 2500, lines: [{ m: 'curious', t: "Let's check the other\npair of sides." }], task: 'extBases', auto: 1 }, // no taps: AB then CD flash once and extend
+    { id: 'other', layout: 'focus', focusHold: 2500, lines: [{ m: 'curious', t: "Let's check the other\npair of sides." }], task: 'extBases', auto: 1 }, // no taps: A->B glows then extends both ways, then D->C (same system as screen 4)
     { id: 'parallel', boardShift: -45, lines: [{ m: 'surprised', t: 'They do not meet.' }], f: { baseExt: 1 } },
     { id: 'abcd', lines: [{ t: 'This means the sides are parallel to each other.' },
       { keep: 1, s: 'A B is parallel to C D.', glow: ['AB', 'CD'], chips: [{ t: 'AB ∥ CD', k: 'white' }] }], f: { par: 1 } },

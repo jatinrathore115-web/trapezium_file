@@ -12,6 +12,13 @@ const CONFIG = {
   drag: { wrongGapMs: 1200 },        // wrong-way drag feedback (wiggle + incorrect sound): at most once per this long
   // a part named in the voice-over grows (CSS .emph, ~0.3 s in / 0.3 s out) and holds this long before easing back
   emph: { holdMs: 650 },
+  // screen 4 leg trace: one speed (px/ms) for the glowing line and the dotted extension on both legs; pause before C->B
+  trace: { pxPerMs: 0.4, gapMs: 250 },
+  // screen 1 build: pen speed round the outline, start delay after the screen opens (≈ voice start), outline glow time.
+  // (Entrance timings for the side numbers, corner letters and shape assembly live with their GSAP timelines in js/motion.js)
+  build: { pxPerMs: 0.36, delayMs: 450, settleMs: 1300 },
+  // screen 3 corner letters: never land closer together than this, so A -> B -> C -> D keeps its rhythm
+  letters: { minGapMs: 420 },
   // qFocus check screens: the question shape starts alone in the centre of the right-hand ice panel (cx, shapeTop0;
   // panel 512..1240 x 104..584). The bubble holds holdMs after the voice and fades (fadeMs); the shape then glides up
   // to shapeTop to make room and the answers stagger in under it.

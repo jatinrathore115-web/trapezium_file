@@ -23,7 +23,8 @@ trapezium-game/
 │   └── game.css                game styles: bubble, Swiftee, board, labels, chips, buttons, CFUs, animations
 ├── js/
 │   ├── vendor/
-│   │   └── dc-runtime.js       template + rendering runtime (from the Design canvas; bundles React 18)
+│   │   ├── dc-runtime.js       template + rendering runtime (from the Design canvas; bundles React 18)
+│   │   └── gsap.min.js         GSAP 3.12.5 (local copy, so the game still runs offline)
 │   ├── config.js               CONFIG: scale, starting shape, drag limits, snapping, timings, stars
 │   ├── lesson-data.js          LESSON: every learning state and CFU, in play order (content as data)
 │   ├── swiftee-manifest.js     GENERATED trimmed copy of the Swiftee manifest (works from file://)
@@ -31,7 +32,9 @@ trapezium-game/
 │   ├── game-engine.js          the game: narration, geometry, drags, ruler, CFUs, scoring, render values
 │   ├── stage-fit.js            scales the stage to the window
 │   ├── snowfall.js             slow background snowfall (behind the panel; off for reduced motion)
-│   └── confetti.js             one confetti burst from the top on each correct action (off for reduced motion)
+│   ├── confetti.js             one confetti burst from the top on each correct action (off for reduced motion)
+│   └── motion.js               the choreographed animations on GSAP (shape build/assembly, side numbers, corner
+│                               letters, traces, shape zoom, wiggle); reverted on every screen change
 ├── tools/
 │   └── build-swiftee-manifest.js   regenerates js/swiftee-manifest.js after the sheets change
 ├── canvas-source/
@@ -45,7 +48,7 @@ trapezium-game/
     └── fake-speech.js · no-speech.js · native-speech.js   speech modes for the tests
 ```
 
-Script load order (in `index.html`): `dc-runtime.js` → `config.js` → `lesson-data.js` → `swiftee-manifest.js` → `swiftee.js` → `game-engine.js`,
+Script load order (in `index.html`): `dc-runtime.js` → `gsap.min.js` → `config.js` → `lesson-data.js` → `swiftee-manifest.js` → `swiftee.js` → `walker.js` → `motion.js` → `game-engine.js`,
 then `stage-fit.js` at the end of the body.
 
 ## Run it
