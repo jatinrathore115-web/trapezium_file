@@ -624,10 +624,10 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (this.state.step <= 0 || this.navLocked()) return;
     // skip back over screens that move on by themselves, or Back would bounce straight forward again
     let i = this.state.step - 1;
-    while (i > 0 && this.steps()[i].locked) i--;
+    while (CONFIG.flow.autoAdvance && i > 0 && this.steps()[i].locked) i--;
     this.sfx('tap'); this.goTo(i, false);
   }
-  // top-right Next: always moves on (the screens also move on by themselves). Skipping an unfinished drag task
+  // top-right Next: always moves on (with CONFIG.flow.autoAdvance off it is the only way forward). Skipping an unfinished drag task
   // applies its result first, so the screens after it ("Now the legs are equal!") still match the shape.
   navNext() {
     const i = this.state.step;
@@ -665,6 +665,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   maybeAdvance(afterLine) {
     if (this.advId) { clearTimeout(this.advId); this.T.delete(this.advId); this.advId = null; }
     const st = this.cur(), i = this.state.step, tok = this.stepTok;
+    if (!CONFIG.flow.autoAdvance) return; // manual navigation: only the Next / Back buttons change the screen
     if (!this.state.done || st.end || i >= this.steps().length - 1) return;
     const wait = st.autoAdvance != null ? st.autoAdvance : CONFIG.flow.advanceMs;
     this.advId = this.tm(() => {

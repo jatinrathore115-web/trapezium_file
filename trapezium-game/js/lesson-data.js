@@ -9,7 +9,8 @@
 //          m = Swiftee's expression while saying it; default talking. reactions in CONFIG.swiftee)
 //   task:  what the learner must do before Next unlocks (extLegs, extBases, tapBases, tapLegs, measure,
 //          dragA, dragAny (any corner, until the legs differ), dragFree (any corner, any move), drag90 (any corner to a right angle), tapAngles, dragD90, tapAD, dragD, dragC); hint = how-to Swiftee says if the learner stalls (unless idle is set)
-//   every finished screen moves on by itself CONFIG.flow.advanceMs after its last line; autoAdvance overrides that wait (ms)
+//   navigation is manual (CONFIG.flow.autoAdvance false): screens change only on Next / Back. With it on, a finished
+//   screen moves on CONFIG.flow.advanceMs after its last line; autoAdvance overrides that wait (ms)
 //   handOnce: a single demo hand gesture as the screen opens, never repeated; wrongRight: { cm, side } = dragging the
 //          corner right more than cm from its start wiggles that side once with the incorrect sound
 //   locked: no Back either (an instruction-only screen with nothing to do)
