@@ -41,10 +41,26 @@ a{color:#123b63}a:hover{color:#0b2742}
 .chip{font-family:'Baloo 2',system-ui,sans-serif;font-weight:700;font-size:27px;line-height:1.1;padding:9px 28px 7px;border-radius:14px;border:2px solid #cfe6f7;background:#fff;color:#123b63;box-shadow:0 4px 12px rgba(18,59,99,.14);animation:chipIn .34s cubic-bezier(.2,1.25,.5,1);white-space:pre}
 .chip.long{font-size:23px;padding:8px 22px 6px}
 .chip.gold{background:#fdf0c4;color:#6e4210;border-color:#efcb6e}
+/* shape-name label (k: 'name'): glossy ice-blue box - bright blue rim with a deeper bottom lip, pale inner face,
+   a soft shine at the top-left, heavy rounded navy type */
+.chip.name{position:relative;font-family:'Nunito',system-ui,sans-serif;font-weight:900;font-size:28px;line-height:1.15;letter-spacing:.2px;
+  color:#0e3a7c;padding:9px 36px 10px;border-radius:24px;border:2px solid #f2faff;
+  background:linear-gradient(180deg,#f7fcff 0%,#e3f2fd 55%,#cfe8fb 100%);
+  box-shadow:0 0 0 5px #3ba7f5,0 5px 0 5px #1e86de,0 10px 18px 4px rgba(18,70,140,.28),inset 0 -3px 0 rgba(43,123,214,.12)}
+.chip.name::before{content:'';position:absolute;left:12px;top:5px;width:26px;height:9px;border-radius:50%;background:rgba(255,255,255,.9);transform:rotate(-24deg);pointer-events:none}
+.chip.name.long{font-size:24px;padding:8px 28px 9px}
 .chip.good{background:#e2f7e6;color:#1d6b35;border-color:#8fd3a1}
 .chip.bad{background:#fde6e2;color:#9b2c1f;border-color:#f2a99d}
 @keyframes chipIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
-.edge{transition:stroke .35s ease}
+.edge{transition:stroke .35s ease,stroke-width .3s cubic-bezier(.3,0,.3,1)}
+/* screen 4: a slanted side flashes once (thicker, soft pink glow) before its dotted extension draws */
+.edge.flash{animation:edgeFlash .8s ease-in-out}
+@keyframes edgeFlash{0%,100%{stroke-width:5px;filter:none}50%{stroke-width:9px;filter:drop-shadow(0 0 6px rgba(232,40,122,.75))}}
+@media (prefers-reduced-motion: reduce){.edge.flash{animation:none;stroke-width:8px}}
+/* screen 16: dragged too far -> the leg gives one short, small wiggle about its middle */
+.edge.wiggle{transform-box:fill-box;transform-origin:center;animation:edgeWiggle .5s ease-in-out}
+@keyframes edgeWiggle{0%,100%{transform:rotate(0)}20%{transform:rotate(1.6deg)}40%{transform:rotate(-1.4deg)}60%{transform:rotate(.9deg)}80%{transform:rotate(-.4deg)}}
+@media (prefers-reduced-motion: reduce){.edge.wiggle{animation:none}}
 .arc{stroke-dasharray:100 100;animation:arcIn .5s ease-out backwards}
 .d1{animation-delay:.15s}
 .d2{animation-delay:.3s}
@@ -98,6 +114,9 @@ a{color:#123b63}a:hover{color:#0b2742}
 .hand-nudge.tap .hand-ring{animation:handRing 1.4s ease-out infinite}
 .hand-nudge.drag .hand-move{animation:handDrag 2.1s cubic-bezier(.45,0,.3,1) infinite}
 .hand-nudge.drag .hand-ring{animation:handRingDrag 2.1s ease-out infinite}
+/* handOnce: a single drag gesture, then gone */
+.hand-nudge.once{animation-duration:2.3s}
+.hand-nudge.once .hand-move,.hand-nudge.once .hand-ring{animation-iteration-count:1}
 @keyframes handLife{0%{opacity:0}7%{opacity:1}92%{opacity:1}100%{opacity:0}}
 @keyframes handTap{0%{transform:translate(14px,20px)}38%{transform:translate(0,0) scale(1)}48%{transform:translate(0,0) scale(.88)}60%{transform:translate(0,0) scale(1)}100%{transform:translate(14px,20px)}}
 @keyframes handRing{0%,44%{transform:scale(.35);opacity:0}52%{opacity:.9}100%{transform:scale(1.45);opacity:0}}
@@ -155,11 +174,11 @@ a{color:#123b63}a:hover{color:#0b2742}
 .leg-glow{animation:legGlowIn .35s ease-out,legGlow 1.8s ease-in-out .35s infinite}
 @keyframes legGlowIn{from{stroke-opacity:0;stroke-width:12px}to{stroke-opacity:.78;stroke-width:20px}}
 @media (prefers-reduced-motion: reduce){.leg-glow{animation:none}}
-/* one-time shape pulse after a line (pulse: 1): the fill deepens and glows, then settles back */
-.shape-fill.pulse1{animation:shapeOnce .9s ease-in-out 1}
-@keyframes shapeOnce{0%,100%{fill:rgba(229,205,234,.92);filter:drop-shadow(0 0 0 rgba(232,40,122,0))}45%{fill:rgba(242,168,210,.97);filter:drop-shadow(0 0 16px rgba(232,40,122,.5))}}
-@media (prefers-reduced-motion: reduce){.shape-fill.pulse1{animation:none}}
-/* "Base" callout: fades and drops in with the voice */
+/* pulse: 1 - the shape (with its labels) zooms up once about its centre, then eases back to its own size. No glow, no second beat */
+.pop-g.pop{animation:shapePop .7s ease-in-out 1}
+@keyframes shapePop{0%{transform:scale(1)}40%{transform:scale(1.07)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion: reduce){.pop-g.pop{animation:none}}
+/* Base / Leg pill labels (screens 11-12): both pills of a pair fade and drop in together with the voice */
 .callout{animation:calloutIn .4s ease-out;filter:drop-shadow(0 3px 6px rgba(18,59,99,.16))}
 @keyframes calloutIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){.callout{animation:none}}
@@ -192,7 +211,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 .bubble.top .bubble-tail{left:-29px;top:calc(50% - 15px);margin-top:0;transform:rotate(90deg)}
 @media (prefers-reduced-motion: reduce){.swiftee.top{animation:none}}
 /* live angle sums beside the legs */
-.tag.sum{font-size:18px;padding:6px 14px;border:2px solid #2e9e4f;color:#1d6b35;background:#effbf1;transition:none}
+.tag.sum{font-size:18px;padding:6px 14px;border:2px solid #2e9e4f;color:#1d6b35;background:#effbf1;transition:left .18s ease-out,top .18s ease-out}
 /* recap card: rows pop in one after another */
 .recap{background:rgba(255,255,255,.92);border:3px solid #cfe6f7;border-radius:24px;padding:20px 22px;box-shadow:0 10px 26px rgba(18,59,99,.14);animation:fade .35s ease-out}
 .recap-title{font-family:'Baloo 2',system-ui,sans-serif;font-weight:800;font-size:28px;color:#123b63;text-align:center;margin-bottom:12px}
@@ -236,3 +255,24 @@ a{color:#123b63}a:hover{color:#0b2742}
 .opt.bad .sd.s2{animation-delay:.5s}.opt.bad .sd.s3{animation-delay:1s}.opt.bad .sd.s4{animation-delay:1.5s}
 @keyframes sideTrace{0%{opacity:0}12%{opacity:.95}35%{opacity:.95}60%,100%{opacity:0}}
 @media (prefers-reduced-motion: reduce){.opt.bad .sd{animation:none}}
+.thumbs-capture .confetti{display:none}
+/* voice-over sync (s.emph): the part being named grows, holds briefly (CONFIG.emph.holdMs), then eases back.
+   Same .3s easing for every part: angle arc (+ its degree tag), side, vertex dot */
+.arc{transition:stroke-width .3s cubic-bezier(.3,0,.3,1),transform .3s cubic-bezier(.3,0,.3,1)}
+.arc.emph{stroke-width:10px;transform:scale(1.3)}
+.edge.emph{stroke-width:9px}
+.tag.alab{transition:transform .3s cubic-bezier(.3,0,.3,1)}
+.tag.alab.emph{transform:translate(-50%,-50%) scale(1.2)}
+.vdot{transition:r .3s cubic-bezier(.3,0,.3,1)}
+@media (prefers-reduced-motion: reduce){.arc,.edge,.tag.alab,.vdot{transition:none}}
+/* qFocus check screens (screen 34): the question shape glides to the centre once the bubble has gone,
+   then the answers come in one by one under it */
+.qshape{transition:left .7s cubic-bezier(.22,.8,.3,1),top .7s cubic-bezier(.22,.8,.3,1)}
+.opts-in .opt{animation:optIn .42s cubic-bezier(.2,1.2,.5,1) backwards;animation-delay:.75s}
+.opts-in .opt:nth-child(2){animation-delay:.93s}
+.opts-in .opt:nth-child(3){animation-delay:1.11s}
+.opts-in .opt:nth-child(4){animation-delay:1.29s}
+@keyframes optIn{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+.opts-in .opt.bad{animation:shake .4s ease}
+@media (prefers-reduced-motion: reduce){.qshape{transition:none}.opts-in .opt{animation:none}}
+.opts-in .opt.nudged{animation:optNudge 1.5s ease-in-out 3}

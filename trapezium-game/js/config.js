@@ -6,6 +6,17 @@ const CONFIG = {
   start: { D: 45, C: 405, baseY: 340, height: 195.96, legAD: 7, legBC: 5 }, // opening shape: AB 3, BC 5, CD 9, AD 7 cm (height = √24 cm)
   limits: { minTop: 90, minBottom: 160, maxLegRun: 243, minX: 16, maxX: 478 }, // keeps the shape readable (angles ~35°–145°)
   snap: { equalLegsCm: 0.3, rightAngleDeg: 5 },
+  // recorded sound effects (others are synthesised): 'good' = every correct action (with the confetti), 'bad' = every wrong one
+  sounds: { good: 'assets/audio/correct.mp3', bad: 'assets/audio/incorrect.mp3' },
+  soundVolume: 0.9,
+  drag: { wrongGapMs: 1200 },        // wrong-way drag feedback (wiggle + incorrect sound): at most once per this long
+  // a part named in the voice-over grows (CSS .emph, ~0.3 s in / 0.3 s out) and holds this long before easing back
+  emph: { holdMs: 650 },
+  // qFocus check screens: the question shape starts alone in the centre of the right-hand ice panel (cx, shapeTop0;
+  // panel 512..1240 x 104..584). The bubble holds holdMs after the voice and fades (fadeMs); the shape then glides up
+  // to shapeTop to make room and the answers stagger in under it.
+  // Shape drawing spans ~y 26..222 of its 500x230 box; answers sit 24 px under it.
+  qFocus: { holdMs: 700, fadeMs: 350, cx: 876, shapeTop0: 220, shapeTop: 171, optTop: 417, optW: 560 },
   ruler: { home: { gap: 80, a: 0 } /* level, centred under DC, gap px below it */, flyMs: 600, holdMs: 700, returnMs: 450 },
   timing: { idleMs: 9000, idleMaxHints: 3, navLockMs: 450 },
   // flow: a finished screen moves on advanceMs after its last line (voice-over) ends. showNext / showBack bring those buttons back.
@@ -24,7 +35,8 @@ const CONFIG = {
   // screen 13 measuring trip: walker size on the shape, home feet point/size (matches the scene layout), timings
   walker: { size: 110, homeX: 199, homeY: 639, homeSize: 259, flyMs: 1100, msPerCm: 380, pauseMs: 550,
     tips: [[488, 272], [484, 281], [494, 273], [489, 270], [486, 278], [483, 279], [491, 281], [489, 281]] }, // tape exit per walk frame (@2x cell px)
-  hand: { idleMs: 8000, showMs: 4400, maxShows: 4 }, // hand nudge: wait with no touch, time on screen, showings per step
+  hand: { idleMs: 8000, showMs: 4400, maxShows: 4, // hand nudge: wait with no touch, time on screen, showings per step
+    onceDelayMs: 500, onceMs: 2300 },                 // handOnce screens: a single demo gesture this long after the line ends
   stars: [[5, 3], [3, 2], [0, 1]],   // [first-try correct >=, stars]
   // Swiftee's expressions (state names from swiftee-assets/atlas/swiftee.manifest.json).
   // A narration line's own m wins; these cover reactions and the pose held between lines.

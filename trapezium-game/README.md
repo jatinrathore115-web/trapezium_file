@@ -30,7 +30,8 @@ trapezium-game/
 │   ├── swiftee.js              Swiftee mascot: plays start → loop → stop expressions on a canvas
 │   ├── game-engine.js          the game: narration, geometry, drags, ruler, CFUs, scoring, render values
 │   ├── stage-fit.js            scales the stage to the window
-│   └── snowfall.js             slow background snowfall (behind the panel; off for reduced motion)
+│   ├── snowfall.js             slow background snowfall (behind the panel; off for reduced motion)
+│   └── confetti.js             one confetti burst from the top on each correct action (off for reduced motion)
 ├── tools/
 │   └── build-swiftee-manifest.js   regenerates js/swiftee-manifest.js after the sheets change
 ├── canvas-source/

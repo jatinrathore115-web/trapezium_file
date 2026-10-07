@@ -27,6 +27,7 @@
 
 <sc-if value="{{isLesson}}" hint-placeholder-val="{{ true }}">
 <svg class="{{fadeCls}}" viewBox="0 0 520 420" width="520" height="420" style="position: absolute; left: 640px; top: 104px; overflow: visible; touch-action: none; transform-origin: 0px 0px; transition: transform 0.7s cubic-bezier(0.22, 0.8, 0.3, 1); transform: {{boardTf}}" aria-label="Trapezium ABCD">
+<g class="pop-g {{popCls}}" style="transform-origin: {{popO}}">
 <polygon class="shape-fill {{spotFill}}" sc-camel-points="{{g.poly}}" fill="rgba(229,205,234,0.92)" stroke="none"></polygon>
 <line sc-camel-x1="{{g.hDA.x1}}" sc-camel-y1="{{g.hDA.y1}}" sc-camel-x2="{{g.hDA.x2}}" sc-camel-y2="{{g.hDA.y2}}" sc-camel-display="{{g.hDA.d}}" class="{{g.hDA.cls}}" stroke="#f5d32e" stroke-width="22" stroke-linecap="round"></line>
 <line sc-camel-x1="{{g.hBC.x1}}" sc-camel-y1="{{g.hBC.y1}}" sc-camel-x2="{{g.hBC.x2}}" sc-camel-y2="{{g.hBC.y2}}" sc-camel-display="{{g.hBC.d}}" class="{{g.hBC.cls}}" stroke="#f5d32e" stroke-width="22" stroke-linecap="round"></line>
@@ -37,18 +38,18 @@
 <line sc-camel-x1="{{g.xAB.x1}}" sc-camel-y1="{{g.xAB.y1}}" sc-camel-x2="{{g.xAB.x2}}" sc-camel-y2="{{g.xAB.y2}}" sc-camel-display="{{g.xAB.d}}" stroke="#e8643c" stroke-width="3" stroke-dasharray="10 8" stroke-linecap="round"></line>
 <line sc-camel-x1="{{g.xCD.x1}}" sc-camel-y1="{{g.xCD.y1}}" sc-camel-x2="{{g.xCD.x2}}" sc-camel-y2="{{g.xCD.y2}}" sc-camel-display="{{g.xCD.d}}" stroke="#e8643c" stroke-width="3" stroke-dasharray="10 8" stroke-linecap="round"></line>
 <rect class="fadein" sc-camel-x="{{g.apex.x}}" sc-camel-y="{{g.apex.y}}" width="13" height="13" rx="2" fill="#e8643c" sc-camel-display="{{g.apex.d}}"></rect>
-<path sc-camel-d="{{g.aA.p}}" pathLength="100" class="{{g.aA.cls}}" sc-camel-display="{{g.aA.d}}" fill="none" stroke="#f08a24" stroke-width="7" stroke-linecap="round"></path>
-<path sc-camel-d="{{g.aB.p}}" pathLength="100" class="{{g.aB.cls}}" sc-camel-display="{{g.aB.d}}" fill="none" stroke="#8e44d6" stroke-width="7" stroke-linecap="round"></path>
-<path sc-camel-d="{{g.aC.p}}" pathLength="100" class="{{g.aC.cls}}" sc-camel-display="{{g.aC.d}}" fill="none" stroke="#2b7bd6" stroke-width="7" stroke-linecap="round"></path>
-<path sc-camel-d="{{g.aD.p}}" pathLength="100" class="{{g.aD.cls}}" sc-camel-display="{{g.aD.d}}" fill="none" stroke="#2e9e4f" stroke-width="7" stroke-linecap="round"></path>
+<path sc-camel-d="{{g.aA.p}}" pathLength="100" class="{{g.aA.cls}}" style="transform-origin: {{g.aA.o}}" sc-camel-display="{{g.aA.d}}" fill="none" stroke="#f08a24" stroke-width="7" stroke-linecap="round"></path>
+<path sc-camel-d="{{g.aB.p}}" pathLength="100" class="{{g.aB.cls}}" style="transform-origin: {{g.aB.o}}" sc-camel-display="{{g.aB.d}}" fill="none" stroke="#8e44d6" stroke-width="7" stroke-linecap="round"></path>
+<path sc-camel-d="{{g.aC.p}}" pathLength="100" class="{{g.aC.cls}}" style="transform-origin: {{g.aC.o}}" sc-camel-display="{{g.aC.d}}" fill="none" stroke="#2b7bd6" stroke-width="7" stroke-linecap="round"></path>
+<path sc-camel-d="{{g.aD.p}}" pathLength="100" class="{{g.aD.cls}}" style="transform-origin: {{g.aD.o}}" sc-camel-display="{{g.aD.d}}" fill="none" stroke="#2e9e4f" stroke-width="7" stroke-linecap="round"></path>
 <path sc-camel-d="{{g.rA.p}}" class="fadein" sc-camel-display="{{g.rA.d}}" fill="none" stroke="#2e9e4f" stroke-width="3"></path>
 <path sc-camel-d="{{g.rB.p}}" class="fadein" sc-camel-display="{{g.rB.d}}" fill="none" stroke="#2e9e4f" stroke-width="3"></path>
 <path sc-camel-d="{{g.rC.p}}" class="fadein" sc-camel-display="{{g.rC.d}}" fill="none" stroke="#2e9e4f" stroke-width="3"></path>
 <path sc-camel-d="{{g.rD.p}}" class="fadein" sc-camel-display="{{g.rD.d}}" fill="none" stroke="#2e9e4f" stroke-width="3"></path>
-<line sc-camel-x1="{{g.eAB.x1}}" sc-camel-y1="{{g.eAB.y1}}" sc-camel-x2="{{g.eAB.x2}}" sc-camel-y2="{{g.eAB.y2}}" class="edge" style="stroke: {{g.eAB.c}}" stroke-width="5" stroke-linecap="round"></line>
-<line sc-camel-x1="{{g.eBC.x1}}" sc-camel-y1="{{g.eBC.y1}}" sc-camel-x2="{{g.eBC.x2}}" sc-camel-y2="{{g.eBC.y2}}" class="edge" style="stroke: {{g.eBC.c}}" stroke-width="5" stroke-linecap="round"></line>
-<line sc-camel-x1="{{g.eCD.x1}}" sc-camel-y1="{{g.eCD.y1}}" sc-camel-x2="{{g.eCD.x2}}" sc-camel-y2="{{g.eCD.y2}}" class="edge" style="stroke: {{g.eCD.c}}" stroke-width="5" stroke-linecap="round"></line>
-<line sc-camel-x1="{{g.eDA.x1}}" sc-camel-y1="{{g.eDA.y1}}" sc-camel-x2="{{g.eDA.x2}}" sc-camel-y2="{{g.eDA.y2}}" class="edge" style="stroke: {{g.eDA.c}}" stroke-width="5" stroke-linecap="round"></line>
+<line sc-camel-x1="{{g.eAB.x1}}" sc-camel-y1="{{g.eAB.y1}}" sc-camel-x2="{{g.eAB.x2}}" sc-camel-y2="{{g.eAB.y2}}" class="edge {{g.eAB.cls}}"style="stroke: {{g.eAB.c}}" stroke-width="5" stroke-linecap="round"></line>
+<line sc-camel-x1="{{g.eBC.x1}}" sc-camel-y1="{{g.eBC.y1}}" sc-camel-x2="{{g.eBC.x2}}" sc-camel-y2="{{g.eBC.y2}}" class="edge {{g.eBC.cls}}"style="stroke: {{g.eBC.c}}" stroke-width="5" stroke-linecap="round"></line>
+<line sc-camel-x1="{{g.eCD.x1}}" sc-camel-y1="{{g.eCD.y1}}" sc-camel-x2="{{g.eCD.x2}}" sc-camel-y2="{{g.eCD.y2}}" class="edge {{g.eCD.cls}}"style="stroke: {{g.eCD.c}}" stroke-width="5" stroke-linecap="round"></line>
+<line sc-camel-x1="{{g.eDA.x1}}" sc-camel-y1="{{g.eDA.y1}}" sc-camel-x2="{{g.eDA.x2}}" sc-camel-y2="{{g.eDA.y2}}" class="edge {{g.eDA.cls}}"style="stroke: {{g.eDA.c}}" stroke-width="5" stroke-linecap="round"></line>
 <path sc-camel-d="{{g.tape.p}}" sc-camel-display="{{g.tape.d}}" class="tape" fill="none" stroke="#f7c531" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"></path>
 <path sc-camel-d="{{g.tapeTk.p}}" sc-camel-display="{{g.tapeTk.d}}" fill="none" stroke="#6b4c0c" stroke-width="1.6" stroke-linecap="round"></path>
 <path sc-camel-d="{{g.tk.p}}" class="fadein" sc-camel-display="{{g.tk.d}}" fill="none" stroke="#8e44d6" stroke-width="3" stroke-linecap="round"></path>
@@ -57,19 +58,22 @@
 <path sc-camel-d="{{g.arw.h}}" sc-camel-display="{{g.arw.d}}" class="nudge" fill="#f08a24" stroke="none"></path>
 <g class="{{g.rl.cls}}" sc-camel-transform="{{g.rl.tf}}" sc-camel-display="{{g.rl.d}}" data-qa="ruler" onPointerDown="{{g.rl.down}}" style="cursor: {{g.rl.cur}}"><rect x="-8" y="0" width="416" height="27" rx="4" fill="#ffd36b" stroke="#c9961e" stroke-width="2"></rect><path d="M0,0 L0,13 M20,0 L20,8 M40,0 L40,13 M60,0 L60,8 M80,0 L80,13 M100,0 L100,8 M120,0 L120,13 M140,0 L140,8 M160,0 L160,13 M180,0 L180,8 M200,0 L200,13 M220,0 L220,8 M240,0 L240,13 M260,0 L260,8 M280,0 L280,13 M300,0 L300,8 M320,0 L320,13 M340,0 L340,8 M360,0 L360,13 M380,0 L380,8 M400,0 L400,13" stroke="#7a5a10" stroke-width="1.8" stroke-linecap="round"></path><text x="0" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">0</text><text x="40" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">1</text><text x="80" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">2</text><text x="120" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">3</text><text x="160" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">4</text><text x="200" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">5</text><text x="240" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">6</text><text x="280" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">7</text><text x="320" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">8</text><text x="360" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">9</text><text x="400" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">10</text></g>
 <g class="callout" sc-camel-display="{{g.cal.d}}" pointer-events="none">
-<path sc-camel-d="{{g.cal.l1}}" fill="none" stroke="#3f5573" stroke-width="2.5" stroke-linecap="round"></path>
-<path sc-camel-d="{{g.cal.h1}}" fill="#3f5573"></path>
-<path sc-camel-d="{{g.cal.l2}}" fill="none" stroke="#3f5573" stroke-width="2.5" stroke-linecap="round"></path>
-<path sc-camel-d="{{g.cal.h2}}" fill="#3f5573"></path>
-<rect sc-camel-x="{{g.cal.x}}" sc-camel-y="{{g.cal.y}}" width="86" height="40" rx="11" fill="#ffffff" stroke="#cfe6f7" stroke-width="2"></rect>
-<text sc-camel-display="{{g.cal.tb}}" sc-camel-x="{{g.cal.tx}}" sc-camel-y="{{g.cal.ty}}" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="19" fill="#123b63">Base</text>
-<text sc-camel-display="{{g.cal.tl}}" sc-camel-x="{{g.cal.tx}}" sc-camel-y="{{g.cal.ty}}" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="19" fill="#123b63">Legs</text>
+<path sc-camel-d="{{g.cal.p1.stem}}" fill="none" stroke="#f0a020" stroke-width="2" stroke-dasharray="2 3" stroke-linecap="round"></path>
+<circle sc-camel-cx="{{g.cal.p1.dx}}" sc-camel-cy="{{g.cal.p1.dy}}" r="3.5" fill="#f08a24"></circle>
+<rect class="cal-pill" sc-camel-x="{{g.cal.p1.x}}" sc-camel-y="{{g.cal.p1.y}}" sc-camel-width="{{g.cal.w}}" height="32" rx="16" fill="#fde49b" stroke="#f3c552" stroke-width="2"></rect>
+<text sc-camel-display="{{g.cal.tb}}" sc-camel-x="{{g.cal.p1.tx}}" sc-camel-y="{{g.cal.p1.ty}}" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="18" fill="#123b63">Base</text>
+<text sc-camel-display="{{g.cal.tl}}" sc-camel-x="{{g.cal.p1.tx}}" sc-camel-y="{{g.cal.p1.ty}}" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="18" fill="#123b63">Leg</text>
+<path sc-camel-d="{{g.cal.p2.stem}}" fill="none" stroke="#b87ae6" stroke-width="2" stroke-dasharray="2 3" stroke-linecap="round"></path>
+<circle sc-camel-cx="{{g.cal.p2.dx}}" sc-camel-cy="{{g.cal.p2.dy}}" r="3.5" fill="#a35ad8"></circle>
+<rect class="cal-pill" sc-camel-x="{{g.cal.p2.x}}" sc-camel-y="{{g.cal.p2.y}}" sc-camel-width="{{g.cal.w}}" height="32" rx="16" fill="#e5c9f8" stroke="#c99be9" stroke-width="2"></rect>
+<text sc-camel-display="{{g.cal.tb}}" sc-camel-x="{{g.cal.p2.tx}}" sc-camel-y="{{g.cal.p2.ty}}" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="18" fill="#123b63">Base</text>
+<text sc-camel-display="{{g.cal.tl}}" sc-camel-x="{{g.cal.p2.tx}}" sc-camel-y="{{g.cal.p2.ty}}" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="18" fill="#123b63">Leg</text>
 </g>
 <circle sc-camel-cx="{{g.halo.x}}" sc-camel-cy="{{g.halo.y}}" r="19" sc-camel-display="{{g.halo.d}}" class="halo" fill="none" stroke="#8e44d6"></circle>
-<circle sc-camel-cx="{{g.vA.x}}" sc-camel-cy="{{g.vA.y}}" sc-camel-r="{{g.vA.r}}" fill="#fff" stroke="{{g.vA.c}}" sc-camel-stroke-width="{{g.vA.w}}"></circle>
-<circle sc-camel-cx="{{g.vB.x}}" sc-camel-cy="{{g.vB.y}}" sc-camel-r="{{g.vB.r}}" fill="#fff" stroke="{{g.vB.c}}" sc-camel-stroke-width="{{g.vB.w}}"></circle>
-<circle sc-camel-cx="{{g.vC.x}}" sc-camel-cy="{{g.vC.y}}" sc-camel-r="{{g.vC.r}}" fill="#fff" stroke="{{g.vC.c}}" sc-camel-stroke-width="{{g.vC.w}}"></circle>
-<circle sc-camel-cx="{{g.vD.x}}" sc-camel-cy="{{g.vD.y}}" sc-camel-r="{{g.vD.r}}" fill="#fff" stroke="{{g.vD.c}}" sc-camel-stroke-width="{{g.vD.w}}"></circle>
+<circle class="vdot" sc-camel-cx="{{g.vA.x}}" sc-camel-cy="{{g.vA.y}}" sc-camel-r="{{g.vA.r}}" fill="#fff" stroke="{{g.vA.c}}" sc-camel-stroke-width="{{g.vA.w}}"></circle>
+<circle class="vdot" sc-camel-cx="{{g.vB.x}}" sc-camel-cy="{{g.vB.y}}" sc-camel-r="{{g.vB.r}}" fill="#fff" stroke="{{g.vB.c}}" sc-camel-stroke-width="{{g.vB.w}}"></circle>
+<circle class="vdot" sc-camel-cx="{{g.vC.x}}" sc-camel-cy="{{g.vC.y}}" sc-camel-r="{{g.vC.r}}" fill="#fff" stroke="{{g.vC.c}}" sc-camel-stroke-width="{{g.vC.w}}"></circle>
+<circle class="vdot" sc-camel-cx="{{g.vD.x}}" sc-camel-cy="{{g.vD.y}}" sc-camel-r="{{g.vD.r}}" fill="#fff" stroke="{{g.vD.c}}" sc-camel-stroke-width="{{g.vD.w}}"></circle>
 <line sc-camel-x1="{{g.tAB.x1}}" sc-camel-y1="{{g.tAB.y1}}" sc-camel-x2="{{g.tAB.x2}}" sc-camel-y2="{{g.tAB.y2}}" data-qa="edge-AB" sc-camel-display="{{g.tAB.d}}" class="{{g.tAB.cls}}" onClick="{{g.tAB.click}}" stroke="rgba(0,0,0,0.001)" stroke-width="36" stroke-linecap="round" style="cursor: pointer"></line>
 <line sc-camel-x1="{{g.tBC.x1}}" sc-camel-y1="{{g.tBC.y1}}" sc-camel-x2="{{g.tBC.x2}}" sc-camel-y2="{{g.tBC.y2}}" data-qa="edge-BC" sc-camel-display="{{g.tBC.d}}" class="{{g.tBC.cls}}" onClick="{{g.tBC.click}}" stroke="rgba(0,0,0,0.001)" stroke-width="36" stroke-linecap="round" style="cursor: pointer"></line>
 <line sc-camel-x1="{{g.tCD.x1}}" sc-camel-y1="{{g.tCD.y1}}" sc-camel-x2="{{g.tCD.x2}}" sc-camel-y2="{{g.tCD.y2}}" data-qa="edge-CD" sc-camel-display="{{g.tCD.d}}" class="{{g.tCD.cls}}" onClick="{{g.tCD.click}}" stroke="rgba(0,0,0,0.001)" stroke-width="36" stroke-linecap="round" style="cursor: pointer"></line>
@@ -78,37 +82,36 @@
 <circle sc-camel-cx="{{g.kB.x}}" sc-camel-cy="{{g.kB.y}}" r="28" data-qa="vtx-B" sc-camel-display="{{g.kB.d}}" class="{{g.kB.cls}}" onClick="{{g.kB.click}}" onPointerDown="{{g.kB.down}}" fill="rgba(0,0,0,0.001)" style="cursor: {{g.kB.cur}}"></circle>
 <circle sc-camel-cx="{{g.kC.x}}" sc-camel-cy="{{g.kC.y}}" r="28" data-qa="vtx-C" sc-camel-display="{{g.kC.d}}" class="{{g.kC.cls}}" onClick="{{g.kC.click}}" onPointerDown="{{g.kC.down}}" fill="rgba(0,0,0,0.001)" style="cursor: {{g.kC.cur}}"></circle>
 <circle sc-camel-cx="{{g.kD.x}}" sc-camel-cy="{{g.kD.y}}" r="28" data-qa="vtx-D" sc-camel-display="{{g.kD.d}}" class="{{g.kD.cls}}" onClick="{{g.kD.click}}" onPointerDown="{{g.kD.down}}" fill="rgba(0,0,0,0.001)" style="cursor: {{g.kD.cur}}"></circle>
+</g>
 </svg>
 <div class="{{fadeCls}} board" style="position: absolute; left: 640px; top: 104px; width: 520px; height: 420px; pointer-events: none; transform: {{boardTf}}">
+<div class="pop-g {{popCls}}" style="position: absolute; left: 0px; top: 0px; width: 520px; height: 420px; transform-origin: {{popO}}">
 <sc-for list="{{tags}}" as="tg" hint-placeholder-count="4">
 <div class="tag {{tg.cls}}" style="left: {{tg.x}}px; top: {{tg.y}}px">{{tg.t}}</div>
 </sc-for>
 </div>
+</div>
 </sc-if>
 
 <sc-if value="{{isCfu1}}" hint-placeholder-val="{{ false }}">
-<div class="{{fadeCls}}" style="position: absolute; left: 650px; top: 130px; width: 504px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
-<button data-qa="opt-A" class="opt {{c1.A.cls}}" disabled="{{c1.A.dis}}" onClick="{{c1.A.pick}}" aria-label="Shape A" style="position: relative; height: 174px; display: flex; align-items: center; justify-content: center">
-<span style="position: absolute; left: 12px; top: 10px; width: 32px; height: 32px; border-radius: 50%; background: #2b7bd6; color: #fff; font-weight: 900; font-size: 18px; display: flex; align-items: center; justify-content: center">A</span>
+<div class="{{fadeCls}}" style="position: absolute; left: 636px; top: 153px; width: 480px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
+<button data-qa="opt-A" class="opt {{c1.A.cls}}" disabled="{{c1.A.dis}}" onClick="{{c1.A.pick}}" aria-label="Shape A" style="position: relative; height: 184px; display: flex; align-items: center; justify-content: center">
 <svg width="200" height="120" viewBox="0 0 200 120" aria-hidden="true"><polygon points="28,98 172,98 138,26 62,26" fill="#ffd66b" stroke="#b5870f" stroke-width="3.5" stroke-linejoin="round"></polygon><path d="M96,20 L102,26 L96,32 M96,92 L102,98 L96,104" fill="none" stroke="#d9640a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 </button>
-<button data-qa="opt-B" class="opt {{c1.B.cls}}" disabled="{{c1.B.dis}}" onClick="{{c1.B.pick}}" aria-label="Shape B" style="position: relative; height: 174px; display: flex; align-items: center; justify-content: center">
-<span style="position: absolute; left: 12px; top: 10px; width: 32px; height: 32px; border-radius: 50%; background: #2b7bd6; color: #fff; font-weight: 900; font-size: 18px; display: flex; align-items: center; justify-content: center">B</span>
+<button data-qa="opt-B" class="opt {{c1.B.cls}}" disabled="{{c1.B.dis}}" onClick="{{c1.B.pick}}" aria-label="Shape B" style="position: relative; height: 184px; display: flex; align-items: center; justify-content: center">
 <svg width="200" height="120" viewBox="0 0 200 120" aria-hidden="true"><polygon points="26,92 158,108 180,16 80,46" fill="#f7a8c8" stroke="#b8457a" stroke-width="3.5" stroke-linejoin="round"></polygon><line class="sd s1" x1="26" y1="92" x2="158" y2="108" stroke="#f5c400" stroke-width="7" stroke-linecap="round"></line><line class="sd s2" x1="158" y1="108" x2="180" y2="16" stroke="#f5c400" stroke-width="7" stroke-linecap="round"></line><line class="sd s3" x1="180" y1="16" x2="80" y2="46" stroke="#f5c400" stroke-width="7" stroke-linecap="round"></line><line class="sd s4" x1="80" y1="46" x2="26" y2="92" stroke="#f5c400" stroke-width="7" stroke-linecap="round"></line></svg>
 </button>
-<button data-qa="opt-C" class="opt {{c1.C.cls}}" disabled="{{c1.C.dis}}" onClick="{{c1.C.pick}}" aria-label="Shape C" style="position: relative; height: 174px; display: flex; align-items: center; justify-content: center">
-<span style="position: absolute; left: 12px; top: 10px; width: 32px; height: 32px; border-radius: 50%; background: #2b7bd6; color: #fff; font-weight: 900; font-size: 18px; display: flex; align-items: center; justify-content: center">C</span>
+<button data-qa="opt-C" class="opt {{c1.C.cls}}" disabled="{{c1.C.dis}}" onClick="{{c1.C.pick}}" aria-label="Shape C" style="position: relative; height: 184px; display: flex; align-items: center; justify-content: center">
 <svg width="200" height="120" viewBox="0 0 200 120" aria-hidden="true"><polygon points="100,10 142,46 100,112 58,46" fill="#cdbaf3" stroke="#6f4cc0" stroke-width="3.5" stroke-linejoin="round"></polygon></svg>
 </button>
-<button data-qa="opt-D" class="opt {{c1.D.cls}}" disabled="{{c1.D.dis}}" onClick="{{c1.D.pick}}" aria-label="Shape D" style="position: relative; height: 174px; display: flex; align-items: center; justify-content: center">
-<span style="position: absolute; left: 12px; top: 10px; width: 32px; height: 32px; border-radius: 50%; background: #2b7bd6; color: #fff; font-weight: 900; font-size: 18px; display: flex; align-items: center; justify-content: center">D</span>
+<button data-qa="opt-D" class="opt {{c1.D.cls}}" disabled="{{c1.D.dis}}" onClick="{{c1.D.pick}}" aria-label="Shape D" style="position: relative; height: 184px; display: flex; align-items: center; justify-content: center">
 <svg width="200" height="120" viewBox="0 0 200 120" aria-hidden="true"><polygon points="104,4 146,84 98,106 50,76" fill="#a8e6c1" stroke="#23803f" stroke-width="3.5" stroke-linejoin="round"></polygon><line class="sd s1" x1="104" y1="4" x2="146" y2="84" stroke="#f5c400" stroke-width="7" stroke-linecap="round"></line><line class="sd s2" x1="146" y1="84" x2="98" y2="106" stroke="#f5c400" stroke-width="7" stroke-linecap="round"></line><line class="sd s3" x1="98" y1="106" x2="50" y2="76" stroke="#f5c400" stroke-width="7" stroke-linecap="round"></line><line class="sd s4" x1="50" y1="76" x2="104" y2="4" stroke="#f5c400" stroke-width="7" stroke-linecap="round"></line></svg>
 </button>
 </div>
 </sc-if>
 
 <sc-if value="{{isCfu2}}" hint-placeholder-val="{{ false }}">
-<svg class="{{fadeCls}}" width="500" height="230" viewBox="0 0 500 230" style="position: absolute; left: 650px; top: 120px" aria-label="Trapezium ABCD with equal legs">
+<svg class="{{fadeCls}} qshape" width="500" height="230" viewBox="0 0 500 230" style="position: absolute; left: {{qx}}px; top: {{qy}}px" aria-label="Trapezium ABCD with equal legs">
 <polygon points="180,60 320,60 420,195 80,195" fill="rgba(229,205,234,0.92)" stroke="#e8287a" stroke-width="5" stroke-linejoin="round"></polygon>
 <line x1="180" y1="60" x2="80" y2="195" stroke="#8e44d6" stroke-width="5" stroke-linecap="round"></line>
 <line x1="320" y1="60" x2="420" y2="195" stroke="#8e44d6" stroke-width="5" stroke-linecap="round"></line>
@@ -123,7 +126,7 @@
 </sc-if>
 
 <sc-if value="{{isCfu3}}" hint-placeholder-val="{{ false }}">
-<svg class="{{fadeCls}}" width="520" height="250" viewBox="0 0 520 250" style="position: absolute; left: 640px; top: 112px" aria-label="Trapezium ABCD with angle A of 68 degrees and angle D unknown">
+<svg class="{{fadeCls}}" width="520" height="250" viewBox="0 0 520 250" style="position: absolute; left: 589px; top: 165px" aria-label="Trapezium ABCD with angle A of 68 degrees and angle D unknown">
 <polygon points="120,50 400,50 452,203 181.8,203" fill="rgba(229,205,234,0.92)" stroke="#e8287a" stroke-width="5" stroke-linejoin="round"></polygon>
 <path d="M120,50 L152,50 A32,32 0 0 1 132.0,79.7 Z" fill="#f08a24" fill-opacity="0.85"></path>
 <path d="M181.8,203 L213.8,203 A32,32 0 0 0 169.8,173.3 Z" fill="#2e9e4f" fill-opacity="0.85"></path>
@@ -139,7 +142,7 @@
 </sc-if>
 
 <sc-if value="{{isCfu5}}" hint-placeholder-val="{{ false }}">
-<svg class="{{fadeCls}}" width="500" height="230" viewBox="0 0 500 230" style="position: absolute; left: 650px; top: 120px" aria-label="Isosceles trapezium ABCD with AB 6 cm, CD 10 cm, AD 5 cm and BC unknown">
+<svg class="{{fadeCls}}" width="500" height="230" viewBox="0 0 500 230" style="position: absolute; left: 617px; top: 171px" aria-label="Isosceles trapezium ABCD with AB 6 cm, CD 10 cm, AD 5 cm and BC unknown">
 <polygon points="154,48.4 346,48.4 410,195 90,195" fill="rgba(229,205,234,0.92)" stroke="#e8287a" stroke-width="5" stroke-linejoin="round"></polygon>
 <path d="M131.4,122.5 L115.0,115.3 M129.0,128.0 L112.6,120.8 M385.0,115.3 L368.6,122.5 M387.4,120.8 L371.0,128.0" stroke="#8e44d6" stroke-width="3" stroke-linecap="round"></path>
 <path d="M244,42.4 L250,48.4 L244,54.4 M244,189 L250,195 L244,201" fill="none" stroke="#f08a24" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -156,7 +159,7 @@
 </sc-if>
 
 <sc-if value="{{hasOpts}}" hint-placeholder-val="{{ false }}">
-<div class="{{fadeCls}}" style="position: absolute; left: {{optLeft}}px; top: {{optTop}}px; width: 504px; display: flex; gap: 12px">
+<div class="{{fadeCls}} {{optCls}}" style="position: absolute; left: {{optLeft}}px; top: {{optTop}}px; width: {{optW}}px; display: flex; gap: 12px">
 <sc-for list="{{opts}}" as="o" hint-placeholder-count="3">
 <button class="opt {{o.cls}}" data-qa="opt-{{o.id}}" disabled="{{o.dis}}" onClick="{{o.pick}}" style="flex-grow: 1; flex-basis: 0; height: 74px; padding: 4px 8px; line-height: 1.15">{{o.t}}</button>
 </sc-for>
@@ -164,11 +167,11 @@
 </sc-if>
 
 <sc-if value="{{isCfu4}}" hint-placeholder-val="{{ false }}">
-<svg class="{{fadeCls}}" width="180" height="90" viewBox="0 0 180 90" style="position: absolute; left: 662px; top: 127px" aria-label="Purple trapezium with legs of different lengths"><polygon points="10,78 170,78 160,14 40,14" fill="#cdbaf3" stroke="#6f4cc0" stroke-width="3.5" stroke-linejoin="round"></polygon><path d="M96,8 L102,14 L96,20 M96,72 L102,78 L96,84" fill="none" stroke="#d9640a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-<svg class="{{fadeCls}}" width="180" height="90" viewBox="0 0 180 90" style="position: absolute; left: 662px; top: 231px" aria-label="Green trapezium with equal legs"><polygon points="15,78 165,78 125,14 55,14" fill="#a8e6c1" stroke="#23803f" stroke-width="3.5" stroke-linejoin="round"></polygon><path d="M42.3,47.6 L30.4,40.2 M39.6,51.8 L27.7,44.4 M149.6,40.2 L137.7,47.6 M152.3,44.4 L140.4,51.8" stroke="#1d6b35" stroke-width="2.5" stroke-linecap="round"></path><path d="M86,8 L92,14 L86,20 M86,72 L92,78 L86,84" fill="none" stroke="#d9640a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-<svg class="{{fadeCls}}" width="180" height="90" viewBox="0 0 180 90" style="position: absolute; left: 662px; top: 335px" aria-label="Pink trapezium with two right angles"><polygon points="20,78 165,78 125,14 20,14" fill="#f7a8c8" stroke="#b8457a" stroke-width="3.5" stroke-linejoin="round"></polygon><path d="M20,28 L34,28 L34,14 M34,78 L34,64 L20,64" fill="none" stroke="#b8457a" stroke-width="2.5"></path><path d="M70,8 L76,14 L70,20 M88,72 L94,78 L88,84" fill="none" stroke="#d9640a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<svg class="{{fadeCls}}" width="180" height="90" viewBox="0 0 180 90" style="position: absolute; left: 634px; top: 157px" aria-label="Purple trapezium with legs of different lengths"><polygon points="10,78 170,78 160,14 40,14" fill="#cdbaf3" stroke="#6f4cc0" stroke-width="3.5" stroke-linejoin="round"></polygon><path d="M96,8 L102,14 L96,20 M96,72 L102,78 L96,84" fill="none" stroke="#d9640a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<svg class="{{fadeCls}}" width="180" height="90" viewBox="0 0 180 90" style="position: absolute; left: 634px; top: 261px" aria-label="Green trapezium with equal legs"><polygon points="15,78 165,78 125,14 55,14" fill="#a8e6c1" stroke="#23803f" stroke-width="3.5" stroke-linejoin="round"></polygon><path d="M42.3,47.6 L30.4,40.2 M39.6,51.8 L27.7,44.4 M149.6,40.2 L137.7,47.6 M152.3,44.4 L140.4,51.8" stroke="#1d6b35" stroke-width="2.5" stroke-linecap="round"></path><path d="M86,8 L92,14 L86,20 M86,72 L92,78 L86,84" fill="none" stroke="#d9640a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<svg class="{{fadeCls}}" width="180" height="90" viewBox="0 0 180 90" style="position: absolute; left: 634px; top: 365px" aria-label="Pink trapezium with two right angles"><polygon points="20,78 165,78 125,14 20,14" fill="#f7a8c8" stroke="#b8457a" stroke-width="3.5" stroke-linejoin="round"></polygon><path d="M20,28 L34,28 L34,14 M34,78 L34,64 L20,64" fill="none" stroke="#b8457a" stroke-width="2.5"></path><path d="M70,8 L76,14 L70,20 M88,72 L94,78 L88,84" fill="none" stroke="#d9640a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 <sc-for list="{{slots}}" as="sl" hint-placeholder-count="3">
-<button class="slot {{sl.cls}}" data-qa="slot-{{sl.id}}" onClick="{{sl.tap}}" aria-label="{{sl.aria}}" style="left: 868px; top: {{sl.y}}px">{{sl.t}}</button>
+<button class="slot {{sl.cls}}" data-qa="slot-{{sl.id}}" onClick="{{sl.tap}}" aria-label="{{sl.aria}}" style="left: 840px; top: {{sl.y}}px">{{sl.t}}</button>
 </sc-for>
 <sc-for list="{{labs}}" as="lb" hint-placeholder-count="3">
 <button class="lab {{lb.cls}}" data-qa="lab-{{lb.id}}" onPointerDown="{{lb.down}}" aria-label="{{lb.t}}" style="left: {{lb.x}}px; top: {{lb.y}}px">{{lb.t}}</button>
@@ -276,6 +279,8 @@
 
 <div class="walker" aria-hidden="true" style="position: absolute; left: 0px; top: 0px; width: 120px; height: 120px; pointer-events: none; visibility: hidden; z-index: 12"><canvas width="512" height="512" style="width: 100%; height: 100%; display: block"></canvas></div>
 
+<canvas class="confetti" width="1280" height="720" aria-hidden="true" style="position: absolute; left: 0px; top: 0px; width: 1280px; height: 720px; pointer-events: none; z-index: 15"></canvas>
+
 <sc-if value="{{handOn}}" hint-placeholder-val="{{ false }}">
 <div class="{{hand.cls}}" style="left: {{hand.x}}px; top: {{hand.y}}px; --dx: {{hand.dx}}px; --dy: {{hand.dy}}px" aria-hidden="true">
 <span class="hand-ring"></span>
@@ -291,5 +296,6 @@ var Component = window.TrapeziumGame;
 </script>
 <script src="js/stage-fit.js"></script>
 <script src="js/snowfall.js"></script>
+<script src="js/confetti.js"></script>
 </body>
 </html>
