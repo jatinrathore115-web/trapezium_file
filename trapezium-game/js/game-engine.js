@@ -1080,9 +1080,9 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   labPos(id) {
     const c4 = this.state.c4;
     if (c4.drag && c4.drag.id === id) return { x: c4.drag.x, y: c4.drag.y };
-    if (c4.at[id]) { const sl = this.slotsDef().find((q) => q.id === c4.at[id]); return { x: 840 + 62, y: sl.y + 7 }; }
+    if (c4.at[id]) { const sl = this.slotsDef().find((q) => q.id === c4.at[id]); return { x: 840 + 52, y: sl.y + 7 }; } // 180-wide label centred in the 284-wide box
     const i = this.labsDef().findIndex((l) => l.id === id);
-    return { x: 624 + i * 172, y: 480 };
+    return { x: 594 + i * 192, y: 480 }; // three 180-wide cards, 12 apart, centred under the panel (x 876)
   }
   labDown(id, e) {
     const c4 = this.state.c4;
@@ -1104,7 +1104,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (!L.moved && Math.hypot(e.clientX - L.sx, e.clientY - L.sy) < 6) return;
     L.moved = true;
     const px = (e.clientX - L.r.left) / L.sc, py = (e.clientY - L.r.top) / L.sc;
-    this.setState({ c4: Object.assign({}, this.state.c4, { drag: { id: L.id, x: px - L.ox, y: py - L.oy }, sel: null }) });
+    this.setState({ c4: Object.assign({}, this.state.c4, { drag: { id: L.id, x: px - L.ox, y: py - L.oy, px: px, py: py }, sel: null }) });
   }
   rootUp(e) {
     if (this.drag || this.rd) return this.up(e);
@@ -1450,7 +1450,11 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     });
     const slots = this.slotsDef().map((q, i) => {
       const filled = Object.keys(c4.at).some((k) => c4.at[k] === q.id);
-      return { id: q.id, y: q.y, cls: c4.sel && !filled ? 'hot' : '', t: filled ? '' : 'Drop label here', aria: 'Label slot for shape ' + (i + 1), tap: () => this.slotTap(q.id) };
+      const d = c4.drag, over = !filled && d && d.px > 840 - 20 && d.px < 840 + 284 + 20 && d.py > q.y - 20 && d.py < q.y + 64 + 20;
+      // blank drop zones: soft dashed outline that gently breathes; brighter while a label is held or selected;
+      // highlighted when the held label is over it (any empty box: highlighting only the right one would give the answer away)
+      const cls = filled ? 'filled' : over ? 'hot' : (c4.sel || d) ? 'ready' : 'empty';
+      return { id: q.id, y: q.y, cls: cls, t: '', aria: 'Drop zone for shape ' + (i + 1), tap: () => this.slotTap(q.id) };
     });
     // end
     const nRight = Object.keys(s.results).filter((k) => s.results[k]).length;

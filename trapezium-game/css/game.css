@@ -91,12 +91,28 @@ a{color:#123b63}a:hover{color:#0b2742}
 @keyframes bumpA{0%,100%{transform:scale(1)}40%{transform:scale(1.12)}}
 @keyframes bumpB{0%,100%{transform:scale(1)}40%{transform:scale(1.12)}}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
-.lab{position:absolute;width:160px;height:50px;border-radius:12px;border:2px solid #efcb6e;background:#fdf0c4;color:#6e4210;font-weight:900;font-size:15px;display:flex;align-items:center;justify-content:center;cursor:grab;box-shadow:0 4px 0 #d9b04c;touch-action:none;padding:0 6px}
-.lab.sel{border-color:#d9640a;box-shadow:0 0 0 4px rgba(217,100,10,.3),0 4px 0 #d9b04c}
-.lab.drag{cursor:grabbing;box-shadow:0 12px 22px rgba(18,59,99,.28);transform:scale(1.05);z-index:5}
-.lab.lock{background:#e3f7e7;border-color:#2e9e4f;color:#1d6b35;box-shadow:0 4px 0 #23803f;cursor:default}
-.slot{position:absolute;width:284px;height:64px;border-radius:14px;border:3px dashed #8cc3e6;background:rgba(255,255,255,.55);cursor:pointer;color:#5b7f9c;font-weight:800;font-size:15px}
-.slot.hot{border-color:#d9640a;background:rgba(255,243,228,.85)}
+/* check 4 (screen 36) label cards: raised, roomy, with a small grip so they read as "pick me up" */
+.lab{position:absolute;width:180px;height:50px;box-sizing:border-box;border-radius:14px;border:2px solid #efcb6e;background:linear-gradient(180deg,#fff7da 0%,#fdeec0 100%);color:#6e4210;font-weight:900;font-size:15px;display:flex;align-items:center;justify-content:center;cursor:grab;box-shadow:0 4px 0 #d9b04c,0 6px 12px rgba(18,59,99,.10);touch-action:none;padding:0 8px 0 22px;
+  transition:left .28s cubic-bezier(.22,.8,.3,1),top .28s cubic-bezier(.22,.8,.3,1),transform .18s ease,box-shadow .18s ease}
+.lab::before{content:'';position:absolute;left:9px;top:50%;width:6px;height:14px;margin-top:-7px;opacity:.55;
+  background:radial-gradient(circle,#b8862a 1.2px,transparent 1.6px) 0 0/3px 4.7px}
+.lab:hover{transform:translateY(-2px)}
+.lab.sel{border-color:#d9640a;box-shadow:0 0 0 4px rgba(217,100,10,.25),0 4px 0 #d9b04c}
+/* picked up: lifts, grows a little and tilts, follows the finger exactly (no left/top easing) */
+.lab.drag{cursor:grabbing;box-shadow:0 16px 26px rgba(18,59,99,.28);transform:scale(1.07) rotate(-2deg);z-index:5;transition:transform .18s ease,box-shadow .18s ease}
+.lab.lock{background:#e3f7e7;border-color:#2e9e4f;color:#1d6b35;box-shadow:0 4px 0 #23803f;cursor:default;padding:0 8px}
+.lab.lock::before{display:none}
+.lab.lock:hover{transform:none}
+/* drop zones: blank. Soft dashed outline and a faint inner glow that gently breathes so it reads as "put something here" */
+.slot{position:absolute;width:284px;height:64px;box-sizing:border-box;border-radius:16px;border:2.5px dashed #9fcbe9;background:rgba(255,255,255,.42);cursor:pointer;
+  box-shadow:inset 0 2px 8px rgba(43,123,214,.07);transition:border-color .2s ease,background .2s ease,transform .2s ease,box-shadow .2s ease}
+.slot.empty{animation:slotBreathe 2.8s ease-in-out infinite}
+@keyframes slotBreathe{0%,100%{border-color:#a8d0ec;background:rgba(255,255,255,.40)}50%{border-color:#7fbbe4;background:rgba(255,255,255,.58)}}
+.slot.ready{border-color:#6fb2e2;background:rgba(236,247,255,.72)}
+/* the held label is over this box: warm highlight, a touch bigger */
+.slot.hot{border-color:#f0a020;border-style:solid;background:rgba(255,246,222,.92);transform:scale(1.03);box-shadow:0 0 0 4px rgba(240,160,32,.18)}
+.slot.filled{border-color:transparent;background:transparent;box-shadow:none}
+@media (prefers-reduced-motion: reduce){.slot.empty{animation:none}.lab,.slot{transition:none}}
 .star{color:#c9d6e0}
 .star.on{color:#f2b51c}
 .startbtn{height:68px;padding:0 40px;border-radius:999px;border:0;background:#d9640a;color:#fff;font-family:'Baloo 2',system-ui,sans-serif;font-weight:800;font-size:30px;display:flex;align-items:center;gap:12px;box-shadow:0 6px 0 #a54a05;cursor:pointer;animation:ready 1.8s ease-in-out infinite}
