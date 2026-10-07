@@ -17,6 +17,7 @@
 //           'top' = Swiftee small at top-left, bubble beside her at the top, shape large in the centre;
 //           'spotlight' centres and enlarges the shape, moves Swiftee to the right (pose = held expression)
 //   f:     board display flags (met = legs extended to where they meet, legGlow = legs highlighted, sideLen = base lengths shown too, baseExt, par, legsPurple, legLen, ticks, arcs, right, eq)
+//   auto: 1 on the measure step = Swiftee measures every side by herself (no taps)
 //   practice: a quick question with opts / ok / okChips that is not scored; noBoard: no shape; layout 'recap': the recap card
 //   cfu:   check number; opts (ok / fb feedback), ok = praise line
 // =====================================================================
@@ -38,7 +39,7 @@ const LESSON = {
     { id: 'defFull', lines: [{ t: 'A quadrilateral with at least\none pair of parallel sides\nis called a trapezium.', chips: [{ t: 'Trapezium', k: 'gold' }] }], f: { par: 1 } },
     { id: 'bases', boardShift: -40, lines: [{ t: 'The parallel sides\nare called bases.', glow: ['AB', 'CD'], callout: 'bases' }], f: { par: 1 } },
     { id: 'legs', boardShift: -40, lines: [{ t: 'And the non-parallel sides\nare called legs.', glow: ['DA', 'BC'], glowAt: 'legs', callout: 'legs' }], f: { par: 1 } },
-    { id: 'measure', lines: [{ m: 'curious', t: "Let's measure the sides\nof this trapezium." }], task: 'measure', hint: 'Tap the glowing side to measure it', idle: 'Tap the glowing side, or drag the ruler onto it.', f: { par: 1, legsPurple: 1 } },
+    { id: 'measure', lines: [{ m: 'curious', t: "Let's measure the sides\nof this trapezium." }], task: 'measure', auto: 1, hint: 'Tap the glowing side to measure it', idle: 'Tap the glowing side and I will measure it.', f: { par: 1, legsPurple: 1 } },
     { id: 'scalene', lines: [{ m: 'surprised', t: 'Woah! All the sides of\nthis trapezium are of\ndifferent lengths.', s: 'Whoa! All the sides of this trapezium are of different lengths.' }, { t: 'This type of trapezium which\nhas sides of different lengths\nis called a scalene trapezium.', chips: [{ t: 'Scalene trapezium', k: 'gold' }] }],
       f: { par: 1, legsPurple: 1, legLen: 1, sideLen: 1 } },
     { id: 'equal', lines: [{ m: 'curious', t: "Let's change its\nshape a little." }], f: { par: 1, legsPurple: 1, legLen: 1, sideLen: 1 } },
@@ -59,7 +60,7 @@ const LESSON = {
     { id: 'sumAD', lines: [{ m: 'surprised', t: '∠A and ∠D add up to 180°.', glow: ['DA'], chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
     { id: 'supp', lines: [{ m: 'happy', t: 'That means they are\nsupplementary angles.', chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
     // quick practice question (not scored): pick the sum of ∠B and ∠C
-    { id: 'askBC', practice: 1, optTop: 432, chipTop: 540, boardShiftY: -62, idle: 'Add ∠B and ∠C. They sit on the same leg, BC.',
+    { id: 'askBC', practice: 1, optTop: 476, chipTop: 105, boardShiftY: -11, // question card on top, shape, answers below idle: 'Add ∠B and ∠C. They sit on the same leg, BC.',
       lines: [{ m: 'curious', t: 'What about ∠B and ∠C?', glow: ['BC'], chips: [{ t: '∠B + ∠C = ?', k: 'white' }] }],
       ok: 'Correct! ∠B and ∠C are\nsupplementary angles too.', okChips: [{ t: '∠B + ∠C = 180°', k: 'gold' }],
       opts: [
@@ -68,11 +69,11 @@ const LESSON = {
         { id: '360', t: '360°', fb: '360° is all four angles. Just add ∠B and ∠C.' }
       ], f: { par: 1, arcs: 'ABCD' } },
     { id: 'whatIf', lines: [{ m: 'curious', t: 'What if we change the shape\nof this trapezium?' }], f: { par: 1, arcs: 'ABCD' } },
-    { id: 'dragSum', layout: 'top', lines: [{ m: 'curious', t: 'Drag any vertex to change the angles.\nNotice the sum of angles.' }],
+    { id: 'dragSum', layout: 'top', lines: [{ m: 'curious', t: 'Drag any vertex to change\nthe angles. Notice the\nsum of angles.' }],
       task: 'dragFree', hint: 'Drag any corner and watch the sums', idle: 'Drag any corner and watch the two sums.',
       after: [{ m: 'surprised', t: 'The angles changed, but\neach sum is still 180°!' }], f: { par: 1, arcs: 'ABCD', sums: 1 } },
     { id: 'always', lines: [{ m: 'happy', t: 'No matter the shape, the angles\nalways add up to 180°.', chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }, { t: '∠B + ∠C = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
-    { id: 'rule', lines: [{ t: 'So in any trapezium, angles on the\nsame leg always add up to 180°.', chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }, { t: '∠B + ∠C = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
+    { id: 'rule', lines: [{ t: 'So in any trapezium,\nangles on the same leg\nalways add up to 180°.', chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }, { t: '∠B + ∠C = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
     { id: 'make90', layout: 'top', lines: [{ m: 'curious', t: 'Drag any vertex to make any angle 90°.' }],
       task: 'drag90', hint: 'Drag a corner until an angle is 90°', idle: 'Drag a corner slowly and stop when an angle shows 90°.',
       after: [{ m: 'happy', t: 'Great job! One of the angles\nis a right angle.' }], f: { par: 1, arcs: 'ABCD' } },
@@ -85,9 +86,9 @@ const LESSON = {
       ok: 'Yes! Shape A has exactly one pair of parallel sides.',
       opts: [
         { id: 'A', ok: true },
-        { id: 'B', fb: 'Shape B has two pairs of parallel sides. That makes it a parallelogram.' },
+        { id: 'B', fb: 'Look at each side of shape B. No two sides are parallel, so it is not a trapezium.' },
         { id: 'C', fb: 'Shape C has no parallel sides at all.' },
-        { id: 'D', fb: 'Shape D has two pairs of parallel sides. That makes it a rectangle.' }
+        { id: 'D', fb: 'Look at each side of shape D. No two sides are parallel, so it is not a trapezium.' }
       ] },
     { id: 'cfu2', cfu: 2, idle: 'Look closely at the marks on the legs.', hint: 'Check 2 of 5 · Which type of trapezium?', optTop: 376,
       lines: [{ m: 'curious', t: 'What type of trapezium is this?' }],

@@ -14,7 +14,8 @@ trapezium-game/
 │       ├── swiftee.webp            Swiftee still (shown until the animated sprite is ready)
 │       ├── speech-bubble.webp      (unused: the bubble is now drawn in CSS)
 │       ├── ice-panel.webp          glass board panel
-│       └── snow-background.webp    snowy background
+│       ├── winter-background.webp  winter scene background (all screens)
+│       └── snow-background.webp    (unused: previous background)
 ├── swiftee-assets/             Swiftee sprite sheets + manifest (the game reads atlas/swiftee.manifest.json
 │                               and spritesheets/1x|2x; see swiftee-assets/README.md)
 ├── css/
@@ -28,7 +29,8 @@ trapezium-game/
 │   ├── swiftee-manifest.js     GENERATED trimmed copy of the Swiftee manifest (works from file://)
 │   ├── swiftee.js              Swiftee mascot: plays start → loop → stop expressions on a canvas
 │   ├── game-engine.js          the game: narration, geometry, drags, ruler, CFUs, scoring, render values
-│   └── stage-fit.js            scales the stage to the window
+│   ├── stage-fit.js            scales the stage to the window
+│   └── snowfall.js             slow background snowfall (behind the panel; off for reduced motion)
 ├── tools/
 │   └── build-swiftee-manifest.js   regenerates js/swiftee-manifest.js after the sheets change
 ├── canvas-source/
@@ -215,3 +217,21 @@ legs, a right angle at A), so the screens after it still match the shape (`navNe
 **Screens · N** (top-left) opens a panel of snapshots of every screen; tap one to open that screen directly (the shape is
 rebuilt as if the earlier screens were done, see `jumpTo()`). The lesson does not move on while the panel is open.
 Snapshots live in `assets/thumbs/NN.webp`; after changing screens run `node tools/build-thumbs.js` (needs Chrome or Edge).
+
+## Lip-sync and word timing
+
+The voice is the clock for every line (`say()` in `js/game-engine.js`). Nothing shows until the voice starts; Swiftee switches to her
+`talking` animation at that instant (`SwifteeMascot.talk()`), moves her beak only while the voice speaks, closes it when it ends and
+then shows the line's expression (`m`) for `CONFIG.swiftee.reactMs`. Each word appears when the voice reaches it: word-boundary
+events are mapped to exact word offsets in the spoken text. Voices without boundary events use a paced reveal that starts with the
+voice and learns its real speed after each line (`paceK`). With no voice at all, words and beak run on the paced timing.
+
+## Measuring trip (screen 13)
+
+Automatic (`auto: 1` on the step): after "Let's measure the sides of this trapezium." Swiftee flies onto corner A (`flapping`, shrinking
+to `CONFIG.walker.size`) and measures A → B → C → D → A by herself. On each side she walks with her feet on the line (`measuring`), pulling a
+tape out of the tape measure in her hand: the tape is anchored at the side's first corner, lies just outside the side with half-cm ticks and
+cm numbers, and rises into her hand (exact per-frame hand points: `CONFIG.walker.tips`). The length label appears at the corner, the tape
+stays laid out until the next side starts, and after the fourth side she flies home and the screen moves on. Code: `js/walker.js`,
+`autoMeasure()` / `measureLeg()` in `js/game-engine.js`; timings in `CONFIG.walker`. The walk sheet comes from the draft
+`swiftee-assets/source/drafts/swiftee-measuring-draft.png` via `node tools/build-measuring-sheet.js <png> 4 2` + `node tools/build-swiftee-manifest.js`.

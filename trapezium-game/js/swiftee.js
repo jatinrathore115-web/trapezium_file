@@ -46,6 +46,25 @@ window.SwifteeMascot = class SwifteeMascot {
     this.target = state;
     if (this.m) this.preload(state);
   }
+  // Lip-sync: talk(true) cuts straight to the talking loop (beak moving) the moment the voice starts;
+  // talk(false, next) closes the beak (talk_stop) and goes on to `next`. Neither waits for minHoldMs.
+  talk(on, next) {
+    if (!this.m || !this.m.states.talking) { if (!on && next) this.play(next); return; }
+    const now = performance.now();
+    if (on) {
+      this.target = 'talking';
+      if (this.cur && this.cur.state === 'talking' && this.cur.phase !== 'stop') return;
+      this.preload('talking');
+      if (this.cur) this.swap(this.clip('talking', 'loop', this.parts('talking').loop), now);
+      return;
+    }
+    this.target = next || this.idle;
+    this.preload(this.target);
+    if (this.cur && this.cur.state === 'talking') {
+      const stop = this.parts('talking').stop;
+      this.swap(stop && !this.reduced ? this.clip('talking', 'stop', stop) : this.enter(this.target), now);
+    }
+  }
   // mirror horizontally (the art faces right; on the right of the screen Swiftee should face left)
   setFlip(on) { this.flip = !!on; this.cv = null; }
   // fetch sheets ahead of time so a reaction never waits on the network
@@ -89,7 +108,8 @@ window.SwifteeMascot = class SwifteeMascot {
   clip(state, phase, anim) {
     const a = this.m.animations[anim] || {};
     const n = this.m.scales[this.scale()].sheets[anim].frames;
-    return { state: state, phase: phase, anim: anim, n: n, pp: !!a.pingpong, i: 0, t0: performance.now() };
+    const fms = a.fps ? 1000 / a.fps : this.frameMs; // an animation may set its own frame rate (e.g. the measuring walk)
+    return { state: state, phase: phase, anim: anim, n: n, pp: !!a.pingpong, i: 0, t0: performance.now(), fms: fms };
   }
   len(c) { return c.pp ? Math.max(1, c.n * 2 - 2) : c.n; }
   frameOf(c) { return c.pp && c.i >= c.n ? c.n * 2 - 2 - c.i : c.i; }
@@ -120,11 +140,12 @@ window.SwifteeMascot = class SwifteeMascot {
       this.draw(now);
       return;
     }
+    const fms = c.fms || this.frameMs;
     const el = now - this.last;
-    if (el < this.frameMs) { if (this.fade || !this.drawn) this.draw(now); return; }
-    let steps = Math.floor(el / this.frameMs);
+    if (el < fms) { if (this.fade || !this.drawn) this.draw(now); return; }
+    let steps = Math.floor(el / fms);
     if (steps > 3) { steps = 1; this.last = now; } // tab was hidden: don't race to catch up
-    else this.last += steps * this.frameMs;
+    else this.last += steps * fms;
     for (let k = 0; k < steps; k++) this.step(now);
     this.draw(now);
   }

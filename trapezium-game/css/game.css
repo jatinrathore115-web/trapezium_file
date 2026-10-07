@@ -13,7 +13,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 .bubble-text{display:flex;flex-wrap:wrap;justify-content:center;column-gap:.28em;font-family:'Nunito',system-ui,sans-serif;font-weight:800;line-height:1.25;color:#123b63;text-align:center}
 /* Tail sits on the inner edge of the bottom border: its fill opens the border, its edges run straight out of it,
    and anything above the border is clipped, so the outline reads as one continuous line */
-.bubble-tail{position:absolute;left:26px;top:100%;display:block;overflow:hidden;filter:drop-shadow(0 4px 4px rgba(18,59,99,.10))}
+.bubble-tail{position:absolute;left:26px;top:100%;margin-top:-1px;display:block;overflow:hidden;filter:drop-shadow(0 4px 4px rgba(18,59,99,.10))}
 @keyframes bubA{from{transform:scale(.97);opacity:.8}to{transform:scale(1);opacity:1}}
 @keyframes bubB{from{transform:scale(.97);opacity:.8}to{transform:scale(1);opacity:1}}
 /* Swiftee is intentionally static on every screen: fixed position, no idle, talk or reaction motion */
@@ -119,7 +119,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 .board{transform-origin:0 0;transition:transform .7s cubic-bezier(.22,.8,.3,1)}
 /* (the board <svg> takes its transform-origin/transition inline: the runtime does not bind class on the svg root) */
 .shape-fill.spot{animation:shapePulse 2.4s ease-in-out .7s infinite}
-@keyframes shapePulse{0%,100%{fill:rgba(160,212,246,.6);filter:drop-shadow(0 0 0 rgba(43,123,214,0))}50%{fill:rgba(126,192,240,.8);filter:drop-shadow(0 0 14px rgba(43,123,214,.45))}}
+@keyframes shapePulse{0%,100%{fill:rgba(229,205,234,.92);filter:drop-shadow(0 0 0 rgba(232,40,122,0))}50%{fill:rgba(240,176,214,.95);filter:drop-shadow(0 0 14px rgba(232,40,122,.4))}}
 .swiftee{left:130px;animation:swHome .45s ease-out}
 .swiftee.spot{left:900px;animation:swSpot .5s ease-out}
 @keyframes swHome{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
@@ -157,7 +157,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 @media (prefers-reduced-motion: reduce){.leg-glow{animation:none}}
 /* one-time shape pulse after a line (pulse: 1): the fill deepens and glows, then settles back */
 .shape-fill.pulse1{animation:shapeOnce .9s ease-in-out 1}
-@keyframes shapeOnce{0%,100%{fill:rgba(160,212,246,.6);filter:drop-shadow(0 0 0 rgba(43,123,214,0))}45%{fill:rgba(110,182,238,.85);filter:drop-shadow(0 0 16px rgba(43,123,214,.55))}}
+@keyframes shapeOnce{0%,100%{fill:rgba(229,205,234,.92);filter:drop-shadow(0 0 0 rgba(232,40,122,0))}45%{fill:rgba(242,168,210,.97);filter:drop-shadow(0 0 16px rgba(232,40,122,.5))}}
 @media (prefers-reduced-motion: reduce){.shape-fill.pulse1{animation:none}}
 /* "Base" callout: fades and drops in with the voice */
 .callout{animation:calloutIn .4s ease-out;filter:drop-shadow(0 3px 6px rgba(18,59,99,.16))}
@@ -186,10 +186,10 @@ a{color:#123b63}a:hover{color:#0b2742}
 .bubble.manual .bubble-text{flex-wrap:wrap}
 .bubble.manual .w{white-space:nowrap}
 /* 'top' layout: Swiftee small at the panel's top-left, bubble beside her (tail points left), shape centred */
-.swiftee.top{left:118px;top:58px!important;transform:scale(.62);transform-origin:0 0;animation:swTopIn .45s ease-out}
+.swiftee.top{left:112px;top:66px!important;animation:swTopIn .45s ease-out} /* same size as everywhere: only the position changes */
 @keyframes swTopIn{from{opacity:0}to{opacity:1}}
-.bubble.top{left:300px!important;top:104px!important;bottom:auto!important;max-width:640px;transform-origin:0 50%}
-.bubble.top .bubble-tail{left:-25px;top:calc(50% - 15px);margin-top:0;transform:rotate(90deg)}
+.bubble.top{left:358px!important;top:128px!important;bottom:auto!important;max-width:640px;transform-origin:0 50%}
+.bubble.top .bubble-tail{left:-29px;top:calc(50% - 15px);margin-top:0;transform:rotate(90deg)}
 @media (prefers-reduced-motion: reduce){.swiftee.top{animation:none}}
 /* live angle sums beside the legs */
 .tag.sum{font-size:18px;padding:6px 14px;border:2px solid #2e9e4f;color:#1d6b35;background:#effbf1;transition:none}
@@ -212,3 +212,27 @@ a{color:#123b63}a:hover{color:#0b2742}
 .cf{position:absolute;top:-24px;width:10px;height:16px;border-radius:3px;opacity:0;animation:cfFall 2.6s cubic-bezier(.3,.6,.5,1) forwards}
 @keyframes cfFall{0%{opacity:1;translate:0 0}85%{opacity:1}100%{opacity:0;translate:-30px 760px;rotate:540deg}}
 @media (prefers-reduced-motion: reduce){.cf{display:none}.bs{animation:none;opacity:1}}
+/* Scene layout (screens 1-30): ice panel on the right, Swiftee + bubble on the snow at the left */
+.stage.scene .panel-img{left:512px!important;top:104px!important;width:728px!important;height:480px!important}
+.stage.scene .swiftee,.stage.scene .swiftee.top{left:70px!important;top:412px!important}
+.stage.scene .bubble,.stage.scene .bubble.top{left:87px!important;top:auto!important;bottom:290px!important;max-width:380px;transform-origin:126px 100%}
+.stage.scene .bubble.manual{max-width:420px}
+.stage.scene .bubble .bubble-tail,.stage.scene .bubble.top .bubble-tail{left:120px;top:100%;margin-top:-1px;transform:none}
+.stage.scene .opt{transition:transform .12s ease}
+/* snowfall layer (js/snowfall.js): hidden in thumbnail captures so snapshots stay stable */
+.thumbs-capture .snowfall{display:none}
+/* a turned-over ruler keeps its numbers upright */
+.ruler.turned text{transform:scaleY(-1);transform-box:fill-box;transform-origin:center}
+/* screen 13: home Swiftee steps away while the walker measures on the shape */
+.swiftee.away{opacity:0;transition:opacity .15s ease}
+.tape{filter:drop-shadow(0 1px 1px rgba(122,90,16,.35))}
+/* tape-measure numbers (screen 13) */
+.tag.tnum{font-size:11px;font-weight:900;color:#6b4c0c;background:#ffe27a;border:1px solid #c9961e;padding:0 4px;border-radius:4px;box-shadow:none;line-height:15px;animation:none}
+/* home Swiftee fades out/in as the walker takes over, so the hand-off has no pop */
+.swiftee{transition:opacity .2s ease}
+/* check 1: a wrongly picked shape traces its sides one by one, so the learner sees no pair runs the same way */
+.opt .sd{opacity:0}
+.opt.bad .sd{animation:sideTrace 2.6s ease-in-out both}
+.opt.bad .sd.s2{animation-delay:.5s}.opt.bad .sd.s3{animation-delay:1s}.opt.bad .sd.s4{animation-delay:1.5s}
+@keyframes sideTrace{0%{opacity:0}12%{opacity:.95}35%{opacity:.95}60%,100%{opacity:0}}
+@media (prefers-reduced-motion: reduce){.opt.bad .sd{animation:none}}
