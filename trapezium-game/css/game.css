@@ -75,8 +75,11 @@ a{color:#123b63}a:hover{color:#0b2742}
 @keyframes ready{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
 .ibtn{width:48px;height:48px;border-radius:50%;border:2px solid #cfe6f7;background:#fff;color:#123b63;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;box-shadow:0 3px 0 #a9cfe8}
 .ibtn:disabled{opacity:.45;cursor:not-allowed}
-.opt{border:3px solid #bfe0f5;background:#fff;color:#123b63;border-radius:16px;font-weight:800;font-size:20px;cursor:pointer;box-shadow:0 4px 0 #9ccbe8;transition:transform .12s ease}
-.opt:hover{transform:translateY(-2px)}
+/* answer cards: a raised, glossy game button - lifts on hover, squashes down when pressed */
+.opt{border:3px solid #bfe0f5;background:linear-gradient(180deg,#ffffff 0%,#f2f9ff 100%);color:#123b63;border-radius:18px;font-weight:800;font-size:20px;cursor:pointer;
+  box-shadow:0 5px 0 #9ccbe8,0 10px 18px rgba(18,59,99,.12);transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease}
+.opt:hover{transform:translateY(-3px);border-color:#8cc8ef;box-shadow:0 8px 0 #9ccbe8,0 14px 22px rgba(18,59,99,.16)}
+.opt:active{transform:translateY(3px) scale(.97);box-shadow:0 2px 0 #9ccbe8,0 4px 8px rgba(18,59,99,.10);transition-duration:.06s}
 .opt.good{background:#e3f7e7;border-color:#2e9e4f;box-shadow:0 4px 0 #23803f}
 .opt.bad{background:#fde6e3;border-color:#d94a35;box-shadow:0 4px 0 #ad3523;animation:shake .4s ease}
 .opt:disabled{cursor:default}
@@ -85,7 +88,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 @keyframes bumpB{0%,100%{transform:scale(1)}40%{transform:scale(1.12)}}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
 /* check 4 (screen 36) label cards: raised, roomy, with a small grip so they read as "pick me up" */
-.lab{position:absolute;width:180px;height:50px;box-sizing:border-box;border-radius:14px;border:2px solid #efcb6e;background:linear-gradient(180deg,#fff7da 0%,#fdeec0 100%);color:#6e4210;font-weight:900;font-size:15px;display:flex;align-items:center;justify-content:center;cursor:grab;box-shadow:0 4px 0 #d9b04c,0 6px 12px rgba(18,59,99,.10);touch-action:none;padding:0 8px 0 22px;
+.lab{position:absolute;width:200px;height:56px;box-sizing:border-box;border-radius:14px;border:2px solid #efcb6e;background:linear-gradient(180deg,#fff7da 0%,#fdeec0 100%);color:#6e4210;font-weight:900;font-size:15px;display:flex;align-items:center;justify-content:center;cursor:grab;box-shadow:0 4px 0 #d9b04c,0 6px 12px rgba(18,59,99,.10);touch-action:none;padding:0 8px 0 22px;
   transition:left .28s cubic-bezier(.22,.8,.3,1),top .28s cubic-bezier(.22,.8,.3,1),transform .18s ease,box-shadow .18s ease}
 .lab::before{content:'';position:absolute;left:9px;top:50%;width:6px;height:14px;margin-top:-7px;opacity:.55;
   background:radial-gradient(circle,#b8862a 1.2px,transparent 1.6px) 0 0/3px 4.7px}
@@ -183,10 +186,8 @@ a{color:#123b63}a:hover{color:#0b2742}
 .leg-glow{animation:legGlowIn .35s ease-out,legGlow 1.8s ease-in-out .35s infinite}
 @keyframes legGlowIn{from{stroke-opacity:0;stroke-width:12px}to{stroke-opacity:.78;stroke-width:20px}}
 @media (prefers-reduced-motion: reduce){.leg-glow{animation:none}}
-/* Base / Leg pill labels (screens 11-12): both pills of a pair fade and drop in together with the voice */
-.callout{animation:calloutIn .4s ease-out;filter:drop-shadow(0 3px 6px rgba(18,59,99,.16))}
-@keyframes calloutIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion: reduce){.callout{animation:none}}
+/* Base / Leg pill labels (screens 14-15) */
+.callout{filter:drop-shadow(0 3px 6px rgba(18,59,99,.16))} /* the pills come in one by one via GSAP (Motion.calloutIn) */
 /* Screen list (top-left): same pill as Back/Next; panel of live snapshots (assets/thumbs, see tools/build-thumbs.js) */
 .screens-btn{z-index:16;min-width:0;padding:0 18px}
 .screens-scrim{position:absolute;left:0;top:0;width:1280px;height:720px;background:rgba(13,34,54,.22);z-index:17;animation:fade .2s ease-out}
@@ -229,7 +230,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 @media (prefers-reduced-motion: reduce){.recap-row{animation:none;opacity:1}}
 /* "Great job!" celebration: three stars pop in, confetti falls once */
 .celebrate{position:absolute;left:0;top:0;width:1280px;height:720px;pointer-events:none;overflow:hidden}
-.big-stars{position:absolute;left:640px;top:210px;width:500px;display:flex;justify-content:center;align-items:flex-end;gap:18px}
+.big-stars{position:absolute;left:626px;top:270px;width:500px;display:flex;justify-content:center;align-items:flex-end;gap:18px}
 .bs{opacity:0;animation:starPop .6s cubic-bezier(.2,1.6,.4,1) forwards;filter:drop-shadow(0 6px 10px rgba(196,143,5,.35))}
 .bs.s1{animation-delay:.25s}.bs.s2{animation-delay:.5s;margin-bottom:22px}.bs.s3{animation-delay:.75s}
 @keyframes starPop{from{opacity:0;transform:scale(.2) rotate(-40deg)}to{opacity:1;transform:scale(1) rotate(0)}}
@@ -298,3 +299,76 @@ a{color:#123b63}a:hover{color:#0b2742}
 /* Choreographed motion (screen 1 build glow + fill, side numbers, corner letters, shape assembly, shape zoom,
    wrong-way wiggle, leg/base traces) runs on GSAP in js/motion.js; this sheet keeps the static looks and the small
    hover / state transitions. */
+/* screen 23: arcs and angle values wait hidden for the voice cue (Motion.anglesIn sets them visible inline) */
+.arc.pre,.tag.alab.pre{opacity:0;animation:none}
+/* screen 34 "hero" finale: the ice board fades away and Swiftee is the whole scene - centred, a soft hover (GSAP,
+   Motion.heroIn), her bubble centred just above her head, a warm glow behind her, two small stars at her sides and a
+   few twinkling sparkles. Everything else stays clear. */
+.stage .panel-img{transition:opacity .45s ease}
+.stage.hero .panel-img{opacity:0}
+.stage.scene.hero .swiftee{left:510px!important;top:330px!important;animation:none!important}
+.stage.scene.hero .bubble{left:640px!important;top:auto!important;bottom:372px!important;translate:-50% 0;transform-origin:50% 100%}
+.stage.scene.hero .bubble .bubble-tail{left:calc(50% - 15px)}
+.stage.hero .big-stars{left:420px;top:448px;width:440px;justify-content:space-between;gap:0}
+.stage.hero .bs{animation:none;opacity:0}
+.stage.hero .bs.s2{display:none}
+.stage.hero .bs.s1,.stage.hero .bs.s3{width:64px;height:64px}
+.hglow,.hspk{display:none}
+.stage.hero .hglow{display:block;position:absolute;left:400px;top:250px;width:480px;height:440px;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(255,236,170,.55),rgba(255,236,170,.18) 60%,rgba(255,236,170,0));opacity:0}
+.stage.hero .hspk{display:block;position:absolute;width:18px;height:18px;margin:-9px 0 0 -9px;opacity:0;
+  background:#fff6c8;clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);filter:drop-shadow(0 0 4px rgba(255,214,90,.9))}
+/* screen 26 supplementary-angles figure (GSAP, Motion.supp*): hidden until its voice cue */
+.supp-viz .sv-base,.supp-viz .sv-a,.supp-viz .sv-d,.supp-viz .sv-180{opacity:0}
+/* optsAfter screens: the answers slide up one by one as soon as the question has been asked */
+.opts-in.quick .opt{animation-delay:0s}
+.opts-in.quick .opt:nth-child(2){animation-delay:.16s}
+.opts-in.quick .opt:nth-child(3){animation-delay:.32s}
+.opts-in.quick .opt:nth-child(4){animation-delay:.48s}
+/* screen 28: the curious question mark beside the reshaped trapezium (GSAP, Motion.settleShape) */
+.curious-q{opacity:0;pointer-events:none;font-family:'Baloo 2',system-ui,sans-serif;font-weight:800;font-size:46px;line-height:1;color:#f08a24;text-shadow:0 3px 0 rgba(255,255,255,.8),0 6px 12px rgba(18,59,99,.18)}
+/* screen 29 sum panels: soft cream, thin outline in the pair's colours (A + D orange / yellow, B + C purple / blue) */
+.tag.sum.sumL,.tag.sum.sumR{background:#fffaf0;color:#123b63;font-weight:900;border-radius:14px;box-shadow:0 3px 0 rgba(0,0,0,.06)}
+.tag.sum.sumL{border:2px solid #f08a24;border-bottom-color:#F5C542;border-right-color:#F5C542}
+.tag.sum.sumR{border:2px solid #8e44d6;border-bottom-color:#2b7bd6;border-right-color:#2b7bd6}
+/* screen 33: the 90° labels inside the right-angled corners (revealed by GSAP) */
+.tag.r90{color:#1d6b35;background:rgba(239,251,241,.9);border:1.5px solid #8fd3a1}
+.r90pre .rmark,.r90pre .tag.r90{opacity:0;animation:none} /* screen 33: hidden from the first frame; GSAP reveals them on cue */
+/* screen 35 animated recall (GSAP, Motion.recapPrep / recap): the layer's parts start hidden; the summary card and
+   its rows wait for the end of the recall instead of popping in on their own */
+.rc-layer .rc{opacity:0}
+.recap.gs{animation:none;opacity:0}
+.recap.gs .recap-row{animation:none;opacity:0}
+.recap-ico{flex:none;width:46px;height:36px;border-radius:10px;background:#fff;box-shadow:0 1px 4px rgba(18,59,99,.12);display:flex;align-items:center;justify-content:center}
+/* screen 38 (check 3): parts the GSAP story reveals (Motion.q3*) start hidden; the relationship hint sits above the
+   shape; a wrong answer is a warm orange, not red */
+.q3 .q3-ad,.q3 .q3-vD,.q3 .q3-q,.q3 .q3-wD,.q3 .q3-wA,.q3 .q3-vA{opacity:0}
+.q3-hint{opacity:0;translate:-50% 0;display:flex;align-items:center;gap:8px;padding:6px 16px;border-radius:16px;background:#fbf8ee;border:3px solid #5cc6cf;
+  font-family:'Nunito',system-ui,sans-serif;font-weight:900;font-size:22px;color:#0b5b70;box-shadow:0 4px 12px rgba(11,91,112,.10);pointer-events:none}
+.q3-hint .q3h-a{color:#d9640a}.q3-hint .q3h-x{color:#b8860b}.q3-hint .q3h-op{color:#5b7f9c}
+.q3-hint .q3h-sa,.q3-hint .q3h-sd{opacity:0}
+.q3-fly{position:absolute;left:0;top:0;opacity:0;pointer-events:none;font-family:'Nunito',system-ui,sans-serif;font-weight:900;font-size:22px;color:#1d6b35;
+  background:#e3f7e7;border:2px solid #2e9e4f;border-radius:12px;padding:2px 10px;translate:-50% -50%}
+.soft-wrong .opt.bad{background:#fff3e2;border-color:#f0a020;box-shadow:0 5px 0 #e0a24a,0 10px 18px rgba(18,59,99,.10);color:#8a4b0a}
+/* screen 39 (check 4): labels wait for the instruction; drop boxes glow blue under a held label, turn green with a
+   check once matched, pulse orange on a wrong drop (GSAP); clue lines on the legs start hidden */
+.lab.pre{opacity:0;pointer-events:none}
+.q4s .q4-leg{opacity:0}
+.slot.hot{border-color:#56aee8;border-style:solid;background:rgba(230,244,255,.92);transform:scale(1.03);box-shadow:0 0 0 5px rgba(86,174,232,.22)}
+.slot.filled.ok{border:2.5px solid #2e9e4f;background:rgba(227,247,231,.7)}
+.slot.filled.ok::after{display:none;content:'';position:absolute;right:10px;top:50%;width:26px;height:26px;margin-top:-13px;border-radius:50%;background:#2e9e4f;color:#fff;font-weight:900;font-size:16px;line-height:26px;text-align:center}
+/* screen 39 redesign: each row is a "challenge strip" - the shape on its own soft card, a small connector, then its
+   answer slot; label chips are bigger and float gently while they wait */
+.q4-strip{position:absolute;width:522px;height:96px;border-radius:22px;background:rgba(255,255,255,.38);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.65),0 4px 14px rgba(18,59,99,.06);pointer-events:none}
+.q4-card{position:absolute;width:196px;height:92px;border-radius:18px;background:linear-gradient(180deg,#ffffff,#f4f9ff);box-shadow:0 4px 0 #cfe4f5,0 8px 16px rgba(18,59,99,.10);pointer-events:none}
+.q4-link{position:absolute;width:12px;height:20px;pointer-events:none;background:#8cc3e6;clip-path:polygon(0 0,100% 50%,0 100%);opacity:.75}
+.stage .slot{border:2.5px dashed #7fbbe4;background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(232,245,255,.75));box-shadow:inset 0 0 0 4px rgba(255,255,255,.55),inset 0 3px 10px rgba(43,123,214,.08)}
+.stage .slot.empty{animation:slotBreathe 2.6s ease-in-out infinite}
+.stage .slot.hot{border-color:#3fa3e8;border-style:solid;background:rgba(228,243,255,.95);transform:scale(1.04);box-shadow:0 0 0 6px rgba(63,163,232,.22),inset 0 0 0 4px rgba(255,255,255,.6)}
+.stage .lab{font-size:17px;border-radius:16px}
+.stage .lab:not(.drag):not(.lock):not(.pre):not(.sel){animation:labFloat 2.8s ease-in-out infinite}
+.stage .lab:nth-of-type(2){animation-delay:-.9s}.stage .lab:nth-of-type(3){animation-delay:-1.8s}
+@keyframes labFloat{0%,100%{translate:0 0}50%{translate:0 -3px}}
+.stage .lab.sel{transform:translateY(-3px) scale(1.03);box-shadow:0 0 0 5px rgba(63,163,232,.35),0 6px 0 #d9b04c}
+.stage .lab.drag{transform:scale(1.04) rotate(-1.5deg)}
+@media (prefers-reduced-motion: reduce){.stage .lab{animation:none!important}}

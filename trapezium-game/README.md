@@ -4,6 +4,8 @@ One continuous, playable lesson: Swiftee walks the learner through parallel side
 scalene / isosceles / right trapeziums and the angle rules, then five checks (CFUs) and a score screen.
 Lengths and angles are measured live from the shape the learner has made.
 
+The full screen-by-screen flow, mechanics, feedback and scoring are described in [GAME_DESIGN.md](GAME_DESIGN.md).
+
 ## Folder structure
 
 ```

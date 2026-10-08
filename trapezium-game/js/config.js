@@ -5,7 +5,15 @@ const CONFIG = {
   pxPerCm: 40,                       // board scale: 1 cm = 40 board px
   start: { D: 45, C: 405, baseY: 340, height: 195.96, legAD: 7, legBC: 5 }, // opening shape: AB 3, BC 5, CD 9, AD 7 cm (height = √24 cm)
   limits: { minTop: 90, minBottom: 160, maxLegRun: 243, minX: 16, maxX: 478 }, // keeps the shape readable (angles ~35°–145°)
-  snap: { equalLegsCm: 0.3, rightAngleDeg: 5 },
+  // equalLegsCm: legs count as equal for the other drag screens; exactCm: screen 19 (drag A to equal legs) - the legs
+  // are equal only when AD reads exactly the same as BC on its label (labels show one decimal, so within 0.05 cm)
+  // unequalCm: screen 21 - the legs count as no longer equal once they differ by this much (their labels then differ)
+  // the trapezium for the angle screens (screen 22 on): A = 120 deg, B = 105 deg, C = 75 deg, D = 60 deg (x of each corner;
+  // the bases keep their heights). Every angle label, arc, sum and question is computed from this shape.
+  // screen 33: a right trapezium - vertical left side (90° at A and D), slanted right side
+  rightShape: { A: 45, B: 300, C: 405, D: 45 },
+  angleShape: { A: 158.14, B: 352.49, C: 405, D: 45 },
+  snap: { equalLegsCm: 0.3, exactCm: 0.05, unequalCm: 0.2, rightAngleDeg: 5 },
   // recorded sound effects (others are synthesised): 'good' = every correct action (with the confetti), 'bad' = every wrong one
   sounds: { good: 'assets/audio/correct.mp3', bad: 'assets/audio/incorrect.mp3' },
   soundVolume: 0.9,
