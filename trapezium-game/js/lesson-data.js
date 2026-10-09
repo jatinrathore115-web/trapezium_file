@@ -55,33 +55,43 @@ const LESSON = {
     // letterIn: the corner letters start hidden; letters: 1 on the line = each one flies in from its own corner exactly
     // as the voice says it (spoken "A, B, C, D", shown "ABCD")
     { id: 'quadName', letterIn: 1, autoNext: 900, lines: [{ m: 'happy', t: 'We can call it\nquadrilateral ABCD.', s: 'We can call it quadrilateral, A, B, C, D.', letters: 1 }] },
-    // assemble: the shape re-forms from its four sides - top, right, bottom, left - each flying in from its own side
-    // voiceDelay: she speaks once the outline has closed; growAt: on "special" the shape (held at 88% while it
-    // assembled) comes forward once to full size with a soft glow; labelsIn: as the next line starts, A B C D fade
-    // softly back in one by one
-    { id: 'special', assemble: 1, voiceDelay: 3000, lines: [{ m: 'happy', t: 'This is a special type\nof quadrilateral.', growAt: 'special' },
-      { m: 'curious', t: "Let's see what\nmakes it special.", labelsIn: 1 }] },
+    // onStart 'growFocus': as Swiftee starts speaking the shape (letters included) grows to 120%, holds, and returns to
+    // its exact original size
+    { id: 'special', lines: [{ m: 'happy', t: 'This is a special type\nof quadrilateral.', onStart: 'growFocus' },
+      { m: 'curious', t: "Let's see what\nmakes it special." }] },
     { id: 'meet', lines: [{ m: 'curious', t: 'These two sides look like they will meet.' }], f: { legGlow: 1 } },
     // instruction only: nothing to tap, no Next/Back; moves on as soon as the voice-over ends
-    { id: 'extendSay', autoAdvance: 1, locked: 1, lines: [{ m: 'curious', t: "Let's extend them." }], f: { legGlow: 1 } },
+    // purpleLegs: AD and BC turn the legs' purple as Swiftee speaks (screen 6) and stay purple (screen 7)
+    { id: 'extendSay', purpleLegs: 'voice', autoAdvance: 1, locked: 1, lines: [{ m: 'curious', t: "Let's extend them." }], f: { legGlow: 1 } },
     // opens wordless with the shape at centre stage; no taps: D->A glows, then extends dotted past A; then
     // C->B the same way; both dotted lines stay
-    { id: 'extend', layout: 'focus', lines: [], task: 'extLegs', auto: 1,
+    { id: 'extend', purpleLegs: 1, layout: 'focus', lines: [], task: 'extLegs', auto: 1,
       after: [{ m: 'surprised', t: 'Woah! The sides meet.', s: 'Whoa! The sides meet.' }] },
     { id: 'other', layout: 'focus', focusHold: 2500, lines: [{ m: 'curious', t: "Let's check the other\npair of sides." }], task: 'extBases', auto: 1 }, // no taps: A->B glows then extends both ways, then D->C (same system as screen 4)
     { id: 'parallel', boardShift: -45, lines: [{ m: 'surprised', t: 'They do not meet.' }], f: { baseExt: 1 } },
-    // parIn: AB and CD step out as the screen opens; sidesIn: each glides back in from its own side as the voice names
-    // it ("A B" top from above, "C D" bottom from below), then the parallel arrows return
-    { id: 'abcd', parIn: ['AB', 'CD'], lines: [{ t: 'This means the sides are parallel to each other.' },
-      { keep: 1, s: 'A B is parallel to C D.', glow: ['AB', 'CD'], sidesIn: 1, chips: [{ t: 'AB ∥ CD', k: 'white' }] }], f: { par: 1 } },
+    // AB and CD stay visible; spoken "A B" and "C D" cues pulse each side.
+    { id: 'abcd', lines: [{ t: 'This means the sides are parallel to each other.' },
+      { keep: 1, s: 'A B is parallel to C D.', chipsAfterParts: ['AB', 'CD'], chips: [{ t: 'AB ∥ CD', k: 'white' }] }], f: { par: 1 } },
     { id: 'onePair', lines: [{ t: "So this quadrilateral has\none pair of parallel sides.", chips: [{ t: 'AB ∥ CD', k: 'white' }] }], f: { par: 1 } },
-    { id: 'def', lines: [{ t: 'We call this a trapezium.', pulse: 1, pulseAt: 'trapezium', chips: [{ t: 'Trapezium', k: 'name' }] }], f: { par: 1 } },
+    { id: 'def', lines: [{ t: 'We call this a trapezium.', pulse: 1, pulseAt: 'trapezium', chipsAt: 'trapezium', chipsAfterPulse: 1, holdChips: 1, chips: [{ t: 'TRAPEZIUM', k: 'name' }] }], f: { par: 1 } },
     // pairAt: on "one (pair of parallel sides)" AB then DC are drawn in, pulse together and hold, legs dimmed meanwhile
-    { id: 'defFull', lines: [{ t: 'A quadrilateral with at least\none pair of parallel sides\nis called a trapezium.', pairAt: 'one', chips: [{ t: 'Trapezium', k: 'name' }] }], f: { par: 1 } },
+    { id: 'defFull', legsSet: 1, lines: [{ t: 'A quadrilateral with at least\none pair of parallel sides\nis called a trapezium.', pairAt: 'one', chips: [{ t: 'Trapezium', k: 'name' }] }], f: { par: 1 } },
     { id: 'bases', boardShift: -40, lines: [{ t: 'The parallel sides\nare called bases.', glow: ['AB', 'CD'], focusAt: 'parallel', glowAt: 'bases', callout: 'bases' }], f: { par: 1 } },
-    { id: 'legs', boardShift: -40, lines: [{ t: 'And the non-parallel sides\nare called legs.', glow: ['DA', 'BC'], focusAt: 'non-parallel', glowAt: 'legs', callout: 'legs' }], f: { par: 1 } },
-    { id: 'measure', lines: [{ m: 'curious', t: "Let's measure the sides\nof this trapezium." }], task: 'measure', auto: 1, hint: 'Tap the glowing side to measure it', idle: 'Tap the glowing side and I will measure it.', f: { par: 1, legsPurple: 1 } },
-    { id: 'scalene', lines: [{ m: 'surprised', t: 'Woah! All the sides of\nthis trapezium are of\ndifferent lengths.', s: 'Whoa! All the sides of this trapezium are of different lengths.' }, { t: 'This type of trapezium which\nhas sides of different lengths\nis called a scalene trapezium.', chips: [{ t: 'Scalene trapezium', k: 'name' }] }],
+    { id: 'legs', boardShift: -40, lines: [{ t: 'The other two sides\nare called legs.', glow: ['DA', 'BC'], focusAt: 'other', glowAt: 'legs', callout: 'legs' }], f: { par: 1 } },
+    { id: 'measure', lines: [{ m: 'curious', t: "Let's measure the sides\nof this trapezium." }], task: 'measure', auto: 1,
+      // once all four sides are measured, the bubble changes to her reaction (it no longer opens screen 17)
+      after: [{ m: 'surprised', t: 'Woah! All the sides of\nthis trapezium are of\ndifferent lengths.', s: 'Whoa! All the sides of this trapezium are of different lengths.' }], hint: 'Tap the glowing side to measure it', idle: 'Tap the glowing side and I will measure it.', f: { par: 1, legsPurple: 1 } },
+    // "different": AB, BC, CD, DA glow one by one with their lengths (sideTour); "scalene": the name label pops in
+    { id: 'scalene', lines: [{ t: 'This type of trapezium which\nhas sides of different lengths\nis called a scalene trapezium.', holdChips: 1,
+      cueAt: { different: 'sideTour', scalene: 'showTitle' }, chips: [{ t: 'Scalene trapezium', k: 'name' }] }],
+      f: { par: 1, legsPurple: 1, legLen: 1, sideLen: 1 } },
+    // the legs are different too: AD then BC glow with their lengths, Swiftee laughs, wonders what if they were equal,
+    // then "Let's find out." and on to the next screen (autoNext). The shape and its lengths do not change here.
+    { id: 'legsDiff', autoNext: 1200, lines: [
+      { m: 'surprised', t: 'Look! Its legs are of\ndifferent length too.', noEmph: 1, cueAt: { legs: 'legsCompare' } },
+      { laugh: 1, t: 'Hee hee hee!', ms: 1400 },
+      { m: 'curious', t: 'What if the legs were\nthe same length?', noEmph: 1, cueAt: { legs: 'legsTogether' } },
+      { m: 'excited', t: "Let's find out.", cueAt: { find: 'findOut' } }],
       f: { par: 1, legsPurple: 1, legLen: 1, sideLen: 1 } },
     { id: 'equal', lines: [{ m: 'curious', t: "Let's change its\nshape a little." }], f: { par: 1, legsPurple: 1, legLen: 1, sideLen: 1 } },
     // the drag itself: Swiftee and the bubble move to the top, the shape takes centre stage
@@ -91,34 +101,32 @@ const LESSON = {
       // Equal legs on release -> snap + correct sound + praise (finishTask)
       task: 'dragA', handOnce: 1, wrongRight: { cm: 0.5, side: 'BC' }, hint: 'Drag point A along the top side', after: [{ m: 'happy', t: 'Perfect! Both legs are equal.' }],
       f: { par: 1, legsPurple: 1, legLen: 1, sideLen: 1 } },
-    { id: 'iso', lines: [{ m: 'happy', t: 'Yay! Now the legs are of same lengths.' }, { t: 'A trapezium where legs are\nof same length is called\nan isosceles trapezium.', legsAt: 'same', chips: [{ t: 'Isosceles trapezium', k: 'name' }] }],
+    // goes straight to the explanation (the previous screen already celebrated "Perfect! Both legs are equal.");
+    // "same" shows the equal legs, "isosceles" pops the name label in (hidden until then)
+    { id: 'iso', lines: [{ t: 'A trapezium where legs are\nof same length is called\nan isosceles trapezium.', legsAt: 'same', holdChips: 1, cueAt: { isosceles: 'showTitle' }, chips: [{ t: 'Isosceles trapezium', k: 'name' }] }],
       f: { par: 1, legsPurple: 1, legLen: 1, ticks: 1, sideLen: 1 } },
-    // try it back: any corner may move; done once the legs differ again
-    // screen 21: make the legs unequal. entryPop: handles pop, labels fade in; lockTalk: corners wait for the voice;
-    // handMs: the hint hand demonstrates on A after 3 s idle; okCheck: a sparkle burst on success (no check-mark icons); stillEqual: the
-    // corrective line; autoNext: on to screen 22 once the praise has played
-    { id: 'scalDrag', layout: 'top', entryPop: 1, lockTalk: 1, handMs: 3000, okCheck: 1, autoNext: 1500,
-      lines: [{ m: 'curious', t: 'Drag any corner so the legs\nare no longer equal.' }],
-      task: 'dragAny', hint: 'Drag any corner along its side', idle: 'Drag any corner so the legs are no longer equal.',
-      stillEqual: 'Look carefully! The two legs are still equal. Try again!',
-      after: [{ m: 'happy', t: 'Great job! The legs are\nno longer equal!' }],
-      f: { par: 1, legsPurple: 1, legLen: 1, sideLen: 1 } },
-    // shape: from here the trapezium is the angle-screen shape (CONFIG.angleShape: A 120, B 105, C 75, D 60)
-    { id: 'sidesDone', shape: 1, lines: [{ m: 'happy', t: 'We know all about the sides\nof a trapezium.', pulse: 1, pulseAt: 'trapezium', chips: [{ t: 'Trapezium', k: 'name' }] }], f: { par: 1 } },
+    // shape: from here the trapezium is the angle-screen shape (CONFIG.angleShape: A 120, B 105, C 75, D 60);
+    // morphIn: the isosceles shape from the previous screen glides into it instead of jumping
+    { id: 'sidesDone', shape: 1, morphIn: 1, lines: [{ m: 'happy', t: 'We know all about the sides\nof a trapezium.', pulse: 1, pulseAt: 'trapezium', chips: [{ t: 'Trapezium', k: 'name' }] }], f: { par: 1 } },
     // anglesIn + anglesAt: the four angles wait hidden, then come in A -> B -> C -> D on "angles", each from its corner
     { id: 'angles', anglesIn: 1, lines: [{ m: 'curious', t: "Let's look at its angles.", anglesAt: 'angles' }], f: { par: 1, arcs: 'ABCD' } },
-    { id: 'notice', lines: [{ m: 'thinking', t: 'Did you notice something?' }], f: { par: 1, arcs: 'ABCD' } },
-    // angleCues: "∠A" then "∠D" each get the focus animation (others dimmed); sumAt '180': both pulse together and the
-    // sum label pops in
-    { id: 'sumAD', lines: [{ m: 'surprised', t: '∠A and ∠D add up to 180°.', angleCues: 1, sumAt: '180', chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
+    // focusAng: 120° (A) and 60° (D) glow softly, 105° and 75° step back - the pair the next screen adds up
+    { id: 'notice', lines: [{ m: 'thinking', t: 'Did you notice something?' }], f: { par: 1, arcs: 'ABCD', focusAng: 'AD' } },
+    // the sum is built visually in the formula box (Motion.eqStart / eqFly / eqResult): as the line starts 120° and 60°
+    // glow (focusAng) and "∠A + ∠D = ?" rises in; on "add" copies of 120° and 60° glide from the shape into it; on "180"
+    // 180° pops in, "120° + 60° = 180°" holds, then it settles to "∠A + ∠D = 180°". dimIn: 105° and 75° stay dimmed
+    { id: 'sumAD', dimIn: 'BC', lines: [{ m: 'surprised', t: '∠A and ∠D add up to 180°.', noEmph: 1, onStart: 'eqStart',
+      cueAt: { add: 'eqFly', 180: { fn: 'eqResult', sfx: 'snap' } } }], f: { par: 1, arcs: 'ABCD', focusAng: 'AD' } },
     // onStart / cueAt: A and D pulse as the line starts; on "supplementary" their wedges fly together into a straight
     // 180 deg angle beside the shape; on "angles" the equation glows with a soft confirmation sound
-    { id: 'supp', lines: [{ m: 'happy', t: 'That means they are\nsupplementary angles.', onStart: 'suppStart',
+    { id: 'supp', dimIn: 'BC', lines: [{ m: 'happy', t: 'That means they are\nsupplementary angles.', onStart: 'suppStart',
       cueAt: { supplementary: 'suppSectors', angles: { fn: 'suppConfirm', sfx: 'snap' } }, chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
     // quick practice question (not scored): pick the sum of ∠B and ∠C
-    { id: 'askBC', practice: 1, optTop: 476, chipTop: 105, boardShiftY: -11, idle: 'Add ∠B and ∠C. They sit on the same leg, BC.', // question card on top, shape, answers below
+    { id: 'askBC', practice: 1, optTop: 476, chipTop: 105, boardShiftY: -11, idle: 'What about ∠B and ∠C?', // question card on top, shape, answers below
+      // idle: the reminder repeats the question word for word, so the question never seems to change while waiting
       // the question label pops in; ∠B then ∠C get focus, then glow together; the answers then slide in one by one;
-      // a correct answer shows the real sum (okSum), e.g. 105° + 75° = 180°
+      // a correct answer shows the real sum (okSum), e.g. 105° + 75° = 180°; focusAng: like screen 24, the asked pair
+      // (105°, 75°) gets the soft glow and 120°, 60° step back for the whole question
       optsAfter: 1, okSum: ['B', 'C'],
       lines: [{ m: 'curious', t: 'What about ∠B and ∠C?', angleCues: 1, pairEnd: ['B', 'C'], onStart: 'askIn', chips: [{ t: '∠B + ∠C = ?', k: 'white' }] }],
       ok: 'Correct! ∠B and ∠C are\nsupplementary angles too.', okChips: [{ t: '∠B + ∠C = 180°', k: 'gold' }],
@@ -126,19 +134,25 @@ const LESSON = {
         { id: '90', t: '90°', fb: 'Not quite. Add the two angles on leg BC.' },
         { id: '180', t: '180°', ok: true },
         { id: '360', t: '360°', fb: '360° is all four angles. Just add ∠B and ∠C.' }
-      ], f: { par: 1, arcs: 'ABCD' } },
+      ], f: { par: 1, arcs: 'ABCD', focusAng: 'BC' } },
     // morph: on "change" the top corners glide through these trapeziums (bases stay parallel, angles live); on
-    // "trapezium" the last one settles, the bases glow and a "?" appears. The last frame carries on to screen 29.
+    // "trapezium" the last one settles with a gentle bounce (no other effects). The last frame carries on to screen 29.
     { id: 'whatIf', morph: [{ A: 100, B: 300 }, { A: 215, B: 398 }, { A: 128, B: 378 }],
       lines: [{ m: 'curious', t: 'What if we change the shape\nof this trapezium?', onStart: 'whatIfStart', cueAt: { change: 'shapeMorph', trapezium: 'shapeSettle' } }], f: { par: 1, arcs: 'ABCD' } },
     // handles pop in and wait for the voice (entryPop, lockTalk); on "change" a guide hand drags A and back; on "sum"
-    // each pair pulses with its panel; first real drag -> check mark + both 180° panels glow; idle hand after 3 s
-    { id: 'dragSum', layout: 'top', entryPop: 1, lockTalk: 1, handMs: 3000, okCheck: 1,
+    // each pair pulses with its panel. explore: free play - any corner, any number of times, no check or success
+    // feedback; the two sums sit in a fixed row and update live (the dragged leg's angles and sum glow); the first real
+    // drag unlocks Done (no feedback line - the live sums already show it), the only way the activity completes. Idle hand after 3 s.
+    { id: 'dragSum', layout: 'top', entryPop: 1, lockTalk: 1, handMs: 3000, explore: 1,
       lines: [{ m: 'curious', t: 'Drag any vertex to change\nthe angles. Notice the\nsum of angles.', cueAt: { change: 'demoDrag', sum: 'sumPanels' } }],
       task: 'dragFree', hint: 'Drag any corner and watch the sums', idle: 'Drag any corner and watch the two sums.',
-      after: [{ m: 'surprised', t: 'The angles changed, but\neach sum is still 180°!' }], f: { par: 1, arcs: 'ABCD', sums: 1 } },
-    { id: 'always', lines: [{ m: 'happy', t: 'No matter the shape, the angles\nalways add up to 180°.', chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }, { t: '∠B + ∠C = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
-    { id: 'rule', lines: [{ t: 'So in any trapezium,\nangles on the same leg\nalways add up to 180°.', chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }, { t: '∠B + ∠C = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
+      f: { par: 1, arcs: 'ABCD', sums: 1 } },
+    // sumSteps: the two sums one pair at a time - A, D in focus while the first box shows their measured values and
+    // resolves to 180°, then B, C and the second box (its = 180° pulses more). The boxes are set by the engine
+    { id: 'always', sumSteps: 1, lines: [{ m: 'happy', t: 'No matter the shape, the angles\nalways add up to 180°.' }], f: { par: 1, arcs: 'ABCD' } },
+    // sumSteps 'sym': the rule in general - the angle values on the shape turn into their names (∠A...), then the same
+    // two-step focus as screen 30: A, D glow and the first box's = 180° resolves, then B, C and the second (stronger)
+    { id: 'rule', sumSteps: 'sym', lines: [{ t: 'So in any trapezium,\nangles on the same leg\nalways add up to 180°.' }], f: { par: 1, arcs: 'ABCD' } },
     { id: 'make90', layout: 'top', lines: [{ m: 'curious', t: 'Drag any vertex to make any angle 90°.' }],
       task: 'drag90', hint: 'Drag a corner until an angle is 90°', idle: 'Drag a corner slowly and stop when an angle shows 90°.',
       after: [{ m: 'happy', t: 'Great job! One of the angles\nis a right angle.' }], f: { par: 1, arcs: 'ABCD' } },
@@ -146,15 +160,15 @@ const LESSON = {
     // draws A's 90° marker, "right" lights the L at A then D's marker, "called" brings in the title; afterwards the
     // learner can tap the 90° corners (rightTap) - both found -> the vertical side glows and a check appears
     { id: 'right', shape: 'right', build: 1, buildPx: 0.9, voiceDelay: 1700, right90: 1, rightTap: 1, okCheck: 1,
-      lines: [{ t: 'This type of trapezium where\none of the angles is a right angle\nis called a right angled trapezium.', pulse: 1, pulseAt: 'trapezium',
+      lines: [{ t: 'This type of trapezium where\ntwo of its angles are right angles\nis called a right angled trapezium.', pulse: 1, pulseAt: 'trapezium',
         holdChips: 1, cueAt: { angles: 'rightMarkA', right: 'rightL', called: 'showTitle' }, chips: [{ t: 'Right trapezium', k: 'name' }] }],
       f: { par: 1, right: 1 } },
     // hero: no board - Swiftee flies to centre stage and congratulates the learner; she speaks once she has landed
     { id: 'wellDone', noBoard: 1, hero: 1, voiceDelay: 1100, lines: [{ m: 'celebrating', t: 'Great job! Now you know\nall about trapeziums.' }] },
-    // recapAnim: the heading fades in while Swiftee speaks; as she says "today" the animated recall plays (definition,
-    // bases and legs, the three types, angles on the same leg), each stage voiced as it plays; it ends on its last
-    // animated state (no summary card)
-    { id: 'recap', noBoard: 1, layout: 'recap', recapAnim: 1, lines: [{ m: 'happy', t: "Let's recall what\nwe learnt today.", cueAt: { today: 'recapRun' } }] },
+    // summary: the animated trapezium summary (js/summary.js) - four big ice cards (Definition, Parts, Types, Angles),
+    // one at a time, explained by Swiftee with the card text in sync, each collected into a row, then a 2x2 recap
+    { id: 'recap', noBoard: 1, layout: 'recap', summary: 1, noIdle: 1,
+      lines: [{ m: 'happy', t: "Let's recall what\nwe learnt today." }] },
     { id: 'cfu1', cfu: 1, idle: 'Look for the shape with exactly one pair of parallel sides.', hint: 'Check 1 of 5 · Which one is a trapezium?',
       lines: [{ m: 'curious', t: 'Which of these quadrilaterals is a trapezium? Look for one pair of parallel sides.' }],
       ok: 'Yes! This shape has exactly one pair of parallel sides.',

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Trapezium lesson game</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@600;700;800;900&amp;display=swap">
 <link rel="stylesheet" href="css/stage.css">
 <link rel="stylesheet" href="css/game.css">
@@ -16,6 +17,7 @@
 <script src="js/swiftee.js"></script>
 <script src="js/walker.js"></script>
 <script src="js/motion.js"></script>
+<script src="js/summary.js"></script>
 <script src="js/game-engine.js"></script>
 </head>
 <body>
@@ -39,7 +41,7 @@
 <line class="xleg" sc-camel-x1="{{g.xB.x1}}" sc-camel-y1="{{g.xB.y1}}" sc-camel-x2="{{g.xB.x2}}" sc-camel-y2="{{g.xB.y2}}" sc-camel-display="{{g.xB.d}}" stroke="#e8643c" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round"></line>
 <line class="xleg" sc-camel-x1="{{g.xAB.x1}}" sc-camel-y1="{{g.xAB.y1}}" sc-camel-x2="{{g.xAB.x2}}" sc-camel-y2="{{g.xAB.y2}}" sc-camel-display="{{g.xAB.d}}" stroke="#e8643c" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round"></line>
 <line class="xleg" sc-camel-x1="{{g.xCD.x1}}" sc-camel-y1="{{g.xCD.y1}}" sc-camel-x2="{{g.xCD.x2}}" sc-camel-y2="{{g.xCD.y2}}" sc-camel-display="{{g.xCD.d}}" stroke="#e8643c" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round"></line>
-<rect class="fadein" sc-camel-x="{{g.apex.x}}" sc-camel-y="{{g.apex.y}}" width="13" height="13" rx="2" fill="#e8643c" sc-camel-display="{{g.apex.d}}"></rect>
+<circle class="fadein" sc-camel-cx="{{g.apex.cx}}" sc-camel-cy="{{g.apex.cy}}" r="7.5" fill="#e8643c" sc-camel-display="{{g.apex.d}}"></circle>
 <clipPath id="shapeClip"><polygon sc-camel-points="{{g.poly}}"></polygon></clipPath>
 <g class="angle-marks" clip-path="url(#shapeClip)">
 <path sc-camel-d="{{g.aA.p}}" pathLength="100" class="{{g.aA.cls}}" style="transform-origin: {{g.aA.o}}" sc-camel-display="{{g.aA.d}}" fill="none" stroke="#f08a24" stroke-width="7" stroke-linecap="round"></path>
@@ -65,7 +67,7 @@
 <path sc-camel-d="{{g.arw.h}}" sc-camel-display="{{g.arw.d}}" class="nudge" fill="#f08a24" stroke="none"></path>
 <g class="{{g.rl.cls}}" sc-camel-transform="{{g.rl.tf}}" sc-camel-display="{{g.rl.d}}" data-qa="ruler" onPointerDown="{{g.rl.down}}" style="cursor: {{g.rl.cur}}"><rect x="-8" y="0" width="416" height="27" rx="4" fill="#ffd36b" stroke="#c9961e" stroke-width="2"></rect><path d="M0,0 L0,13 M20,0 L20,8 M40,0 L40,13 M60,0 L60,8 M80,0 L80,13 M100,0 L100,8 M120,0 L120,13 M140,0 L140,8 M160,0 L160,13 M180,0 L180,8 M200,0 L200,13 M220,0 L220,8 M240,0 L240,13 M260,0 L260,8 M280,0 L280,13 M300,0 L300,8 M320,0 L320,13 M340,0 L340,8 M360,0 L360,13 M380,0 L380,8 M400,0 L400,13" stroke="#7a5a10" stroke-width="1.8" stroke-linecap="round"></path><text x="0" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">0</text><text x="40" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">1</text><text x="80" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">2</text><text x="120" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">3</text><text x="160" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">4</text><text x="200" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">5</text><text x="240" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">6</text><text x="280" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">7</text><text x="320" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">8</text><text x="360" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">9</text><text x="400" y="23" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="10" fill="#6b4c0c">10</text></g>
 <g class="okcheck" sc-camel-transform="{{g.okc.tf}}" sc-camel-display="{{g.okc.d}}" pointer-events="none"><path class="spk" d="M0,-30 L2,-24 L8,-22 L2,-20 L0,-14 L-2,-20 L-8,-22 L-2,-24 Z" fill="#f2b51c"></path><path class="spk" d="M27,-6 L28.5,-2 L32,-0.5 L28.5,1 L27,5 L25.5,1 L22,-0.5 L25.5,-2 Z" fill="#2e9e4f"></path><path class="spk" d="M-26,8 L-24.5,12 L-21,13.5 L-24.5,15 L-26,19 L-27.5,15 L-31,13.5 L-27.5,12 Z" fill="#56bdf4"></path></g>
-<g class="callout" sc-camel-display="{{g.cal.d}}" pointer-events="none">
+<g class="callout {{g.cal.cls}}" sc-camel-display="{{g.cal.d}}" pointer-events="none">
 <g class="calp calp1">
 <path class="cal-stem" sc-camel-d="{{g.cal.p1.stem}}" fill="none" stroke="#f3c552" stroke-width="2.5" stroke-linecap="round"></path>
 <rect class="cal-pill" sc-camel-x="{{g.cal.p1.x}}" sc-camel-y="{{g.cal.p1.y}}" sc-camel-width="{{g.cal.w}}" height="32" rx="16" fill="#fde49b" stroke="#f3c552" stroke-width="2"></rect>
@@ -100,6 +102,9 @@
 <div class="tag {{tg.cls}}" style="left: {{tg.x}}px; top: {{tg.y}}px">{{tg.t}}</div>
 </sc-for>
 </div>
+<sc-if value="{{showDone}}" hint-placeholder-val="{{ false }}">
+<button class="navbtn done-btn" data-qa="done" aria-label="Done" disabled="{{doneDis}}" onClick="{{doneExplore}}" style="left: {{doneX}}px; top: {{doneY}}px">Done</button>
+</sc-if>
 </div>
 </sc-if>
 
@@ -199,7 +204,6 @@
 </sc-for>
 </sc-if>
 
-<div class="curious-q" aria-hidden="true" style="position: absolute; left: 1104px; top: 196px">?</div>
 <svg class="supp-viz" width="1280" height="720" viewBox="0 0 1280 720" aria-hidden="true" style="position: absolute; left: 0px; top: 0px; pointer-events: none; overflow: visible">
 <line class="sv-base" x1="1099" y1="398" x2="1227" y2="398" stroke="#123b63" stroke-width="2.5" stroke-linecap="round"></line>
 <g class="sv-a"><path d="M1163,398 L1111,398 A52,52 0 0 1 1189,353 Z" fill="#f08a24" fill-opacity="0.9" stroke="#ffffff" stroke-width="1.5"></path><text x="1146.0" y="378.0" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="13" fill="#ffffff">120°</text></g>
@@ -241,49 +245,7 @@
 </sc-if>
 
 <sc-if value="{{isRecap}}" hint-placeholder-val="{{ false }}">
-<svg class="rc-layer" width="728" height="480" viewBox="0 0 728 480" aria-hidden="true" style="position: absolute; left: 512px; top: 104px; overflow: visible; pointer-events: none">
-<text class="rc rc-head" x="364" y="58" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="30" fill="#123b63" font-family="Baloo 2, sans-serif">What we learnt today</text>
-<text class="rc rc-cap" x="364" y="100" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="18" fill="#2b7bd6"></text>
-<line class="rc rc-xAB" x1="10" y1="170" x2="718" y2="170" stroke="#e8643c" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round"></line>
-<line class="rc rc-xCD" x1="10" y1="330" x2="718" y2="330" stroke="#e8643c" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round"></line>
-<polygon class="rc rc-fill" fill="rgba(229,205,234,0.92)"></polygon>
-<line class="rc rc-hb rc-hAB" stroke="#f5b942" stroke-width="14" stroke-linecap="round"></line>
-<line class="rc rc-hb rc-hBC" stroke="#f5b942" stroke-width="14" stroke-linecap="round"></line>
-<line class="rc rc-hb rc-hCD" stroke="#f5b942" stroke-width="14" stroke-linecap="round"></line>
-<line class="rc rc-hb rc-hDA" stroke="#f5b942" stroke-width="14" stroke-linecap="round"></line>
-<line class="rc rc-s rc-sAB" stroke="#e8287a" stroke-width="5" stroke-linecap="round"></line>
-<line class="rc rc-s rc-sBC" stroke="#e8287a" stroke-width="5" stroke-linecap="round"></line>
-<line class="rc rc-s rc-sCD" stroke="#e8287a" stroke-width="5" stroke-linecap="round"></line>
-<line class="rc rc-s rc-sDA" stroke="#e8287a" stroke-width="5" stroke-linecap="round"></line>
-<path class="rc rc-chev" fill="none" stroke="#f08a24" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"></path>
-<path class="rc rc-tick" fill="none" stroke="#2bb3a6" stroke-width="3" stroke-linecap="round"></path>
-<path class="rc rc-rA" fill="none" stroke="#2e9e4f" stroke-width="3"></path><path class="rc rc-rD" fill="none" stroke="#2e9e4f" stroke-width="3"></path>
-<path class="rc rc-aA" pathLength="100" fill="none" stroke="#f08a24" stroke-width="7"></path><path class="rc rc-aB" pathLength="100" fill="none" stroke="#8e44d6" stroke-width="7"></path>
-<path class="rc rc-aC" pathLength="100" fill="none" stroke="#2b7bd6" stroke-width="7"></path><path class="rc rc-aD" pathLength="100" fill="none" stroke="#F5C542" stroke-width="7"></path>
-<g class="rcp-vA"><g class="rc rc-vA"><rect x="-24" y="-13" width="48" height="26" rx="8" fill="rgba(255,255,255,0.85)"></rect><text class="" x="0" y="6" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="16" fill="#123b63"></text></g></g>
-<g class="rcp-vB"><g class="rc rc-vB"><rect x="-24" y="-13" width="48" height="26" rx="8" fill="rgba(255,255,255,0.85)"></rect><text class="" x="0" y="6" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="16" fill="#123b63"></text></g></g>
-<g class="rcp-vC"><g class="rc rc-vC"><rect x="-24" y="-13" width="48" height="26" rx="8" fill="rgba(255,255,255,0.85)"></rect><text class="" x="0" y="6" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="16" fill="#123b63"></text></g></g>
-<g class="rcp-vD"><g class="rc rc-vD"><rect x="-24" y="-13" width="48" height="26" rx="8" fill="rgba(255,255,255,0.85)"></rect><text class="" x="0" y="6" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="16" fill="#123b63"></text></g></g>
-<g class="rcp-dA"><g class="rc rc-dA"><circle r="7" fill="#fff" stroke="#e8287a" stroke-width="3"></circle></g></g>
-<g class="rcp-dB"><g class="rc rc-dB"><circle r="7" fill="#fff" stroke="#e8287a" stroke-width="3"></circle></g></g>
-<g class="rcp-dC"><g class="rc rc-dC"><circle r="7" fill="#fff" stroke="#e8287a" stroke-width="3"></circle></g></g>
-<g class="rcp-dD"><g class="rc rc-dD"><circle r="7" fill="#fff" stroke="#e8287a" stroke-width="3"></circle></g></g>
-<g class="rcp-lA"><g class="rc rc-lA"><text class="" x="0" y="7" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="21" fill="#123b63">A</text></g></g>
-<g class="rcp-lB"><g class="rc rc-lB"><text class="" x="0" y="7" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="21" fill="#123b63">B</text></g></g>
-<g class="rcp-lC"><g class="rc rc-lC"><text class="" x="0" y="7" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="21" fill="#123b63">C</text></g></g>
-<g class="rcp-lD"><g class="rc rc-lD"><text class="" x="0" y="7" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="21" fill="#123b63">D</text></g></g>
-<g class="rcp-n1"><g class="rc rc-n1"><circle r="13" fill="#2b7bd6"></circle><text class="" x="0" y="5" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="15" fill="#ffffff">1</text></g></g>
-<g class="rcp-n2"><g class="rc rc-n2"><circle r="13" fill="#2b7bd6"></circle><text class="" x="0" y="5" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="15" fill="#ffffff">2</text></g></g>
-<g class="rcp-n3"><g class="rc rc-n3"><circle r="13" fill="#2b7bd6"></circle><text class="" x="0" y="5" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="15" fill="#ffffff">3</text></g></g>
-<g class="rcp-n4"><g class="rc rc-n4"><circle r="13" fill="#2b7bd6"></circle><text class="" x="0" y="5" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="15" fill="#ffffff">4</text></g></g>
-<g class="rcp-tB1"><g class="rc rc-tB1"><rect x="-32" y="-15" width="64" height="30" rx="15" fill="#fde49b" stroke="#f3c552" stroke-width="2"></rect><text class="" x="0" y="6" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="16" fill="#123b63">Base</text></g></g><g class="rcp-tB2"><g class="rc rc-tB2"><rect x="-32" y="-15" width="64" height="30" rx="15" fill="#fde49b" stroke="#f3c552" stroke-width="2"></rect><text class="" x="0" y="6" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="16" fill="#123b63">Base</text></g></g><g class="rcp-tL1"><g class="rc rc-tL1"><rect x="-32" y="-15" width="64" height="30" rx="15" fill="#c9f0ec" stroke="#2bb3a6" stroke-width="2"></rect><text class="" x="0" y="6" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="16" fill="#123b63">Leg</text></g></g><g class="rcp-tL2"><g class="rc rc-tL2"><rect x="-32" y="-15" width="64" height="30" rx="15" fill="#c9f0ec" stroke="#2bb3a6" stroke-width="2"></rect><text class="" x="0" y="6" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="16" fill="#123b63">Leg</text></g></g>
-<g class="rcp-par" transform="translate(364 392)"><g class="rc rc-par"><text class="" x="0" y="7" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="20" fill="#d9640a">AB ∥ CD</text></g></g>
-<g transform="translate(364 432)"><g class="rcp-name"><g class="rc rc-name rc-pill"><rect x="-40" y="-18" width="80" height="36" rx="18" fill="#fbf8ee" stroke="#5cc6cf" stroke-width="3"></rect><text class="" x="0" y="7.92" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="22" fill="#0b5b70"></text></g></g></g>
-<g transform="translate(232 400)"><g class="rcp-eq1"><g class="rc rc-eq1 rc-pill"><rect x="-40" y="-18" width="80" height="36" rx="18" fill="#fffaf0" stroke="#f08a24" stroke-width="3"></rect><text class="" x="0" y="6.4799999999999995" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="18" fill="#123b63"></text></g></g></g>
-<g transform="translate(496 400)"><g class="rcp-eq2"><g class="rc rc-eq2 rc-pill"><rect x="-40" y="-18" width="80" height="36" rx="18" fill="#fffaf0" stroke="#8e44d6" stroke-width="3"></rect><text class="" x="0" y="6.4799999999999995" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="18" fill="#123b63"></text></g></g></g>
-<g transform="translate(364 446)"><g class="rc rc-supp"><text class="" x="0" y="8" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="24" fill="#d9640a" font-family="Baloo 2, sans-serif">Supplementary angles</text></g></g>
-<g transform="translate(636 262)"><g class="rc rc-st"><line x1="-46" y1="0" x2="46" y2="0" stroke="#123b63" stroke-width="2.5" stroke-linecap="round"></line><path class="rc-st1" stroke="#fff" stroke-width="1.5"></path><path class="rc-st2" stroke="#fff" stroke-width="1.5"></path><text class="rc-st180" x="0" y="24" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="16" fill="#123b63">180°</text></g></g>
-</svg>
+<div class="sum-root"></div>
 </sc-if>
 
 <sc-if value="{{isEnd}}" hint-placeholder-val="{{ false }}">
@@ -299,9 +261,9 @@
 </div>
 </sc-if>
 
-<div style="position: absolute; left: calc({{chipLeft}}px - 80px); top: {{chipTop}}px; width: 680px; height: 104px; display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; align-content: center; justify-content: center; gap: 12px; pointer-events: none">
+<div class="chip-row" style="position: absolute; left: calc({{chipLeft}}px - 80px); top: {{chipTop}}px; width: 680px; height: 104px; display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; align-content: center; justify-content: center; gap: 12px; pointer-events: none">
 <sc-for list="{{chips}}" as="cp" hint-placeholder-count="1">
-<div class="chip {{cp.k}}">{{cp.t}}</div>
+<div class="chip {{cp.k}}">{{cp.t}}<span class="chip-res">{{cp.r}}</span></div>
 </sc-for>
 </div>
 

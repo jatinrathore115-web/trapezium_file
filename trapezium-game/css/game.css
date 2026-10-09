@@ -38,6 +38,8 @@ a{color:#123b63}a:hover{color:#0b2742}
 .tag.off{display:none}
 .alab,.vlab{transition:none}
 .alab{animation:fade .3s ease-out}
+/* screen 3 (letterIn): the corner letters start hidden and only appear as each flies in on its voice cue */
+.tag.vlab.vin:not([data-landed]){opacity:0}
 .chip{font-family:'Baloo 2',system-ui,sans-serif;font-weight:700;font-size:27px;line-height:1.1;padding:9px 28px 7px;border-radius:14px;border:2px solid #cfe6f7;background:#fff;color:#123b63;box-shadow:0 4px 12px rgba(18,59,99,.14);animation:chipIn .34s cubic-bezier(.2,1.25,.5,1);white-space:pre}
 .chip.long{font-size:23px;padding:8px 22px 6px}
 /* shape-name (k: 'name') and angle-sum (k: 'gold') labels share one reference style: warm cream face, a clean teal
@@ -49,7 +51,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 .chip.good{background:#e2f7e6;color:#1d6b35;border-color:#8fd3a1}
 .chip.bad{background:#fde6e2;color:#9b2c1f;border-color:#f2a99d}
 @keyframes chipIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
-.edge{transition:stroke .35s ease,stroke-width .3s cubic-bezier(.3,0,.3,1)}
+.edge{transition:stroke .5s ease,stroke-width .3s cubic-bezier(.3,0,.3,1)}
 /* screen 4: a slanted side flashes once (thicker, soft pink glow) before its dotted extension draws */
 .edge.flash{animation:edgeFlash .8s ease-in-out}
 @keyframes edgeFlash{0%,100%{stroke-width:5px;filter:none}50%{stroke-width:9px;filter:drop-shadow(0 0 6px rgba(232,40,122,.75))}}
@@ -265,11 +267,12 @@ a{color:#123b63}a:hover{color:#0b2742}
    Same .3s easing for every part: angle arc (+ its degree tag), side, vertex dot */
 .arc{transition:stroke-width .3s cubic-bezier(.3,0,.3,1),transform .3s cubic-bezier(.3,0,.3,1)}
 .arc.emph{stroke-width:10px;transform:scale(1.3)}
-.edge.emph{stroke-width:9px}
+.edge.emph{stroke-width:9px;animation:sidePulse .65s ease-in-out}
+@keyframes sidePulse{0%,100%{stroke-width:5px;filter:drop-shadow(0 0 0 transparent)}50%{stroke-width:8px;filter:drop-shadow(0 0 3px rgba(23,55,94,.22))}}
 .tag.alab{transition:transform .3s cubic-bezier(.3,0,.3,1)}
 .tag.alab.emph{transform:translate(-50%,-50%) scale(1.2)}
 .vdot{transition:r .3s cubic-bezier(.3,0,.3,1)}
-@media (prefers-reduced-motion: reduce){.arc,.edge,.tag.alab,.vdot{transition:none}}
+@media (prefers-reduced-motion: reduce){.arc,.edge,.tag.alab,.vdot{transition:none}.edge.emph{animation:none}}
 /* qFocus check screens (screen 34): the question shape glides to the centre once the bubble has gone,
    then the answers come in one by one under it */
 .qshape{transition:left .7s cubic-bezier(.22,.8,.3,1),top .7s cubic-bezier(.22,.8,.3,1)}
@@ -287,6 +290,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 /* screen 4 leg trace: a soft pink glow drawn on along the leg (D->A, C->B); at the corner it fades off the side while
    the dotted extension (xleg) draws on from the corner */
 .trace{opacity:.95;filter:drop-shadow(0 0 4px rgba(232,40,122,.45));transition:opacity .35s ease}
+.trace.leg{stroke:#8e44d6;filter:drop-shadow(0 0 4px rgba(142,68,214,.5))} /* along a leg the glow is the legs' purple */
 .trace.out{opacity:0}
 .xleg{animation:xlegIn .2s ease both}
 @keyframes xlegIn{from{opacity:0}to{opacity:1}}
@@ -326,7 +330,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 .opts-in.quick .opt:nth-child(3){animation-delay:.32s}
 .opts-in.quick .opt:nth-child(4){animation-delay:.48s}
 /* screen 28: the curious question mark beside the reshaped trapezium (GSAP, Motion.settleShape) */
-.curious-q{opacity:0;pointer-events:none;font-family:'Baloo 2',system-ui,sans-serif;font-weight:800;font-size:46px;line-height:1;color:#f08a24;text-shadow:0 3px 0 rgba(255,255,255,.8),0 6px 12px rgba(18,59,99,.18)}
 /* screen 29 sum panels: soft cream, thin outline in the pair's colours (A + D orange / yellow, B + C purple / blue) */
 .tag.sum.sumL,.tag.sum.sumR{background:#fffaf0;color:#123b63;font-weight:900;border-radius:14px;box-shadow:0 3px 0 rgba(0,0,0,.06)}
 .tag.sum.sumL{border:2px solid #f08a24;border-bottom-color:#F5C542;border-right-color:#F5C542}
@@ -334,12 +337,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 /* screen 33: the 90° labels inside the right-angled corners (revealed by GSAP) */
 .tag.r90{color:#1d6b35;background:rgba(239,251,241,.9);border:1.5px solid #8fd3a1}
 .r90pre .rmark,.r90pre .tag.r90{opacity:0;animation:none} /* screen 33: hidden from the first frame; GSAP reveals them on cue */
-/* screen 35 animated recall (GSAP, Motion.recapPrep / recap): the layer's parts start hidden; the summary card and
-   its rows wait for the end of the recall instead of popping in on their own */
-.rc-layer .rc{opacity:0}
-.recap.gs{animation:none;opacity:0}
-.recap.gs .recap-row{animation:none;opacity:0}
-.recap-ico{flex:none;width:46px;height:36px;border-radius:10px;background:#fff;box-shadow:0 1px 4px rgba(18,59,99,.12);display:flex;align-items:center;justify-content:center}
 /* screen 38 (check 3): parts the GSAP story reveals (Motion.q3*) start hidden; the relationship hint sits above the
    shape; a wrong answer is a warm orange, not red */
 .q3 .q3-ad,.q3 .q3-vD,.q3 .q3-q,.q3 .q3-wD,.q3 .q3-wA,.q3 .q3-vA{opacity:0}
@@ -372,3 +369,82 @@ a{color:#123b63}a:hover{color:#0b2742}
 .stage .lab.sel{transform:translateY(-3px) scale(1.03);box-shadow:0 0 0 5px rgba(63,163,232,.35),0 6px 0 #d9b04c}
 .stage .lab.drag{transform:scale(1.04) rotate(-1.5deg)}
 @media (prefers-reduced-motion: reduce){.stage .lab{animation:none!important}}
+/* legsSet screens (13): the purple legs are drawn as they are from the first frame - no colour transition */
+.legs-set .eDA,.legs-set .eBC{transition:none}
+/* screens 14-15: a matched pair of labels - both "Base" pills yellow, both "Leg" pills purple (the legs' colour) */
+.callout.cal-bases .cal-pill{fill:#fde49b;stroke:#f3c552}
+.callout.cal-bases .cal-stem{stroke:#f3c552}
+.callout.cal-legs .cal-pill{fill:#ead7fb;stroke:#8e44d6}
+.callout.cal-legs .cal-stem{stroke:#8e44d6}
+/* screen 35 summary (js/summary.js): one big ice card at a time, Swiftee peeking from behind its left edge; collected
+   cards appear in a row below only once collected. The card recreates the supplied board art: glossy ice-blue face,
+   bright cyan glowing rim, white corner highlights, a soft wave across the bottom */
+.stage.summary .panel-img{opacity:0}
+.stage.scene.summary .swiftee{left:226px!important;top:332px!important;animation:none!important}
+.stage.scene.summary .bubble{left:auto!important;right:850px!important;top:auto!important;bottom:400px!important;max-width:380px;z-index:8;transform-origin:85% 100%}
+.stage.scene.summary .bubble .bubble-tail{left:auto;right:56px}
+.sum-root{position:absolute;left:0;top:0;width:1280px;height:720px;z-index:6;pointer-events:none}
+.sm-card{position:absolute;left:440px;top:70px;width:780px;height:510px;box-sizing:border-box;border-radius:56px;overflow:hidden;
+  background:radial-gradient(ellipse 70% 60% at 50% 38%,#e3f6fd 0%,#cdeefb 45%,#a9dcf6 100%);
+  border:4px solid #fff;box-shadow:0 0 0 5px #39c3f5,0 0 22px 6px rgba(57,195,245,.55),inset 0 0 26px rgba(57,166,230,.35)}
+.sm-card::before,.sm-card::after{content:'';position:absolute;top:14px;width:84px;height:84px;box-sizing:border-box;border-radius:50%;border:11px solid transparent;border-top-color:rgba(255,255,255,.95);pointer-events:none}
+.sm-card::before{left:14px;transform:rotate(-45deg)}
+.sm-card::after{right:14px;transform:rotate(45deg)}
+.sm-card .sm-wave{position:absolute;left:-10%;right:-10%;bottom:-36%;height:60%;border-radius:50%;background:rgba(150,212,246,.55);pointer-events:none}
+.sm-head{position:absolute;left:0;right:0;top:30px;text-align:center;font-family:'Baloo 2',system-ui,sans-serif;font-weight:800;font-size:34px;color:#123b63;z-index:1}
+.sm-svg{position:absolute;left:30px;top:26px;width:720px;height:466px;overflow:visible;z-index:1}
+.sm-cap{position:absolute;left:30px;right:30px;bottom:30px;display:flex;flex-wrap:wrap;gap:10px 14px;justify-content:center;align-items:center;z-index:1;
+  font-family:'Nunito',system-ui,sans-serif;font-weight:900;font-size:24px;color:#0b5b70}
+.sm-cp{padding:6px 18px;border-radius:18px;background:#fbf8ee;border:3px solid #5cc6cf}
+.sm-cp.hl{border-color:#f5c542}
+.sm-cp.base{background:#fde49b;border-color:#f3c552;color:#123b63}
+.sm-cp.leg{background:#ead7fb;border-color:#8e44d6;color:#123b63}
+.sm-cp.vtx{border-color:#e8287a;color:#123b63}
+.sm-cp.eq b{color:#1d6b35}
+.sm-row{position:absolute;left:478px;top:604px;display:flex;gap:14px}
+.sm-slot{width:150px;height:96px;box-sizing:border-box}
+.sm-mini{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:16px;background:#fbf8ee;box-shadow:inset 0 0 0 2.5px #5cc6cf,0 4px 10px rgba(18,59,99,.12);font-family:'Nunito',system-ui,sans-serif;color:#0b5b70}
+.sm-mini b{font-weight:900;font-size:14px}
+.sm-mini i{display:none}
+.sm-slot.sm-big{z-index:2}
+.sm-slot.sm-big .sm-mini{box-shadow:inset 0 0 0 3px #5cc6cf,0 6px 14px rgba(18,59,99,.14)}
+.sm-slot.sm-big .sm-ico svg{width:170px;height:85px}
+.sm-slot.sm-big .sm-mini b{font-size:24px}
+.sm-slot.sm-big .sm-mini i{display:block;font-style:normal;font-weight:800;font-size:18px;color:#123b63;margin-top:4px}
+
+/* angles already measured (after the angles screen): they stay put instead of drawing in again on every screen */
+.arc.still,.tag.alab.still{animation:none}
+/* focusAng: the pair to notice gets a soft warm glow behind it, the other angles step back (after a short beat) */
+.arc.glow{animation:arcGlow .7s ease-out .35s both}
+.tag.alab.glow{animation:labGlow .7s ease-out .35s both}
+.arc.dim,.tag.alab.dim{animation:angDim .7s ease-out .35s both}
+@keyframes arcGlow{from{filter:drop-shadow(0 0 0 rgba(255,184,40,0))}to{filter:drop-shadow(0 0 5px rgba(255,184,40,.85))}}
+@keyframes labGlow{from{box-shadow:0 0 0 0 rgba(255,196,60,0),0 0 0 0 rgba(255,184,40,0)}to{box-shadow:0 0 0 3px rgba(255,214,110,.55),0 0 16px 4px rgba(255,184,40,.5)}}
+@keyframes angDim{from{opacity:1}to{opacity:.35}}
+@media (prefers-reduced-motion: reduce){.arc.glow,.tag.alab.glow,.arc.dim,.tag.alab.dim{animation-duration:.01s;animation-delay:0s}}
+
+/* screen 25: the angle sum built in the formula box (Motion.eqStart / eqFly / eqResult). Same face as the gold chip;
+   each slot stacks its symbol (∠A) and its value (120°) in one cell, so nothing shifts as they swap */
+.chip.gold.eq-build{position:absolute;z-index:6;display:flex;align-items:center;gap:9px;white-space:nowrap;pointer-events:none;animation:none}
+.eq-slot{display:inline-grid;justify-items:center}
+.eq-slot>span{grid-area:1/1}
+.eq-val{opacity:0}
+.eq-r .eq-val{min-width:2.6em;text-align:center}
+.tag.alab.eq-fly{z-index:7;pointer-events:none;animation:none;transition:none;background:#fff}
+.eq-layer{position:fixed;width:1280px;height:720px;transform-origin:0 0;pointer-events:none;z-index:50;font-family:'Nunito',system-ui,sans-serif;color:#123b63}
+
+/* screen 29 (explore): the two sums in a fixed row - equal fixed-width boxes, text centred, so nothing shifts as the
+   values change; the box of the leg being dragged (and its two angles) glows softly while it changes */
+.tag.sum.fixed{min-width:200px;text-align:center;transition:box-shadow .2s ease-out}
+.tag.sum.sumL.live{box-shadow:0 0 0 3px rgba(245,197,66,.55),0 0 14px 2px rgba(240,138,36,.35)}
+.tag.sum.sumR.live{box-shadow:0 0 0 3px rgba(142,68,214,.35),0 0 14px 2px rgba(43,123,214,.30)}
+.arc.live{filter:drop-shadow(0 0 5px rgba(255,184,40,.85));transition:filter .15s ease-out}
+.tag.alab.live{box-shadow:0 0 0 3px rgba(255,214,110,.55),0 0 14px 3px rgba(255,184,40,.45)}
+/* Done: the game's own button style, centred under the equation row; waits (dimmed) until the first drag */
+.done-btn{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;min-width:120px}
+.done-btn:active:not(:disabled){transform:translate(-50%,-50%) translateY(2px) scale(.96)}
+.done-btn:disabled{opacity:.45;cursor:default;filter:saturate(.6)}
+
+/* screen 30 (sumSteps): fixed-width sum boxes so nothing shifts as symbols turn into values; the result part can pulse */
+.chip.gold.sumstep{box-sizing:border-box;width:316px;text-align:center;font-size:25px;padding:8px 20px 9px}
+.chip-res{display:inline-block}

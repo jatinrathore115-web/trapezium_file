@@ -46,6 +46,13 @@ window.SwifteeMascot = class SwifteeMascot {
     this.target = state;
     if (this.m) this.preload(state);
   }
+  // cut(state) cross-fades straight into an expression's loop, skipping the hold and start/stop clips (quick reactions)
+  cut(state) {
+    if (!this.m || !this.m.states[state] && this.m.standalone.indexOf(state) < 0) return;
+    this.target = state;
+    this.preload(state);
+    if (this.cur && this.cur.state !== state) this.swap(this.clip(state, 'loop', this.parts(state).loop), performance.now());
+  }
   // Lip-sync: talk(true) cuts straight to the talking loop (beak moving) the moment the voice starts;
   // talk(false, next) closes the beak (talk_stop) and goes on to `next`. Neither waits for minHoldMs.
   talk(on, next) {
@@ -91,10 +98,15 @@ window.SwifteeMascot = class SwifteeMascot {
     if (this.sheets[anim]) return this.sheets[anim];
     const info = this.m.scales[this.scale()].sheets[anim];
     if (!info) return null;
-    const img = new Image(), sh = { img: img, ready: false, info: info };
-    img.decoding = 'async';
-    img.onload = () => { sh.ready = true; };
-    img.src = this.base + info.image;
+    // a paged sheet (info.pages: too many frames for one image) is ready once every page has loaded
+    const pages = (info.pages || [{ image: info.image, cols: info.cols, first: 0, frames: info.frames }]).map((p) => {
+      const pg = Object.assign({ img: new Image(), ready: false }, p);
+      pg.img.decoding = 'async';
+      pg.img.onload = () => { pg.ready = true; sh.ready = pages.every((x) => x.ready); };
+      pg.img.src = this.base + p.image;
+      return pg;
+    });
+    const sh = { ready: false, info: info, pages: pages };
     this.sheets[anim] = sh;
     return sh;
   }
@@ -183,11 +195,11 @@ window.SwifteeMascot = class SwifteeMascot {
   blit(ctx, anim, f, alpha) {
     const sh = this.sheets[anim];
     if (!sh || !sh.ready) return false;
-    const cell = sh.info.cell, cols = sh.info.cols;
-    const sx = (f % cols) * cell, sy = Math.floor(f / cols) * cell;
+    const cell = sh.info.cell, pg = sh.pages.find((p) => f >= p.first && f < p.first + p.frames) || sh.pages[0], i = f - pg.first;
+    const sx = (i % pg.cols) * cell, sy = Math.floor(i / pg.cols) * cell;
     ctx.globalAlpha = alpha;
     ctx.setTransform(this.flip ? -1 : 1, 0, 0, 1, this.flip ? ctx.canvas.width : 0, 0);
-    ctx.drawImage(sh.img, sx, sy, cell, cell, 0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.drawImage(pg.img, sx, sy, cell, cell, 0, 0, ctx.canvas.width, ctx.canvas.height);
     return true;
   }
   draw(now) {

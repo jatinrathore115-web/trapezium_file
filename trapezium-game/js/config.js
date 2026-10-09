@@ -12,6 +12,8 @@ const CONFIG = {
   // the bases keep their heights). Every angle label, arc, sum and question is computed from this shape.
   // screen 33: a right trapezium - vertical left side (90° at A and D), slanted right side
   rightShape: { A: 45, B: 300, C: 405, D: 45 },
+  // screen 21: an isosceles trapezium - AB 5 cm, CD 10 cm, both legs 5.5 cm (run 2.5 cm each side, height √24 cm)
+  isoShape: { A: 140, B: 340, C: 440, D: 40 },
   angleShape: { A: 158.14, B: 352.49, C: 405, D: 45 },
   snap: { equalLegsCm: 0.3, exactCm: 0.05, unequalCm: 0.2, rightAngleDeg: 5 },
   // recorded sound effects (others are synthesised): 'good' = every correct action (with the confetti), 'bad' = every wrong one

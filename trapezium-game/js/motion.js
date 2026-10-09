@@ -18,57 +18,8 @@
   // the labels are centred on their point by CSS (translate -50% -50%); GSAP keeps that while it owns the transform
   const centred = (els) => G.set(els, { xPercent: -50, yPercent: -50, x: 0, y: 0 });
   // every element any Motion animation touches (Motion.clear wipes their animated properties on screen change)
-  const ANIMATED = '.tag.snum, .tag.vlab, .edge, .vdot, .shape-fill, .outline-settle, .pop-g, .chev, .calp > *, .ticks, .tag.mtag, .okcheck *, .tag.alab, .arc, .chip, .swiftee, .bs, .hspk, .hglow, .sv-a, .sv-d, .sv-base, .sv-180, .curious-q, .rmark, .tag.r90, .recap.gs, .recap-row, .recap-ico, .rc-ico3, .rc-ico4a, .rc-ico4b, .q3, .q3 *, .q3-hint, .q3-hint *, .q3-fly, .q4s, .q4s *, .slot, .lab, .q4-strip, .q4-card, .q4-link';
+  const ANIMATED = '.tag.snum, .tag.vlab, .edge, .vdot, .shape-fill, .outline-settle, .pop-g, .chev, .calp > *, .ticks, .tag.mtag, .okcheck *, .tag.alab, .arc, .chip, .chip-res, .swiftee, .swiftee canvas, .swiftee img, .bubble, .bs, .hspk, .hglow, .sv-a, .sv-d, .sv-base, .sv-180, .rmark, .tag.r90, .q3, .q3 *, .q3-hint, .q3-hint *, .q3-fly, .q4s, .q4s *, .slot, .lab, .q4-strip, .q4-card, .q4-link';
   const ANIMATED_SVG = '.edge, .vdot, .shape-fill, .outline-settle, svg g.pop-g, .chev, .calp > *, .ticks, .okcheck *, .arc, .sv-a, .sv-d, .sv-base, .sv-180, .rmark';
-
-  // ---------- screen 35 recall: geometry for the recap layer (x of each corner; the bases stay at y 170 / 330) ----------
-  const RY = { top: 170, bot: 330 };
-  const RS = { quad: { A: 250, B: 480, C: 560, D: 180 }, scal: { A: 300, B: 470, C: 560, D: 170 }, iso: { A: 260, B: 460, C: 540, D: 180 },
-    right: { A: 200, B: 420, C: 540, D: 200 }, ang: { A: 262.4, B: 517.1, C: 560, D: 170 } }; // ang: A 120, B 105, C 75, D 60
-  const NB = { A: ['D', 'B'], B: ['A', 'C'], C: ['B', 'D'], D: ['C', 'A'] }, SIDES = { AB: ['A', 'B'], BC: ['B', 'C'], CD: ['D', 'C'], DA: ['D', 'A'] };
-  const rq = (s) => document.querySelector('.stage .rc-layer ' + s);
-  const rf = (n) => +n.toFixed(1);
-  const rP = (X) => ({ A: { x: X.A, y: RY.top }, B: { x: X.B, y: RY.top }, C: { x: X.C, y: RY.bot }, D: { x: X.D, y: RY.bot } });
-  const rUnit = (p, q) => { const L = Math.hypot(q.x - p.x, q.y - p.y) || 1; return { x: (q.x - p.x) / L, y: (q.y - p.y) / L }; };
-  const rAng = (P, k) => { const u = rUnit(P[k], P[NB[k][0]]), w = rUnit(P[k], P[NB[k][1]]); return Math.round(Math.acos(Math.max(-1, Math.min(1, u.x * w.x + u.y * w.y))) * 180 / Math.PI); };
-  const rPlace = (sel, p) => { const e = rq(sel); if (e) e.setAttribute('transform', 'translate(' + rf(p.x) + ' ' + rf(p.y) + ')'); };
-  // a pill (rect + text) sized to its text
-  const rPill = (name, text) => { const g = rq('.rc-' + name); if (!g) return; const tx = g.querySelector('text'), r = g.querySelector('rect'); tx.textContent = text;
-    const w = (tx.getComputedTextLength ? tx.getComputedTextLength() : text.length * 11) + 36; r.setAttribute('x', rf(-w / 2)); r.setAttribute('width', rf(w)); };
-  // draw every part of the recap shape for corner x positions X
-  function rRender(X) {
-    const P = rP(X), poly = rq('.rc-fill');
-    if (!poly) return;
-    const cx = (X.A + X.B + X.C + X.D) / 4, cy = (RY.top + RY.bot) / 2;
-    poly.setAttribute('points', ['A', 'B', 'C', 'D'].map((k) => rf(P[k].x) + ',' + P[k].y).join(' '));
-    Object.keys(SIDES).forEach((s) => { const a = P[SIDES[s][0]], b = P[SIDES[s][1]];
-      ['.rc-s', '.rc-h'].forEach((c) => { const e = rq(c + s); if (e) { e.setAttribute('x1', rf(a.x)); e.setAttribute('y1', a.y); e.setAttribute('x2', rf(b.x)); e.setAttribute('y2', b.y); } }); });
-    const out = (s, d) => { const a = P[SIDES[s][0]], b = P[SIDES[s][1]], mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, L = Math.hypot(b.x - a.x, b.y - a.y) || 1;
-      let nx = -(b.y - a.y) / L, ny = (b.x - a.x) / L; if (nx * (mx - cx) + ny * (my - cy) < 0) { nx = -nx; ny = -ny; } return { x: mx + nx * d, y: my + ny * d }; };
-    ['AB', 'BC', 'CD', 'DA'].forEach((s, i) => rPlace('.rcp-n' + (i + 1), out(s, 24)));
-    rPlace('.rcp-tB1', out('AB', 34)); rPlace('.rcp-tB2', out('CD', 34)); rPlace('.rcp-tL1', out('DA', 48)); rPlace('.rcp-tL2', out('BC', 48));
-    const chev = (a, b) => { const mx = (a.x + b.x) / 2, my = a.y; return 'M' + rf(mx - 6) + ',' + (my - 6) + ' L' + rf(mx) + ',' + my + ' L' + rf(mx - 6) + ',' + (my + 6) + ' M' + rf(mx + 2) + ',' + (my - 6) + ' L' + rf(mx + 8) + ',' + my + ' L' + rf(mx + 2) + ',' + (my + 6); };
-    const ch = rq('.rc-chev'); if (ch) ch.setAttribute('d', chev(P.A, P.B) + ' ' + chev(P.D, P.C));
-    const tick = (s) => { const a = P[SIDES[s][0]], b = P[SIDES[s][1]], mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, t = rUnit(a, b), n = { x: -t.y, y: t.x };
-      return [-3.5, 3.5].map((o) => 'M' + rf(mx + t.x * o - n.x * 8) + ',' + rf(my + t.y * o - n.y * 8) + ' L' + rf(mx + t.x * o + n.x * 8) + ',' + rf(my + t.y * o + n.y * 8)).join(' '); };
-    const tk = rq('.rc-tick'); if (tk) tk.setAttribute('d', tick('DA') + ' ' + tick('BC'));
-    ['A', 'B', 'C', 'D'].forEach((k) => {
-      const v = P[k], u = rUnit(v, P[NB[k][0]]), w = rUnit(v, P[NB[k][1]]), R = 24, cross = u.x * w.y - u.y * w.x;
-      const arc = rq('.rc-a' + k); if (arc) arc.setAttribute('d', 'M' + rf(v.x + u.x * R) + ',' + rf(v.y + u.y * R) + ' A' + R + ',' + R + ' 0 0 ' + (cross > 0 ? 1 : 0) + ' ' + rf(v.x + w.x * R) + ',' + rf(v.y + w.y * R));
-      let bx = u.x + w.x, by = u.y + w.y; const bl = Math.hypot(bx, by) || 1; bx /= bl; by /= bl;
-      rPlace('.rcp-v' + k, { x: v.x + bx * 56, y: v.y + by * 56 }); const vt = rq('.rc-v' + k + ' text'); if (vt) vt.textContent = rAng(P, k) + '°';
-      rPlace('.rcp-d' + k, v); rPlace('.rcp-l' + k, { x: v.x - bx * 22, y: v.y - by * 22 });
-      const s = 14, rm = rq('.rc-r' + k);
-      if (rm) rm.setAttribute('d', 'M' + rf(v.x + u.x * s) + ',' + rf(v.y + u.y * s) + ' L' + rf(v.x + u.x * s + w.x * s) + ',' + rf(v.y + u.y * s + w.y * s) + ' L' + rf(v.x + w.x * s) + ',' + rf(v.y + w.y * s));
-    });
-  }
-  // the straight-angle demo: two sectors (a1 then 180 - a1) side by side on one line
-  function rStraight(a1, c1, c2) {
-    const r = 34, p = (deg) => { const t = deg * Math.PI / 180; return rf(r * Math.cos(t)) + ',' + rf(-r * Math.sin(t)); };
-    const s1 = rq('.rc-st1'), s2 = rq('.rc-st2');
-    if (s1) { s1.setAttribute('d', 'M0,0 L' + p(180) + ' A' + r + ',' + r + ' 0 0 1 ' + p(180 - a1) + ' Z'); s1.setAttribute('fill', c1); }
-    if (s2) { s2.setAttribute('d', 'M0,0 L' + p(180 - a1) + ' A' + r + ',' + r + ' 0 0 1 ' + p(0) + ' Z'); s2.setAttribute('fill', c2); }
-  }
 
   const Motion = {
     ok: !!G,
@@ -83,6 +34,7 @@
       if (G) G.set($(ANIMATED), { clearProps: 'opacity,transform,filter,textShadow,strokeWidth,translate,rotate,scale' });
       // GSAP pins SVG origins to 0 0 whenever it touches an SVG element (even while clearing), so drop that by hand
       $(ANIMATED_SVG).forEach((el) => { el.style.removeProperty('transform-origin'); el.style.removeProperty('stroke-dasharray'); });
+      document.querySelectorAll('.eq-layer').forEach((el) => el.remove()); // screen 25's equation build
       ctx = G ? G.context(() => {}) : null;
     },
 
@@ -150,18 +102,17 @@
         .to(el, { strokeWidth: 5, filter: NOGLOW, duration: 0.35, ease: 'sine.out' })
         .set(el, { clearProps: 'strokeWidth,filter' })); // hand the stroke back to the stylesheet (voice-sync emphasis)
     },
-    // screen 13 "one pair of parallel sides": the legs dim to neutral and the arrow marks step aside; AB draws itself
+    // screen 13 "one pair of parallel sides": the legs stay solid purple; the arrow marks step aside; AB draws itself
     // A -> B, then DC draws D -> C (a pen stroke, not a fade); both give one synchronized pulse with a soft glow,
     // hold highlighted for a moment, then everything eases back to normal
     parallelPair() {
       const ab = $('.eAB')[0], cd = $('.eCD')[0];
       if (!G || !ab || !cd) return;
       const len = (e) => Math.hypot(+e.getAttribute('x2') - +e.getAttribute('x1'), +e.getAttribute('y2') - +e.getAttribute('y1')) || 1;
-      const la = len(ab), lc = len(cd), legs = $('.eDA').concat($('.eBC')), chev = $('.chev'), draw = reduced ? 0 : 0.55;
+      const la = len(ab), lc = len(cd), chev = $('.chev'), draw = reduced ? 0 : 0.55;
       add(() => {
         const tl = G.timeline();
-        tl.to(legs, { opacity: 0.35, duration: 0.3, ease: 'sine.out' }, 0)
-          .to(chev, { opacity: 0, duration: 0.2, ease: 'sine.out' }, 0)
+        tl.to(chev, { opacity: 0, duration: 0.2, ease: 'sine.out' }, 0)
           // both parallel sides clear, then are drawn in one after the other (DC's line runs C -> D, so it is revealed
           // from its end to read D -> C)
           .set(ab, { strokeDasharray: la, strokeDashoffset: la }, 0)
@@ -174,9 +125,8 @@
           .to(chev, { opacity: 1, duration: 0.35, ease: 'sine.out' }, '<')
           // back to normal
           .to([ab, cd], { strokeWidth: 5, filter: NOGLOW, duration: 0.45, ease: 'sine.inOut' }, '>+0.9')
-          .to(legs, { opacity: 1, duration: 0.45, ease: 'sine.inOut' }, '<')
           .set([ab, cd], { clearProps: 'strokeDasharray,strokeDashoffset,strokeWidth,filter' })
-          .set(legs, { clearProps: 'opacity' });
+;
         return tl;
       });
     },
@@ -190,7 +140,6 @@
       const len = (e) => Math.hypot(+e.getAttribute('x2') - +e.getAttribute('x1'), +e.getAttribute('y2') - +e.getAttribute('y1')) || 1;
       add(() => {
         const tl = G.timeline();
-        tl.to(others, { opacity: 0.4, duration: 0.3, ease: 'sine.out' }, 0);
         pair.forEach((e, i) => {
           const L = len(e);
           tl.fromTo(e, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.45, ease: 'power2.inOut' }, 0.05 + i * 0.4)
@@ -227,7 +176,7 @@
     equalLegs() {
       const legs = [$('.eDA')[0], $('.eBC')[0]].filter(Boolean);
       if (!G || legs.length < 2) return;
-      const bases = $('.eAB').concat($('.eCD')), ticks = $('.ticks'), labels = $('.board .tag.mtag.eq');
+      const bases = $('.eAB').concat($('.eCD')), ticks = $('.ticks'), labels = $('.board .tag.mtag.mleg');
       const L = legs.map((e) => Math.hypot(+e.getAttribute('x2') - +e.getAttribute('x1'), +e.getAttribute('y2') - +e.getAttribute('y1')) || 1);
       // dash h at each end, gap between: h 0 -> L/2 closes the line from both ends into the middle
       const draw = (h) => legs.forEach((e, i) => { const hh = Math.min(h * L[i], L[i] / 2); e.style.strokeDasharray = hh + ' ' + Math.max(0, L[i] - 2 * hh) + ' ' + hh + ' 0'; });
@@ -313,6 +262,118 @@
         return tl;
       });
     },
+    // screen 25 "∠A and ∠D add up to 180°": the sum is built in the formula box. eqStart: the frame "∠A + ∠D = ?"
+    // rises in; eqFly ("add"): copies of the 120° and 60° labels lift off the shape and glide into the ∠A / ∠D places;
+    // eqResult ("180"): 180° pops in, "120° + 60° = 180°" holds, then the box settles to "∠A + ∠D = 180°".
+    // Each step completes the ones before it if a cue comes early; everything here is removed by clear().
+    // the build lives in its own layer outside the template runtime's markup (the runtime must never meet nodes it
+    // did not make), laid exactly over the stage and scaled with it, so its children use stage coordinates
+    eqLayer() {
+      const stage = document.querySelector('.stage');
+      if (!stage) return null;
+      let L = document.querySelector('.eq-layer');
+      if (!L) { L = document.createElement('div'); L.className = 'eq-layer'; document.body.appendChild(L); }
+      const r = stage.getBoundingClientRect(), k = r.width / 1280 || 1;
+      L.style.left = r.left + 'px'; L.style.top = r.top + 'px'; L.style.transform = 'scale(' + k + ')';
+      return L;
+    },
+    eqStart() {
+      if (!G || document.querySelector('.eq-build')) return;
+      const row = $('.chip-row')[0], stage = this.eqLayer();
+      if (!row || !stage) return;
+      const slot = (cls, sym) => '<span class="eq-slot ' + cls + '"><span class="eq-sym">' + sym + '</span><span class="eq-val"></span></span>';
+      const box = document.createElement('div');
+      box.className = 'chip gold eq-build';
+      box.innerHTML = slot('eq-a', '∠A') + '<span class="eq-op">+</span>' + slot('eq-d', '∠D') + '<span class="eq-op">=</span>' + slot('eq-r', '?');
+      // centred on the formula row (stage coordinates: the row's own left/top/size)
+      box.style.left = (row.offsetLeft + row.offsetWidth / 2) + 'px'; box.style.top = (row.offsetTop + row.offsetHeight / 2) + 'px';
+      stage.appendChild(box);
+      add(() => G.timeline()
+        .fromTo(box, { xPercent: -50, yPercent: -50, opacity: 0, y: 14, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: 'power2.out' }, 0.15)
+        .fromTo(box.querySelector('.eq-r .eq-sym'), { opacity: 0 }, { opacity: 0.35, duration: 0.3 }, 0.35));
+    },
+    eqFly() {
+      if (!G) return;
+      if (!document.querySelector('.eq-build')) this.eqStart();
+      const box = document.querySelector('.eq-build'), stage = this.eqLayer();
+      if (!box || box.dataset.flown) return;
+      box.dataset.flown = '1';
+      const sr = stage.getBoundingClientRect(), k = sr.width / 1280 || 1;
+      const local = (r) => ({ x: (r.left - sr.left + r.width / 2) / k, y: (r.top - sr.top + r.height / 2) / k });
+      add(() => {
+        const tl = G.timeline({ onComplete: () => { box.dataset.landed = '1'; if (box._after) box._after(); } });
+        [['A', '.eq-a'], ['D', '.eq-d']].forEach(([v, sel], i) => {
+          const src = $('.board .tag.alab.l' + v)[0], dst = box.querySelector(sel);
+          if (!src || !dst) return;
+          const val = src.textContent.trim(), from = local(src.getBoundingClientRect()), to = local(dst.getBoundingClientRect());
+          dst.querySelector('.eq-val').textContent = val;
+          // the copy: same pill as the angle label, laid over the original (which stays where it is)
+          const c = document.createElement('div');
+          c.className = 'tag alab eq-fly'; c.textContent = val; c.style.left = from.x + 'px'; c.style.top = from.y + 'px';
+          stage.appendChild(c);
+          const at = i * 0.18, grow = 28 / 17; // label type (17px) grows to the formula's (28px) on the way
+          tl.fromTo(c, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1 }, { y: -8, scale: 1.12, boxShadow: '0 6px 14px rgba(11,91,112,.22)', duration: 0.25, ease: 'power2.out' }, at)
+            .to(c, { x: to.x - from.x, y: to.y - from.y, scale: grow, backgroundColor: 'rgba(255,255,255,0)', boxShadow: '0 0 0 rgba(0,0,0,0)', duration: 0.7, ease: 'power2.inOut' }, at + 0.25)
+            // landing: the symbol makes way, the value takes its place, the copy dissolves into it
+            .to(dst.querySelector('.eq-sym'), { opacity: 0, duration: 0.2 }, at + 0.8)
+            .fromTo(dst.querySelector('.eq-val'), { opacity: 0 }, { opacity: 1, duration: 0.2 }, at + 0.9)
+            .to(c, { opacity: 0, duration: 0.15, onComplete: () => c.remove() }, at + 0.95)
+            .fromTo(dst, { scale: 1 }, { scale: 1.08, duration: 0.14, ease: 'sine.out', yoyo: true, repeat: 1 }, at + 0.95);
+        });
+        return tl;
+      });
+    },
+    eqResult(onPop) {
+      if (!G) return;
+      if (!document.querySelector('.eq-build')) this.eqStart();
+      const box = document.querySelector('.eq-build');
+      if (!box || box.dataset.result) return;
+      box.dataset.result = '1';
+      const go = () => {
+        const r = box.querySelector('.eq-r'), swap = (sel, toVal) => [box.querySelector(sel + ' .eq-sym'), box.querySelector(sel + ' .eq-val')][toVal ? 1 : 0];
+        r.querySelector('.eq-val').textContent = '180°';
+        if (onPop) onPop();
+        add(() => G.timeline()
+          .to(r.querySelector('.eq-sym'), { opacity: 0, duration: 0.15 }, 0)
+          .fromTo(r.querySelector('.eq-val'), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.6)' }, 0.05)
+          .fromTo(box, { boxShadow: '0 0 0 0 rgba(255,196,60,0)' }, { boxShadow: '0 0 0 6px rgba(255,214,110,.45)', duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.1)
+          // hold "120° + 60° = 180°", then settle to the rule "∠A + ∠D = 180°"
+          .to([swap('.eq-a', true), swap('.eq-d', true)], { opacity: 0, duration: 0.35, ease: 'sine.inOut' }, 1.6)
+          .to([swap('.eq-a', false), swap('.eq-d', false)], { opacity: 1, duration: 0.35, ease: 'sine.inOut' }, 1.75));
+      };
+      // a value still in flight lands first
+      if (box.dataset.landed) go();
+      else { box._after = go; if (!box.dataset.flown) this.eqFly(); }
+    },
+    // screen 30: the values arrive in a sum box (a soft lift-in of the box's text)
+    sumValues(i) {
+      const c = $('.chip-row .chip')[i];
+      if (!G || !c) return;
+      add(() => G.fromTo(c, { scale: 1 }, { scale: 1.04, duration: 0.2, ease: 'sine.out', yoyo: true, repeat: 1 }));
+    },
+    // screen 31: the angle values turn into their names (∠A...) with a soft pop, all four together
+    angleNames() {
+      const labs = $('.board .tag.alab');
+      if (!G || !labs.length) return;
+      add(() => G.fromTo(labs, { xPercent: -50, yPercent: -50, scale: 0.7 }, { scale: 1, duration: 0.4, ease: 'back.out(1.8)', stagger: 0.06 }));
+    },
+    // ...and its result resolves: "180°" pops, the box gets a soft warm halo (strong: a second, slightly bigger pulse)
+    sumResolve(i, strong) {
+      const c = $('.chip-row .chip')[i], r = c && c.querySelector('.chip-res');
+      if (!G || !c || !r) return;
+      add(() => {
+        const tl = G.timeline();
+        tl.fromTo(r, { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(1.8)' }, 0)
+          .fromTo(c, { boxShadow: '0 0 0 0px rgba(255,196,60,0)' }, { boxShadow: '0 0 0 6px rgba(255,214,110,.5)', duration: 0.35, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.1);
+        if (strong) tl.to(r, { scale: 1.18, color: '#d9640a', duration: 0.28, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.55);
+        return tl;
+      });
+    },
+    // angles that were dimmed on the previous screen start this one dimmed (set at once, before the first paint)
+    dimAngles(keys) {
+      const els = keys.split('').map((x) => $('.arc.a' + x)[0]).concat(keys.split('').map((x) => $('.tag.alab.l' + x)[0])).filter(Boolean);
+      if (G && els.length) add(() => G.set(els, { opacity: 0.35 }));
+    },
     // the named pair together (on "180"): both arcs and values pulse at once, then every angle comes back to full
     anglesTogether(keys) {
       if (!G || !keys.length) return;
@@ -331,6 +392,16 @@
       if (G && all.length) add(() => G.timeline().to(all, { opacity: 1, duration: 0.45, ease: 'sine.inOut' }).set(all, { clearProps: 'opacity,strokeWidth,strokeDasharray,strokeDashoffset' }));
     },
     // the sum label arriving: a soft pop (90% -> 100%, slight lift)
+    // a name label arriving: 85% -> 105% -> 100%, then one gentle pulse
+    titlePop() {
+      const els = $('.chip'), el = els[els.length - 1];
+      if (!G || !el) return;
+      add(() => G.timeline()
+        .fromTo(el, { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1.05, duration: reduced ? 0 : 0.3, ease: 'power2.out' })
+        .to(el, { scale: 1, duration: reduced ? 0 : 0.2, ease: 'sine.inOut' })
+        .to(el, { scale: 1.04, boxShadow: '0 0 0 6px rgba(92,198,207,0.3), 0 4px 14px rgba(11,91,112,0.12)', duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, '>+0.15')
+        .set(el, { clearProps: 'boxShadow' }));
+    },
     chipPop() {
       const els = $('.chip');
       const el = els[els.length - 1];
@@ -446,23 +517,15 @@
         return tl;
       });
     },
-    // settle: a gentle bounce about the shape's centre, a glow travelling along both bases, a curious "?" popping in
+    // settle: the reshaped trapezium lands with a gentle bounce about its centre (nothing else moves - the shape change
+    // is the whole story here)
     settleShape(cx, cy) {
       if (!G) return;
-      const g = $('svg g.pop-g')[0], d = $('div.pop-g')[0], q = $('.curious-q')[0];
-      const bases = [$('.eAB')[0], $('.eCD')[0]].filter(Boolean);
-      const len = (e) => Math.hypot(+e.getAttribute('x2') - +e.getAttribute('x1'), +e.getAttribute('y2') - +e.getAttribute('y1')) || 1;
+      const g = $('svg g.pop-g')[0], d = $('div.pop-g')[0];
       add(() => {
         const tl = G.timeline();
         if (g) tl.fromTo(g, { scale: 1 }, { scale: 1.04, svgOrigin: cx + ' ' + cy, duration: 0.18, ease: 'sine.out', yoyo: true, repeat: 1 }, 0);
         if (d) tl.fromTo(d, { scale: 1 }, { scale: 1.04, transformOrigin: cx + 'px ' + cy + 'px', duration: 0.18, ease: 'sine.out', yoyo: true, repeat: 1 }, 0);
-        bases.forEach((e) => {
-          const L = len(e);
-          tl.fromTo(e, { strokeDasharray: L * 0.35 + ' ' + L, strokeDashoffset: L * 0.35, filter: GLOW }, { strokeDashoffset: -L, duration: reduced ? 0 : 0.9, ease: 'sine.inOut' }, 0.25)
-            .set(e, { clearProps: 'strokeDasharray,strokeDashoffset,filter' });
-        });
-        if (q) tl.fromTo(q, { opacity: 0, scale: 0.4, rotation: -20 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.5, ease: 'back.out(2)' }, 0.5)
-          .to(q, { rotation: 8, duration: 0.35, ease: 'sine.inOut', yoyo: true, repeat: 3 }, '>');
         return tl;
       });
     },
@@ -527,124 +590,6 @@
         .to(s, { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(46,158,79,0.7))', duration: 0.35, ease: 'sine.out' })
         .to(s, { strokeWidth: 5, filter: NOGLOW, duration: 0.6, ease: 'sine.inOut' }, '>+0.4')
         .set(s, { clearProps: 'strokeWidth,filter' }));
-    },
-
-    // ---------- screen 35: the recall ----------
-    // on open: everything hidden, the heading fades in while Swiftee speaks
-    recapPrep() {
-      if (!G) return;
-      rRender(RS.quad);
-      add(() => G.timeline().set($('.rc-layer .rc'), { opacity: 0 }).to($('.rc-head'), { opacity: 1, y: 0, duration: 0.5, ease: 'back.out(1.5)' }, 0.3));
-    },
-    // the four stages, then the summary card. sfx(kind) plays the game's soft sounds.
-    recap(sfx, api) {
-      if (!G) return;
-      api = api || { say() {}, busy: () => false, done() {} };
-      const X = Object.assign({}, RS.quad), snd = (k) => () => sfx && sfx(k);
-      const el = (s) => $('.rc-layer ' + s);
-      const cap = (txt) => () => { const c = rq('.rc-cap'); if (c) c.textContent = txt; };
-      const name = (txt) => () => rPill('name', txt);
-      const morph = (tl, to, at) => tl.to(X, Object.assign({ duration: 1.0, ease: 'power2.inOut', onUpdate: () => rRender(X) }, to), at).call(snd('morph'), null, at);
-      const popIn = (sel) => ({ opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(1.8)' });
-      const sides = ['.rc-sAB', '.rc-sBC', '.rc-sCD', '.rc-sDA'];
-      rRender(X);
-      add(() => {
-        const tl = G.timeline();
-        // voice-over: each phrase starts where its animation starts; the timeline waits there until Swiftee has
-        // finished the previous phrase (never two at once), then she speaks and the animation plays
-        const vo = (at, text, m) => tl.addPause(at, () => {
-          const go = () => { if (api.busy()) { G.delayedCall(0.1, go); return; } if (text) api.say(text, m); tl.resume(); };
-          go();
-        });
-        vo(0, 'A trapezium has four sides,');
-        vo(2.75, 'with one pair of parallel sides.');
-        vo(7.15, 'The parallel sides are called bases,');
-        vo(8.95, 'and the other two sides are legs.');
-        vo(12.6, 'We learnt about three types:', 'curious');
-        vo(12.68, 'Scalene trapezium,');
-        vo(15.15, 'Isosceles trapezium,');
-        vo(17.65, 'and right trapezium.');
-        vo(21.7, 'Angles on the same leg add up to 180 degrees.');
-        vo(27.35, 'These are called supplementary angles.', 'happy');
-        // stage 1 - what is a trapezium?
-        tl.call(cap('1 · What is a trapezium?'), null, 0).fromTo(el('.rc-cap'), { opacity: 0, y: -6 }, { opacity: 1, y: 0, duration: 0.35 }, 0)
-          .to(el('.rc-head'), { opacity: 0.35, duration: 0.4 }, 0);
-        sides.forEach((s, i) => {
-          const e = el(s)[0], L = e ? Math.hypot(e.getAttribute('x2') - e.getAttribute('x1'), e.getAttribute('y2') - e.getAttribute('y1')) : 100;
-          tl.fromTo(e, { opacity: 1, strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: 0.32, ease: 'sine.inOut' }, 0.3 + i * 0.34)
-            .fromTo(el('.rc-n' + (i + 1)), { opacity: 0, scale: 0.4, transformOrigin: '50% 50%' }, popIn(), 0.5 + i * 0.34).call(snd('draw'), null, 0.3 + i * 0.34);
-        });
-        tl.set(el('.rc-s'), { clearProps: 'strokeDasharray,strokeDashoffset' }, 1.75)
-          .to(['A', 'B', 'C', 'D'].map((k) => rq('.rc-d' + k)).concat(['A', 'B', 'C', 'D'].map((k) => rq('.rc-l' + k))).filter(Boolean), { opacity: 1, duration: 0.3, stagger: 0.05 }, 1.6)
-          .call(snd('pop'), null, 1.6)
-          .to(el('.rc-fill'), { opacity: 1, duration: 0.5 }, 1.7)
-          .call(name('Quadrilateral'), null, 1.8).fromTo(el('.rc-name'), { opacity: 0, scale: 0.85 }, popIn(), 1.85).call(snd('pop'), null, 1.85)
-          .to([1, 2, 3, 4].map((n) => rq('.rc-n' + n)).filter(Boolean), { opacity: 0, duration: 0.3 }, 2.7)
-          .to(el('.rc-hAB').concat(el('.rc-hCD')), { opacity: 0.85, duration: 0.3, yoyo: true, repeat: 1, repeatDelay: 0.4 }, 2.8)
-          .to(el('.rc-chev'), { opacity: 1, duration: 0.3 }, 2.9).call(snd('shimmer'), null, 2.8)
-          .fromTo(el('.rc-xAB').concat(el('.rc-xCD')), { opacity: 0, scaleX: 0.3, transformOrigin: '50% 50%' }, { opacity: 1, scaleX: 1, duration: 0.7, ease: 'sine.out' }, 3.6)
-          .fromTo(el('.rc-par'), { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.35 }, 4.3)
-          .to(el('.rc-name'), { scaleY: 0, duration: 0.15, ease: 'sine.in' }, 5.1).call(name('Trapezium'), null, 5.25)
-          .to(el('.rc-name'), { scaleY: 1, duration: 0.3, ease: 'back.out(2)' }, 5.25).call(snd('chime'), null, 5.25)
-          .to(el('.rc-xAB').concat(el('.rc-xCD'), el('.rc-par')), { opacity: 0, duration: 0.4 }, 6.6);
-        // stage 2 - parts: bases, then legs, then both
-        const hb = el('.rc-hAB').concat(el('.rc-hCD')), hl = el('.rc-hBC').concat(el('.rc-hDA'));
-        tl.to(el('.rc-cap'), { opacity: 0, duration: 0.2 }, 7.0).call(cap('2 · Parts of a trapezium'), null, 7.2).to(el('.rc-cap'), { opacity: 1, duration: 0.3 }, 7.2)
-          .to(el('.rc-name'), { opacity: 0, duration: 0.2 }, 7.0)
-          .set(hb, { stroke: '#f5b942' }, 7.2).set(hl, { stroke: '#2bb3a6' }, 7.2)
-          .to(hb, { opacity: 0.85, duration: 0.35 }, 7.3).to(el('.rc-sBC').concat(el('.rc-sDA')), { opacity: 0.35, duration: 0.3 }, 7.3)
-          .fromTo(el('.rc-tB1'), { opacity: 0, scale: 0.6 }, popIn(), 7.5).fromTo(el('.rc-tB2'), { opacity: 0, scale: 0.6 }, popIn(), 7.75).call(snd('whoosh'), null, 7.3)
-          .call(name('Bases'), null, 7.9).to(el('.rc-name'), { opacity: 1, duration: 0.3 }, 7.9)
-          .to(hb, { opacity: 0, duration: 0.3 }, 9.0).to(el('.rc-sBC').concat(el('.rc-sDA')), { opacity: 1, duration: 0.3 }, 9.0)
-          .to(el('.rc-sAB').concat(el('.rc-sCD')), { opacity: 0.35, duration: 0.3 }, 9.1)
-          .to(hl, { opacity: 0.85, duration: 0.35 }, 9.1)
-          .fromTo(el('.rc-tL1'), { opacity: 0, scale: 0.6 }, popIn(), 9.3).fromTo(el('.rc-tL2'), { opacity: 0, scale: 0.6 }, popIn(), 9.55).call(snd('whoosh'), null, 9.1)
-          .call(name('Legs'), null, 9.7)
-          .to(el('.rc-sBC').concat(el('.rc-sDA')), { strokeWidth: 8, duration: 0.25, yoyo: true, repeat: 3 }, 9.8)
-          .to(el('.rc-sAB').concat(el('.rc-sCD')), { opacity: 1, duration: 0.3 }, 10.9).to(hb, { opacity: 0.85, duration: 0.3 }, 10.9)
-          .call(name('Bases and legs'), null, 11.0)
-          .to(hb.concat(hl, el('.rc-tB1'), el('.rc-tB2'), el('.rc-tL1'), el('.rc-tL2')), { opacity: 0, duration: 0.4 }, 12.0);
-        // stage 3 - types: one shape morphs through scalene, isosceles, right
-        tl.to(el('.rc-cap'), { opacity: 0, duration: 0.2 }, 12.4).call(cap('3 · Types of trapezium'), null, 12.6).to(el('.rc-cap'), { opacity: 1, duration: 0.3 }, 12.6)
-          .to(el('.rc-name'), { opacity: 0, duration: 0.2 }, 12.4);
-        morph(tl, RS.scal, 12.7);
-        tl.call(name('Scalene trapezium'), null, 13.8).call(snd('chime'), null, 13.8).to(el('.rc-name'), { opacity: 1, duration: 0.3 }, 13.8)
-          .to(hl, { opacity: 0.85, duration: 0.25, yoyo: true, repeat: 1 }, 14.0)
-          .to(el('.rc-name'), { opacity: 0, duration: 0.2 }, 15.0);
-        morph(tl, RS.iso, 15.2);
-        tl.to(el('.rc-tick'), { opacity: 1, duration: 0.3 }, 16.25).call(name('Isosceles trapezium'), null, 16.3).to(el('.rc-name'), { opacity: 1, duration: 0.3 }, 16.3)
-          .to(el('.rc-sBC').concat(el('.rc-sDA')), { strokeWidth: 8, duration: 0.25, yoyo: true, repeat: 1 }, 16.4).call(snd('chime'), null, 16.3)
-          .to(el('.rc-tick').concat(el('.rc-name')), { opacity: 0, duration: 0.25 }, 17.5);
-        morph(tl, RS.right, 17.7);
-        tl.to(el('.rc-rA').concat(el('.rc-rD')), { opacity: 1, duration: 0.35, stagger: 0.2 }, 18.75)
-          .call(name('Right trapezium'), null, 18.9).to(el('.rc-name'), { opacity: 1, duration: 0.3 }, 18.9).call(snd('chime'), null, 18.9)
-          .set(el('.rc-hDA'), { stroke: '#2e9e4f' }, 19.0).to(el('.rc-hDA'), { opacity: 0.7, duration: 0.3, yoyo: true, repeat: 1, repeatDelay: 0.4 }, 19.0)
-          .to(el('.rc-rA').concat(el('.rc-rD'), el('.rc-name')), { opacity: 0, duration: 0.3 }, 20.3);
-        // stage 4 - angles on the same leg add up to 180 deg
-        tl.to(el('.rc-cap'), { opacity: 0, duration: 0.2 }, 20.5).call(cap('4 · Angles on the same leg'), null, 20.7).to(el('.rc-cap'), { opacity: 1, duration: 0.3 }, 20.7);
-        morph(tl, RS.ang, 20.7);
-        const arc = (k, at) => tl.call(snd('tick'), null, at).fromTo(el('.rc-a' + k), { opacity: 1, strokeDasharray: 100, strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: 0.45, ease: 'power2.out' }, at)
-          .fromTo(el('.rc-v' + k), { opacity: 0, scale: 0.7 }, popIn(), at + 0.2);
-        const eq = (n, txt, at) => tl.call(() => rPill('eq' + n, txt), null, at).fromTo(el('.rc-eq' + n), { opacity: 0, scale: 0.8 }, popIn(), at).call(snd('warm'), null, at);
-        const demo = (a1, c1, c2, at, d) => tl.call(() => rStraight(a1, c1, c2), null, at)
-          .fromTo(el('.rc-st'), { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: d, ease: 'power2.out' }, at)
-          .to(el('.rc-st'), { opacity: 0, duration: 0.3 }, at + d + 0.9);
-        arc('A', 21.8); arc('D', 22.4);
-        eq(1, '120° + 60° = 180°', 23.0); demo(120, '#f08a24', '#F5C542', 23.2, 0.6);
-        tl.to(el('.rc-eq1'), { scale: 1.08, duration: 0.25, yoyo: true, repeat: 1 }, 23.9);
-        arc('B', 25.0); arc('C', 25.5);
-        eq(2, '105° + 75° = 180°', 26.0); demo(105, '#8e44d6', '#2b7bd6', 26.1, 0.4);
-        tl.to(el('.rc-eq2'), { scale: 1.08, duration: 0.25, yoyo: true, repeat: 1 }, 26.6)
-          .call(() => { rPill('eq1', '∠A + ∠D = 180°'); rPill('eq2', '∠B + ∠C = 180°'); }, null, 27.4)
-          .fromTo(el('.rc-eq1').concat(el('.rc-eq2')), { scale: 0.92 }, { scale: 1, duration: 0.3, ease: 'back.out(2)' }, 27.4)
-          .fromTo(el('.rc-supp'), { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.8)' }, 27.8).call(snd('chime'), null, 27.8);
-        // the end: the heading comes back up, and once Swiftee has finished the last phrase a gentle flourish plays
-        // and she gives a happy reaction. The final recall state stays until the learner taps Next.
-        tl.to(el('.rc-head'), { opacity: 1, duration: 0.4 }, 29.2);
-        vo(29.4, '');
-        tl.call(() => api.done(), null, 29.45);
-        return tl;
-      });
     },
 
     // ---------- screen 38 (check 3) ----------
@@ -859,15 +804,109 @@
       add(() => G.fromTo($('.q4s'), { filter: 'drop-shadow(0px 0px 0px rgba(46,158,79,0))' }, { filter: 'drop-shadow(0px 0px 9px rgba(46,158,79,0.7))', duration: 0.3, yoyo: true, repeat: 1, stagger: 0.25 }));
     },
 
+    // screen 4: as Swiftee starts speaking the whole shape (outline, fill, corners, letters) grows to 120% about its own
+    // centre (0.8 s), holds 0.5 s, and returns to exactly its original size (0.8 s) - ease-in-out, no bounce. Lines keep
+    // their thickness while it grows (non-scaling stroke for the duration). Once per line playback.
+    growFocus() {
+      const g = $('svg g.pop-g')[0], d = $('div.pop-g')[0], P = window.__trapP && window.__trapP();
+      if (!G || !P) return;
+      const cx = (P.A.x + P.B.x + P.C.x + P.D.x) / 4, cy = (P.A.y + P.B.y + P.C.y + P.D.y) / 4, S = 1.2, f = reduced ? 0 : 1;
+      const lines = g ? Array.from(g.querySelectorAll('.edge, circle')) : [];
+      add(() => {
+        const tl = G.timeline();
+        tl.call(() => lines.forEach((l) => l.setAttribute('vector-effect', 'non-scaling-stroke')), null, 0);
+        if (g) tl.fromTo(g, { scale: 1 }, { scale: S, svgOrigin: cx + ' ' + cy, duration: 0.8 * f, ease: 'sine.inOut' }, 0)
+          .to(g, { scale: 1, duration: 0.8 * f, ease: 'sine.inOut' }, 0.8 * f + 0.5);
+        if (d) tl.fromTo(d, { scale: 1 }, { scale: S, transformOrigin: cx + 'px ' + cy + 'px', duration: 0.8 * f, ease: 'sine.inOut' }, 0)
+          .to(d, { scale: 1, duration: 0.8 * f, ease: 'sine.inOut' }, 0.8 * f + 0.5);
+        tl.call(() => { lines.forEach((l) => l.removeAttribute('vector-effect')); if (g) G.set(g, { clearProps: 'transform' }); if (d) G.set(d, { clearProps: 'transform' }); });
+        return tl;
+      });
+    },
+
+    // each side in turn (0.65 s apart): it thickens with a soft purple glow while its length label pulses, then settles
+    sideTour(list, together, labelsTogether) {
+      if (!G) return;
+      const tags = $('.board .tag.mtag');
+      add(() => {
+        const tl = G.timeline();
+        if (together) {
+          const at = list.length * 0.65 + 0.1, els = together.map((k) => $('.e' + k)[0]).filter(Boolean);
+          const labs = (labelsTogether || list.filter(([k]) => together.indexOf(k) >= 0).map(([, l]) => l)).map((l) => tags.find((x) => x.textContent.trim() === l && getComputedStyle(x).display !== 'none')).filter(Boolean);
+          tl.to(els, { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(142,68,214,0.7))', duration: 0.35, ease: 'sine.out' }, at)
+            .to(els, { strokeWidth: 5, filter: NOGLOW, duration: 0.45, ease: 'sine.inOut' }, at + 0.7)
+            .set(els, { clearProps: 'strokeWidth,filter' }, at + 1.2);
+          if (labs.length) tl.fromTo(labs, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.2, boxShadow: '0 0 0 4px rgba(142,68,214,0.3)', duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
+            .set(labs, { clearProps: 'boxShadow' }, at + 0.65);
+        }
+        list.forEach(([k, len], i) => {
+          const e = $('.e' + k)[0], lab = tags.find((x) => x.textContent.trim() === len && getComputedStyle(x).display !== 'none'), at = i * 0.65;
+          if (e) tl.to(e, { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(142,68,214,0.7))', duration: 0.25, ease: 'sine.out' }, at)
+            .to(e, { strokeWidth: 5, filter: NOGLOW, duration: 0.35, ease: 'sine.inOut' }, at + 0.3)
+            .set(e, { clearProps: 'strokeWidth,filter' }, at + 0.66);
+          if (lab) tl.fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.2, boxShadow: '0 0 0 4px rgba(142,68,214,0.3)', duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
+            .set(lab, { clearProps: 'boxShadow' }, at + 0.55);
+        });
+        return tl;
+      });
+    },
+
+    // legs compared side by side: each leg (with its length) lights up `gap` s after the last and they all stay lit
+    // until `hold` s, so the comparison is still on screen while Swiftee says "different" / "same"; then they settle together
+    legsHold(list, gap, hold) {
+      if (!G) return;
+      const tags = $('.board .tag.mtag');
+      add(() => {
+        const tl = G.timeline(), els = [], labs = [];
+        list.forEach(([k, len], i) => {
+          const e = $('.e' + k)[0], lab = tags.find((x) => x.textContent.trim() === len && getComputedStyle(x).display !== 'none'), at = i * gap;
+          if (e) { els.push(e); tl.to(e, { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(142,68,214,0.7))', duration: 0.3, ease: 'sine.out' }, at); }
+          if (lab) { labs.push(lab); tl.fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.15, boxShadow: '0 0 0 4px rgba(142,68,214,0.3)', duration: 0.3, ease: 'back.out(2)' }, at); }
+        });
+        tl.to(els, { strokeWidth: 5, filter: NOGLOW, duration: 0.45, ease: 'sine.inOut' }, hold)
+          .to(labs, { scale: 1, boxShadow: '0 0 0 0px rgba(142,68,214,0)', duration: 0.45, ease: 'sine.inOut' }, hold)
+          .set(els, { clearProps: 'strokeWidth,filter' })
+          .set(labs, { clearProps: 'boxShadow' });
+        return tl;
+      });
+    },
+
+    // Swiftee's laugh: a small bounce with a head tilt (her canvas only - her spot never changes) and a bubble wiggle
+    laughBounce() {
+      const sw = $('.swiftee canvas, .swiftee img'), bub = $('.bubble')[0];
+      if (!G || reduced) return;
+      add(() => G.timeline()
+        .to(sw, { y: -10, rotation: -5, transformOrigin: '50% 90%', duration: 0.14, ease: 'sine.out', yoyo: true, repeat: 5 }, 0)
+        .set(sw, { clearProps: 'transform' })
+        .to(bub, { rotation: 2, duration: 0.1, ease: 'sine.inOut', yoyo: true, repeat: 5 }, 0)
+        .set(bub, { clearProps: 'rotate,transform' }));
+    },
+    // a very subtle emphasis on the shape (board only, about 2%)
+    boardPulse() {
+      const g = $('svg g.pop-g')[0], d = $('div.pop-g')[0], P = window.__trapP && window.__trapP();
+      if (!G || !P) return;
+      const cx = (P.A.x + P.B.x + P.C.x + P.D.x) / 4, cy = (P.A.y + P.B.y + P.C.y + P.D.y) / 4;
+      add(() => {
+        const tl = G.timeline();
+        if (g) tl.fromTo(g, { scale: 1 }, { scale: 1.02, svgOrigin: cx + ' ' + cy, duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, 0);
+        if (d) tl.fromTo(d, { scale: 1 }, { scale: 1.02, transformOrigin: cx + 'px ' + cy + 'px', duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, 0);
+        tl.call(() => { if (g) G.set(g, { clearProps: 'transform' }); if (d) G.set(d, { clearProps: 'transform' }); });
+        return tl;
+      });
+    },
+
     // the parallel-arrow marks return once both parallel sides are back
     arrowsIn() { const els = $('.chev'); if (G && els.length) add(() => G.to(els, { opacity: 1, duration: 0.45, ease: 'sine.out', overwrite: 'auto' })); },
 
     // soft exit (no cut) for labels leaving with the screen change, e.g. numbers and letters on screen 3
+    // screen 3 starts with every corner letter waiting (hidden) for its cue again
+    lettersReset() { $('.tag.vlab').forEach((e) => e.removeAttribute('data-landed')); },
     fadeOut(sel) { const els = $(sel); if (G && els.length) add(() => G.to(els, { opacity: 0, duration: 0.35, ease: 'sine.out' })); },
 
     // screen 3: a corner letter arrives on its voice cue from its own corner, then a soft glow settles on it once
     letterIn(k, onLand) {
       const el = $('.tag.vlab.c' + k)[0];
+      if (el) el.setAttribute('data-landed', '1'); // stays shown through the hand-over to the next screen (CSS .vlab.vin)
       if (!G || !el) { if (onLand) onLand(); return; }
       const d = { A: [-44, -44], B: [44, -44], C: [44, 44], D: [-44, 44] }[k];
       add(() => {

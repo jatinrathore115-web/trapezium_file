@@ -12,6 +12,8 @@ for (const sc in m.scales) {
   for (const k in m.scales[sc].sheets) {
     const s = m.scales[sc].sheets[k];
     out.scales[sc].sheets[k] = { cell: s.cell, frames: s.frames, cols: s.cols, image: s.image };
+    // a sheet too big for one image is split into pages (e.g. 2x 'excited': frames 0-63 on p0, 64-71 on p1)
+    if (s.pageList) out.scales[sc].sheets[k].pages = s.pageList.map((p) => ({ image: p.image, cols: p.cols, first: p.firstFrame, frames: p.frames }));
   }
 }
 // extra animations (swiftee-assets/extra/extra.json, e.g. 'measuring' from tools/build-measuring-sheet.js)

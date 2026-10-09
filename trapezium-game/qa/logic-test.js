@@ -4,8 +4,10 @@ const path=require('path'), rd=f=>fs.readFileSync(path.join(__dirname,'..',f),'u
 const html=rd('index.html');
 const js=rd('js/config.js')+'\n'+rd('js/lesson-data.js')+'\n'+rd('js/game-engine.js').replace('window.TrapeziumGame = class TrapeziumGame','const Component = class Component');
 const tpl=html.match(/<x-dc>([\s\S]*?)<\/x-dc>/)[1];
-class DCLogic{constructor(p){this.props=p||{}} setState(u){const v=typeof u==='function'?u(this.state):u; this.state=Object.assign({},this.state,v);} }
-const Component=new Function('DCLogic','StreamableLogic','React','window', js+'; return Component;')(DCLogic,DCLogic,{},{});
+class DCLogic{constructor(p){this.props=p||{}} setState(u,cb){const v=typeof u==='function'?u(this.state):u; this.state=Object.assign({},this.state,v); if(cb) cb();} }
+// js/motion.js (GSAP) needs a browser: a stand-in that does no animation but finishes value/morph tweens at once
+const Motion=new Proxy({},{get:(o,k)=>k==='value'?(from,to,d,e,onUpdate,onDone)=>{onUpdate(to); if(onDone) onDone();}:k==='morph'?(from,frames,onUpdate,onSeg,onDone)=>{const f=frames[frames.length-1]; onUpdate({A:f.A,B:f.B}); onDone();}:()=>{}});
+const Component=new Function('DCLogic','StreamableLogic','React','window','Motion', js+'; return Component;')(DCLogic,DCLogic,{},{},Motion);
 // speed up timers
 const c=new Component({});
 const realTm=c.tm.bind(c);
@@ -52,10 +54,14 @@ const focusWait=async()=>{ for(let k=0;k<100&&c.cur().layout==='focus'&&!c.state
       case 'measure': for (const k of ['AB','BC','CD','DA']) { c.tapEdge(k); await sleep(120); } await sleep(4500); break;
       case 'tapAngles': ['A','B','C','D'].forEach(k=>c.tapVertex(k)); await sleep(400); break;
       case 'tapAD': c.tapVertex('B'); c.tapVertex('A'); c.tapVertex('D'); await sleep(400); break;
-      case 'dragFree': { const Q=c.clone(P); Q.B.x=Q.B.x-40; c.setState({P:Q,moved:true}); c.checkDrag('B'); await sleep(600); break; }
+      case 'dragFree': { const Q=c.clone(P); Q.B.x=Q.B.x-40; c.setState({P:Q,moved:true}); c.dragMoved=true; c.checkDrag('B'); await sleep(600);
+        // explore: dragging never completes the screen - only Done does (and only once)
+        if(st.explore){ if(c.state.done) errs.push(st.id+': explore completed by dragging'); if(!c.state.explored) errs.push(st.id+': drag did not unlock Done'); const at=c.state.step; c.navAt=0; c.doneExplore(); c.doneExplore(); if(c.state.step!==at+1) errs.push(st.id+': Done did not move on exactly once (step '+c.state.step+')'); c.navAt=0; c.goTo(at,true); c.setState({done:true}); advCalls=1; }
+        break; }
       case 'drag90': { const Q=c.clone(P); Q.A.x=Q.D.x+3; c.setState({P:Q,moved:true}); c.checkDrag('A'); await sleep(600); if(Math.abs(c.angle(c.state.P,'A')-90)>0.5) errs.push('drag90: no snap to 90'); break; }
       case 'dragAny': { const Q=c.clone(P); Q.B.x=Q.B.x+2; c.setState({P:Q,moved:true}); c.checkDrag('B'); if(c.state.done) errs.push('dragAny: done while legs still equal'); const R=c.clone(c.state.P); R.B.x=R.B.x-100; c.setState({P:R,moved:true}); c.checkDrag('B'); await sleep(600); break; }
-      case 'dragA': { const Q=c.clone(P); Q.A.x=Q.D.x+(Q.C.x-Q.B.x)+5; c.setState({P:Q,moved:true}); c.checkDrag('A'); break; }
+      case 'dragA': { const Q=c.clone(P); Q.A.x=Q.D.x+(Q.C.x-Q.B.x); // legs exactly equal (the screen needs AD to read exactly BC)
+        c.setState({P:Q,moved:true}); c.checkDrag('A'); break; }
       case 'dragD90': { const Q=c.clone(P); Q.D.x=Q.A.x+3; c.setState({P:Q,moved:true}); c.checkDrag('D'); break; }
       case 'dragD': { const Q=c.clone(P); Q.D.x=Q.A.x-60; c.setState({P:Q,moved:true}); c.checkDrag('D'); break; }
       case 'dragC': { const Q=c.clone(P); Q.C.x=Q.C.x-40; c.setState({P:Q,moved:true}); c.checkDrag('C'); break; }
@@ -69,16 +75,17 @@ const focusWait=async()=>{ for(let k=0;k<100&&c.cur().layout==='focus'&&!c.state
     const lens=[c.dist(c.state.P.A,c.state.P.D)/40, c.dist(c.state.P.B,c.state.P.C)/40].map(x=>x.toFixed(2));
     console.log(String(i).padStart(2), st.id.padEnd(9), 'done', c.state.done, '| chips', JSON.stringify(v.chips.map(x=>x.t)), '| hint', v.hintText||'-', '| ang', JSON.stringify(V), '| legs', lens.join('/'), '| tags', v.tags.filter(t=>t.cls!=='vlab').map(t=>t.t).join(','));
     if(!c.state.done) errs.push(st.id+': task not done');
-    if(st.task||st.cfu||st.opts){ await sleep(300); if(!advCalls) errs.push(st.id+': finished but never moves on'); }
+    if(st.task||st.cfu||st.opts){ for(let w=0;w<60&&!advCalls;w++) await sleep(50); if(!advCalls) errs.push(st.id+': finished but never moves on'); } // polled: a busy machine slows the (sped-up) timers
     // advance
     c.navAt=0; if(i<steps.length-1){ if(st.task==='dragA'||st.task==='dragD90'){ c.goTo(i+1,true);} else c.next(); }
   }
   console.log('score', c.renderVals().scoreText, c.renderVals().progressLabel);
-  // a narration screen moves on by itself once its line has finished
+  // navigation is manual (CONFIG.flow.autoAdvance false): a narration screen stays put; only autoNext screens move on
   c.maybeAdvance=realAdvance;
-  { const k=steps.findIndex(x=>x.id==='parallel'); c.navAt=0; c.goTo(k,true); await sleep(250); if(c.state.step<=k) errs.push('parallel: no auto-advance after narration (step '+c.state.step+')'); else console.log('auto-advance after narration: ok'); }
-  // Next is hidden everywhere
-  if(c.renderVals().nextCls!=='auto') errs.push('Next button is visible');
+  { const k=steps.findIndex(x=>x.id==='parallel'); c.navAt=0; c.goTo(k,true); await sleep(400); if(c.state.step!==k) errs.push('parallel: moved on by itself (step '+c.state.step+')'); else console.log('narration screen stays put: ok'); }
+  { const k=steps.findIndex(x=>x.autoNext); c.navAt=0; c.goTo(k,true); for(let w=0;w<80&&c.state.step<=k;w++) await sleep(50); if(c.state.step<=k) errs.push(steps[k].id+': autoNext screen did not move on'); else console.log('autoNext screen moves on: ok'); }
+  // the top-right Next is available on a finished screen
+  { c.navAt=0; c.goTo(steps.findIndex(x=>x.id==='parallel'),true); if(c.renderVals().navNextDis) errs.push('top-right Next disabled on a narration screen'); }
   // speech conversions
   ['So, AB is parallel to CD.','Can you make ∠A exactly 90°?','In an isosceles trapezium, AB = 6 cm, CD = 10 cm and AD = 5 cm. What is the length of BC?','∠A + ∠D = 180°'].forEach(t=>console.log('SPEECH:',c.speechOf(t)));
   console.log(errs.length? 'ERRORS:\n'+[...new Set(errs)].join('\n') : 'NO ERRORS');
