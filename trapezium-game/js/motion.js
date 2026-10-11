@@ -351,6 +351,17 @@
       if (!G || !c) return;
       add(() => G.fromTo(c, { scale: 1 }, { scale: 1.04, duration: 0.2, ease: 'sine.out', yoyo: true, repeat: 1 }));
     },
+    // one angle steps forward: its arc thickens and its value pops (screen 34 "another right angle")
+    anglePop(k) {
+      const arc = $('.arc.a' + k)[0], lab = $('.tag.alab.l' + k)[0];
+      if (!G) return;
+      add(() => {
+        const tl = G.timeline();
+        if (lab) tl.fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.3, duration: 0.25, ease: 'back.out(2)', yoyo: true, repeat: 1 }, 0);
+        if (arc) tl.fromTo(arc, { strokeWidth: 5 }, { strokeWidth: 10, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, 0);
+        return tl;
+      });
+    },
     // screen 31: the angle values turn into their names (∠A...) with a soft pop, all four together
     angleNames() {
       const labs = $('.board .tag.alab');
@@ -575,6 +586,23 @@
         .set(sides, { clearProps: 'strokeWidth,filter' })
         .call(() => this.rightMark('D'), null, 0.55));
     },
+    // screen 35 "right angles": both right angles get the lesson's soft gold focus glow (marker and 90° label), and keep it
+    rightGlow() {
+      const ms = $('.rmark'), labs = $('.tag.r90');
+      if (!G) return;
+      add(() => G.timeline()
+        .fromTo(labs, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.2, duration: 0.25, ease: 'back.out(2)', yoyo: true, repeat: 1, stagger: 0.12 }, 0)
+        .to(labs, { boxShadow: '0 0 0 3px rgba(255,214,110,.55), 0 0 14px 3px rgba(255,184,40,.45)', duration: 0.4, ease: 'sine.out', stagger: 0.12 }, 0)
+        .to(ms, { filter: 'drop-shadow(0px 0px 5px rgba(255,184,40,0.85))', duration: 0.4, ease: 'sine.out', stagger: 0.12 }, 0));
+    },
+    // the name label below the shape pulses twice, gently (after it has popped in)
+    titlePulse() {
+      const els = $('.chip'), el = els[els.length - 1];
+      if (!G || !el) return;
+      add(() => G.timeline()
+        .to(el, { scale: 1.06, boxShadow: '0 0 0 6px rgba(92,198,207,0.32), 0 4px 14px rgba(11,91,112,0.12)', duration: 0.35, ease: 'sine.inOut', yoyo: true, repeat: 3 })
+        .set(el, { clearProps: 'boxShadow' }));
+    },
     // tapping a found corner: marker + label give a soft green pulse
     rightFound(k) {
       const m = $('.rm' + k)[0], lab = $('.tag.r90' + k)[0];
@@ -636,25 +664,19 @@
         .fromTo($('.q3-hint'), { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.45, ease: 'back.out(1.6)' }, 0.2)
         .fromTo($('.q3h-sa').concat($('.q3h-sd')), { opacity: 0, scale: 0.4, transformOrigin: '50% 100%' }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(2)', stagger: 0.15 }, 0.55));
     },
-    // a wrong answer: attention back to the relationship - 120° and 180° pulse; after two misses the cue shows the
-    // difference to work out (180° − 120° = ?) without giving the answer
-    q3Wrong(misses) {
+    // a wrong answer: the hint is said first ("Angles on the same leg add up to 180°."), then the equation comes in at
+    // the top as its picture - "120° + ? = 180°" (q3Hint), once. It never changes form; later misses pulse it again
+    q3Wrong() {
       if (!G) return;
+      const h = $('.q3-hint')[0], shown = h && +getComputedStyle(h).opacity > 0.5;
       add(() => {
         const tl = G.timeline();
-        if (misses >= 2) {
-          const h = $('.q3-hint')[0];
-          tl.to(h, { scale: 0.9, opacity: 0.4, duration: 0.15 }, 0).call(() => {
-            const a = h.querySelector('.q3h-a'), s = h.querySelector('.q3h-s'), ops = h.querySelectorAll('.q3h-op');
-            a.textContent = '180°'; ops[0].textContent = '−'; h.querySelector('.q3h-x').textContent = '120°'; ops[1].textContent = '='; s.textContent = '?';
-            h.querySelector('.q3h-x').style.color = '#d9640a'; a.style.color = '#0b5b70'; s.style.color = '#b8860b';
-          }, null, 0.15).to(h, { scale: 1, opacity: 1, duration: 0.35, ease: 'back.out(2)' }, 0.15);
-        }
-        tl.fromTo($('.q3h-a').concat($('.q3h-s')), { scale: 1 }, { scale: 1.25, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1, stagger: 0.2 }, 0.4);
+        if (!shown) tl.call(() => this.q3Hint(), null, 1.9); // after the hint line
+        else tl.fromTo($('.q3h-a').concat($('.q3h-s')), { scale: 1 }, { scale: 1.25, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1, stagger: 0.2 }, 0.4);
         return tl;
       });
     },
-    // idle: the "?" pulses and the cue glows briefly
+    // idle: the "?" at D pulses (and the equation, if it is already showing)
     q3Idle() {
       if (!G) return;
       add(() => G.timeline()
@@ -670,6 +692,7 @@
       const q = $('.q3-q')[0], fly = $('.q3-fly')[0], h = $('.q3-hint')[0];
       const at = (el) => { const r = el.getBoundingClientRect(); return { x: (r.left + r.width / 2 - sr.left) / k, y: (r.top + r.height / 2 - sr.top) / k }; };
       const a = card ? at(card) : { x: 700, y: 470 }, b = q ? at(q) : { x: 760, y: 350 };
+      if (h && +getComputedStyle(h).opacity < 0.5) this.q3Hint(); // right first time: the equation appears as it resolves
       add(() => G.timeline()
         .set(fly, { left: a.x, top: a.y, opacity: 1, scale: 1 }, 0)
         .to(fly, { left: b.x, top: b.y, scale: 0.9, duration: reduced ? 0 : 0.7, ease: 'power2.inOut' }, 0)

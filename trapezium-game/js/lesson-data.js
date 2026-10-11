@@ -153,15 +153,23 @@ const LESSON = {
     // sumSteps 'sym': the rule in general - the angle values on the shape turn into their names (∠A...), then the same
     // two-step focus as screen 30: A, D glow and the first box's = 180° resolves, then B, C and the second (stronger)
     { id: 'rule', sumSteps: 'sym', lines: [{ t: 'So in any trapezium,\nangles on the same leg\nalways add up to 180°.' }], f: { par: 1, arcs: 'ABCD' } },
+    // a teaser before the 90° drag: Swiftee wonders aloud; on "90" the four corners pulse once (they can be moved next)
+    { id: 'what90', lines: [{ m: 'curious', t: 'What if we make one of\nthe angles 90°?', cueAt: { 90: { fn: 'vertexPulse', sfx: 'chime' } } }], f: { par: 1, arcs: 'ABCD' } },
     { id: 'make90', layout: 'top', lines: [{ m: 'curious', t: 'Drag any vertex to make any angle 90°.' }],
       task: 'drag90', hint: 'Drag a corner until an angle is 90°', idle: 'Drag a corner slowly and stop when an angle shows 90°.',
-      after: [{ m: 'happy', t: 'Great job! One of the angles\nis a right angle.' }], f: { par: 1, arcs: 'ABCD' } },
+      after: [{ m: 'happy', t: 'Great job!' }], f: { par: 1, arcs: 'ABCD' } },
+    // the learner's right angle glows (others step back); on "another" its partner on the same leg - 90° too, as the two
+    // add up to 180° - pops with a chime and joins the glow. The shape is the one the learner made on the previous screen
+    { id: 'another90', lines: [{ m: 'surprised', t: 'Woah! We got another\nright angle.', noEmph: 1, cueAt: { woah: 'anotherStart', another: 'anotherReveal' } }], f: { par: 1, arcs: 'ABCD' } },
     // a genuine right trapezium (shape: 'right'), drawn fresh by the pen (build, buildPx) before Swiftee speaks; "angles"
     // draws A's 90° marker, "right" lights the L at A then D's marker, "called" brings in the title; afterwards the
     // learner can tap the 90° corners (rightTap) - both found -> the vertical side glows and a check appears
-    { id: 'right', shape: 'right', build: 1, buildPx: 0.9, voiceDelay: 1700, right90: 1, rightTap: 1, okCheck: 1,
-      lines: [{ t: 'This type of trapezium where\ntwo of its angles are right angles\nis called a right angled trapezium.', pulse: 1, pulseAt: 'trapezium',
-        holdChips: 1, cueAt: { angles: 'rightMarkA', right: 'rightL', called: 'showTitle' }, chips: [{ t: 'Right trapezium', k: 'name' }] }],
+    // no entry animation: the right trapezium (and both 90° marks) is there from the first frame - the previous shape
+    // glides into it (morphIn) instead of jumping. "right" (angles): both right angles glow gold and keep it; "called":
+    // the name label pops in; "angled": it pulses twice. Then the learner can tap the 90° corners (rightTap).
+    { id: 'right', shape: 'right', morphIn: 1, right90: 1, rightTap: 1, okCheck: 1,
+      lines: [{ t: 'A trapezium with two adjacent\nright angles is called a\nright angled trapezium.', noEmph: 1,
+        holdChips: 1, cueAt: { right: 'rightGlow', called: 'showTitle', angled: 'titlePulse' }, chips: [{ t: 'Right trapezium', k: 'name' }] }],
       f: { par: 1, right: 1 } },
     // hero: no board - Swiftee flies to centre stage and congratulates the learner; she speaks once she has landed
     { id: 'wellDone', noBoard: 1, hero: 1, voiceDelay: 1100, lines: [{ m: 'celebrating', t: 'Great job! Now you know\nall about trapeziums.' }] },
@@ -187,17 +195,19 @@ const LESSON = {
         { id: 'r', t: 'Right trapezium', fb: 'There are no right angles in this shape. Look at the legs instead.' }
       ] },
     // the drawing builds in (enterFx); "trapezium" pulses it, "120" opens ∠A, "value" runs a light down AD and asks
-    // "?" at D; then the "120° + ? = 180°" cue (hintFx) and the answers slide in (optsAfter). Wrong answers are a soft
-    // orange (softWrong) and pulse the cue (badFx); the right one flies 60° to D (okFx); idle pulses "?" (idleFx)
-    { id: 'cfu3', cfu: 3, idle: 'Remember, angles on the same leg add up to 180°.', hint: 'Check 3 of 5 · Find the missing angle', optTop: 433,
-      enterFx: 'q3In', hintFx: 'q3Hint', okFx: 'q3Correct', badFx: 'q3Wrong', idleFx: 'q3Idle', optsAfter: 1, softWrong: 1, handMs: 3000, voiceDelay: 1300,
+    // "?" at D; then the answers slide in (optsAfter). The question stays static: no equation up front, and the idle
+    // reminder repeats it word for word. A wrong answer (soft orange, softWrong) always gives the one hint - angles on
+    // the same leg add up to 180° - and then the "120° + ? = 180°" equation comes in at the top (badFx), never changing
+    // form. The right answer flies 60° to D and the equation resolves (okFx); idle pulses "?" (idleFx)
+    { id: 'cfu3', cfu: 3, idle: 'In this trapezium, ∠A = 120°. What is the value of ∠D?', hint: 'Check 3 of 5 · Find the missing angle', optTop: 433,
+      enterFx: 'q3In', okFx: 'q3Correct', badFx: 'q3Wrong', idleFx: 'q3Idle', optsAfter: 1, softWrong: 1, handMs: 3000, voiceDelay: 1300,
       lines: [{ m: 'curious', t: 'In this trapezium, ∠A = 120°. What is the value of ∠D?', cueAt: { trapezium: 'q3Shape', 120: 'q3A', value: 'q3D' } }],
       ok: 'Correct! 120° + 60° = 180°.',
       opts: [
-        { id: 'a', t: '120°', fb: 'Angles on the same leg add up to 180°, so ∠D is not equal to ∠A.' },
+        { id: 'a', t: '120°', fb: 'Angles on the same leg add up to 180°.' },
         { id: 'b', t: '60°', ok: true },
-        { id: 'c', t: '50°', fb: 'Check your subtraction: 180° − 120° = ?' },
-        { id: 'd', t: '180°', fb: '180° is the sum of ∠A and ∠D, not ∠D by itself.' }
+        { id: 'c', t: '50°', fb: 'Angles on the same leg add up to 180°.' },
+        { id: 'd', t: '180°', fb: 'Angles on the same leg add up to 180°.' }
       ] },
     { id: 'cfu4', cfu: 4, idle: 'Look at the marks on each shape: equal legs, right angles, or neither.', lockNext: 1, hint: 'Check 4 of 5 · Drag each label to its shape',
       // shapes draw in (enterFx); "Label" lights each shape's clue; "correct" brings the labels in (labelsAt) - they
@@ -215,7 +225,9 @@ const LESSON = {
         { id: 'c', t: '6 cm', fb: '6 cm is the top base AB. BC is a leg, like AD.' },
         { id: 'd', t: '10 cm', fb: '10 cm is the bottom base CD. BC is a leg, like AD.' }
       ] },
-    { id: 'end', end: 1, lines: [{ m: 'celebrating', t: 'Amazing work! You know all about trapeziums now.' }] }
+    // lesson complete: the same hero stage as wellDone (no panel, Swiftee flies to centre), the result laid out around
+    // her (title, stars, score, Play again); she speaks once she has landed
+    { id: 'end', end: 1, hero: 1, voiceDelay: 1100, lines: [{ m: 'celebrating', t: 'Amazing work! You know all about trapeziums now.' }] }
   ],
   cfu4: {
     labels: [{ id: 'iso', t: 'Isosceles trapezium' }, { id: 'right', t: 'Right trapezium' }, { id: 'scal', t: 'Scalene trapezium' }],

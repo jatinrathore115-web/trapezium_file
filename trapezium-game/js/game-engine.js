@@ -759,7 +759,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     else P = this.clone(this.snaps[i]);
     this.setState({
       step: i, P: P, done: !st.task && !st.cfu && !st.opts, ext: { DA: 0, BC: 0, AB: 0, CD: 0 }, tap: {}, ang: {}, chips: [], toast: null,
-      moved: false, dragging: null, picks: {}, cfuFirst: true, bird: '', hand: null, bubOff: false, centered: false, glow: null, pulse: false, callout: null, emph: {}, qc: false, trace: null, build: null, legFb: null, numsGone: false, explored: false, angFocus: null, symAng: false, rFound: {}, rAll: false, labsIn: false, purpleOn: false, vIn: {}, flash: null, wig: null, measuring: null, tape: null, swAway: false, line: '', reveal: 0, ruler: this.rulerHome(), rulerDrag: false,
+      moved: false, dragging: null, picks: {}, cfuFirst: true, bird: '', hand: null, bubOff: false, centered: false, glow: null, pulse: false, callout: null, emph: {}, qc: false, trace: null, build: null, legFb: null, numsGone: false, explored: false, angFocus: null, symAng: false, linesDone: false, rFound: {}, rAll: false, labsIn: false, purpleOn: false, vIn: {}, flash: null, wig: null, measuring: null, tape: null, swAway: false, line: '', reveal: 0, ruler: this.rulerHome(), rulerDrag: false,
       c4: { at: { iso: null, right: null, scal: null }, locked: {}, sel: null, drag: null, checking: false }
     });
     if (this.sw) this.sw.setFlip(st.layout === 'spotlight'); // on the right, Swiftee faces left toward the shape
@@ -770,6 +770,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     this.pose(this.restPose());
     this.setState({}, () => this.stepMotion(st)); // once the new screen is drawn
     const lines = () => this.playLines(st.lines, () => {
+      this.setState({ linesDone: true }); // the screen's own lines are over (feedback lines later do not lock anything)
       // screen 16: after her instruction, a moment to take it in, the bubble fades, then she flies off to measure
       if (st.task === 'measure' && st.auto) this.tm(() => { this.setState({ bubOff: true }); this.tm(() => this.autoMeasure(), CONFIG.focus.fadeMs + 150); }, 1200);
       else if (st.task === 'extLegs' && st.auto) this.autoExtend(['DA', 'BC']);
@@ -838,6 +839,22 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     pair(0, 900, false);
     at(3000, () => this.setState({ angFocus: 'BC' }));
     pair(1, 3600, true);
+  }
+  // screen after the 90° drag: the learner's right angle glows (the non-right angles step back); on "another" its
+  // partner on the same leg - also 90°, since the two add up to 180° - pops and joins the glow
+  anotherStart() {
+    const P = this.state.P, right = ['A', 'B', 'C', 'D'].filter((k) => Math.abs(this.angle(P, k) - 90) < 0.5);
+    const partner = { A: 'D', D: 'A', B: 'C', C: 'B' };
+    let first = this.first90 && right.indexOf(this.first90) >= 0 ? this.first90 : right[0];
+    if (!first) return;
+    this.another = { first: first, other: partner[first] };
+    this.setState({ angFocus: first });
+  }
+  anotherReveal() {
+    const a = this.another;
+    if (!a) return;
+    this.sfx('chime');
+    this.setState({ angFocus: a.first + a.other }, () => Motion.anglePop(a.other));
   }
   // explore screens: Done is the only way the activity completes; it moves on once (repeat taps do nothing)
   doneExplore() {
@@ -1100,12 +1117,12 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   // screen 33 exploration: tapping a 90° corner pulses its marker; both found -> the vertical side glows + check
   rightTap(k) {
     const P = this.state.P;
-    if (Math.abs(this.angle(P, k) - 90) > 0.5) { this.sfx('tap'); this.interject({ m: 'thinking', t: 'That angle is not 90°. Look for the square corners.' }); return; }
+    if (Math.abs(this.angle(P, k) - 90) > 0.5) { this.sfx('bad'); Motion.wiggle(k === 'A' || k === 'D' ? 'DA' : 'BC'); this.interject({ m: 'thinking', t: 'That angle is not 90°. Look for the square corners.' }); return; }
     if (this.state.rFound[k]) return;
     const f = Object.assign({}, this.state.rFound, { [k]: 1 }), all = ['A', 'B', 'C', 'D'].filter((x) => Math.abs(this.angle(P, x) - 90) < 0.5).every((x) => f[x]);
     this.sfx('pop');
     Motion.rightFound(k);
-    this.setState({ rFound: f, rAll: all }, () => { if (all) { this.sfx('good'); Motion.rightAll(); Motion.okCheck(); } });
+    this.setState({ rFound: f, rAll: all }, () => { if (all) { this.cheer(); Motion.rightAll(); Motion.okCheck(); } }); // every right angle found: correct sound + confetti
   }
   // what a screen animates once it is on screen (GSAP, js/motion.js)
   stepMotion(st) {
@@ -1129,7 +1146,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (st.dimIn) Motion.dimAngles(st.dimIn); // angles dimmed on the previous screen start dimmed here (no flash back to full)
     if (st.entryPop) Motion.entryPop();
     if (st.hero) Motion.heroIn();
-    if (st.right90) Motion.rightPrep();
+    if (st.right90 && st.build) Motion.rightPrep(); // drawn on cue only when the shape draws itself
     if (st.enterFx && Motion[st.enterFx]) Motion[st.enterFx]();
     if (st.assemble) {
       const P = this.state.P;
@@ -1437,6 +1454,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       const left = k === 'A' || k === 'D', a = this.angle(P, left ? 'A' : 'B');
       if (Math.abs(a - 90) < CONFIG.snap.rightAngleDeg) {
         if (k === 'A') P.A.x = P.D.x; if (k === 'D') P.D.x = P.A.x; if (k === 'B') P.B.x = P.C.x; if (k === 'C') P.C.x = P.B.x;
+        this.first90 = k; // the corner the learner made 90° (the next screen reveals its partner on the same leg)
         this.setState({ P: P });
         this.finishTask();
       } else {
@@ -1799,7 +1817,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     ['A', 'B', 'C', 'D'].forEach((k) => {
       const anyV = this.anyCorner(), Vk = P[k], drag = dk === k || anyV;
       g['v' + k] = { x: r1(Vk.x), y: r1(Vk.y), r: vOn(k) ? (drag ? 11 : 7) + (em['v' + k] ? 4 : 0) : 0, c: drag ? PU : NAVY, w: drag ? 4 : 3 };
-      const tapV = ((task === 'tapAngles' || task === 'tapAD') && !s.done) || (!!st.rightTap && !s.talking);
+      const tapV = ((task === 'tapAngles' || task === 'tapAD') && !s.done) || (!!st.rightTap && (s.linesDone || !s.talking)); // listen first, then tap freely (also while she answers a wrong tap)
       const pulse = tapV && !s.ang[k] && (task === 'tapAngles' || k === 'A' || k === 'D');
       g['k' + k] = {
         x: r1(Vk.x), y: r1(Vk.y), d: dsp(tapV || drag), cls: pulse || (anyV && !s.dragging) ? 'vp' : '',
@@ -2038,9 +2056,9 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       nextCls: CONFIG.flow.showNext && st.autoAdvance == null ? (s.done && !s.talking ? 'ready' : '') : 'auto', // screens move on by themselves
       nextLabel: isLastCfu ? 'Finish' : 'Next',
       // spotlight: the board (shape + its labels) glides to centre stage and grows; Swiftee moves right; no bubble
-      sceneCls: scene ? 'scene' + (st.hero ? ' hero' : '') + (st.summary ? ' summary' : '') : '', // hero (screen 34): no board, Swiftee centre stage
+      sceneCls: scene ? 'scene' + (st.hero ? ' hero' : '') + (st.hero && st.end ? ' endhero' : '') + (st.summary ? ' summary' : '') : '', // hero (screen 34): no board, Swiftee centre stage
       boardTf: scene ? 'translate(' + CONFIG.scene.boardX + 'px, ' + (st.boardShiftY || 0) + 'px)' : spot ? tf(CONFIG.spotlight) : (st.layout === 'focus' && s.centered ? tf(CONFIG.focus) : (st.layout === 'top' ? tf(CONFIG.topLayout) : (st.boardShift || st.boardShiftY ? 'translate(' + (st.boardShift || 0) + 'px, ' + (st.boardShiftY || 0) + 'px)' : 'none'))),
-      boardCls: fadeV + (st.legsSet ? ' legs-set' : '') + (st.assemble ? ' asm' : '') + (st.right90 ? ' r90pre' : ''), // fade class + assemble (screen 4): the four sides fly in and form the shape - all in CSS (.asm)
+      boardCls: fadeV + (st.legsSet ? ' legs-set' : '') + (st.assemble ? ' asm' : '') + (st.right90 && st.build ? ' r90pre' : ''), // fade class + assemble (screen 4): the four sides fly in and form the shape - all in CSS (.asm)
       spotFill: spot ? 'spot' : '', // (screen 1 build: Motion hides the fill and fades it in last)
       // pulse: the whole shape (and its labels) zooms once about its own centre (no fill glow)
       popCls: '', // (the zoom itself is Motion.pop)

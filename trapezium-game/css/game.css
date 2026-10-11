@@ -448,3 +448,28 @@ a{color:#123b63}a:hover{color:#0b2742}
 /* screen 30 (sumSteps): fixed-width sum boxes so nothing shifts as symbols turn into values; the result part can pulse */
 .chip.gold.sumstep{box-sizing:border-box;width:316px;text-align:center;font-size:25px;padding:8px 20px 9px}
 .chip-res{display:inline-block}
+
+/* answer cards that can no longer be tapped look disabled, everywhere:
+   - a wrong pick: a brief warm flash and shake (feedback), then it settles flat, grey and faded - not left red.
+     Check 1's wrong shape first traces its sides (the explanation), so it settles once that trace has finished.
+   - after the right answer: the untouched cards step back too, so the correct (green) card stands out */
+.opt.bad,.opts-in .opt.bad,.soft-wrong .opt.bad{animation:shake .4s ease,optDisable .45s ease .55s both;cursor:not-allowed}
+.opt.bad.bad:has(.sd){animation:shake .4s ease,optDisable .45s ease 2.6s both}
+@keyframes optDisable{to{background:#eef2f6;border-color:#d5dee6;box-shadow:0 2px 0 #cfd8e0;color:#8193a4;filter:grayscale(1);opacity:.72;transform:none}}
+.opt:disabled:not(.good):not(.bad){background:#f3f6f9;border-color:#dbe3ea;box-shadow:0 2px 0 #d3dce4;color:#8193a4;filter:grayscale(.8);opacity:.68;cursor:not-allowed;transition:opacity .3s ease,filter .3s ease,box-shadow .3s ease}
+.opt:disabled{pointer-events:auto}
+@media (prefers-reduced-motion: reduce){.opt.bad,.opts-in .opt.bad,.soft-wrong .opt.bad,.opt.bad.bad:has(.sd){animation:optDisable .01s linear both}}
+
+/* lesson complete (end screen): the same hero stage as "Great job! Now you know all about trapeziums" - no panel,
+   Swiftee centred with the warm glow - with her bubble above her and the score line and Play again below. After she
+   lands the line fades in, then the button */
+.stage.endhero .big-stars{display:none}
+.stage.scene.hero.endhero .swiftee{top:300px!important}
+.stage.scene.hero.endhero .bubble{bottom:426px!important}
+.stage.endhero .hglow{top:222px}
+.end-hero{position:absolute;left:0;top:0;width:1280px;height:720px;pointer-events:none;z-index:4}
+.eh-score{position:absolute;left:0;right:0;top:572px;text-align:center;font-weight:900;font-size:22px;color:#123b63;
+  text-shadow:0 1px 0 rgba(255,255,255,.8);animation:ehIn .45s ease-out 1.6s both}
+.eh-again{position:absolute;left:50%;top:614px;translate:-50% 0;pointer-events:auto;animation:ehIn .45s ease-out 1.9s both}
+@keyframes ehIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.eh-score,.eh-again{animation:none}}
