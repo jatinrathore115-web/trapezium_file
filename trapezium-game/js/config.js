@@ -38,7 +38,8 @@ const CONFIG = {
   timing: { idleMs: 9000, idleMaxHints: 3, navLockMs: 450 },
   // flow: a finished screen moves on advanceMs after its last line (voice-over) ends. showNext / showBack bring those buttons back.
   // autoAdvance: false = navigation is fully manual (top-right Next / Back only; a finished screen stays put)
-  flow: { autoAdvance: false, advanceMs: 2500, showNext: false, showBack: false },
+  // cover: the game opens on the front page (polar bear, Play button) instead of starting straight away
+  flow: { autoAdvance: false, advanceMs: 2500, showNext: false, showBack: false, cover: true },
   // spotlight screen: board moved/scaled from its usual spot (transform-origin = board top-left at 640,104).
   // Puts the shape (board centre ~260,228) at stage (560,358): mid-height, balanced against Swiftee on the right.
   // scene layout (screens 1-30): board nudged so the shape is centred in the right-hand panel; card row under it

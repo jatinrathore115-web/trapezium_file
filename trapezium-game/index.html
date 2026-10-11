@@ -311,6 +311,16 @@
 </div>
 </sc-if>
 
+<!-- front page: the polar bear scene with live snowfall and one big Play button (the lesson starts on its tap, which
+     also unlocks the voice-over and sounds) -->
+<sc-if value="{{showCover}}" hint-placeholder-val="{{ false }}">
+<div class="{{coverCls}}">
+<div class="cover-art"><img src="assets/images/start-bear.webp" alt="A polar bear fishing through a hole in the ice"></div>
+<canvas class="snowfall-cover" width="1280" height="720" aria-hidden="true"></canvas>
+<button class="play-btn" data-qa="play" aria-label="Play" onClick="{{coverGo}}"><span class="play-ring"></span><span class="play-ring r2"></span><img src="assets/images/play-button.webp" alt=""></button>
+</div>
+</sc-if>
+
 </div>
 </div>
 </x-dc>

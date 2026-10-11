@@ -4,6 +4,11 @@ A guided, voice-led lesson on **trapeziums** for young learners. The mascot **Sw
 shape on an ice panel draws, moves and highlights itself in step with her words. The learner taps and drags at key
 moments, then answers five scored checks.
 
+- **Front page** first: the polar bear fishing on the ice (`assets/images/start-bear.webp`) fills the screen, drifts
+  very slowly, with snow falling over it; one big **Play** button (`assets/images/play-button.webp`) sits on the ice
+  beside the fishing hole, floating gently and sending out ripples. Hover lifts it, a press squashes it; on Play it
+  pops with a chime and the scene zooms softly away into Screen 1. The tap also unlocks the voice-over and sounds.
+  Play again (end screen) and jumps from the screen list skip it. `CONFIG.flow.cover: false` turns it off.
 - **43 screens** in one fixed sequence: 36 learning screens, 5 checks, 1 lesson-complete screen.
 - **Navigation is manual**: the learner moves on with **Next** / **Back** (top right). Only the opening intro
   (Screens 1→2→3→4) and Screen 18 (after "Let's find out.") move on by themselves.

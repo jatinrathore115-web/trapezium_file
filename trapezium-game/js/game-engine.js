@@ -57,7 +57,19 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       LESSON.steps.forEach((st) => (st.lines || []).concat(st.after || []).forEach((L) => { if (L.m) want.push(L.m); }));
       this.sw.warm(want.filter((x, i) => want.indexOf(x) === i));
     }
-    this.start();
+    if (!CONFIG.flow.cover) this.start(); // otherwise the front page waits for its Play button (coverGo)
+  }
+  // front page Play: the button squashes and pops (CSS), the scene zooms softly away, then the lesson starts. The tap
+  // is the user gesture browsers need before they allow the voice-over and sounds
+  coverGo() {
+    if (this.state.started || this.coverBusy) return;
+    this.coverBusy = true;
+    this.unlockAudio();
+    this.sfx('chime');
+    this.setState({ coverLeaving: true });
+    // Screen 1 starts underneath straight after the button's pop, so the scene fades into the real lesson
+    setTimeout(() => this.start(), 220);
+    setTimeout(() => { this.coverBusy = false; this.setState({ coverLeaving: false }); }, 900);
   }
   componentWillUnmount() { this.clearT(); this.cancelSpeech(); if (this.sw) this.sw.destroy(); }
   componentDidUpdate() {
@@ -93,6 +105,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     return P;
   }
   jumpTo(i) {
+    if (!this.state.started) this.start(); // a jump from the screen list (or a tool) skips the front page
     if (i === this.state.step) { this.setState({ navOpen: false }); return; }
     let P = this.initP();
     this.snaps = {};
@@ -2035,6 +2048,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       birdCls: 'bird', // Swiftee's expressions are driven by pose() (js/swiftee.js), not by re-rendering
       chips: chips.map((c) => ({ t: c.t, r: c.r || '', k: c.k + (c.t.length > 20 ? ' long' : '') })), // r: a result part animated on its own (screen 30)
       rootDown: () => this.rootDown(),
+      showCover: !s.started || !!s.coverLeaving, coverCls: 'cover' + (s.coverLeaving ? ' leaving' : ''), coverGo: () => this.coverGo(),
       // explore (screen 29): Done sits centred under the fixed equation row (board coordinates), enabled after the first drag
       showDone: !!st.explore, doneDis: !s.explored, doneX: 225, doneY: Math.max(s.P.D.y, s.P.C.y) + 99, doneExplore: () => this.doneExplore(),
       wordSize: wi > 15 || (s.line || '').length > 80 ? 22 : 24, // long lines get the smaller size

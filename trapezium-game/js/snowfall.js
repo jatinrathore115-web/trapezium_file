@@ -14,10 +14,14 @@
   if (reduced) return;
 
   var rnd = function (a, b) { return a + Math.random() * (b - a); };
+  // one snow system per canvas: the lesson background (subtle) and the front page (denser, bigger flakes, so it
+  // clearly reads as snow falling over the picture)
+  function system(SEL, LAYERS) {
   var flakes = [];
   LAYERS.forEach(function (L, li) {
     for (var i = 0; i < L.n; i++) flakes.push(make(L, li, true));
   });
+
   function make(L, li, anywhere) {
     return {
       L: li, x: Math.random() * W, y: anywhere ? Math.random() * H : rnd(-30, -6),
@@ -29,7 +33,7 @@
   var cv = null, ctx = null, last = 0, dpr = 1;
   function canvas() {
     if (cv && cv.isConnected) return cv;
-    cv = document.querySelector('.stage canvas.snowfall');
+    cv = document.querySelector(SEL);
     ctx = null;
     return cv;
   }
@@ -68,4 +72,11 @@
     ctx.globalAlpha = 1; ctx.shadowBlur = 0;
   }
   requestAnimationFrame(frame);
+  }
+  system('.stage canvas.snowfall', LAYERS);
+  system('.stage canvas.snowfall-cover', [
+    { n: 70, r: [1.2, 2.2], v: [22, 34], a: [0.65, 0.9], blur: 0 },
+    { n: 45, r: [2.2, 3.4], v: [34, 50], a: [0.8, 0.95], blur: 0 },
+    { n: 22, r: [3.6, 5.6], v: [50, 72], a: [0.7, 0.9], blur: 2 }
+  ]);
 })();

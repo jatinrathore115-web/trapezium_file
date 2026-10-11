@@ -473,3 +473,36 @@ a{color:#123b63}a:hover{color:#0b2742}
 .eh-again{position:absolute;left:50%;top:614px;translate:-50% 0;pointer-events:auto;animation:ehIn .45s ease-out 1.9s both}
 @keyframes ehIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){.eh-score,.eh-again{animation:none}}
+
+/* ---------- front page (cover) ----------
+   The polar bear scene fills the stage and drifts very slowly (a gentle "live" zoom); snow falls over it
+   (js/snowfall.js, .snowfall-cover); the Play button sits on the ice beside the fishing hole, floats softly and sends
+   out ripples like the water. Hover lifts and brightens it, a press squashes it, and on Play it pops while the whole
+   scene zooms softly away into the lesson. */
+.cover{position:absolute;left:0;top:0;width:1280px;height:720px;overflow:hidden;z-index:60;background:#8fd0fb;animation:coverIn .5s ease-out both}
+.cover-art{position:absolute;inset:0;animation:coverDrift 22s ease-in-out infinite alternate;transform-origin:52% 46%}
+.cover-art img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none}
+.snowfall-cover{position:absolute;left:0;top:0;width:1280px;height:720px;pointer-events:none}
+.play-btn{position:absolute;left:640px;top:597px;width:150px;height:150px;margin:-75px 0 0 -75px;padding:0;border:0;background:none;cursor:pointer;
+  border-radius:50%;-webkit-tap-highlight-color:transparent;animation:playIn .6s cubic-bezier(.3,1.5,.5,1) .45s both}
+.play-btn img{position:relative;display:block;width:100%;height:100%;pointer-events:none;
+  filter:drop-shadow(0 8px 14px rgba(18,59,99,.35));animation:playFloat 2.4s ease-in-out 1.1s infinite;transition:transform .18s cubic-bezier(.3,1.6,.5,1),filter .18s ease}
+.play-btn:hover img{transform:scale(1.09);filter:drop-shadow(0 12px 18px rgba(18,59,99,.4)) brightness(1.08)}
+.play-btn:active img{transform:scale(.88);filter:drop-shadow(0 3px 6px rgba(18,59,99,.35)) brightness(.97);transition-duration:.06s}
+.play-btn:focus-visible{outline:4px solid #fff;outline-offset:6px}
+.play-ring{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;border:4px solid rgba(255,255,255,.85);
+  box-shadow:0 0 12px rgba(120,190,255,.6);opacity:0;pointer-events:none;animation:playRipple 2.4s ease-out 1.1s infinite}
+.play-ring.r2{animation-delay:2.3s}
+.cover.leaving{animation:coverOut .6s ease-in .22s both}
+.cover.leaving .cover-art{animation:coverZoom .8s ease-in both}
+.cover.leaving .play-btn{animation:playPop .45s ease-out both}
+.cover.leaving .play-ring{animation:none;opacity:0}
+@keyframes coverIn{from{opacity:0}to{opacity:1}}
+@keyframes coverDrift{from{transform:scale(1)}to{transform:scale(1.06) translateY(-6px)}}
+@keyframes playIn{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:none}}
+@keyframes playFloat{0%,100%{translate:0 0}50%{translate:0 -7px}}
+@keyframes playRipple{0%{opacity:.85;transform:scale(1)}100%{opacity:0;transform:scale(1.75)}}
+@keyframes playPop{0%{transform:scale(.88)}40%{transform:scale(1.18)}100%{transform:scale(1.35);opacity:0}}
+@keyframes coverZoom{to{transform:scale(1.14)}}
+@keyframes coverOut{to{opacity:0}}
+@media (prefers-reduced-motion: reduce){.cover-art,.play-btn img,.play-ring{animation:none}.play-ring{opacity:0}}

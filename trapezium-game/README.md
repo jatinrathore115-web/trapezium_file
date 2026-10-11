@@ -16,6 +16,8 @@ trapezium-game/
 │       ├── swiftee.webp            Swiftee still (shown until the animated sprite is ready)
 │       ├── speech-bubble.webp      (unused: the bubble is now drawn in CSS)
 │       ├── ice-panel.webp          glass board panel
+│       ├── play-button.webp        front page Play button
+│       ├── start-bear.webp         front page scene (polar bear fishing)
 │       ├── winter-background.webp  winter scene background (all screens)
 │       └── snow-background.webp    (unused: previous background)
 ├── swiftee-assets/             Swiftee sprite sheets + manifest (the game reads atlas/swiftee.manifest.json
