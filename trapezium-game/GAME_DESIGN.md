@@ -75,7 +75,7 @@ Exception: **Screen 36** (finale) hides the ice panel — Swiftee flies to the c
 | 12 | "We call this a trapezium." | On "trapezium" the shape pulses and the **Trapezium** label pops in (same case as Screen 13). |
 | 13 | "A quadrilateral with at least one pair of parallel sides is called a trapezium." | The definition acted out. "quadrilateral": the four sides trace in one after another. "parallel": AB and DC run out both ways as dashed lines that never meet, the lines fade and the parallel arrows pop on (hidden until then). "trapezium": the **Trapezium** label pops in below and pulses. |
 | 14 | "The parallel sides are called bases." | AB then CD get a subtle highlight sweep; two **yellow** "Base" labels pop in one by one on "bases". Nothing else moves. |
-| 15 | "The other two sides are called legs." | AD then BC (purple) get a subtle highlight sweep; two **purple** "Leg" labels pop in on "legs". |
+| 15 | "The other two sides are called legs." | AD then BC (purple) get a subtle highlight sweep; two **purple** "Leg" labels pop in on "legs". The two **Leg** labels sit level and opposite (like the Base labels on Screen 14): left of AD and right of BC at the legs' shared mid-height, each joined by a short horizontal connector; both legs glow together. |
 
 ### Part 2 — Types by sides (Screens 16–22)
 

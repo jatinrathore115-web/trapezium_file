@@ -1768,13 +1768,16 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       const legs = s.callout === 'legs';
       const show = (s.callout === 'bases' && !s.tap.AB && !s.tap.CD) || (legs && !s.tap.DA && !s.tap.BC);
       // one pill label per side: a soft rounded pill just outside the side's midpoint, joined to it by a short solid
-      // tail in the pill's own border colour (no dot). Bases: above AB / below CD. Legs: out from each leg.
+      // tail in the pill's own border colour (no dot). Bases: above AB / below CD. Legs: level, left of AD / right of BC.
       // First pill yellow, second lilac; both appear together and follow the shape.
       const W = legs ? 64 : 78, H = 32, cx0 = (A.x + B.x + C.x + D.x) / 4, cy0 = (A.y + B.y + C.y + D.y) / 4;
-      const pill = (p, q, vert) => {
+      // dir 'v': straight up/down (bases); 'h': straight out left/right (legs) - the two leg midpoints share one height
+      // (the bases are horizontal), so the pair sits level and opposite, like the bases' pair
+      const pill = (p, q, dir) => {
+        const vert = dir === 'v', horiz = dir === 'h';
         const m = { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 }, L = this.dist(p, q) || 1;
-        let nx = vert ? 0 : -(q.y - p.y) / L, ny = vert ? (m.y < cy0 ? -1 : 1) : (q.x - p.x) / L;
-        if (!vert && nx * (m.x - cx0) + ny * (m.y - cy0) < 0) { nx = -nx; ny = -ny; }
+        let nx = vert ? 0 : horiz ? (m.x < cx0 ? -1 : 1) : -(q.y - p.y) / L, ny = vert ? (m.y < cy0 ? -1 : 1) : horiz ? 0 : (q.x - p.x) / L;
+        if (!vert && !horiz && nx * (m.x - cx0) + ny * (m.y - cy0) < 0) { nx = -nx; ny = -ny; }
         const ext = (W / 2) * Math.abs(nx) + (H / 2) * Math.abs(ny), dot = 10, gap = 12; // tail starts clear of the stroke + parallel arrows
         const c = { x: m.x + nx * (dot + gap + ext), y: m.y + ny * (dot + gap + ext) };
         const d0 = { x: m.x + nx * dot, y: m.y + ny * dot }, e = { x: c.x - nx * ext, y: c.y - ny * ext };
@@ -1782,7 +1785,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
           stem: 'M' + r1(d0.x) + ',' + r1(d0.y) + ' L' + r1(e.x) + ',' + r1(e.y) };
       };
       g.cal = { d: dsp(show), cls: legs ? 'cal-legs' : 'cal-bases', tb: dsp(!legs), tl: dsp(legs), w: W,
-        p1: legs ? pill(D, A, false) : pill(A, B, true), p2: legs ? pill(B, C, false) : pill(D, C, true) };
+        p1: legs ? pill(D, A, 'h') : pill(A, B, 'v'), p2: legs ? pill(B, C, 'h') : pill(D, C, 'v') };
     }
     // equal-leg ticks
     const ad = this.dist(A, D), bc = this.dist(B, C);
