@@ -45,7 +45,9 @@
     const chev = el('path', { fill: 'none', stroke: OR, 'stroke-width': 3.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: 0 }, g);
     const ticks = el('path', { fill: 'none', stroke: PU, 'stroke-width': 3, 'stroke-linecap': 'round', opacity: 0 }, g);
     const rmarks = el('path', { fill: 'none', stroke: GR, 'stroke-width': 3, opacity: 0 }, g);
-    const arcs = {}, vals = {};
+    const arcs = {}, vals = {}, fills = {};
+    // each angle filled in its own colour (as on the lesson screens and Screen 40), drawn under its arc
+    [['A', OR], ['B', PU], ['C', '#2b7bd6'], ['D', YEL]].forEach(([k, c]) => { fills[k] = el('path', { fill: c, 'fill-opacity': 1, stroke: 'none', opacity: 0 }, g); });
     [['A', OR], ['B', PU], ['C', '#2b7bd6'], ['D', YEL]].forEach(([k, c]) => { arcs[k] = el('path', { fill: 'none', stroke: c, 'stroke-width': 7, 'stroke-linecap': 'round', pathLength: 100, opacity: 0 }, g); });
     ['A', 'B', 'C', 'D'].forEach((k) => { vals[k] = el('text', { 'text-anchor': 'middle', 'font-family': 'Nunito, sans-serif', 'font-weight': 900, 'font-size': 17, fill: NAVY, opacity: 0 }, g); });
     const dots = {}, labs = {};
@@ -75,6 +77,7 @@
       ['A', 'B', 'C', 'D'].forEach((k) => {
         const v = P[k], u = unit(v, P[NB[k][0]]), w = unit(v, P[NB[k][1]]), R = 26, cross = u.x * w.y - u.y * w.x;
         arcs[k].setAttribute('d', 'M' + f1(v.x + u.x * R) + ',' + f1(v.y + u.y * R) + ' A' + R + ',' + R + ' 0 0 ' + (cross > 0 ? 1 : 0) + ' ' + f1(v.x + w.x * R) + ',' + f1(v.y + w.y * R));
+        const RW = R + 3.5; fills[k].setAttribute('d', 'M' + f1(v.x) + ',' + f1(v.y) + ' L' + f1(v.x + u.x * RW) + ',' + f1(v.y + u.y * RW) + ' A' + RW + ',' + RW + ' 0 0 ' + (cross > 0 ? 1 : 0) + ' ' + f1(v.x + w.x * RW) + ',' + f1(v.y + w.y * RW) + ' Z'); fills[k]._v = v;
         let bx = u.x + w.x, by = u.y + w.y; const bl = Math.hypot(bx, by) || 1; bx /= bl; by /= bl;
         vals[k].setAttribute('x', f1(v.x + bx * 58)); vals[k].setAttribute('y', f1(v.y + by * 58 + 6)); vals[k].textContent = angle(X, k) + '°';
         dots[k].setAttribute('cx', f1(v.x)); dots[k].setAttribute('cy', v.y);
@@ -85,7 +88,7 @@
       g.setAttribute('data-cx', f1(cx)); g.setAttribute('data-cy', cy);
     }
     render();
-    return { g, fill, hi, side, hit, chev, ticks, rmarks, arcs, vals, dots, labs, render, get X() { return X; } };
+    return { g, fill, hi, side, hit, chev, ticks, rmarks, arcs, fills, vals, dots, labs, render, get X() { return X; } };
   }
 
   // a small shape icon (for the collection cards and the type choices)
@@ -132,7 +135,7 @@
       const row = div('sm-row', null, root);
       // collected cards: nothing is shown until a card has actually been collected (no empty placeholders)
       const slots = CARDS.map((c) => { const s = div('sm-slot', `<div class="sm-mini"><span class="sm-ico">${icon(c.key, 70)}</span><b>${c.title}</b><i>${c.recap}</i></div>`, row); return s; });
-      const allParts = () => [dg.chev, dg.ticks, dg.rmarks].concat(Object.values(dg.arcs), Object.values(dg.vals), Object.values(dg.hi));
+      const allParts = () => [dg.chev, dg.ticks, dg.rmarks].concat(Object.values(dg.arcs), Object.values(dg.fills), Object.values(dg.vals), Object.values(dg.hi));
       const resetParts = () => { G.set(allParts(), { opacity: 0 }); dg.ticks._mode = 'same'; };
       G.set(card, { opacity: 0 }); G.set(slots, { opacity: 0 });
 
@@ -144,7 +147,8 @@
       const capAdd = (html, cls) => { const s = document.createElement('span'); s.className = 'sm-cp ' + (cls || ''); s.innerHTML = html; cap.appendChild(s); G.fromTo(s, { opacity: 0, y: 10, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: D(0.5), ease: 'back.out(1.8)' }); sfx('pop'); };
       const capSet = (html, cls) => { cap.innerHTML = ''; capAdd(html, cls); };
       const morph = (to) => tw(() => G.to(Object.assign({}, dg.X), Object.assign({}, to, { duration: D(0.9), ease: 'power2.inOut', onUpdate() { dg.render(this.targets()[0]); } })));
-      const arc = (k) => G.fromTo(dg.arcs[k], { opacity: 1, strokeDasharray: 100, strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: D(0.45) });
+      // the arc draws round while its filled angle grows out of the corner (Screen 40's fill)
+      const arc = (k) => { const v = dg.fills[k]._v; G.fromTo(dg.fills[k], { opacity: 1, scale: 0, svgOrigin: v.x + ' ' + v.y }, { scale: 1, duration: D(0.5), ease: 'back.out(1.6)' }); return G.fromTo(dg.arcs[k], { opacity: 1, strokeDasharray: 100, strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: D(0.45) }); };
 
       const enterCard = async (title, X) => {
         await wait(D(0.5)); // a short breath between cards

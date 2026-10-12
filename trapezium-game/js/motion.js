@@ -22,8 +22,8 @@
   const lenTag = (k) => $('.board .tag.m' + k).filter((x) => getComputedStyle(x).display !== 'none')[0];
   const centred = (els) => G.set(els, { xPercent: -50, yPercent: -50, x: 0, y: 0 });
   // every element any Motion animation touches (Motion.clear wipes their animated properties on screen change)
-  const ANIMATED = '.tag.snum, .tag.vlab, .edge, .vdot, .shape-fill, .outline-settle, .pop-g, .chev, .calp > *, .ticks, .tag.mtag, .okcheck *, .tag.alab, .arc, .chip, .chip-res, .xleg, .swiftee, .swiftee canvas, .swiftee img, .bubble, .bs, .hspk, .hglow, .sv-a, .sv-d, .sv-base, .sv-180, .rmark, .tag.r90, .q3, .q3 *, .q3-hint, .q3-hint *, .q3-fly, .q4s, .q4s *, .slot, .lab, .q4-strip, .q4-card, .q4-link';
-  const ANIMATED_SVG = '.edge, .vdot, .shape-fill, .outline-settle, svg g.pop-g, .chev, .calp > *, .ticks, .okcheck *, .arc, .sv-a, .sv-d, .sv-base, .sv-180, .rmark';
+  const ANIMATED = '.tag.snum, .tag.vlab, .edge, .vdot, .shape-fill, .outline-settle, .pop-g, .chev, .calp > *, .ticks, .tag.mtag, .okcheck *, .tag.alab, .arc, .wedge, .chip, .chip-res, .xleg, .swiftee, .swiftee canvas, .swiftee img, .bubble, .bs, .hspk, .hglow, .sv-a, .sv-d, .sv-base, .sv-180, .rmark, .tag.r90, .q3, .q3 *, .q3-hint, .q3-hint *, .q3-fly, .q4s, .q4s *, .slot, .lab, .q4-strip, .q4-card, .q4-link';
+  const ANIMATED_SVG = '.wedge, .edge, .vdot, .shape-fill, .outline-settle, svg g.pop-g, .chev, .calp > *, .ticks, .okcheck *, .arc, .sv-a, .sv-d, .sv-base, .sv-180, .rmark';
 
   const Motion = {
     ok: !!G,
@@ -38,7 +38,7 @@
       if (G) G.set($(ANIMATED), { clearProps: 'opacity,transform,filter,textShadow,strokeWidth,translate,rotate,scale,backgroundColor,borderColor,color' });
       // GSAP pins SVG origins to 0 0 whenever it touches an SVG element (even while clearing), so drop that by hand
       $(ANIMATED_SVG).forEach((el) => { el.style.removeProperty('transform-origin'); el.style.removeProperty('stroke-dasharray'); });
-      document.querySelectorAll('.eq-layer, .stage .tmp-ext').forEach((el) => el.remove()); // screen 25's equation build, screen 13's extensions
+      document.querySelectorAll('.eq-layer, .stage .supp-at').forEach((el) => el.remove()); // screen 25's equation build, the on-shape supplementary figure
       ctx = G ? G.context(() => {}) : null;
     },
 
@@ -259,8 +259,12 @@
       add(() => {
         const tl = G.timeline();
         order.forEach((k, i) => {
-          const arc = $('.arc.a' + k)[0], lab = $('.tag.alab.l' + k)[0], at = i * 0.4;
+          const arc = $('.arc.a' + k)[0], lab = $('.tag.alab.l' + k)[0], at = i * 0.55;
           if (arc) tl.fromTo(arc, { opacity: 1, strokeDasharray: 100, strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.45, ease: 'power2.out' }, at);
+          // screen 23 (wedges): as on screen 40, the filled angle grows out of its corner with a soft overshoot, then a glow
+          const wd = $('.wedge.w' + k)[0], dot = dots[i];
+          if (wd && dot) tl.fromTo(wd, { opacity: 1, scale: 0, svgOrigin: dot.getAttribute('cx') + ' ' + dot.getAttribute('cy') }, { scale: 1, duration: reduced ? 0 : 0.5, ease: 'back.out(1.6)' }, at)
+            .to(wd, { filter: 'drop-shadow(0px 0px 5px ' + ({ A: 'rgba(240,138,36,0.8)', B: 'rgba(142,68,214,0.7)', C: 'rgba(43,123,214,0.7)', D: 'rgba(245,197,66,0.9)' })[k] + ')', duration: 0.3, yoyo: true, repeat: 1 }, at + 0.45);
           if (lab) tl.fromTo(lab, { opacity: 0, x: dir[k][0], y: dir[k][1], xPercent: -50, yPercent: -50, scale: 0.9 },
             { opacity: 1, x: 0, y: 0, scale: 1, duration: reduced ? 0 : 0.5, ease: 'power3.out' }, at + 0.1);
         });
@@ -273,8 +277,9 @@
     angleFocus(k) {
       if (!G) return;
       const arc = $('.arc.a' + k)[0], lab = $('.tag.alab.l' + k)[0];
+      this.wedgeGrow([k]);
       const others = ['A', 'B', 'C', 'D'].filter((x) => x !== k);
-      const dim = others.map((x) => $('.arc.a' + x)[0]).concat(others.map((x) => $('.tag.alab.l' + x)[0])).filter(Boolean);
+      const dim = others.map((x) => $('.arc.a' + x)[0]).concat(others.map((x) => $('.tag.alab.l' + x)[0]), others.map((x) => $('.wedge.w' + x)[0])).filter(Boolean);
       add(() => {
         const tl = G.timeline();
         tl.to(dim, { opacity: 0.35, duration: 0.3, ease: 'sine.out' }, 0).to([arc, lab].filter(Boolean), { opacity: 1, duration: 0.2 }, 0);
@@ -308,7 +313,7 @@
       const row = $('.chip-row')[0], stage = this.eqLayer();
       if (!row || !stage) return;
       const box = document.createElement('div'), K = sp.keys || 'AD';
-      box.className = 'chip gold eq-build' + (sp.pair ? ' eq-pair' : ''); box.dataset.i = sp.i || 0; box.dataset.keys = K;
+      box.className = 'chip gold eq-build eqpair-' + K + (sp.pair ? ' eq-pair' : ''); box.dataset.i = sp.i || 0; box.dataset.keys = K;
       // "∠A + ∠D =" stays; the answer side starts as "?" and is where the values land ("120° + 60°") and then add up
       // ("180°") - all three states share one fixed-width cell, so the equation never shifts
       box.innerHTML = '<span>∠' + K[0] + '</span><span class="eq-op">+</span><span>∠' + K[1] + '</span><span class="eq-op">=</span>' +
@@ -445,16 +450,19 @@
     },
     // screen 17 "...has sides of different lengths": AB, BC, CD, DA in turn
     lensSeq() { this.lensIn(['AB', 'BC', 'CD', 'DA'], 0.45); },
-    // screen 16 "...all the sides ... are of different lengths": each length label pulses mildly and takes its own colour
+    // screen 16 "...all the sides ... are of different lengths": the same rhythm as screen 17's lensSeq - AB, BC, CD, DA
+    // in turn (0.45 s apart), each side glows while its length pops (0.5 -> 1 with the same back-out ease, as if it
+    // arrived again) and takes its own colour
     lenColors() {
       if (!G) return;
       add(() => {
         const tl = G.timeline();
         ['AB', 'BC', 'CD', 'DA'].forEach((k, i) => {
-          const lab = $('.board .tag.m' + k).filter((x) => getComputedStyle(x).display !== 'none')[0];
-          if (!lab) return;
-          tl.call(() => lab.setAttribute('data-col', k), null, i * 0.22) // colours in CSS (.tag.mtag[data-col]) so a redraw keeps them
-            .fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.14, duration: 0.3, ease: 'sine.inOut', yoyo: true, repeat: 3 }, i * 0.22);
+          const lab = lenTag(k), e = $('.e' + k)[0], at = i * 0.45;
+          if (lab) tl.call(() => lab.setAttribute('data-col', k), null, at) // colours in CSS (.tag.mtag[data-col]) so a redraw keeps them
+            .fromTo(lab, { xPercent: -50, yPercent: -50, scale: 0.5 }, { scale: 1, duration: 0.4, ease: 'back.out(2.2)' }, at);
+          if (e) tl.to(e, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 5px rgba(142,68,214,0.6))', duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
+            .set(e, { clearProps: 'strokeWidth,filter' }, at + 0.55);
         });
         return tl;
       });
@@ -509,6 +517,18 @@
         return tl;
       });
     },
+    // the named sides give one light, soft glow together (thicker line + gentle halo in their own colour, then back)
+    softGlow(keys) {
+      const els = keys.map((k) => $('.e' + k)[0]).filter(Boolean);
+      if (!G || !els.length) return;
+      add(() => G.timeline()
+        .to(els, { strokeWidth: 7.5, filter: 'drop-shadow(0px 0px 5px rgba(142,68,214,0.55))', duration: 0.3, ease: 'sine.out' })
+        .to(els, { strokeWidth: 5, filter: NOGLOW, duration: 0.35, ease: 'sine.in' })
+        .set(els, { clearProps: 'strokeWidth,filter' }));
+    },
+    // the whole shape (outline, fill, corners, letters) fades in with a soft scale-up - a CSS animation on data-in
+    // (.shape-pre), so a redraw of the shape mid-way can never cut it short
+    shapeIn() { $('.pop-g').forEach((e) => e.setAttribute('data-in', '1')); },
     // the parallel arrows (hidden by .chev-pre) pop onto their sides
     chevIn() {
       const chev = $('.chev');
@@ -523,41 +543,48 @@
       add(() => G.delayedCall(0.3, () => this.rightMark('D')));
       add(() => G.delayedCall(0.9, () => this.rightGlow()));
     },
-    // screen 13 "...one pair of parallel sides": AB and DC run out both ways as dashed lines (never meeting), the
-    // extensions fade, then the parallel arrows (hidden by .chev-pre) pop onto the two sides
+    // screen 13 "...one pair of parallel sides": AB and DC glow together, then the parallel arrows (hidden by .chev-pre)
+    // pop onto the two sides (no dashed extensions)
     defParallel() {
-      const svg = ($('.eAB')[0] || {}).ownerSVGElement, P = window.__trapP && window.__trapP();
-      if (!G || !svg || !P) return;
-      const group = $('.eAB')[0].parentNode, ext = 120, mk = (x1, y, x2) => {
-        const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        l.setAttribute('class', 'tmp-ext'); l.setAttribute('x1', x1); l.setAttribute('y1', y); l.setAttribute('x2', x1); l.setAttribute('y2', y); l.dataset.x2 = x2; // grows out from the corner
-        l.setAttribute('stroke', '#d9531e'); l.setAttribute('stroke-width', '4'); l.setAttribute('stroke-dasharray', '10 7'); l.setAttribute('stroke-linecap', 'round');
-        group.insertBefore(l, group.firstChild); return l;
-      };
-      const lines = [mk(P.A.x, P.A.y, P.A.x - ext), mk(P.B.x, P.B.y, P.B.x + ext), mk(P.D.x, P.D.y, P.D.x - ext), mk(P.C.x, P.C.y, P.C.x + ext)];
       const sides = [$('.eAB')[0], $('.eCD')[0]].filter(Boolean), chev = $('.chev');
-      add(() => G.timeline({ onComplete: () => lines.forEach((l) => l.remove()) })
-        .fromTo(lines, { opacity: 0 }, { opacity: 1, duration: 0.15 }, 0)
-        .to(lines, { attr: { x2: (i, l) => +l.dataset.x2 }, duration: 0.7, ease: 'power2.out' }, 0)
-        .to(sides, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 6px rgba(142,68,214,0.6))', duration: 0.3, yoyo: true, repeat: 1 }, 0.2)
-        .to(lines, { opacity: 0, duration: 0.4, ease: 'sine.in' }, 1.4)
-        .call(() => chev.forEach((c) => c.setAttribute('data-in', '1')), null, 1.75)
-        .fromTo(chev, { opacity: 0, scale: 0.3, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2.4)' }, 1.75)
-        .to(chev, { scale: 1.25, duration: 0.2, yoyo: true, repeat: 1 }, 2.2)
+      if (!G || !sides.length) return;
+      add(() => G.timeline()
+        .to(sides, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 6px rgba(142,68,214,0.6))', duration: 0.3, yoyo: true, repeat: 1 }, 0)
+        .call(() => chev.forEach((c) => c.setAttribute('data-in', '1')), null, 0.6)
+        .fromTo(chev, { opacity: 0, scale: 0.3, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2.4)' }, 0.6)
+        .to(chev, { scale: 1.25, duration: 0.2, yoyo: true, repeat: 1 }, 1.05)
         .set(sides, { clearProps: 'strokeWidth,filter' }));
     },
     // the name label below the shape pops in (holdChips) and pulses (screens 13, 17, 21: showTitle -> titlePop)
 
+    // Screen 40's angle fill, for any angle: the filled wedge grows out of its corner (scale 0 -> 1, soft overshoot) and
+    // glows once in its own colour. keys: 'AD' / ['B'] ..., one after another (0.3 s apart), after delay s
+    wedgeGrow(keys, delay) {
+      const P = window.__trapP && window.__trapP(), K = typeof keys === 'string' ? keys.split('') : keys;
+      const C = { A: 'rgba(240,138,36,0.8)', B: 'rgba(142,68,214,0.7)', C: 'rgba(43,123,214,0.7)', D: 'rgba(245,197,66,0.9)' };
+      if (!G || !P) return;
+      add(() => {
+        const tl = G.timeline({ delay: delay || 0 });
+        K.forEach((k, i) => {
+          const w = $('.wedge.w' + k)[0];
+          if (!w || getComputedStyle(w).display === 'none') return;
+          tl.fromTo(w, { scale: 0, svgOrigin: P[k].x + ' ' + P[k].y }, { scale: 1, duration: reduced ? 0 : 0.5, ease: 'back.out(1.6)' }, i * 0.3)
+            .to(w, { filter: 'drop-shadow(0px 0px 5px ' + C[k] + ')', duration: 0.3, yoyo: true, repeat: 1 }, i * 0.3 + 0.45)
+            .set(w, { clearProps: 'transform,filter' }, i * 0.3 + 1.1);
+        });
+        return tl;
+      });
+    },
     // angles that were dimmed on the previous screen start this one dimmed (set at once, before the first paint)
     dimAngles(keys) {
-      const els = keys.split('').map((x) => $('.arc.a' + x)[0]).concat(keys.split('').map((x) => $('.tag.alab.l' + x)[0])).filter(Boolean);
+      const els = keys.split('').map((x) => $('.arc.a' + x)[0]).concat(keys.split('').map((x) => $('.tag.alab.l' + x)[0]), keys.split('').map((x) => $('.wedge.w' + x)[0])).filter(Boolean);
       if (G && els.length) add(() => G.set(els, { opacity: 0.35 }));
     },
     // the named pair together (on "180"): both arcs and values pulse at once, then every angle comes back to full
     anglesTogether(keys) {
       if (!G || !keys.length) return;
       const arcs = keys.map((k) => $('.arc.a' + k)[0]).filter(Boolean), labs = keys.map((k) => $('.tag.alab.l' + k)[0]).filter(Boolean);
-      const all = $('.arc').concat($('.board .tag.alab'));
+      const all = $('.arc').concat($('.board .tag.alab'), $('.wedge'));
       add(() => G.timeline()
         .to(arcs.concat(labs), { opacity: 1, duration: 0.2 }, 0)
         .to(arcs, { strokeWidth: 10, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, 0)
@@ -567,7 +594,7 @@
     },
     // after a line that focused angles without a sum: every angle eases back to full
     anglesRestore() {
-      const all = $('.arc').concat($('.board .tag.alab'));
+      const all = $('.arc').concat($('.board .tag.alab'), $('.wedge'));
       if (G && all.length) add(() => G.timeline().to(all, { opacity: 1, duration: 0.45, ease: 'sine.inOut' }).set(all, { clearProps: 'opacity,strokeWidth,strokeDasharray,strokeDashoffset' }));
     },
     // the sum label arriving: a soft pop (90% -> 100%, slight lift)
@@ -615,7 +642,8 @@
     suppStart() {
       if (!G) return;
       const focus = ['A', 'D'].map((k) => $('.arc.a' + k)[0]).filter(Boolean), flab = ['A', 'D'].map((k) => $('.tag.alab.l' + k)[0]).filter(Boolean);
-      const dim = ['B', 'C'].map((k) => $('.arc.a' + k)[0]).concat(['B', 'C'].map((k) => $('.tag.alab.l' + k)[0])).filter(Boolean);
+      const dim = ['B', 'C'].map((k) => $('.arc.a' + k)[0]).concat(['B', 'C'].map((k) => $('.tag.alab.l' + k)[0]), ['B', 'C'].map((k) => $('.wedge.w' + k)[0])).filter(Boolean);
+      this.wedgeGrow('AD', 0.1);
       add(() => G.timeline()
         .to(dim, { opacity: 0.35, duration: 0.4, ease: 'sine.inOut' }, 0)
         .to(focus, { strokeWidth: 10, duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.1)
@@ -644,7 +672,7 @@
       if (!G) return;
       const chips = $('.chip'), chip = chips[chips.length - 1];
       const fig = $('.sv-a').concat($('.sv-d'), $('.sv-base'), $('.sv-180'));
-      const all = $('.arc').concat($('.board .tag.alab'));
+      const all = $('.arc').concat($('.board .tag.alab'), $('.wedge'));
       add(() => {
         const tl = G.timeline();
         if (chip) tl.to(chip, { scale: 1.06, boxShadow: '0 0 0 6px rgba(92,198,207,0.35), 0 4px 18px rgba(46,158,79,0.35)', duration: 0.3, ease: 'sine.out' }, 0)
@@ -677,7 +705,7 @@
       const wedges = keys.map((key, i) => {
         const [s, e] = spans[i], p1 = pt(s, R), p2 = pt(e, R), mid = pt((s + e) / 2, 31);
         const g = document.createElementNS(ns, 'g');
-        g.innerHTML = '<path d="M' + V[0] + ',' + V[1] + ' L' + p1[0].toFixed(1) + ',' + p1[1].toFixed(1) + ' A' + R + ',' + R + ' 0 0 1 ' + p2[0].toFixed(1) + ',' + p2[1].toFixed(1) + ' Z" fill="' + COL[key] + '" fill-opacity="0.9" stroke="#ffffff" stroke-width="1.5"></path>' +
+        g.innerHTML = '<path d="M' + V[0] + ',' + V[1] + ' L' + p1[0].toFixed(1) + ',' + p1[1].toFixed(1) + ' A' + R + ',' + R + ' 0 0 1 ' + p2[0].toFixed(1) + ',' + p2[1].toFixed(1) + ' Z" fill="' + COL[key] + '" fill-opacity="1" stroke="#ffffff" stroke-width="1.5"></path>' +
           '<text x="' + mid[0].toFixed(1) + '" y="' + (mid[1] + 5).toFixed(1) + '" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="13" fill="#ffffff">' + val(key) + '°</text>';
         svg.appendChild(g); return g;
       });
@@ -704,6 +732,54 @@
       });
     },
     suppBC() { this.suppPair(['B', 'C']); },
+    // supplementary angles shown on the shape itself (screens 26, 27): the bottom base extends past the lower corner S as
+    // a dashed line; a copy of the upper angle T (same colour) slides down the leg to S and turns over (a half-turn
+    // about S) so it sits on the extension, beside S's own angle - together they fill a straight angle, which gets a
+    // half-circle and a "180°" label. Geometry: the half-turn maps T's rays (along its base, along the leg) onto the
+    // extension and back up the leg, so the copy is exact for any shape. Removed after a hold (and by clear()).
+    suppAt(T, S) {
+      const P = window.__trapP && window.__trapP(), e = $('.eAB')[0];
+      if (!G || !P || !e) return;
+      const ns = 'http://www.w3.org/2000/svg', R = 34, COL = { A: '#f08a24', B: '#8e44d6', C: '#2b7bd6', D: '#F5C542' };
+      const nb = { A: 'B', B: 'A', C: 'D', D: 'C' }, unit = (p, q) => { const L = Math.hypot(q.x - p.x, q.y - p.y) || 1; return { x: (q.x - p.x) / L, y: (q.y - p.y) / L }; };
+      const t = P[T], s = P[S], dT = unit(t, P[nb[T]]), dS = unit(s, P[nb[S]]), up = unit(s, t);
+      const wedge = (u, v, col) => { const c = u.x * v.y - u.y * v.x, g = document.createElementNS(ns, 'path');
+        g.setAttribute('d', 'M0,0 L' + (u.x * R).toFixed(1) + ',' + (u.y * R).toFixed(1) + ' A' + R + ',' + R + ' 0 0 ' + (c > 0 ? 1 : 0) + ' ' + (v.x * R).toFixed(1) + ',' + (v.y * R).toFixed(1) + ' Z');
+        g.setAttribute('fill', col); g.setAttribute('fill-opacity', '1'); g.setAttribute('stroke', '#fff'); g.setAttribute('stroke-width', '1.5'); return g; };
+      const root = document.createElementNS(ns, 'g'); root.setAttribute('class', 'supp-at');
+      const ex = { x: -dS.x, y: -dS.y }, L = 92; // the extension: past S, away from the shape
+      const line = document.createElementNS(ns, 'line');
+      line.setAttribute('x1', s.x); line.setAttribute('y1', s.y); line.setAttribute('x2', s.x); line.setAttribute('y2', s.y);
+      line.setAttribute('stroke', '#5b7f9c'); line.setAttribute('stroke-width', '3'); line.setAttribute('stroke-dasharray', '8 6'); line.setAttribute('stroke-linecap', 'round');
+      const own = wedge(dS, up, COL[S]); own.setAttribute('transform', 'translate(' + s.x + ' ' + s.y + ')');
+      const copy = wedge(dT, unit(t, s), COL[T]); copy.setAttribute('transform', 'translate(' + t.x + ' ' + t.y + ')');
+      // the straight-angle marker: a half-circle over S from the extension round to the base, and its label
+      const r2 = R + 9, a0 = { x: s.x + ex.x * r2, y: s.y + ex.y * r2 }, a1 = { x: s.x + dS.x * r2, y: s.y + dS.y * r2 };
+      const half = document.createElementNS(ns, 'path'), side = ex.x * up.y - ex.y * up.x;
+      half.setAttribute('d', 'M' + a0.x.toFixed(1) + ',' + a0.y.toFixed(1) + ' A' + r2 + ',' + r2 + ' 0 0 ' + (side > 0 ? 1 : 0) + ' ' + a1.x.toFixed(1) + ',' + a1.y.toFixed(1));
+      half.setAttribute('fill', 'none'); half.setAttribute('stroke', '#0b5b70'); half.setAttribute('stroke-width', '2.5'); half.setAttribute('stroke-linecap', 'round');
+      const lbl = document.createElementNS(ns, 'text');
+      // above the half-circle, nudged outward - clear of the corner letter (below) and the angle value (inside the shape)
+      lbl.setAttribute('x', (s.x + ex.x * 16).toFixed(1)); lbl.setAttribute('y', (s.y - r2 - 10).toFixed(1)); lbl.setAttribute('text-anchor', 'middle');
+      lbl.setAttribute('font-family', 'Nunito, sans-serif'); lbl.setAttribute('font-weight', '900'); lbl.setAttribute('font-size', '20'); lbl.setAttribute('fill', '#0b5b70'); lbl.textContent = '180°';
+      [line, own, copy, half, lbl].forEach((n) => root.appendChild(n));
+      const dot = $('.vdot')[0];
+      if (dot && dot.parentNode === e.parentNode) e.parentNode.insertBefore(root, dot); else e.parentNode.appendChild(root);
+      const o = { x: t.x, y: t.y, r: 0 }, place = () => copy.setAttribute('transform', 'translate(' + o.x.toFixed(1) + ' ' + o.y.toFixed(1) + ') rotate(' + o.r.toFixed(1) + ')');
+      add(() => G.timeline({ onComplete: () => root.remove() })
+        .to(line, { attr: { x2: s.x + ex.x * L, y2: s.y + ex.y * L }, duration: reduced ? 0 : 0.45, ease: 'power2.out' }, 0)
+        .fromTo(own, { opacity: 0, scale: 0, svgOrigin: s.x + ' ' + s.y }, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.6)' }, 0.25)
+        .fromTo(copy, { opacity: 0 }, { opacity: 1, duration: 0.25 }, 0.55)
+        // down the leg (from above), then the half-turn into place on the extension
+        .to(o, { x: s.x, y: s.y, duration: reduced ? 0 : 0.85, ease: 'power2.inOut', onUpdate: place }, 0.7)
+        .to(o, { r: 180, duration: reduced ? 0 : 0.6, ease: 'power2.inOut', onUpdate: place }, 1.6)
+        .fromTo(half, { opacity: 0, strokeDasharray: 200, strokeDashoffset: 200 }, { opacity: 1, strokeDashoffset: 0, duration: 0.45, ease: 'sine.out' }, 2.25)
+        .fromTo(lbl, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.35, ease: 'back.out(2)' }, 2.5)
+        .to([own, copy], { filter: 'drop-shadow(0px 0px 6px rgba(255,184,40,0.85))', duration: 0.3, yoyo: true, repeat: 1 }, 2.6)
+        .to(root, { opacity: 0, duration: 0.5, ease: 'sine.inOut' }, 6.2));
+    },
+    suppAtAD() { this.suppAt('A', 'D'); },
+    suppAtBC() { this.suppAt('B', 'C'); },
     // a question label arriving: pops down into place, then one soft shine across it
     askIn() {
       const chips = $('.chip'), el = chips[chips.length - 1];

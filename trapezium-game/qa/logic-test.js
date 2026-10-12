@@ -48,7 +48,7 @@ const focusWait=async()=>{ for(let k=0;k<100&&c.cur().layout==='focus'&&!c.state
     const P=c.state.P;
     switch(st.task){
       case 'extLegs': await focusWait(); c.tapEdge('AB'); await focusWait(); c.tapEdge('DA'); c.tapEdge('BC'); await sleep(1200); break;
-      case 'extBases': { const early=c.state.centered; c.tapEdge('AB'); if(!early && c.state.ext.AB>0) errs.push('other: tap accepted before the shape reached centre'); await focusWait(); c.tapEdge('AB'); c.tapEdge('CD'); await sleep(1200); break; }
+      case 'extBases': { const early=c.state.centered; c.tapEdge('AB'); if(st.layout==='focus' && !early && c.state.ext.AB>0) errs.push('other: tap accepted before the shape reached centre'); await focusWait(); c.tapEdge('AB'); c.tapEdge('CD'); await sleep(1200); break; }
       case 'tapBases': c.tapEdge('DA'); c.tapEdge('AB'); c.tapEdge('CD'); await sleep(400); break;
       case 'tapLegs': c.tapEdge('DA'); c.tapEdge('BC'); await sleep(400); break;
       case 'measure': for (const k of ['AB','BC','CD','DA']) { c.tapEdge(k); await sleep(120); } await sleep(4500); break;

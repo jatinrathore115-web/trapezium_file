@@ -85,9 +85,13 @@ window.SwifteeMascot = class SwifteeMascot {
     this.sc = px > 300 ? '2x' : '1x'; // @1x is a 256px cell; only pay for @2x when it is drawn larger
     return this.sc;
   }
+  // the expression sheets' own _start/_stop clips are pre-blended between two poses (semi-transparent, doubled outlines),
+  // so expressions switch by the engine's cross-fade instead (old frame under the new one at full strength - always
+  // solid). Talking keeps its start/stop: those frames are clean and give the lip-sync its open/close
   parts(state) {
     const s = this.m.states[state];
-    return s ? { start: s.start, loop: s.loop, stop: s.stop } : { loop: state };
+    if (!s) return { loop: state };
+    return state === 'talking' ? { start: s.start, loop: s.loop, stop: s.stop } : { loop: s.loop };
   }
   preload(state) {
     const p = this.parts(state);
@@ -174,7 +178,7 @@ window.SwifteeMascot = class SwifteeMascot {
     c.i = 0;
     if (c.phase === 'loop' && (this.target === c.state || !held)) return; // wrap
     const nx = this.advance(now);
-    if (nx) { this.cur = nx; this.sheet(nx.anim); }
+    if (nx) { if (nx.state !== c.state) this.swap(nx, now); else { this.cur = nx; this.sheet(nx.anim); } } // a new expression cross-fades in
   }
   swap(nx, now) {
     const c = this.cur;

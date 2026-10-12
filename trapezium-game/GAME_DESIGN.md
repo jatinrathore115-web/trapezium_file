@@ -68,12 +68,12 @@ Exception: **Screen 36** (finale) hides the ice panel — Swiftee flies to the c
 | 5 | "These two sides look like they will meet." | The two legs are emphasised. |
 | 6 | "Let's extend them." | Legs AD and BC remain purple. |
 | 7 | *(after)* "Woah! The sides meet." | Legs stay purple. **Automatic**: a glowing line runs D→A then turns into a dotted extension; then C→B. They meet at a point. Where the extended sides meet, the orange dot keeps pulsing: it gently grows and glows, and two thin rings ripple out from it. |
-| 8 | "Let's check the other pair of sides." | **Automatic**: each base glows from its middle outwards, then extends as dotted lines both ways. Colours swapped (Screens 8–9): the parallel sides **AB and DC are purple**, **AD and BC are pink** (same stroke width). |
+| 8 | "Let's check the other pair of sides." | **Automatic, in place** (no fade, no glide to centre): 1 s after the line both AB and DC give one light glow together, then AB glows from its middle out and extends both ways as dotted lines, then DC the same. Colours swapped (Screens 8–9): the parallel sides **AB and DC are purple**, **AD and BC are pink** (same stroke width).
 | 9 | "This pair of sides does not meet." | Colours as Screen 8 (AB, DC purple; AD, BC pink). The dashed extensions are bolder and deeper orange. On "pair" and "meet" the parallel sides pulse together with their extensions and arrows. |
 | 10 | "This means the sides are parallel to each other." / *(voice)* "A B is parallel to C D." | The bases step out, then return one by one as "A B" and "C D" are spoken; parallel arrows appear. Label **AB ∥ CD**. |
 | 11 | "So this quadrilateral has one pair of parallel sides." | On "parallel" the pair AB, DC pulses with its extensions/arrows; label **AB ∥ CD**. Parallel arrows (all screens) are larger, deeper orange, on a white halo. |
 | 12 | "We call this a trapezium." | On "trapezium" the shape pulses and the **Trapezium** label pops in (same case as Screen 13). |
-| 13 | "A quadrilateral with at least one pair of parallel sides is called a trapezium." | The definition acted out. "quadrilateral": the four sides trace in one after another. "parallel": AB and DC run out both ways as dashed lines that never meet, the lines fade and the parallel arrows pop on (hidden until then). "trapezium": the **Trapezium** label pops in below and pulses. |
+| 13 | "A quadrilateral with at least one pair of parallel sides is called a trapezium." | The definition acted out. "quadrilateral": the four sides trace in one after another. "parallel": AB and DC glow together and the parallel arrows pop on (hidden until then); no dashed lines. "trapezium": the **Trapezium** label pops in below and pulses. |
 | 14 | "The parallel sides are called bases." | AB then CD get a subtle highlight sweep; two **yellow** "Base" labels pop in one by one on "bases". Nothing else moves. |
 | 15 | "The other two sides are called legs." | AD then BC (purple) get a subtle highlight sweep; two **purple** "Leg" labels pop in on "legs". The two **Leg** labels sit level and opposite (like the Base labels on Screen 14): left of AD and right of BC at the legs' shared mid-height, each joined by a short horizontal connector; both legs glow together. |
 
@@ -81,25 +81,25 @@ Exception: **Screen 36** (finale) hides the ice panel — Swiftee flies to the c
 
 | # | Swiftee says | What happens |
 |---|---|---|
-| 16 | "Let's measure the sides of this trapezium." | **Automatic**: Swiftee flies onto the shape and walks each side with a tape measure. Lengths appear outside the shape: **3 cm, 5 cm, 9 cm, 7 cm**. Once all four are measured she reacts: "Woah! All the sides of this trapezium are of different lengths." |
+| 16 | "Let's measure the sides of this trapezium." | **Automatic**: Swiftee flies onto the shape and walks each side with a tape measure. Lengths appear outside the shape: **3 cm, 5 cm, 9 cm, 7 cm**. Once all four are measured she reacts: "Woah! All the sides of this trapezium are of different lengths." *(after)* "Woah! All the sides … different lengths.": from "sides", as on Screen 17, AB, BC, CD, DA in turn (0.45 s apart) - each side glows while its length pops and takes its own colour. |
 | 17 | "This type of trapezium which has sides of different lengths is called a scalene trapezium." | "trapezium": the shape pops once. The lengths start hidden; from "sides" they pop in one by one (AB, BC, CD, DA) with their side glowing. "scalene": **Scalene trapezium** pops in below and pulses. Shape lifted a little so the bottom length clears the label. |
-| 18 | "Look! Its legs are of different length too." / *(Swiftee laughs: "Hee hee hee!")* / "What if the legs were the same length?" / "Let's find out." | "different": both legs light up together and their lengths pop once. No laugh line. "What if the legs were the same length?", "Let's find out.", then on to Screen 19 (2.6 s hold). |
+| 18 | "Look! Its legs are of different length too." / "What if the legs were the same length?" / "Let's find out." | "different": both legs light up together and their lengths pop once. No laugh line. "What if the legs were the same length?", "Let's find out.", then on to Screen 19 (2.6 s hold). |
 | 19 | "Let's change its shape a little." | — |
 | 20 | "Drag vertex A so that both the legs are of equal length." | **Learner drags A** (see §4.3). Correct only when AD reads **exactly 5 cm**. *(after)* "Perfect! Both legs are equal." |
 | 21 | "A trapezium where legs are of same length is called an isosceles trapezium." | "trapezium": the shape pops once. Lengths and equal marks start hidden. "same": both legs are highlighted and their two lengths appear together and pop. "isosceles": the lengths shrink into the legs and become the equal marks, then **Isosceles trapezium** pops in below and pulses. |
-| 22 | "We know all about the sides of a trapezium." | A fresh start for the angles part: the panel opens blank and the pen traces the angle-shape trapezium one side at a time, then Swiftee speaks. |
+| 22 | "We know all about the sides of a trapezium." | A calm recap. The panel opens empty; as Swiftee starts speaking the whole trapezium (outline, fill, corners, letters) fades in with a soft, settling scale-up (0.8 s). "sides": the parallel arrows pop on. "trapezium": the **Trapezium** label pops in below and gives one soft pulse. |
 
 ### Part 3 — Angles (Screens 23–35)
 
 | # | Swiftee says | What happens |
 |---|---|---|
-| 23 | "Let's look at its angles." | On "angles": arcs and values come in **A → B → C → D**, each from its corner. All values sit inside the shape. From here on, shown angles stay in place (no draw-in replay on later screens). |
+| 23 | "Let's look at its angles." | From "look", the four angles fill in one after another, **A → B → C → D** (0.55 s apart), with Screen 40's technique: each filled wedge, in its own arc colour (A orange, B purple, C blue, D yellow), grows out of its corner with a soft overshoot and a brief glow, while its arc draws round and its value glides in. Wedges are clipped to the shape. From here on, shown angles stay in place (no draw-in replay on later screens). |
 | 24 | "Did you notice something?" | Angles already in place. After a short beat **120° (A)** and **60° (D)** get a soft warm glow; 105° and 75° fade back to 35%. |
 | 25 | "∠A and ∠D add up to 180°." | **∠A + ∠D = ?** appears; on "add" copies of 120° then 60° fly from the shape, one after the other, to the answer side, replacing the "?"; on "180" they add up into **180°** (halo, pulse), leaving **∠A + ∠D = 180°**. 120° and 60° glow; 105°, 75° faded. |
-| 26 | "That means they are supplementary angles." | A and D pulse; on "supplementary" copies of the 120° and 60° wedges fly together into a **straight 180°** angle; on "angles" the equation glows. |
-| 27 | "What about ∠B and ∠C?" | **Practice question** (not scored): 105° and 75° keep a soft glow, 120° and 60° fade back (as on Screen 24); ∠B then ∠C focus, then glow together; answers slide in: **90° · 180° ✓ · 360°**. Correct shows **105° + 75° = 180°**. Wrong: "Not quite. Try again." / "360° is the sum of all four angles. Try again." Right: the 105° and 75° wedges fly off B and C and lock into a straight **180°** angle beside the shape (as on Screen 26). The question stays in the bubble. |
+| 26 | "That means they are supplementary angles." | As the line starts, A and D pulse (B, C fade back). "supplementary", **on the shape**: DC extends past D as a dashed line; D's 60° fills in at D; a copy of A's 120° (orange) slides down AD to D and turns over onto the extension beside it - together a straight angle, marked by a half-circle and **180°**. "angles": the **∠A + ∠D = 180°** label glows (snap). The figure fades after a few seconds. |
+| 27 | "What about ∠B and ∠C?" | **Practice question** (not scored): 105° and 75° keep a soft glow, 120° and 60° fade back (as on Screen 24); ∠B then ∠C focus, then glow together; answers slide in: **90° · 180° ✓ · 360°**. Correct shows **105° + 75° = 180°**. Wrong: "Not quite. Try again." / "360° is the sum of all four angles. Try again." Right: on the shape, as on Screen 26 - CD extends past C (dashed), a copy of 105° slides down BC and turns onto it beside 75°: a straight **180°**. The question stays in the bubble. |
 | 28 | "What if we change the shape of this trapezium?" | **Automatic**: the top corners glide through three trapeziums (angles update live, bases stay parallel), then settles with a gentle bounce. No other effects. |
-| 29 | "Drag any vertex to change the angles. Notice the sum of angles." | Free exploration (unlimited dragging, Done to finish). The two sums sit in a fixed row clear of the D/C letters; Done is centred below. |
+| 29 | "Drag any vertex to change the angles. Notice the sum of angles." | Free exploration (unlimited dragging, Done to finish). The two sums sit in a fixed row clear of the D/C letters; Done appears below the panel after the first drag. |
 | 30 | "No matter the shape, the angles always add up to 180°." | Two equation builds as on Screen 25: **∠A + ∠D = ?** (A, D in focus) - 113° and 67° fly in and add to 180°; then **∠B + ∠C = ?** (faded until its turn; focus moves to B, C) - the same. Ends as ∠A + ∠D = 180° and ∠B + ∠C = 180°. |
 | 31 | "So in any trapezium, angles on the same leg always add up to 180°." | The angle values turn into their names (∠A, ∠B, ∠C, ∠D), placed exactly where the values were; then A/D and B/C in turn with their box's = 180° pulsing. |
 | 32 | "What if we make one of the angles 90°?" | A short teaser before the 90° drag: Swiftee wonders aloud (curious); on "90" the four corner handles pulse once with a soft chime, hinting they can be moved next. |
@@ -111,7 +111,7 @@ Exception: **Screen 36** (finale) hides the ice panel — Swiftee flies to the c
 
 | # | Swiftee says | What happens |
 |---|---|---|
-| 36 | "Great job! Now you know all about trapeziums." | Panel fades; Swiftee flies to the centre, hovers, with a warm glow, two small stars and sparkles. |
+| 36 | "Great job! Now you know all about trapeziums." | The ice panel fades away; Swiftee stays in her usual bottom-left spot with her bubble above her, as on the lesson screens. No stars, no fly-in. |
 | 37 | "Let's recall what we learnt today." then the summary lines | **Animated summary** (§5): four big cards — Definition, Parts, Types, Angles — one at a time, explained by Swiftee with the card text in sync, each collected into a row, then a 2×2 recap. Nothing to tap. |
 
 ### Part 5 — Checks (Screens 38–42, scored) and end (43)
@@ -123,7 +123,7 @@ Exception: **Screen 36** (finale) hides the ice panel — Swiftee flies to the c
 | 40 | "In this trapezium, ∠A = 120°. What is the value of ∠D?" | 120° · **60° ✓** · 50° · 180° | The question stays static: no equation up front, and the idle reminder repeats the question word for word. Any wrong answer: the card flashes orange then turns disabled, Swiftee gives the one hint *"Angles on the same leg add up to 180°."*, then the equation **120° + ? = 180°** comes in at the top (once; it never changes form, later misses just pulse it). Right: 60° flies to D and the equation resolves to **120° + 60° = 180°** (it appears then if the learner was right first time). |
 | 41 | "Drag the labels to their correct place." | Purple → **Scalene**, green → **Isosceles**, pink → **Right** | Drag labels to boxes, each drop checked instantly; see §4.6. The question stays in the bubble at all times: it returns after any feedback line, and the idle reminder repeats it word for word. Labels: cream name cards with a teal border and grip; a correct drop widens the label to fill its slot and melts into it (slot turns soft green); a wrong drop flashes orange, shakes and glides back. |
 | 42 | "In an isosceles trapezium, AB = 6 cm, CD = 10 cm and AD = 5 cm. What is the length of BC?" | 4 cm · **5 cm ✓** · 6 cm · 10 cm | Tap an answer. The question stays in the bubble at all times: it returns after any feedback line, and the idle reminder repeats it word for word. |
-| 43 | "Amazing work! You know all about trapeziums now." | — | Same hero stage as Screen 36: no panel, Swiftee flies to centre with the warm glow and hovers. Only Swiftee and her bubble - no title, stars, score line or Play again. |
+| 43 | "Amazing work! You know all about trapeziums now." | — | Hero stage: no panel, Swiftee flies to centre with the warm glow and hovers. Only Swiftee and her bubble - no title, stars, score line or Play again. |
 
 ---
 
@@ -148,6 +148,18 @@ Exception: **Screen 36** (finale) hides the ice panel — Swiftee flies to the c
 - Every screen change stops speech, sounds and animations and resets the screen's state; returning replays the screen.
 - Automatic moves only: Screens 1→2→3→4 (one continuous intro) and Screen 18→19 after "Let's find out."
 
+### Filled angles (Screens 23–35)
+
+Every angle shown from Screen 23 on is drawn as a **solid filled wedge** in exactly its arc colour (A orange, B purple, C blue, D yellow; fill and outline the same colour, full strength), reaching the arc's outer edge, like Screen 40. The summary's angle card fills its angles the same way. Whenever a screen brings an angle into focus, its wedge grows out of the corner with a soft overshoot and a brief glow (Screen 40's technique): Screen 23 all four in turn; 24, 25 and 26 A and D; 27 B then C as they are named; 30 and 31 each pair as the focus moves. Fills fade back and glow with their arcs, follow dragged corners live (29, 33), and give way to the square mark at 90°. No screen's sequence, values or interaction changed.
+
+### Equation panels
+
+Every angle-pair equation (Screens 25, 26, 27, 30, 31) uses the same cream panel with a teal border as Screen 40's hint, and ends with a small **straight-angle picture** of that pair in its own colours (∠A + ∠D: orange + yellow; ∠B + ∠C: purple + blue), so each equation is visibly linked to its two angles. Panels keep their existing animations and values. Screen 29's live drag sums stay compact (no picture).
+
+### Buttons
+
+Every clickable answer button (Screens 27, 39, 40, 42) and the top controls (Screen N, Back, Next) and Done use one **crystal-blue button** (assets/images/crystal-button.webp, a 9-slice so the bevelled corners keep their shape at any width). Navy text, centred; options equal width, 18px apart, centred on the panel. Answer buttons stay **still** (they fade in; no idle pulse, no lift or dip on hover/press - hover only brightens); correct glows green; wrong shakes with a red (or orange) halo, then greys out; disabled is grey and faded. Not used for Check 1's shape cards, Check 4's draggable labels and slots, or the round Play button.
+
 ### 4.3 Shape dragging (Screens 20, 29, 33)
 
 - Only the **x** position of a corner moves, so **AB stays parallel to DC** at all times.
@@ -160,7 +172,7 @@ Exception: **Screen 36** (finale) hides the ice panel — Swiftee flies to the c
 | Screen | Goal | Correct when | Wrong / feedback |
 |---|---|---|---|
 | 20 | Make the legs equal by dragging A | AD reads **exactly 5 cm** (= BC) — succeeds the moment it does, A snaps to the exact spot | Release elsewhere: "AD is 5.2 cm. Keep dragging A until it shows exactly 5 cm."; dragging A to the right (wrong way) wiggles BC with the incorrect sound. One demo hand at the start. |
-| 29 | Explore angles | Learner taps **Done** (enabled after the first real drag) | No wrong answer, no auto-complete, no confetti. Guide hand demo first; dragging is unlimited. |
+| 29 | Explore angles | Learner taps **Done** (appears after the first real drag) | No wrong answer, no auto-complete, no confetti. Guide hand demo first; dragging is unlimited. |
 | 33 | Make a corner 90° | A corner within 5° of 90° (snaps to exactly 90°) | Release short: "∠B is 98° now. Keep dragging until it shows 90°." |
 
 ### 4.4 Tapping

@@ -33,7 +33,7 @@ const CONFIG = {
   // panel 512..1240 x 104..584). The bubble holds holdMs after the voice and fades (fadeMs); the shape then glides up
   // to shapeTop to make room and the answers stagger in under it.
   // Shape drawing spans ~y 26..222 of its 500x230 box; answers sit 24 px under it.
-  qFocus: { holdMs: 700, fadeMs: 350, cx: 876, shapeTop0: 220, shapeTop: 171, optTop: 417, optW: 560 },
+  qFocus: { holdMs: 700, fadeMs: 350, cx: 876, shapeTop0: 220, shapeTop: 171, optTop: 417, optW: 680 },
   ruler: { home: { gap: 80, a: 0 } /* level, centred under DC, gap px below it */, flyMs: 600, holdMs: 700, returnMs: 450 },
   // speechRate: the voice-over speed (1 = the voice's normal pace); lineGapMs: the pause after each line, so it can be
   // read and taken in before the next one starts

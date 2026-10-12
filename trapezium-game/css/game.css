@@ -442,9 +442,14 @@ a{color:#123b63}a:hover{color:#0b2742}
 .arc.live{filter:drop-shadow(0 0 5px rgba(255,184,40,.85));transition:filter .15s ease-out}
 .tag.alab.live{box-shadow:0 0 0 3px rgba(255,214,110,.55),0 0 14px 3px rgba(255,184,40,.45)}
 /* Done: the game's own button style, centred under the equation row; waits (dimmed) until the first drag */
-.done-btn{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;min-width:120px}
-.done-btn:active:not(:disabled){transform:translate(-50%,-50%) translateY(2px) scale(.96)}
-.done-btn:disabled{opacity:.45;cursor:default;filter:saturate(.6)}
+/* Done (screen 29): centred under the ice panel (x 512..1240, bottom 584), a 16px gap; appears only once the learner
+   has dragged a corner - it pops up into place with a soft glow so the next step is obvious */
+.done-btn{position:absolute;left:876px;top:600px;translate:-50% 0;min-width:140px;height:46px;font-size:21px;z-index:6;
+  animation:doneIn .5s cubic-bezier(.3,1.6,.5,1) both,doneGlow 1.8s ease-in-out .6s 2}
+.done-btn:active{transform:translateY(2px) scale(.96)}
+@keyframes doneIn{from{opacity:0;transform:translateY(14px) scale(.7)}to{opacity:1;transform:none}}
+@keyframes doneGlow{0%,100%{box-shadow:0 3px 0 #2181c4,0 6px 12px rgba(18,59,99,.18),inset 0 1px 0 rgba(255,255,255,.7)}50%{box-shadow:0 3px 0 #2181c4,0 0 0 8px rgba(86,189,244,.35),0 6px 16px rgba(18,59,99,.22),inset 0 1px 0 rgba(255,255,255,.7)}}
+@media (prefers-reduced-motion: reduce){.done-btn{animation:none}}
 
 /* screen 30 (sumSteps): fixed-width sum boxes so nothing shifts as symbols turn into values; the result part can pulse */
 .chip.gold.sumstep{box-sizing:border-box;width:316px;text-align:center;font-size:25px;padding:8px 20px 9px}
@@ -554,3 +559,86 @@ a{color:#123b63}a:hover{color:#0b2742}
 .stage .lab.lock::before{display:none}
 .stage .slot.filled.ok{border:2.5px solid #2e9e4f;background:linear-gradient(180deg,#eefbf1,#dff5e5);box-shadow:inset 0 0 0 3px rgba(255,255,255,.6),0 0 0 4px rgba(46,158,79,.12)}
 @keyframes labMerge{0%{transform:scale(1.06)}60%{transform:scale(.98)}100%{transform:none}}
+
+/* screen 22 (shapePre): the panel opens empty; on the voice the trapezium fades in with a soft, settling scale-up */
+.shape-pre .pop-g:not([data-in]){opacity:0}
+.shape-pre g.pop-g[data-in]{transform-box:fill-box;transform-origin:center;animation:shapeIn .8s cubic-bezier(.25,1.25,.5,1) both}
+.shape-pre div.pop-g[data-in]{animation:shapeIn .8s cubic-bezier(.25,1.25,.5,1) both}
+@keyframes shapeIn{from{opacity:0;transform:scale(.88)}60%{opacity:1}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.shape-pre .pop-g[data-in]{animation:none}}
+
+/* screen 23 (wedges): the filled angles wait hidden for the voice cue (Motion.anglesIn grows them in from the corner) */
+.wedge.pre{opacity:0}
+/* the filled angles follow their arcs' focus: a focused pair glows softly, the others step back with them */
+.wedge.glow{animation:arcGlow .7s ease-out .35s both}
+.wedge.dim{animation:angDim .7s ease-out .35s both}
+.wedge.live{filter:drop-shadow(0 0 5px rgba(255,184,40,.85))}
+
+/* ---------- crystal buttons (one reusable style): answer buttons (.opt.crys) and the top/Done controls (.navbtn) ----------
+   The artwork (assets/images/crystal-button.webp) is drawn as three layers - not a 9-slice, whose separately drawn
+   tiles left hairline seams once the stage is scaled: a left and a right end-cap (crystal-l/-r.webp, the full height,
+   so the bevelled corners keep their exact shape) laid over one continuous middle strip (crystal-m.webp) that runs
+   under the caps; each cap's inner 28 art px fade out over it, so there is no edge between them. Caps are 112 x 256 art
+   px = 0.4375 x the height; the strip reaches 0.11 x the height under each. The art has its own gloss, so no extra
+   background, border or highlight. Shadows use drop-shadow so they follow the crystal's outline. */
+.opt.crys,.navbtn{
+  --bh:74px;border:0;border-radius:0;box-shadow:none;
+  color:#0d2a5c;font-family:'Baloo 2',system-ui,sans-serif;font-weight:800;text-shadow:0 1px 0 rgba(255,255,255,.55);
+  display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1;
+  padding:0 calc(var(--bh) * .33);
+  filter:drop-shadow(0 3px 0 rgba(13,64,170,.32)) drop-shadow(0 6px 10px rgba(18,59,99,.18));
+  transition:transform .18s ease,filter .18s ease,opacity .2s ease}
+.navbtn::before{display:none}
+.opt.crys:hover:not(:disabled),.navbtn:hover:not(:disabled){transform:translateY(-2px);border-color:transparent;
+  filter:brightness(1.06) drop-shadow(0 5px 0 rgba(13,64,170,.3)) drop-shadow(0 9px 14px rgba(18,59,99,.2))}
+.opt.crys:active:not(:disabled),.navbtn:active:not(:disabled){transform:translateY(2px) scale(.98);transition-duration:.08s;
+  filter:brightness(.98) drop-shadow(0 1px 0 rgba(13,64,170,.35)) drop-shadow(0 2px 4px rgba(18,59,99,.16))}
+.opt.crys:focus-visible,.navbtn:focus-visible{outline:none;filter:drop-shadow(0 0 0 #fff) drop-shadow(0 0 4px #fff) drop-shadow(0 3px 0 rgba(13,64,170,.32))}
+/* sizes */
+.opt.crys{--bh:74px;font-size:21px}
+.navbtn{--bh:44px;height:44px;min-width:104px;font-size:19px}
+.navbtn.screens-btn{--bh:44px;padding:0 22px}
+.done-btn{--bh:50px;height:50px;min-width:150px;font-size:22px}
+/* selected / nudged: a soft blue halo */
+.opt.crys.sel,.opt.crys.nudged{filter:drop-shadow(0 0 6px rgba(120,200,255,.95)) drop-shadow(0 3px 0 rgba(13,64,170,.32))}
+/* correct: the crystal glows green-gold for a moment and keeps a light green halo; text turns deep green */
+.opt.crys.good{color:#145c2e;animation:crysGood .9s ease-out both}
+@keyframes crysGood{0%{filter:drop-shadow(0 0 0 rgba(46,158,79,0)) drop-shadow(0 3px 0 rgba(13,64,170,.32))}35%{filter:brightness(1.12) drop-shadow(0 0 14px rgba(46,200,100,.95)) drop-shadow(0 3px 0 rgba(13,64,170,.32))}100%{filter:drop-shadow(0 0 7px rgba(46,158,79,.75)) drop-shadow(0 3px 0 rgba(13,64,170,.32))}}
+/* wrong: a short shake with a warm halo (orange on soft-wrong screens), then the muted disabled look */
+.opt.crys.bad,.opts-in .opt.crys.bad,.soft-wrong .opt.crys.bad{animation:shake .4s ease,crysBad .5s ease-out,crysOff .45s ease .55s both;cursor:not-allowed}
+.soft-wrong .opt.crys.bad{animation:shake .4s ease,crysSoft .5s ease-out,crysOff .45s ease .55s both}
+@keyframes crysBad{0%,60%{filter:drop-shadow(0 0 9px rgba(217,74,53,.8)) drop-shadow(0 3px 0 rgba(13,64,170,.32))}100%{filter:drop-shadow(0 3px 0 rgba(13,64,170,.32))}}
+@keyframes crysSoft{0%,60%{filter:drop-shadow(0 0 9px rgba(240,160,32,.85)) drop-shadow(0 3px 0 rgba(13,64,170,.32))}100%{filter:drop-shadow(0 3px 0 rgba(13,64,170,.32))}}
+@keyframes crysOff{to{filter:grayscale(1) brightness(1.05);opacity:.55;color:#5d6f82;transform:none}}
+/* disabled (not chosen, or the screen is finished): muted, flat, not clickable */
+.opt.crys:disabled:not(.good):not(.bad),.navbtn:disabled{filter:grayscale(.85);opacity:.5;cursor:not-allowed;color:#5d6f82;background:none}
+@media (prefers-reduced-motion: reduce){.opt.crys,.navbtn{transition:none}.opt.crys.good,.opt.crys.bad{animation:none}}
+/* no rectangular backgrounds or shadows around the crystal's cut corners, in any state (older .opt/.navbtn rules) */
+.opt.crys,.opt.crys:hover,.opt.crys:active,.opt.crys:disabled,.opt.crys.good,.opt.crys.bad,.opt.crys.sel,
+.navbtn,.navbtn:hover,.navbtn:active,.navbtn:disabled{box-shadow:none!important;border:0!important;background-color:transparent!important;
+  background-image:url(../assets/images/crystal-l.webp),url(../assets/images/crystal-r.webp),url(../assets/images/crystal-m.webp)!important;
+  background-position:left center,right center,center center!important;background-repeat:no-repeat!important;
+  background-size:auto 100%,auto 100%,calc(100% - var(--bh) * .65) 100%!important}
+/* Done: pops in, then two soft glows that follow the crystal's outline */
+.done-btn{animation:doneIn .5s cubic-bezier(.3,1.6,.5,1) both,crysGlow 1.8s ease-in-out .6s 2}
+@keyframes crysGlow{0%,100%{filter:drop-shadow(0 3px 0 rgba(13,64,170,.32)) drop-shadow(0 6px 10px rgba(18,59,99,.18))}50%{filter:brightness(1.08) drop-shadow(0 0 10px rgba(120,210,255,.95)) drop-shadow(0 3px 0 rgba(13,64,170,.32))}}
+/* check 2's word answers ("Isosceles trapezium") stay on one line, all three alike */
+.opts-in:not(.quick) .opt.crys{font-size:17px;white-space:nowrap}
+/* noPanel (screen 36): the ice panel fades away, everything else (Swiftee bottom-left, her bubble) as on the lesson screens */
+.stage.nopanel .panel-img{opacity:0}
+.stage.nopanel .big-stars{display:none}
+
+/* answer buttons stay still: no idle nudge pulse, no lift on hover, no press dip, no slide-up entrance (they fade in).
+   Only feedback moves them - correct: green glow; incorrect: one shake, then grey. Hover just brightens a little. */
+.opt.crys.nudged,.opts-in .opt.crys.nudged{animation:none!important;filter:drop-shadow(0 3px 0 rgba(13,64,170,.32)) drop-shadow(0 6px 10px rgba(18,59,99,.18))}
+.opt.crys:hover:not(:disabled),.opt.crys:active:not(:disabled){transform:none!important;filter:brightness(1.06) drop-shadow(0 3px 0 rgba(13,64,170,.32)) drop-shadow(0 6px 10px rgba(18,59,99,.18))}
+.opts-in .opt.crys:not(.good):not(.bad){animation-name:crysFade}
+@keyframes crysFade{from{opacity:0}to{opacity:1}}
+
+/* pair equations (screens 25-31, as on Screen 40's hint): a small straight-angle picture after the equation - the pair's
+   two angles in their own colours, side by side on one line (∠A + ∠D: orange + yellow; ∠B + ∠C: purple + blue) */
+.eqpair-AD::after,.eqpair-BC::after{content:'';display:inline-block;width:46px;height:26px;margin-left:12px;vertical-align:-3px;flex:none;
+  background:no-repeat center/contain}
+.eqpair-AD::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 26'%3E%3Cpath d='M23,24 L3,24 A20,20 0 0 1 33,6.68 Z' fill='%23f08a24'/%3E%3Cpath d='M23,24 L33,6.68 A20,20 0 0 1 43,24 Z' fill='%23F5C542'/%3E%3Cline x1='0' y1='24.6' x2='46' y2='24.6' stroke='%23123b63' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")}
+.eqpair-BC::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 26'%3E%3Cpath d='M23,24 L3,24 A20,20 0 0 1 28.18,4.68 Z' fill='%238e44d6'/%3E%3Cpath d='M23,24 L28.18,4.68 A20,20 0 0 1 43,24 Z' fill='%232b7bd6'/%3E%3Cline x1='0' y1='24.6' x2='46' y2='24.6' stroke='%23123b63' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")}
+.eq-pair.eqpair-AD::after,.eq-pair.eqpair-BC::after,.sumstep.eqpair-AD::after,.sumstep.eqpair-BC::after{width:38px;height:22px;margin-left:8px}
