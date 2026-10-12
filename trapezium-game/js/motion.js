@@ -8,6 +8,8 @@
 // =====================================================================
 (function () {
   const G = window.gsap;
+  // a cue can fire as a screen is being left (rapid Next/Back): its elements are already gone and GSAP just skips them
+  if (G && G.config) G.config({ nullTargetWarn: false });
   const reduced = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   const $ = (sel) => Array.from(document.querySelectorAll('.stage ' + sel));
   const GLOW = 'drop-shadow(0px 0px 6px rgba(232,40,122,0.6))', NOGLOW = 'drop-shadow(0px 0px 0px rgba(232,40,122,0))';
@@ -16,9 +18,11 @@
   let ctx = G ? G.context(() => {}) : null;
   const add = (fn) => (ctx ? ctx.add(fn) : null);
   // the labels are centred on their point by CSS (translate -50% -50%); GSAP keeps that while it owns the transform
+  // the visible length label of a side (each side has a measuring-screen label and a lesson label; one is hidden)
+  const lenTag = (k) => $('.board .tag.m' + k).filter((x) => getComputedStyle(x).display !== 'none')[0];
   const centred = (els) => G.set(els, { xPercent: -50, yPercent: -50, x: 0, y: 0 });
   // every element any Motion animation touches (Motion.clear wipes their animated properties on screen change)
-  const ANIMATED = '.tag.snum, .tag.vlab, .edge, .vdot, .shape-fill, .outline-settle, .pop-g, .chev, .calp > *, .ticks, .tag.mtag, .okcheck *, .tag.alab, .arc, .chip, .chip-res, .swiftee, .swiftee canvas, .swiftee img, .bubble, .bs, .hspk, .hglow, .sv-a, .sv-d, .sv-base, .sv-180, .rmark, .tag.r90, .q3, .q3 *, .q3-hint, .q3-hint *, .q3-fly, .q4s, .q4s *, .slot, .lab, .q4-strip, .q4-card, .q4-link';
+  const ANIMATED = '.tag.snum, .tag.vlab, .edge, .vdot, .shape-fill, .outline-settle, .pop-g, .chev, .calp > *, .ticks, .tag.mtag, .okcheck *, .tag.alab, .arc, .chip, .chip-res, .xleg, .swiftee, .swiftee canvas, .swiftee img, .bubble, .bs, .hspk, .hglow, .sv-a, .sv-d, .sv-base, .sv-180, .rmark, .tag.r90, .q3, .q3 *, .q3-hint, .q3-hint *, .q3-fly, .q4s, .q4s *, .slot, .lab, .q4-strip, .q4-card, .q4-link';
   const ANIMATED_SVG = '.edge, .vdot, .shape-fill, .outline-settle, svg g.pop-g, .chev, .calp > *, .ticks, .okcheck *, .arc, .sv-a, .sv-d, .sv-base, .sv-180, .rmark';
 
   const Motion = {
@@ -31,10 +35,10 @@
     // can touch (the runtime's own bindings - left/top, stroke colour, transform-origin - are left alone).
     clear() {
       if (ctx) ctx.revert();
-      if (G) G.set($(ANIMATED), { clearProps: 'opacity,transform,filter,textShadow,strokeWidth,translate,rotate,scale' });
+      if (G) G.set($(ANIMATED), { clearProps: 'opacity,transform,filter,textShadow,strokeWidth,translate,rotate,scale,backgroundColor,borderColor,color' });
       // GSAP pins SVG origins to 0 0 whenever it touches an SVG element (even while clearing), so drop that by hand
       $(ANIMATED_SVG).forEach((el) => { el.style.removeProperty('transform-origin'); el.style.removeProperty('stroke-dasharray'); });
-      document.querySelectorAll('.eq-layer').forEach((el) => el.remove()); // screen 25's equation build
+      document.querySelectorAll('.eq-layer, .stage .tmp-ext').forEach((el) => el.remove()); // screen 25's equation build, screen 13's extensions
       ctx = G ? G.context(() => {}) : null;
     },
 
@@ -105,6 +109,22 @@
     // screen 13 "one pair of parallel sides": the legs stay solid purple; the arrow marks step aside; AB draws itself
     // A -> B, then DC draws D -> C (a pen stroke, not a fade); both give one synchronized pulse with a soft glow,
     // hold highlighted for a moment, then everything eases back to normal
+    // screens 9 and 11, the parallel pair: AB and DC (with their dashed extensions and parallel arrows) pulse together, with a soft
+    // purple glow, so the learner sees exactly which pair runs side by side without meeting
+    parPulse() {
+      const sides = [$('.eAB')[0], $('.eCD')[0]].filter(Boolean), ext = $('.xleg').filter((e) => getComputedStyle(e).display !== 'none');
+      const chev = $('.chev').filter((e) => getComputedStyle(e).display !== 'none');
+      if (!G || !sides.length) return;
+      add(() => {
+        const tl = G.timeline();
+        tl.to(sides, { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(142,68,214,0.75))', duration: 0.28, ease: 'sine.out', yoyo: true, repeat: 3 }, 0);
+        // the extensions (screen 9) and arrows (screen 11) join in only where they are on screen
+        if (ext.length) tl.to(ext, { strokeWidth: 5, opacity: 1, duration: 0.28, ease: 'sine.out', yoyo: true, repeat: 3 }, 0);
+        if (chev.length) tl.fromTo(chev, { scale: 1 }, { scale: 1.35, transformOrigin: '50% 50%', duration: 0.28, ease: 'sine.out', yoyo: true, repeat: 3 }, 0);
+        tl.call(() => { if (chev.length) G.set(chev, { clearProps: 'transform' }); if (ext.length) G.set(ext, { clearProps: 'strokeWidth,opacity' }); G.set(sides, { clearProps: 'strokeWidth,filter' }); });
+        return tl;
+      });
+    },
     parallelPair() {
       const ab = $('.eAB')[0], cd = $('.eCD')[0];
       if (!G || !ab || !cd) return;
@@ -176,7 +196,8 @@
     equalLegs() {
       const legs = [$('.eDA')[0], $('.eBC')[0]].filter(Boolean);
       if (!G || legs.length < 2) return;
-      const bases = $('.eAB').concat($('.eCD')), ticks = $('.ticks'), labels = $('.board .tag.mtag.mleg');
+      // tick-pre (screen 21): the equal marks come later, out of the lengths (lensToTicks), so they are left alone here
+      const bases = $('.eAB').concat($('.eCD')), ticks = document.querySelector('.board.tick-pre, .tick-pre') ? [] : $('.ticks'), labels = $('.board .tag.mtag.mleg');
       const L = legs.map((e) => Math.hypot(+e.getAttribute('x2') - +e.getAttribute('x1'), +e.getAttribute('y2') - +e.getAttribute('y1')) || 1);
       // dash h at each end, gap between: h 0 -> L/2 closes the line from both ends into the middle
       const draw = (h) => legs.forEach((e, i) => { const hh = Math.min(h * L[i], L[i] / 2); e.style.strokeDasharray = hh + ' ' + Math.max(0, L[i] - 2 * hh) + ' ' + hh + ' 0'; });
@@ -189,7 +210,8 @@
           .call(() => legs.forEach((e) => e.style.removeProperty('stroke-dasharray')))
           // matching pulse + the equality cues, all at the same instant
           .to(legs, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 4px rgba(142,68,214,0.45))', duration: 0.3, ease: 'sine.out' }, '>')
-          .to(ticks, { opacity: 1, duration: 0.3, ease: 'sine.out' }, '<')
+          .to(ticks, { opacity: 1, duration: 0.3, ease: 'sine.out' }, '<') // (none on screen 21: their marks come later)
+          .call(() => labels.forEach((l) => l.setAttribute('data-in', '1')), null, '<') // screen 21 (len-pre): stays shown
           .fromTo(labels, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, xPercent: -50, yPercent: -50, duration: 0.35, ease: 'back.out(1.4)' }, '<')
           .to(legs, { strokeWidth: 6.5, filter: 'drop-shadow(0px 0px 2px rgba(142,68,214,0.3))', duration: 0.25, ease: 'sine.inOut' }, '>')
           // hold, then back to normal
@@ -262,9 +284,9 @@
         return tl;
       });
     },
-    // screen 25 "∠A and ∠D add up to 180°": the sum is built in the formula box. eqStart: the frame "∠A + ∠D = ?"
-    // rises in; eqFly ("add"): copies of the 120° and 60° labels lift off the shape and glide into the ∠A / ∠D places;
-    // eqResult ("180"): 180° pops in, "120° + 60° = 180°" holds, then the box settles to "∠A + ∠D = 180°".
+    // screen 25 "∠A and ∠D add up to 180°": the sum is built in the formula box. eqStart: "∠A + ∠D = ?" rises in;
+    // eqFly ("add"): 120° then 60° fly from the shape to the answer side, replacing the "?"; eqResult ("180"): they add
+    // up into 180°, leaving "∠A + ∠D = 180°".
     // Each step completes the ones before it if a cue comes early; everything here is removed by clear().
     // the build lives in its own layer outside the template runtime's markup (the runtime must never meet nodes it
     // did not make), laid exactly over the stage and scaled with it, so its children use stage coordinates
@@ -277,73 +299,93 @@
       L.style.left = r.left + 'px'; L.style.top = r.top + 'px'; L.style.transform = 'scale(' + k + ')';
       return L;
     },
-    eqStart() {
-      if (!G || document.querySelector('.eq-build')) return;
+    // spec: { i: box number, keys: 'AD' | 'BC', dx: offset from the formula row's centre, pair: two boxes side by side,
+    // dim: start faded (its turn comes later) }. Screen 25 uses box 0 alone; screen 30 two boxes (sumSteps).
+    eqBox(i) { return document.querySelector('.eq-build[data-i="' + (i || 0) + '"]'); },
+    eqStart() { this.eqStartAt({ i: 0, keys: 'AD' }); },
+    eqStartAt(sp) {
+      if (!G || this.eqBox(sp.i)) return;
       const row = $('.chip-row')[0], stage = this.eqLayer();
       if (!row || !stage) return;
-      const slot = (cls, sym) => '<span class="eq-slot ' + cls + '"><span class="eq-sym">' + sym + '</span><span class="eq-val"></span></span>';
-      const box = document.createElement('div');
-      box.className = 'chip gold eq-build';
-      box.innerHTML = slot('eq-a', '∠A') + '<span class="eq-op">+</span>' + slot('eq-d', '∠D') + '<span class="eq-op">=</span>' + slot('eq-r', '?');
+      const box = document.createElement('div'), K = sp.keys || 'AD';
+      box.className = 'chip gold eq-build' + (sp.pair ? ' eq-pair' : ''); box.dataset.i = sp.i || 0; box.dataset.keys = K;
+      // "∠A + ∠D =" stays; the answer side starts as "?" and is where the values land ("120° + 60°") and then add up
+      // ("180°") - all three states share one fixed-width cell, so the equation never shifts
+      box.innerHTML = '<span>∠' + K[0] + '</span><span class="eq-op">+</span><span>∠' + K[1] + '</span><span class="eq-op">=</span>' +
+        '<span class="eq-r"><span class="eq-q">?</span><span class="eq-sum"><span class="eq-v1"></span><span class="eq-op eq-plus">+</span><span class="eq-v2"></span></span><span class="eq-res">180°</span></span>';
       // centred on the formula row (stage coordinates: the row's own left/top/size)
-      box.style.left = (row.offsetLeft + row.offsetWidth / 2) + 'px'; box.style.top = (row.offsetTop + row.offsetHeight / 2) + 'px';
+      box.style.left = (row.offsetLeft + row.offsetWidth / 2 + (sp.dx || 0)) + 'px'; box.style.top = (row.offsetTop + row.offsetHeight / 2) + 'px';
       stage.appendChild(box);
       add(() => G.timeline()
-        .fromTo(box, { xPercent: -50, yPercent: -50, opacity: 0, y: 14, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: 'power2.out' }, 0.15)
-        .fromTo(box.querySelector('.eq-r .eq-sym'), { opacity: 0 }, { opacity: 0.35, duration: 0.3 }, 0.35));
+        .fromTo(box, { xPercent: -50, yPercent: -50, opacity: 0, y: 14, scale: 0.94 }, { opacity: sp.dim ? 0.5 : 1, y: 0, scale: 1, duration: 0.35, ease: 'power2.out' }, 0.15)
+        .fromTo(box.querySelector('.eq-q'), { scale: 1 }, { scale: 1.25, color: '#d9640a', duration: 0.3, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 0.6));
     },
-    eqFly() {
+    // "add": copies of 120° (from A) and then 60° (from D) lift off the shape and fly, one after the other, to the
+    // answer side; the first replaces the "?", the "+" appears, the second lands beside it
+    eqFly() { this.eqFlyAt(0); },
+    eqFlyAt(i) {
       if (!G) return;
-      if (!document.querySelector('.eq-build')) this.eqStart();
-      const box = document.querySelector('.eq-build'), stage = this.eqLayer();
+      if (!this.eqBox(i)) this.eqStart();
+      const box = this.eqBox(i), stage = this.eqLayer();
       if (!box || box.dataset.flown) return;
       box.dataset.flown = '1';
       const sr = stage.getBoundingClientRect(), k = sr.width / 1280 || 1;
       const local = (r) => ({ x: (r.left - sr.left + r.width / 2) / k, y: (r.top - sr.top + r.height / 2) / k });
+      const K = box.dataset.keys, txt = (k) => (($('.board .tag.alab.l' + k)[0] || {}).textContent || '').trim();
+      box.querySelector('.eq-v1').textContent = txt(K[0]); box.querySelector('.eq-v2').textContent = txt(K[1]);
+      if (+getComputedStyle(box).opacity < 0.99) G.to(box, { opacity: 1, duration: 0.3 }); // its turn: full strength
       add(() => {
         const tl = G.timeline({ onComplete: () => { box.dataset.landed = '1'; if (box._after) box._after(); } });
-        [['A', '.eq-a'], ['D', '.eq-d']].forEach(([v, sel], i) => {
+        [[K[0], '.eq-v1'], [K[1], '.eq-v2']].forEach(([v, sel], i) => {
           const src = $('.board .tag.alab.l' + v)[0], dst = box.querySelector(sel);
           if (!src || !dst) return;
-          const val = src.textContent.trim(), from = local(src.getBoundingClientRect()), to = local(dst.getBoundingClientRect());
-          dst.querySelector('.eq-val').textContent = val;
-          // the copy: same pill as the angle label, laid over the original (which stays where it is)
+          // measure the landing spot with the answer side laid out (it is invisible until now)
+          const from = local(src.getBoundingClientRect()), to = local(dst.getBoundingClientRect());
           const c = document.createElement('div');
-          c.className = 'tag alab eq-fly'; c.textContent = val; c.style.left = from.x + 'px'; c.style.top = from.y + 'px';
+          c.className = 'tag alab eq-fly' + (box.classList.contains('eq-pair') ? ' small' : ''); c.textContent = src.textContent.trim(); c.style.left = from.x + 'px'; c.style.top = from.y + 'px';
           stage.appendChild(c);
-          const at = i * 0.18, grow = 28 / 17; // label type (17px) grows to the formula's (28px) on the way
-          tl.fromTo(c, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1 }, { y: -8, scale: 1.12, boxShadow: '0 6px 14px rgba(11,91,112,.22)', duration: 0.25, ease: 'power2.out' }, at)
+          const at = i * 1.05, grow = 28 / 17; // one after the other; the label type grows to the formula's on the way
+          tl.fromTo(c, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1, opacity: 0 }, { opacity: 1, y: -8, scale: 1.12, boxShadow: '0 6px 14px rgba(11,91,112,.22)', duration: 0.25, ease: 'power2.out' }, at)
+            .fromTo(src, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.2, duration: 0.2, yoyo: true, repeat: 1 }, at)
             .to(c, { x: to.x - from.x, y: to.y - from.y, scale: grow, backgroundColor: 'rgba(255,255,255,0)', boxShadow: '0 0 0 rgba(0,0,0,0)', duration: 0.7, ease: 'power2.inOut' }, at + 0.25)
-            // landing: the symbol makes way, the value takes its place, the copy dissolves into it
-            .to(dst.querySelector('.eq-sym'), { opacity: 0, duration: 0.2 }, at + 0.8)
-            .fromTo(dst.querySelector('.eq-val'), { opacity: 0 }, { opacity: 1, duration: 0.2 }, at + 0.9)
-            .to(c, { opacity: 0, duration: 0.15, onComplete: () => c.remove() }, at + 0.95)
-            .fromTo(dst, { scale: 1 }, { scale: 1.08, duration: 0.14, ease: 'sine.out', yoyo: true, repeat: 1 }, at + 0.95);
+            .fromTo(dst, { opacity: 0 }, { opacity: 1, duration: 0.15 }, at + 0.9)
+            .to(c, { opacity: 0, duration: 0.15, onComplete: () => c.remove() }, at + 0.92)
+            .fromTo(dst, { scale: 1 }, { scale: 1.12, duration: 0.14, ease: 'sine.out', yoyo: true, repeat: 1 }, at + 0.95);
+          if (i === 0) tl.to(box.querySelector('.eq-q'), { opacity: 0, scale: 0.5, duration: 0.2 }, at + 0.8)
+            .fromTo(box.querySelector('.eq-plus'), { opacity: 0 }, { opacity: 1, duration: 0.25 }, at + 1.0);
         });
         return tl;
       });
     },
-    eqResult(onPop) {
+    // "180": the two values slide together and add up - they melt into "180°", which pops with a warm halo, leaving
+    // "∠A + ∠D = 180°"
+    eqResult(onPop) { this.eqResultAt(0, onPop); },
+    eqResultAt(i, onPop) {
       if (!G) return;
-      if (!document.querySelector('.eq-build')) this.eqStart();
-      const box = document.querySelector('.eq-build');
+      if (!this.eqBox(i)) this.eqStart();
+      const box = this.eqBox(i);
       if (!box || box.dataset.result) return;
       box.dataset.result = '1';
       const go = () => {
-        const r = box.querySelector('.eq-r'), swap = (sel, toVal) => [box.querySelector(sel + ' .eq-sym'), box.querySelector(sel + ' .eq-val')][toVal ? 1 : 0];
-        r.querySelector('.eq-val').textContent = '180°';
+        const v1 = box.querySelector('.eq-v1'), v2 = box.querySelector('.eq-v2'), plus = box.querySelector('.eq-plus'), res = box.querySelector('.eq-res');
+        const d = (v2.offsetLeft - v1.offsetLeft) / 2;
         if (onPop) onPop();
         add(() => G.timeline()
-          .to(r.querySelector('.eq-sym'), { opacity: 0, duration: 0.15 }, 0)
-          .fromTo(r.querySelector('.eq-val'), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.6)' }, 0.05)
-          .fromTo(box, { boxShadow: '0 0 0 0 rgba(255,196,60,0)' }, { boxShadow: '0 0 0 6px rgba(255,214,110,.45)', duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.1)
-          // hold "120° + 60° = 180°", then settle to the rule "∠A + ∠D = 180°"
-          .to([swap('.eq-a', true), swap('.eq-d', true)], { opacity: 0, duration: 0.35, ease: 'sine.inOut' }, 1.6)
-          .to([swap('.eq-a', false), swap('.eq-d', false)], { opacity: 1, duration: 0.35, ease: 'sine.inOut' }, 1.75));
+          .to(v1, { x: d, opacity: 0, scale: 0.7, duration: 0.45, ease: 'power2.in' }, 0)
+          .to(v2, { x: -d, opacity: 0, scale: 0.7, duration: 0.45, ease: 'power2.in' }, 0)
+          .to(plus, { opacity: 0, scale: 0.5, duration: 0.3 }, 0)
+          .fromTo(res, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.8)' }, 0.38)
+          .fromTo(box, { boxShadow: '0 0 0 0 rgba(255,196,60,0)' }, { boxShadow: '0 0 0 6px rgba(255,214,110,.5)', duration: 0.35, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.45)
+          .to(res, { scale: 1.15, duration: 0.2, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.9)
+          // the answer cell closes up to the sum's width (the faded values leave the layout), so the finished equation
+          // sits centred with no gap
+          .set(box.querySelector('.eq-r'), { width: box.querySelector('.eq-r').offsetWidth, minWidth: 0 }, 0.44)
+          .set(box.querySelector('.eq-sum'), { position: 'absolute' }, 0.44)
+          .to(box.querySelector('.eq-r'), { width: res.offsetWidth, duration: 0.45, ease: 'power2.inOut' }, 0.5));
       };
       // a value still in flight lands first
       if (box.dataset.landed) go();
-      else { box._after = go; if (!box.dataset.flown) this.eqFly(); }
+      else { box._after = go; if (!box.dataset.flown) this.eqFlyAt(i); }
     },
     // screen 30: the values arrive in a sum box (a soft lift-in of the box's text)
     sumValues(i) {
@@ -380,6 +422,132 @@
         return tl;
       });
     },
+    // ---------- side-length labels and the definition story (screens 13, 16, 17, 18, 21) ----------
+    // the whole shape pops once about its centre (board only)
+    shapePop() {
+      const P = window.__trapP && window.__trapP();
+      if (P) this.pop((P.A.x + P.B.x + P.C.x + P.D.x) / 4, (P.A.y + P.B.y + P.C.y + P.D.y) / 4);
+    },
+    // length labels (.mAB/.mBC/.mCD/.mDA, hidden by .len-pre) pop in one after another, each with its side glowing
+    lensIn(keys, gap) {
+      if (!G) return;
+      add(() => {
+        const tl = G.timeline();
+        keys.forEach((k, i) => {
+          const lab = lenTag(k), e = $('.e' + k)[0], at = i * gap;
+          // data-in keeps it shown: the template runtime rewrites the label's style on every redraw, attributes survive
+          if (lab) tl.call(() => lab.setAttribute('data-in', '1'), null, at).fromTo(lab, { opacity: 0, scale: 0.5, xPercent: -50, yPercent: -50 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2.2)' }, at);
+          if (e) tl.to(e, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 5px rgba(142,68,214,0.6))', duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
+            .set(e, { clearProps: 'strokeWidth,filter' }, at + 0.55);
+        });
+        return tl;
+      });
+    },
+    // screen 17 "...has sides of different lengths": AB, BC, CD, DA in turn
+    lensSeq() { this.lensIn(['AB', 'BC', 'CD', 'DA'], 0.45); },
+    // screen 16 "...all the sides ... are of different lengths": each length label pulses mildly and takes its own colour
+    lenColors() {
+      if (!G) return;
+      add(() => {
+        const tl = G.timeline();
+        ['AB', 'BC', 'CD', 'DA'].forEach((k, i) => {
+          const lab = $('.board .tag.m' + k).filter((x) => getComputedStyle(x).display !== 'none')[0];
+          if (!lab) return;
+          tl.call(() => lab.setAttribute('data-col', k), null, i * 0.22) // colours in CSS (.tag.mtag[data-col]) so a redraw keeps them
+            .fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.14, duration: 0.3, ease: 'sine.inOut', yoyo: true, repeat: 3 }, i * 0.22);
+        });
+        return tl;
+      });
+    },
+    // screen 18 "...legs are of different length": both legs light up together (held through the line) and their
+    // two lengths pop once
+    legsPop() {
+      const legs = [$('.eDA')[0], $('.eBC')[0]].filter(Boolean), labs = ['DA', 'BC'].map((k) => lenTag(k)).filter(Boolean);
+      if (!G) return;
+      add(() => G.timeline()
+        .to(legs, { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(142,68,214,0.7))', duration: 0.3, ease: 'sine.out' }, 0)
+        .fromTo(labs, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.3, duration: 0.25, ease: 'back.out(2)', yoyo: true, repeat: 1 }, 0)
+        .to(legs, { strokeWidth: 5, filter: NOGLOW, duration: 0.45, ease: 'sine.inOut' }, 1.8)
+        .set(legs, { clearProps: 'strokeWidth,filter' }));
+    },
+    // screen 21 "...isosceles trapezium": the two equal lengths shrink into their legs and become the equal marks
+    // (the ticks, hidden by .tick-pre until now)
+    lensToTicks() {
+      const labs = ['DA', 'BC'].map((k) => lenTag(k)).filter(Boolean), ticks = $('.ticks'), P = window.__trapP && window.__trapP();
+      if (G) G.killTweensOf(labs);
+      if (!G || !P) return;
+      const mid = { DA: { x: (P.D.x + P.A.x) / 2, y: (P.D.y + P.A.y) / 2 }, BC: { x: (P.B.x + P.C.x) / 2, y: (P.B.y + P.C.y) / 2 } };
+      add(() => {
+        const tl = G.timeline();
+        labs.forEach((lab) => {
+          const k = lab.classList.contains('mDA') ? 'DA' : 'BC';
+          tl.to(lab, { x: mid[k].x - parseFloat(lab.style.left), y: mid[k].y - parseFloat(lab.style.top), scale: 0.3, opacity: 0, duration: 0.55, ease: 'power2.in' }, 0)
+            .call(() => lab.setAttribute('data-gone', '1'), null, 0.55);
+        });
+        tl.call(() => ticks.forEach((t) => t.setAttribute('data-in', '1')), null, 0.45)
+          .fromTo(ticks, { opacity: 0, scale: 0.4, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2.4)' }, 0.45)
+          .to(ticks, { filter: 'drop-shadow(0px 0px 4px rgba(142,68,214,0.8))', duration: 0.25, yoyo: true, repeat: 1 }, 0.85);
+        return tl;
+      });
+    },
+    // screen 13 "A quadrilateral...": the four sides trace in one after the other (AB, BC, CD, DA)
+    defTrace() {
+      if (!G) return;
+      const len = (e) => Math.hypot(+e.getAttribute('x2') - +e.getAttribute('x1'), +e.getAttribute('y2') - +e.getAttribute('y1')) || 1;
+      add(() => {
+        const tl = G.timeline();
+        ['AB', 'BC', 'CD', 'DA'].forEach((k, i) => {
+          const e = $('.e' + k)[0];
+          if (!e) return;
+          const L = len(e), at = i * 0.42;
+          tl.set(e, { strokeDasharray: L, strokeDashoffset: L }, 0)
+            .to(e, { strokeDashoffset: 0, duration: 0.4, ease: 'power1.inOut' }, at)
+            .to(e, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 5px rgba(232,40,122,0.55))', duration: 0.2, yoyo: true, repeat: 1 }, at + 0.3);
+        });
+        tl.call(() => $('.edge').forEach((e) => { e.style.removeProperty('stroke-dasharray'); e.style.removeProperty('stroke-dashoffset'); }))
+          .set($('.edge'), { clearProps: 'strokeWidth,filter' });
+        return tl;
+      });
+    },
+    // the parallel arrows (hidden by .chev-pre) pop onto their sides
+    chevIn() {
+      const chev = $('.chev');
+      if (G && chev.length) add(() => G.timeline()
+        .call(() => chev.forEach((c) => c.setAttribute('data-in', '1')))
+        .fromTo(chev, { opacity: 0, scale: 0.3, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2.4)' })
+        .to(chev, { scale: 1.25, duration: 0.2, yoyo: true, repeat: 1 }));
+    },
+    // screen 35 "right angles": both 90° marks draw into their corners with their labels, then glow gold
+    rightBoth() {
+      this.rightMark('A');
+      add(() => G.delayedCall(0.3, () => this.rightMark('D')));
+      add(() => G.delayedCall(0.9, () => this.rightGlow()));
+    },
+    // screen 13 "...one pair of parallel sides": AB and DC run out both ways as dashed lines (never meeting), the
+    // extensions fade, then the parallel arrows (hidden by .chev-pre) pop onto the two sides
+    defParallel() {
+      const svg = ($('.eAB')[0] || {}).ownerSVGElement, P = window.__trapP && window.__trapP();
+      if (!G || !svg || !P) return;
+      const group = $('.eAB')[0].parentNode, ext = 120, mk = (x1, y, x2) => {
+        const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        l.setAttribute('class', 'tmp-ext'); l.setAttribute('x1', x1); l.setAttribute('y1', y); l.setAttribute('x2', x1); l.setAttribute('y2', y); l.dataset.x2 = x2; // grows out from the corner
+        l.setAttribute('stroke', '#d9531e'); l.setAttribute('stroke-width', '4'); l.setAttribute('stroke-dasharray', '10 7'); l.setAttribute('stroke-linecap', 'round');
+        group.insertBefore(l, group.firstChild); return l;
+      };
+      const lines = [mk(P.A.x, P.A.y, P.A.x - ext), mk(P.B.x, P.B.y, P.B.x + ext), mk(P.D.x, P.D.y, P.D.x - ext), mk(P.C.x, P.C.y, P.C.x + ext)];
+      const sides = [$('.eAB')[0], $('.eCD')[0]].filter(Boolean), chev = $('.chev');
+      add(() => G.timeline({ onComplete: () => lines.forEach((l) => l.remove()) })
+        .fromTo(lines, { opacity: 0 }, { opacity: 1, duration: 0.15 }, 0)
+        .to(lines, { attr: { x2: (i, l) => +l.dataset.x2 }, duration: 0.7, ease: 'power2.out' }, 0)
+        .to(sides, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 6px rgba(142,68,214,0.6))', duration: 0.3, yoyo: true, repeat: 1 }, 0.2)
+        .to(lines, { opacity: 0, duration: 0.4, ease: 'sine.in' }, 1.4)
+        .call(() => chev.forEach((c) => c.setAttribute('data-in', '1')), null, 1.75)
+        .fromTo(chev, { opacity: 0, scale: 0.3, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2.4)' }, 1.75)
+        .to(chev, { scale: 1.25, duration: 0.2, yoyo: true, repeat: 1 }, 2.2)
+        .set(sides, { clearProps: 'strokeWidth,filter' }));
+    },
+    // the name label below the shape pops in (holdChips) and pulses (screens 13, 17, 21: showTitle -> titlePop)
+
     // angles that were dimmed on the previous screen start this one dimmed (set at once, before the first paint)
     dimAngles(keys) {
       const els = keys.split('').map((x) => $('.arc.a' + x)[0]).concat(keys.split('').map((x) => $('.tag.alab.l' + x)[0])).filter(Boolean);
@@ -488,6 +656,54 @@
       });
     },
 
+    // the screen 26 story for any pair on one leg (screen 27, right answer: B and C): copies of the two angle wedges,
+    // in their arc colours and with their values, lift off their corners and fly to the free side of the panel, where
+    // they lock together on one straight line - a 180° angle - with its label; after a moment the figure fades
+    suppPair(keys) {
+      const layer = this.eqLayer(), P = window.__trapP && window.__trapP();
+      const svgB = document.querySelector('.stage svg[viewBox="0 0 520 420"]');
+      if (!G || !layer || !P || !svgB) return;
+      const COL = { A: '#f08a24', B: '#8e44d6', C: '#2b7bd6', D: '#F5C542' }, ns = 'http://www.w3.org/2000/svg';
+      const sr = layer.getBoundingClientRect(), k = sr.width / 1280 || 1, m = svgB.getScreenCTM();
+      const at = (key) => { const q = svgB.createSVGPoint(); q.x = P[key].x; q.y = P[key].y; const s = q.matrixTransform(m); return [(s.x - sr.left) / k, (s.y - sr.top) / k]; };
+      const val = (key) => parseFloat((($('.board .tag.alab.l' + key)[0] || {}).textContent) || '90');
+      const V = [1163, 398], R = 52, pt = (deg, r) => [V[0] + r * Math.cos(deg * Math.PI / 180), V[1] - r * Math.sin(deg * Math.PI / 180)];
+      const svg = document.createElementNS(ns, 'svg');
+      svg.setAttribute('class', 'supp-pair'); svg.setAttribute('width', '1280'); svg.setAttribute('height', '720'); svg.setAttribute('viewBox', '0 0 1280 720');
+      svg.style.cssText = 'position:absolute;left:0;top:0;overflow:visible;pointer-events:none';
+      layer.appendChild(svg);
+      // wedge 1 opens from the left (180°) by its angle, wedge 2 takes the rest of the straight angle
+      const a1 = val(keys[0]), spans = [[180, 180 - a1], [180 - a1, 0]];
+      const wedges = keys.map((key, i) => {
+        const [s, e] = spans[i], p1 = pt(s, R), p2 = pt(e, R), mid = pt((s + e) / 2, 31);
+        const g = document.createElementNS(ns, 'g');
+        g.innerHTML = '<path d="M' + V[0] + ',' + V[1] + ' L' + p1[0].toFixed(1) + ',' + p1[1].toFixed(1) + ' A' + R + ',' + R + ' 0 0 1 ' + p2[0].toFixed(1) + ',' + p2[1].toFixed(1) + ' Z" fill="' + COL[key] + '" fill-opacity="0.9" stroke="#ffffff" stroke-width="1.5"></path>' +
+          '<text x="' + mid[0].toFixed(1) + '" y="' + (mid[1] + 5).toFixed(1) + '" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="13" fill="#ffffff">' + val(key) + '°</text>';
+        svg.appendChild(g); return g;
+      });
+      const base = document.createElementNS(ns, 'line');
+      base.setAttribute('x1', V[0] - 74); base.setAttribute('y1', V[1]); base.setAttribute('x2', V[0] + 74); base.setAttribute('y2', V[1]);
+      base.setAttribute('stroke', '#0b5b70'); base.setAttribute('stroke-width', '4'); base.setAttribute('stroke-linecap', 'round');
+      svg.appendChild(base);
+      const lbl = document.createElementNS(ns, 'text');
+      lbl.setAttribute('x', V[0]); lbl.setAttribute('y', V[1] + 30); lbl.setAttribute('text-anchor', 'middle'); lbl.setAttribute('font-family', 'Nunito, sans-serif');
+      lbl.setAttribute('font-weight', '900'); lbl.setAttribute('font-size', '20'); lbl.setAttribute('fill', '#0b5b70'); lbl.textContent = '180°';
+      svg.appendChild(lbl);
+      add(() => {
+        const tl = G.timeline();
+        wedges.forEach((g, i) => {
+          const c = at(keys[i]);
+          tl.fromTo(g, { opacity: 0, x: c[0] - V[0], y: c[1] - V[1], scale: 0.6, svgOrigin: V[0] + ' ' + V[1] },
+            { opacity: 1, x: 0, y: 0, scale: 1, duration: reduced ? 0 : 0.65, ease: 'power2.inOut' }, 0.15 + i * 0.3);
+        });
+        tl.fromTo(base, { opacity: 0, scaleX: 0.2, svgOrigin: V[0] + ' ' + V[1] }, { opacity: 1, scaleX: 1, duration: 0.4, ease: 'sine.out' }, 0.95)
+          .fromTo(lbl, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.4, ease: 'sine.out' }, 1.15)
+          .to(lbl, { scale: 1.2, svgOrigin: V[0] + ' ' + (V[1] + 24), duration: 0.22, yoyo: true, repeat: 1 }, 1.6)
+          .to(svg, { opacity: 0, duration: 0.5, ease: 'sine.inOut', onComplete: () => svg.remove() }, 4.2);
+        return tl;
+      });
+    },
+    suppBC() { this.suppPair(['B', 'C']); },
     // a question label arriving: pops down into place, then one soft shine across it
     askIn() {
       const chips = $('.chip'), el = chips[chips.length - 1];
@@ -923,6 +1139,8 @@
 
     // soft exit (no cut) for labels leaving with the screen change, e.g. numbers and letters on screen 3
     // screen 3 starts with every corner letter waiting (hidden) for its cue again
+    // every screen starts with the cue marks (data-in / data-gone / data-col) cleared - the elements are reused
+    cueReset() { document.querySelectorAll('.stage [data-in], .stage [data-gone], .stage [data-col]').forEach((e) => { e.removeAttribute('data-in'); e.removeAttribute('data-gone'); e.removeAttribute('data-col'); }); },
     lettersReset() { $('.tag.vlab').forEach((e) => e.removeAttribute('data-landed')); },
     fadeOut(sel) { const els = $(sel); if (G && els.length) add(() => G.to(els, { opacity: 0, duration: 0.35, ease: 'sine.out' })); },
 

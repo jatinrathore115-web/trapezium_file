@@ -35,7 +35,9 @@ const CONFIG = {
   // Shape drawing spans ~y 26..222 of its 500x230 box; answers sit 24 px under it.
   qFocus: { holdMs: 700, fadeMs: 350, cx: 876, shapeTop0: 220, shapeTop: 171, optTop: 417, optW: 560 },
   ruler: { home: { gap: 80, a: 0 } /* level, centred under DC, gap px below it */, flyMs: 600, holdMs: 700, returnMs: 450 },
-  timing: { idleMs: 9000, idleMaxHints: 3, navLockMs: 450 },
+  // speechRate: the voice-over speed (1 = the voice's normal pace); lineGapMs: the pause after each line, so it can be
+  // read and taken in before the next one starts
+  timing: { idleMs: 9000, idleMaxHints: 3, navLockMs: 450, speechRate: 0.86, lineGapMs: 850 },
   // flow: a finished screen moves on advanceMs after its last line (voice-over) ends. showNext / showBack bring those buttons back.
   // autoAdvance: false = navigation is fully manual (top-right Next / Back only; a finished screen stays put)
   // cover: the game opens on the front page (polar bear, Play button) instead of starting straight away

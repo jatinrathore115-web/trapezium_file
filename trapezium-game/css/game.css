@@ -426,10 +426,11 @@ a{color:#123b63}a:hover{color:#0b2742}
 /* screen 25: the angle sum built in the formula box (Motion.eqStart / eqFly / eqResult). Same face as the gold chip;
    each slot stacks its symbol (∠A) and its value (120°) in one cell, so nothing shifts as they swap */
 .chip.gold.eq-build{position:absolute;z-index:6;display:flex;align-items:center;gap:9px;white-space:nowrap;pointer-events:none;animation:none}
-.eq-slot{display:inline-grid;justify-items:center}
-.eq-slot>span{grid-area:1/1}
-.eq-val{opacity:0}
-.eq-r .eq-val{min-width:2.6em;text-align:center}
+.eq-r{display:inline-grid;justify-items:start;align-items:center;min-width:6.4em}
+.eq-r>span{grid-area:1/1}
+.eq-sum{display:flex;gap:9px;align-items:center}
+.eq-v1,.eq-v2,.eq-plus,.eq-res{opacity:0;display:inline-block}
+.eq-q{display:inline-block;color:#b8860b}
 .tag.alab.eq-fly{z-index:7;pointer-events:none;animation:none;transition:none;background:#fff}
 .eq-layer{position:fixed;width:1280px;height:720px;transform-origin:0 0;pointer-events:none;z-index:50;font-family:'Nunito',system-ui,sans-serif;color:#123b63}
 
@@ -464,15 +465,10 @@ a{color:#123b63}a:hover{color:#0b2742}
    Swiftee centred with the warm glow - with her bubble above her and the score line and Play again below. After she
    lands the line fades in, then the button */
 .stage.endhero .big-stars{display:none}
-.stage.scene.hero.endhero .swiftee{top:300px!important}
-.stage.scene.hero.endhero .bubble{bottom:426px!important}
-.stage.endhero .hglow{top:222px}
+.stage.scene.hero.endhero .swiftee{top:330px!important}
+.stage.scene.hero.endhero .bubble{bottom:396px!important}
+.stage.endhero .hglow{top:250px}
 .end-hero{position:absolute;left:0;top:0;width:1280px;height:720px;pointer-events:none;z-index:4}
-.eh-score{position:absolute;left:0;right:0;top:572px;text-align:center;font-weight:900;font-size:22px;color:#123b63;
-  text-shadow:0 1px 0 rgba(255,255,255,.8);animation:ehIn .45s ease-out 1.6s both}
-.eh-again{position:absolute;left:50%;top:614px;translate:-50% 0;pointer-events:auto;animation:ehIn .45s ease-out 1.9s both}
-@keyframes ehIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion: reduce){.eh-score,.eh-again{animation:none}}
 
 /* ---------- front page (cover) ----------
    The polar bear scene fills the stage and drifts very slowly (a gentle "live" zoom); snow falls over it
@@ -506,3 +502,55 @@ a{color:#123b63}a:hover{color:#0b2742}
 @keyframes coverZoom{to{transform:scale(1.14)}}
 @keyframes coverOut{to{opacity:0}}
 @media (prefers-reduced-motion: reduce){.cover-art,.play-btn img,.play-ring{animation:none}.play-ring{opacity:0}}
+
+/* screen 7: the point where the extended legs meet pulses - the dot gently breathes (with a soft glow) and two thin
+   rings ripple out from it, one after the other - so the eye lands on "the sides meet" */
+.apex-dot{transform-box:fill-box;transform-origin:center;animation:fade .35s ease-out,apexBreathe 1.6s ease-in-out .35s infinite}
+.apex-ring{transform-box:fill-box;transform-origin:center;opacity:0;pointer-events:none;animation:apexRipple 1.6s ease-out .35s infinite}
+.apex-ring.r2{animation-delay:1.15s}
+@keyframes apexBreathe{0%,100%{transform:scale(1);filter:drop-shadow(0 0 0 rgba(232,100,60,0))}50%{transform:scale(1.3);filter:drop-shadow(0 0 5px rgba(232,100,60,.7))}}
+@keyframes apexRipple{0%{opacity:.8;transform:scale(1)}100%{opacity:0;transform:scale(3.2)}}
+@media (prefers-reduced-motion: reduce){.apex-dot{animation:fade .35s ease-out}.apex-ring{animation:none}}
+
+/* screen 9 (parStrong): the dashed extensions of the parallel sides are bolder and deeper so they read clearly */
+.par-strong .xleg{stroke:#d9531e;stroke-width:4px;stroke-dasharray:10 7}
+
+/* parts that wait for their voice cue (GSAP reveals them inline): len-pre - the side lengths (screens 17, 21);
+   tick-pre - the equal-leg marks (screen 21, made out of the lengths); chev-pre - the parallel arrows (screen 13) */
+/* the cue marks them with data-in (a redraw rewrites the inline style, attributes survive) */
+.len-pre .tag.mtag:not([data-in]){opacity:0}
+.tick-pre .ticks:not([data-in]){opacity:0}
+.chev-pre .chev:not([data-in]){opacity:0}
+.tag.mtag[data-gone]{opacity:0}
+/* screen 16: each length in its own colour (lenColors) */
+.tag.mtag[data-col]{transition:background-color .35s ease,border-color .35s ease,color .35s ease}
+.tag.mtag[data-col=AB]{background:#fff4c2;border-color:#e0a800;color:#7a5a00}
+.tag.mtag[data-col=BC]{background:#dcefff;border-color:#2b7bd6;color:#164f8f}
+.tag.mtag[data-col=CD]{background:#d8f5f2;border-color:#1fa39a;color:#0d6b65}
+.tag.mtag[data-col=DA]{background:#ffe6d4;border-color:#f08a24;color:#a8500a}
+/* screen 30: two equation builds side by side - a little smaller so both fit the panel */
+.chip.gold.eq-build.eq-pair{font-size:22px;padding:8px 20px 9px;gap:7px}
+.eq-pair .eq-r{min-width:5.6em}
+.tag.alab.eq-fly.small{transform-origin:50% 50%}
+
+/* a right angle's square mark pops into its corner the moment the angle reaches 90° (its arc gives way to it) */
+.rmark{transform-box:fill-box;transform-origin:center;animation:rmarkIn .35s cubic-bezier(.3,1.6,.5,1)}
+@keyframes rmarkIn{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.rmark{animation:none}}
+
+/* check 4 labels, redesigned: the lesson's name-card look (cream face, teal border, deep-teal heavy type) with a grip,
+   a raised edge and a gentle float - clearly something to pick up. Picked up: lifts and tilts. Dropped right: it
+   widens to fill its slot and melts into it (the slot turns soft green, the card loses its edge) so the answer reads
+   as part of the strip. Dropped wrong: orange flash + shake (Motion.q4Bad), then it glides back to the tray. */
+.stage .lab{width:208px;height:56px;white-space:nowrap;border:3px solid #5cc6cf;border-radius:18px;background:linear-gradient(180deg,#fffdf6 0%,#fbf6e6 100%);
+  color:#0b5b70;font-family:'Nunito',system-ui,sans-serif;font-weight:900;font-size:16px;letter-spacing:0;padding:0 8px 0 22px;
+  box-shadow:0 4px 0 #3aa9b3,0 9px 16px rgba(11,91,112,.16);
+  transition:left .38s cubic-bezier(.22,.9,.3,1.12),top .38s cubic-bezier(.22,.9,.3,1.12),width .35s ease,transform .18s ease,box-shadow .2s ease,background-color .3s ease,border-color .3s ease,color .3s ease}
+.stage .lab::before{left:11px;width:7px;height:16px;margin-top:-8px;opacity:.7;background:radial-gradient(circle,#3aa9b3 1.3px,transparent 1.7px) 0 0/3.5px 5.3px}
+.stage .lab:hover{box-shadow:0 6px 0 #3aa9b3,0 12px 20px rgba(11,91,112,.2)}
+.stage .lab.sel{transform:translateY(-3px) scale(1.03);border-color:#d9640a;box-shadow:0 0 0 5px rgba(240,138,36,.28),0 5px 0 #c4570a}
+.stage .lab.drag{transform:scale(1.06) rotate(-2deg);box-shadow:0 18px 28px rgba(11,91,112,.3),0 4px 0 #3aa9b3}
+.stage .lab.lock{width:276px;border-color:transparent;background:transparent;box-shadow:none;color:#1d6b35;padding:0 10px;animation:labMerge .45s ease-out}
+.stage .lab.lock::before{display:none}
+.stage .slot.filled.ok{border:2.5px solid #2e9e4f;background:linear-gradient(180deg,#eefbf1,#dff5e5);box-shadow:inset 0 0 0 3px rgba(255,255,255,.6),0 0 0 4px rgba(46,158,79,.12)}
+@keyframes labMerge{0%{transform:scale(1.06)}60%{transform:scale(.98)}100%{transform:none}}
