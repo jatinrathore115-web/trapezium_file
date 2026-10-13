@@ -33,8 +33,9 @@ const CONFIG = {
   // Next / Back taps; speechRate: voice speed (1 = normal); lineGapMs: pause after each line
   timing: { idleMs: 9000, idleMaxHints: 3, navLockMs: 450, speechRate: 0.86, lineGapMs: 850 },
   // autoAdvance false = manual navigation (a finished screen waits for Next); advanceMs = the wait when it is on;
-  // showNext / showBack: the extra Next and Back buttons (off = top-right ones only); cover: open on the front page
-  flow: { autoAdvance: false, advanceMs: 2500, showNext: false, showBack: false, cover: true },
+  // showNext / showBack: the extra Next and Back buttons (off = top-right ones only); cover: open on the front page;
+  // intro: after Play, the cabin intro (js/intro.js) before screen 1
+  flow: { autoAdvance: false, advanceMs: 2500, showNext: false, showBack: false, cover: true, intro: true },
   // every screen: shape nudged right to centre it in the panel (boardX); position of the label row
   scene: { boardX: 11, chipTop: 476, chipLeft: 616 },
   // Measuring Kit layout (screens 16 and 23): board scale and offset that put the shape in the slab

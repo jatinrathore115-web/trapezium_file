@@ -12,6 +12,13 @@ moments, then answers five scored checks.
   swells out from it, glints twinkle on its rim and a shine crosses its face. Hover lifts and brightens it, a press squashes it; on Play it pops with a
   chime and the scene zooms softly away into Screen 1. The tap also unlocks the voice-over and sounds.
   Jumps from the screen list skip it. `CONFIG.flow.cover: false` turns it off.
+- **Intro** next (`js/intro.js`, art `assets/images/cabin-door-closed.webp` / `cabin-door-open.webp`): the camera pushes
+  in on Swiftee's snowy cabin; a golden bell with a red bow drops in beside the door with "Ring the bell!" and a tapping
+  hand. The learner rings it (it rings by itself after 6 s): ding-dong, sparkles, the door swings open with warm light
+  and a jingle, and Swiftee hops out onto the steps: "Oh, hello there! I'm Swiftee." · "Welcome to my cosy winter
+  cabin!" · "Today I have a special shape to show you." · "It's called a trapezium. Let's go and explore it!". The
+  camera then pulls back - the cabin shrinks into the little cabin on the landscape - while Swiftee hops down to her
+  usual spot, so the last frame is screen 1's own. Skip (top right) goes straight to screen 1.
 - **43 screens** in one fixed sequence: 36 learning screens, 5 checks, 1 lesson-complete screen.
 - **Navigation is manual**: the learner moves on with **Next** / **Back** (top right). Only the opening intro
   (Screens 1→2→3→4, each holding 2.2 s after its line so it can be read) and Screen 18 (after "Let's find out.") move on by themselves.

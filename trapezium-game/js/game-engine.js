@@ -73,11 +73,23 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     this.unlockAudio();
     this.sfx('chime');
     this.setState({ coverLeaving: true });
-    // start screen 1 underneath just after the button pops, so the cover fades into the lesson
-    setTimeout(() => this.start(), 220);
+    // start the intro (or screen 1) underneath just after the button pops, so the cover fades into it
+    setTimeout(() => (CONFIG.flow.intro && window.Intro ? this.startIntro() : this.start()), 220);
     setTimeout(() => { this.coverBusy = false; this.setState({ coverLeaving: false }); }, 900);
   }
-  componentWillUnmount() { ['pointerup', 'touchend', 'click', 'keydown'].forEach((n) => document.removeEventListener(n, this.wakeAudio, true)); this.clearT(); this.cancelSpeech(); if (this.sw) this.sw.destroy(); }
+  // the cabin intro (js/intro.js): Swiftee opens her door and says hello, then the lesson starts from the same picture
+  startIntro() {
+    this.setState({ intro: true, line: '', reveal: 0, bubOff: false });
+    this.pose(CONFIG.swiftee.idle);
+    this.setState({}, () => Intro.play(this, () => this.endIntro()));
+  }
+  endIntro() {
+    if (!this.state.intro) return;
+    this.cancelSpeech(); this.narrTok++;
+    this.setState({ intro: false });
+    this.start();
+  }
+  componentWillUnmount() { if (window.Intro) Intro.stop(); ['pointerup', 'touchend', 'click', 'keydown'].forEach((n) => document.removeEventListener(n, this.wakeAudio, true)); this.clearT(); this.cancelSpeech(); if (this.sw) this.sw.destroy(); }
   componentDidUpdate() {
     this.fitBubble();
     // screen list just opened: scroll the current screen into view
@@ -274,6 +286,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
         tap: [[700, 0, 0.07]], pop: [[520, 0, 0.07], [780, 0.06, 0.09]],
         good: [[660, 0, 0.12], [880, 0.1, 0.12], [1175, 0.2, 0.24]],
         snap: [[990, 0, 0.08], [1320, 0.07, 0.14]],
+        dingdong: [[988, 0, 0.42], [784, 0.38, 0.75]], // the cabin doorbell
         bad: [[240, 0, 0.16], [190, 0.13, 0.22]],
         // softer effects, played quieter
         draw: [[520, 0, 0.18, 760]], shimmer: [[1320, 0, 0.08], [1760, 0.05, 0.08], [2093, 0.1, 0.14]],
@@ -1833,7 +1846,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       // a pair equation (∠A + ∠D or ∠B + ∠C) gets the pair's straight-angle picture (CSS .eqpair-*)
       chips: chips.map((c) => ({ t: c.t, r: c.r || '', k: c.k + (c.t.length > 20 ? ' long' : '') + (/∠A|∠D/.test(c.t) ? ' eqpair-AD' : /∠B|∠C/.test(c.t) ? ' eqpair-BC' : '') })), // r: a result part animated on its own (screens 30-31)
       rootDown: () => this.rootDown(),
-      showCover: !s.started || !!s.coverLeaving, coverCls: 'cover' + (s.coverLeaving ? ' leaving' : ''), coverGo: () => this.coverGo(),
+      showCover: (!s.started && !s.intro) || !!s.coverLeaving, showIntro: !!s.intro, coverCls: 'cover' + (s.coverLeaving ? ' leaving' : ''), coverGo: () => this.coverGo(),
       // explore (screen 29): Done pops in after the first real drag
       showDone: !!st.explore && !!s.explored, doneExplore: () => this.doneExplore(),
       wordSize: wi > 15 || (s.line || '').length > 80 ? 22 : 24, // long lines get the smaller size
@@ -1850,7 +1863,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       nextDisabled: !s.done,
       nextCls: CONFIG.flow.showNext && st.autoAdvance == null ? (s.done && !s.talking ? 'ready' : '') : 'auto', // screens move on by themselves
       nextLabel: isLastCfu ? 'Finish' : 'Next',
-      sceneCls: 'scene' + (st.noPanel ? ' nopanel' : '') + (st.hero ? ' hero' : '') + (st.hero && st.end ? ' endhero' : '') + (st.summary ? ' summary' : '') + (st.room === 'measure' ? ' measure-room' : ''), // hero (screen 43): Swiftee centre stage, no board
+      sceneCls: 'scene' + (s.intro ? ' intro' : '') + (st.noPanel ? ' nopanel' : '') + (st.hero ? ' hero' : '') + (st.hero && st.end ? ' endhero' : '') + (st.summary ? ' summary' : '') + (st.room === 'measure' ? ' measure-room' : ''), // hero (screen 43): Swiftee centre stage, no board
       boardTf: st.room === 'measure' ? tf(CONFIG.measureRoom) : 'translate(' + CONFIG.scene.boardX + 'px, ' + (st.boardShiftY || 0) + 'px)',
       boardCls: fadeV + (st.shapePre ? ' shape-pre' : '') + (st.parStrong ? ' par-strong' : '') + (st.lenPre ? ' len-pre' : '') + (st.tickPre ? ' tick-pre' : '') + (st.chevPre ? ' chev-pre' : '') + (st.legsSet ? ' legs-set' : '') + (st.right90 && st.r90Pre ? ' r90pre' : ''),
       // pulse: the shape and its labels zoom once about the shape's centre

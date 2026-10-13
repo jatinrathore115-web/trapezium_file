@@ -47,6 +47,7 @@ trapezium-game/
 │   ├── angle-walker.js   screen 23: Swiftee measures the angles with one protractor
 │   ├── angle-frames.js   the protractor poses
 │   ├── summary.js        screen 37: the summary cards
+│   ├── intro.js          the cabin intro between the front page and screen 1
 │   ├── stage-fit.js, snowfall.js, confetti.js
 ├── assets/
 │   ├── images/           backgrounds, panels, the front-page banner, buttons, Swiftee extras
@@ -75,7 +76,10 @@ trapezium-game/
 - **Screens.** Navigation is manual: Back and Next sit top right, and "Screen N of 43" (top left) jumps to any screen.
   Skipping an unfinished drag applies its result, so later screens still match the shape.
 - **Shapes.** The bases always stay parallel: corners only slide sideways, within limits that keep the shape readable.
-- **Front page.** The banner fills the stage; the Play button starts the lesson and unlocks sound.
+- **Front page.** The banner fills the stage; the Play button unlocks sound and starts the intro.
+- **Intro** (`js/intro.js`). The camera pushes in on Swiftee's cabin, the learner rings the doorbell (it rings by itself
+  after a few seconds), the door swings open and Swiftee hops out to say hello; then the camera pulls back to the
+  lesson's landscape and screen 1 begins. Skip jumps straight to screen 1. `CONFIG.flow.intro: false` turns it off.
 
 ## Tests
 

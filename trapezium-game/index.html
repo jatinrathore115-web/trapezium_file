@@ -22,6 +22,7 @@
 <script src="js/angle-walker.js"></script>
 <script src="js/motion.js"></script>
 <script src="js/summary.js"></script>
+<script src="js/intro.js"></script>
 <script src="js/game-engine.js"></script>
 </head>
 <body>
@@ -237,6 +238,11 @@
 
 <sc-if value="{{isRecap}}" hint-placeholder-val="{{ false }}">
 <div class="sum-root"></div>
+</sc-if>
+
+<!-- the cabin intro between the front page and screen 1 (js/intro.js fills it) -->
+<sc-if value="{{showIntro}}" hint-placeholder-val="{{ false }}">
+<div class="intro-root"></div>
 </sc-if>
 
 <sc-if value="{{isEnd}}" hint-placeholder-val="{{ false }}">

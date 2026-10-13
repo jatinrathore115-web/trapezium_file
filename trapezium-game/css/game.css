@@ -564,3 +564,34 @@ a{color:#123b63}a:hover{color:#0b2742}
 .eqpair-AD::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 26'%3E%3Cpath d='M23,24 L3,24 A20,20 0 0 1 33,6.68 Z' fill='%23f08a24'/%3E%3Cpath d='M23,24 L33,6.68 A20,20 0 0 1 43,24 Z' fill='%23F5C542'/%3E%3Cline x1='0' y1='24.6' x2='46' y2='24.6' stroke='%23123b63' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")}
 .eqpair-BC::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 26'%3E%3Cpath d='M23,24 L3,24 A20,20 0 0 1 28.18,4.68 Z' fill='%238e44d6'/%3E%3Cpath d='M23,24 L28.18,4.68 A20,20 0 0 1 43,24 Z' fill='%232b7bd6'/%3E%3Cline x1='0' y1='24.6' x2='46' y2='24.6' stroke='%23123b63' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")}
 .eq-pair.eqpair-AD::after,.eq-pair.eqpair-BC::after,.sumstep.eqpair-AD::after,.sumstep.eqpair-BC::after{width:38px;height:22px;margin-left:8px}
+
+/* ---------- the cabin intro (js/intro.js): between the front page and screen 1 ----------
+   The scene sits above the lesson (z 9) with Swiftee and her bubble in front of it; the ice panel, the top buttons and
+   the screen list wait until it ends. Swiftee's spot here is on the cabin's steps; GSAP moves her from the doorway to
+   the steps and finally to her usual lesson spot, so nothing jumps when the lesson takes over. */
+.intro-root{position:absolute;left:0;top:0;width:1280px;height:720px;overflow:hidden;z-index:9;background:#2a4fb8}
+.intro-land,.intro-pic{position:absolute;left:0;top:0;width:1280px;height:720px;object-fit:cover;pointer-events:none;user-select:none}
+.intro-cam{position:absolute;inset:0}
+.intro-leaf{position:absolute;inset:0;background:url(../assets/images/cabin-door-closed.webp) no-repeat;background-size:1280px 720.4px;backface-visibility:hidden}
+.intro-hinge,.intro-glow{position:absolute}
+.intro-glow{border-radius:50% 50% 0 0 / 30% 30% 0 0;mix-blend-mode:screen;opacity:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 70%,rgba(255,214,140,.95),rgba(255,170,80,.45) 45%,rgba(255,170,80,0) 75%);filter:blur(6px)}
+.intro-snow{position:absolute;left:0;top:0;width:1280px;height:720px;pointer-events:none}
+.intro-bell{position:absolute;left:782px;top:330px;width:84px;height:102px;padding:0;border:0;background:none;cursor:pointer;
+  filter:drop-shadow(0 6px 10px rgba(80,30,0,.45)) drop-shadow(0 0 14px rgba(255,214,110,.7));-webkit-tap-highlight-color:transparent}
+.intro-bell svg{width:100%;height:100%;display:block}
+.intro-bell:focus-visible{outline:4px solid #fff;outline-offset:6px;border-radius:12px}
+.intro-cap{position:absolute;left:0;right:0;top:86px;margin:0 auto;width:max-content;padding:10px 26px;border-radius:999px;
+  background:#fffaf0;border:4px solid #d8282f;box-shadow:0 0 0 4px #fff,0 0 0 7px #2e9e4f,0 10px 22px rgba(60,10,10,.35);
+  font:800 30px/1.1 'Baloo 2','Noto Sans Math',system-ui,sans-serif;color:#123b63;pointer-events:none}
+.intro-hand{position:absolute;left:846px;top:400px;width:64px;height:90px;pointer-events:none;transform-origin:25px 22px;animation:introTap 1.1s ease-in-out infinite}
+.intro-hand img{width:100%;height:100%;transform:rotate(-30deg);filter:drop-shadow(0 4px 6px rgba(18,59,99,.35))}
+@keyframes introTap{0%,100%{translate:0 0}45%{translate:-10px -12px}60%{translate:-6px -8px}}
+.intro-star{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;background:#ffd34d;pointer-events:none;
+  clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%)}
+.navbtn.intro-skip{position:absolute;right:24px;top:16px;z-index:2}
+.stage.scene.intro .swiftee{left:514px!important;top:496px!important;z-index:10;animation:none!important}
+.stage.scene.intro .bubble{left:0!important;right:0!important;margin:0 auto;top:auto!important;bottom:250px!important;max-width:520px;z-index:11;transform-origin:50% 100%}
+.stage.scene.intro .bubble .bubble-tail{left:calc(50% - 15px)}
+.stage.scene.intro .panel-img,.stage.intro .topnav,.stage.intro .screens-btn{opacity:0;pointer-events:none}
+@media (prefers-reduced-motion: reduce){.intro-hand{animation:none}}
