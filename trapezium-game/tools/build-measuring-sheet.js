@@ -1,9 +1,9 @@
-// Turns a hand-made frame sheet (e.g. swiftee-measuring-draft.png: 4 x 2 frames on a painted checkerboard)
+// Turns a hand-drawn frame sheet (e.g. swiftee-measuring-draft.png: 4 x 2 frames on a painted checkerboard)
 // into a game sheet that matches the official Swiftee sheets: uniform grid, transparent background,
-// every frame registered on the same head-centre and feet line, Swiftee at the same size as everywhere else.
+// every frame lined up on the same head centre and feet line, Swiftee at her usual size.
 //   node tools/build-measuring-sheet.js <source.png> [cols=4] [rows=2]
-// Writes swiftee-assets/extra/swiftee_measuring@1x.webp and @2x.webp, then run tools/build-swiftee-manifest.js.
-// Needs Chrome or Edge (set CHROME=... if not found).
+// Writes swiftee-assets/extra/swiftee_measuring@1x.webp, @2x.webp and extra.json; then run tools/build-swiftee-manifest.js.
+// The pixel work runs in headless Chrome or Edge (set CHROME=... if not found). Needs Node 22+ (built-in fetch, WebSocket).
 const { spawn } = require('child_process'), fs = require('fs'), path = require('path'), os = require('os');
 const ROOT = path.join(__dirname, '..');
 const [SRC, COLS = '4', ROWS = '2'] = process.argv.slice(2);
@@ -14,7 +14,7 @@ const chromePath = CANDIDATES.find((p) => fs.existsSync(p));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const OUT = path.join(ROOT, 'swiftee-assets', 'extra');
 
-// Runs in the browser: returns { '1x': dataURL, '2x': dataURL, frames, report }
+// Runs inside the browser page: returns { out: { '1x', '2x' } as data URLs, frames, report }
 function processSheet(src, cols, rows) {
   return new Promise((resolve) => {
     const im = new Image();
@@ -83,9 +83,11 @@ function processSheet(src, cols, rows) {
   });
 }
 
+// start Chrome, run processSheet in it over the DevTools protocol, write the results
 (async () => {
   const prof = fs.mkdtempSync(path.join(os.tmpdir(), 'msheet-'));
   const chrome = spawn(chromePath, ['--headless=new', '--disable-gpu', '--remote-debugging-port=9398', '--user-data-dir=' + prof, 'about:blank']);
+  // wait up to 15 s for Chrome's DevTools endpoint
   let ws; for (let i = 0; i < 60 && !ws; i++) { try { const j = await (await fetch('http://127.0.0.1:9398/json/list')).json(); const p = j.find((x) => x.type === 'page'); if (p) ws = p.webSocketDebuggerUrl; } catch (e) {} if (!ws) await sleep(250); }
   const sock = new WebSocket(ws); await new Promise((r) => (sock.onopen = r)); let id = 0; const pend = {};
   sock.onmessage = (m) => { const d = JSON.parse(m.data); if (d.id && pend[d.id]) { pend[d.id](d.result); delete pend[d.id]; } };

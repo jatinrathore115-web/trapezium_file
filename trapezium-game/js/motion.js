@@ -1,44 +1,44 @@
 // =====================================================================
-// MOTION — the lesson's choreographed animations, on GSAP (js/vendor/gsap.min.js).
-// Everything a screen starts runs inside one gsap.context: Motion.clear() (called on every screen change) kills it
-// and reverts every inline style it set, so a screen never inherits half-finished motion from the one before.
-// Only unbound style properties are animated (opacity, transform, filter, stroke-width, text-shadow): the template
-// runtime binds left/top and stroke colour, so the two never fight. Hover/tap feedback stays in CSS.
-// prefers-reduced-motion: entrances jump to their end state, value tweens still run (they carry the lesson state).
+// MOTION - the lesson's animations, built on GSAP (js/vendor/gsap.min.js).
+// Every animation a screen starts runs inside one gsap.context. Motion.clear(), called on every screen change,
+// kills it and wipes the inline styles it set, so no screen inherits half-finished motion from the one before.
+// The template runtime owns left/top and stroke colour, so animations use other properties (opacity, transform,
+// filter, stroke-width...) and the two never fight. Hover/tap feedback stays in CSS.
+// With prefers-reduced-motion, entrances jump to their end state; value tweens still run (they drive lesson state).
 // =====================================================================
 (function () {
   const G = window.gsap;
-  // a cue can fire as a screen is being left (rapid Next/Back): its elements are already gone and GSAP just skips them
+  // a cue can fire while its screen is being left (fast Next/Back); its targets are gone, so don't warn
   if (G && G.config) G.config({ nullTargetWarn: false });
   const reduced = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   const $ = (sel) => Array.from(document.querySelectorAll('.stage ' + sel));
   const GLOW = 'drop-shadow(0px 0px 6px rgba(232,40,122,0.6))', NOGLOW = 'drop-shadow(0px 0px 0px rgba(232,40,122,0))';
-  // one shared feel for every entrance: soft ease-out with a hint of overshoot, 90% -> 100% scale
+  // the shared timing for entrances: a soft ease-out with a slight overshoot
   const ENTER = { duration: 0.6, ease: 'back.out(1.3)' };
   let ctx = G ? G.context(() => {}) : null;
   const add = (fn) => (ctx ? ctx.add(fn) : null);
-  // the labels are centred on their point by CSS (translate -50% -50%); GSAP keeps that while it owns the transform
-  // the visible length label of a side (each side has a measuring-screen label and a lesson label; one is hidden)
+  // the visible length label of a side (each side has two: one for the measuring screen, one for the lesson)
   const lenTag = (k) => $('.board .tag.m' + k).filter((x) => getComputedStyle(x).display !== 'none')[0];
+  // CSS centres labels on their point with translate(-50%, -50%); GSAP must keep that once it owns the transform
   const centred = (els) => G.set(els, { xPercent: -50, yPercent: -50, x: 0, y: 0 });
-  // every element any Motion animation touches (Motion.clear wipes their animated properties on screen change)
-  const ANIMATED = '.tag.snum, .tag.vlab, .edge, .vdot, .shape-fill, .outline-settle, .pop-g, .chev, .calp > *, .ticks, .tag.mtag, .okcheck *, .tag.alab, .arc, .wedge, .chip, .chip-res, .xleg, .swiftee, .swiftee canvas, .swiftee img, .bubble, .bs, .hspk, .hglow, .sv-a, .sv-d, .sv-base, .sv-180, .rmark, .tag.r90, .q3, .q3 *, .q3-hint, .q3-hint *, .q3-fly, .q4s, .q4s *, .slot, .lab, .q4-strip, .q4-card, .q4-link';
-  const ANIMATED_SVG = '.wedge, .edge, .vdot, .shape-fill, .outline-settle, svg g.pop-g, .chev, .calp > *, .ticks, .okcheck *, .arc, .sv-a, .sv-d, .sv-base, .sv-180, .rmark';
+  // every element Motion animates; clear() wipes the animated properties from all of them
+  const ANIMATED = '.tag.snum, .tag.vlab, .edge, .vdot, .shape-fill, .outline-settle, .pop-g, .chev, .calp > *, .ticks, .tag.mtag, .okcheck *, .tag.alab, .arc, .wedge, .chip, .chip-res, .xleg, .swiftee, .swiftee canvas, .swiftee img, .bubble, .rmark, .tag.r90, .q3, .q3 *, .q3-hint, .q3-hint *, .q3-fly, .q4s, .q4s *, .slot, .lab, .q4-strip, .q4-card, .q4-link';
+  // the SVG ones among them (clear() removes transform-origin and stroke-dasharray from these by hand)
+  const ANIMATED_SVG = '.wedge, .edge, .vdot, .shape-fill, .outline-settle, svg g.pop-g, .chev, .calp > *, .ticks, .okcheck *, .arc, .rmark';
 
   const Motion = {
     ok: !!G,
     reduced: reduced,
     // stop everything the current screen started and put every element back as the stylesheet draws it.
-    // revert() alone is not enough: it restores each tween's recorded "before" state, and when one tween started
-    // from another's end (letters faded out, then flown back in) that "before" can be a hidden state, which then
-    // leaks into every later screen. So afterwards every property GSAP animates is wiped from every element it
-    // can touch (the runtime's own bindings - left/top, stroke colour, transform-origin - are left alone).
+    // revert() alone is not enough: a tween that started from another's end state (e.g. letters faded out, then
+    // flown back in) can "revert" to a hidden state, so every animated property is also cleared by hand.
     clear() {
       if (ctx) ctx.revert();
       if (G) G.set($(ANIMATED), { clearProps: 'opacity,transform,filter,textShadow,strokeWidth,translate,rotate,scale,backgroundColor,borderColor,color' });
-      // GSAP pins SVG origins to 0 0 whenever it touches an SVG element (even while clearing), so drop that by hand
+      // GSAP writes transform-origin on any SVG element it touches (even when clearing), and some draws set
+      // stroke-dasharray directly: remove both by hand
       $(ANIMATED_SVG).forEach((el) => { el.style.removeProperty('transform-origin'); el.style.removeProperty('stroke-dasharray'); });
-      document.querySelectorAll('.eq-layer, .stage .supp-at').forEach((el) => el.remove()); // screen 25's equation build, the on-shape supplementary figure
+      document.querySelectorAll('.eq-layer, .stage .supp-at').forEach((el) => el.remove()); // equation builds and suppAt figures are added outside the context, so remove them by hand
       ctx = G ? G.context(() => {}) : null;
     },
 
@@ -51,7 +51,8 @@
     // a pause that dies with the screen
     wait(seconds, fn) { if (!G) { fn(); return; } add(() => G.delayedCall(seconds, fn)); },
 
-    // screen 1: once the pen has closed the outline, a soft glow settles round it and the fill fades in
+    // screen 1: the fill stays hidden while the pen draws; once the outline closes, a soft glow settles on it
+    // and the fill fades in
     hideFill() { if (G) add(() => G.set($('.shape-fill'), { opacity: 0 })); },
     settle() {
       if (!G) return;
@@ -64,8 +65,8 @@
       });
     },
 
-    // screen 2: numbers 1 top, 2 right, 3 bottom, 4 left - each glides in from its own side, one after another;
-    // onLand(i) fires as number i settles (its side then gives the voice-sync grow)
+    // screen 2: the side numbers 1-4 (top, right, bottom, left) glide in from their own sides, one after another;
+    // onLand(i) fires as number i settles
     sideNums(onLand) {
       const els = ['.tag.snum.n1', '.tag.snum.n2', '.tag.snum.n3', '.tag.snum.n4'].map((s) => $(s)[0]).filter(Boolean);
       if (!G || !els.length) { els.forEach((e, i) => onLand && onLand(i)); return; }
@@ -82,35 +83,8 @@
       });
     },
 
-    // the corner letters come softly back, A -> B -> C -> D (screen 4, as Swiftee invites a closer look)
-    labelsIn() {
-      const els = $('.board .tag.vlab');
-      if (G && els.length) add(() => G.to(els, { opacity: 1, duration: reduced ? 0 : 0.45, stagger: 0.15, ease: 'sine.out', overwrite: 'auto' }));
-    },
-
-    // screen 10: the two parallel sides (and their arrow marks) step out softly, to be brought back on the voice cue
-    hideSides(keys) {
-      const els = keys.map((k) => $('.e' + k)[0]).filter(Boolean).concat($('.chev'));
-      if (G && els.length) add(() => G.to(els, { opacity: 0, duration: 0.35, ease: 'sine.out' }));
-    },
-    // ...a parallel side comes back from its own side - top from above, bottom from below - with an ease-out and a
-    // soft glow that settles; onLand fires as it arrives
-    sideIn(k, onLand) {
-      const el = $('.e' + k)[0];
-      if (!G || !el) { if (onLand) onLand(); return; }
-      const dy = k === 'AB' ? -56 : k === 'CD' ? 56 : 0, dx = k === 'BC' ? 56 : k === 'DA' ? -56 : 0;
-      add(() => G.timeline()
-        .fromTo(el, { opacity: 0, x: dx, y: dy, strokeWidth: 7, filter: GLOW },
-          { opacity: 1, x: 0, y: 0, duration: reduced ? 0 : 0.6, ease: 'power3.out', overwrite: 'auto' })
-        .call(() => onLand && onLand())
-        .to(el, { strokeWidth: 5, filter: NOGLOW, duration: 0.35, ease: 'sine.out' })
-        .set(el, { clearProps: 'strokeWidth,filter' })); // hand the stroke back to the stylesheet (voice-sync emphasis)
-    },
-    // screen 13 "one pair of parallel sides": the legs stay solid purple; the arrow marks step aside; AB draws itself
-    // A -> B, then DC draws D -> C (a pen stroke, not a fade); both give one synchronized pulse with a soft glow,
-    // hold highlighted for a moment, then everything eases back to normal
-    // screens 9 and 11, the parallel pair: AB and DC (with their dashed extensions and parallel arrows) pulse together, with a soft
-    // purple glow, so the learner sees exactly which pair runs side by side without meeting
+    // screens 9 and 11: the parallel pair AB, DC pulses together with a soft purple glow (with its dashed
+    // extensions on screen 9, its arrows on screen 11), showing which pair runs side by side without meeting
     parPulse() {
       const sides = [$('.eAB')[0], $('.eCD')[0]].filter(Boolean), ext = $('.xleg').filter((e) => getComputedStyle(e).display !== 'none');
       const chev = $('.chev').filter((e) => getComputedStyle(e).display !== 'none');
@@ -118,41 +92,15 @@
       add(() => {
         const tl = G.timeline();
         tl.to(sides, { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(142,68,214,0.75))', duration: 0.28, ease: 'sine.out', yoyo: true, repeat: 3 }, 0);
-        // the extensions (screen 9) and arrows (screen 11) join in only where they are on screen
+        // the extensions and arrows join in only when they are showing
         if (ext.length) tl.to(ext, { strokeWidth: 5, opacity: 1, duration: 0.28, ease: 'sine.out', yoyo: true, repeat: 3 }, 0);
         if (chev.length) tl.fromTo(chev, { scale: 1 }, { scale: 1.35, transformOrigin: '50% 50%', duration: 0.28, ease: 'sine.out', yoyo: true, repeat: 3 }, 0);
         tl.call(() => { if (chev.length) G.set(chev, { clearProps: 'transform' }); if (ext.length) G.set(ext, { clearProps: 'strokeWidth,opacity' }); G.set(sides, { clearProps: 'strokeWidth,filter' }); });
         return tl;
       });
     },
-    parallelPair() {
-      const ab = $('.eAB')[0], cd = $('.eCD')[0];
-      if (!G || !ab || !cd) return;
-      const len = (e) => Math.hypot(+e.getAttribute('x2') - +e.getAttribute('x1'), +e.getAttribute('y2') - +e.getAttribute('y1')) || 1;
-      const la = len(ab), lc = len(cd), chev = $('.chev'), draw = reduced ? 0 : 0.55;
-      add(() => {
-        const tl = G.timeline();
-        tl.to(chev, { opacity: 0, duration: 0.2, ease: 'sine.out' }, 0)
-          // both parallel sides clear, then are drawn in one after the other (DC's line runs C -> D, so it is revealed
-          // from its end to read D -> C)
-          .set(ab, { strokeDasharray: la, strokeDashoffset: la }, 0)
-          .set(cd, { strokeDasharray: lc, strokeDashoffset: -lc }, 0)
-          .to(ab, { strokeDashoffset: 0, duration: draw, ease: 'power2.inOut' }, 0.1)
-          .to(cd, { strokeDashoffset: 0, duration: draw, ease: 'power2.inOut' }, 0.1 + draw + 0.05)
-          // one synchronized pulse, then a short highlighted hold
-          .to([ab, cd], { strokeWidth: 8, filter: GLOW, duration: 0.3, ease: 'sine.out' }, '>+0.1')
-          .to([ab, cd], { strokeWidth: 7, filter: 'drop-shadow(0px 0px 4px rgba(232,40,122,0.4))', duration: 0.25, ease: 'sine.inOut' }, '>')
-          .to(chev, { opacity: 1, duration: 0.35, ease: 'sine.out' }, '<')
-          // back to normal
-          .to([ab, cd], { strokeWidth: 5, filter: NOGLOW, duration: 0.45, ease: 'sine.inOut' }, '>+0.9')
-          .set([ab, cd], { clearProps: 'strokeDasharray,strokeDashoffset,strokeWidth,filter' })
-;
-        return tl;
-      });
-    },
 
-    // "The parallel sides...": the other two sides dim to neutral and the named pair gets a quick line-reveal sweep,
-    // one after the other (a pen stroke along each side), so the pair comes into focus. calloutIn() undoes the dimming.
+    // screens 14 ("parallel") and 15 ("other"): the named pair redraws itself one side after the other, like a pen stroke
     focusPair(keys) {
       const pair = keys.map((k) => $('.e' + k)[0]).filter(Boolean);
       const others = ['AB', 'BC', 'CD', 'DA'].filter((k) => keys.indexOf(k) < 0).map((k) => $('.e' + k)[0]).filter(Boolean);
@@ -168,9 +116,8 @@
         return tl;
       });
     },
-    // the "Base" / "Leg" pills come in one after another: each connector draws out from its side, then its pill pops
-    // in (90% -> 100%, soft ease-out); then any dimmed sides ease back. The labels stay. (The pair's pulse is the
-    // voice-sync grow on the word itself - "bases" / "legs" - which lands exactly as the labels arrive.)
+    // screens 14 and 15: the "Base" / "Leg" pills come in one after another (each connector draws out from its
+    // side, then its pill pops in), then the other two sides ease back to full strength. The pills stay.
     calloutIn(pairKeys) {
       if (!G) return;
       const keys = pairKeys || [];
@@ -190,13 +137,12 @@
       });
     },
 
-    // screen 20 "same length": the bases dim to neutral; both legs reveal from their two ends toward their middle at
-    // exactly the same time and speed (one shared tween drives both); then they pulse together once, and the
-    // equal-length tick marks and both leg labels appear at that same moment; everything eases back after a hold
+    // screen 21, on "same": the bases dim, both legs draw in from their ends to their middles together, then pulse
+    // once as the equal marks and leg lengths appear; after a short hold everything eases back
     equalLegs() {
       const legs = [$('.eDA')[0], $('.eBC')[0]].filter(Boolean);
       if (!G || legs.length < 2) return;
-      // tick-pre (screen 21): the equal marks come later, out of the lengths (lensToTicks), so they are left alone here
+      // with .tick-pre (screen 21) the equal marks come later, from lensToTicks, so leave them alone here
       const bases = $('.eAB').concat($('.eCD')), ticks = document.querySelector('.board.tick-pre, .tick-pre') ? [] : $('.ticks'), labels = $('.board .tag.mtag.mleg');
       const L = legs.map((e) => Math.hypot(+e.getAttribute('x2') - +e.getAttribute('x1'), +e.getAttribute('y2') - +e.getAttribute('y1')) || 1);
       // dash h at each end, gap between: h 0 -> L/2 closes the line from both ends into the middle
@@ -208,10 +154,10 @@
           .call(() => draw(0), null, 0)
           .to(o, { h: 0.5, duration: reduced ? 0 : 0.7, ease: 'power2.inOut', onUpdate: () => draw(o.h) }, 0.1)
           .call(() => legs.forEach((e) => e.style.removeProperty('stroke-dasharray')))
-          // matching pulse + the equality cues, all at the same instant
+          // the matching pulse, the equal marks and the length labels all land together
           .to(legs, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 4px rgba(142,68,214,0.45))', duration: 0.3, ease: 'sine.out' }, '>')
-          .to(ticks, { opacity: 1, duration: 0.3, ease: 'sine.out' }, '<') // (none on screen 21: their marks come later)
-          .call(() => labels.forEach((l) => l.setAttribute('data-in', '1')), null, '<') // screen 21 (len-pre): stays shown
+          .to(ticks, { opacity: 1, duration: 0.3, ease: 'sine.out' }, '<')
+          .call(() => labels.forEach((l) => l.setAttribute('data-in', '1')), null, '<') // data-in keeps them shown (they start hidden by .len-pre)
           .fromTo(labels, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, xPercent: -50, yPercent: -50, duration: 0.35, ease: 'back.out(1.4)' }, '<')
           .to(legs, { strokeWidth: 6.5, filter: 'drop-shadow(0px 0px 2px rgba(142,68,214,0.3))', duration: 0.25, ease: 'sine.inOut' }, '>')
           // hold, then back to normal
@@ -223,7 +169,7 @@
       });
     },
 
-    // screen 21 entry: the corner handles pop in one after another, then the measurements fade in
+    // screen 29 opens: the corner handles pop in one after another, then any length labels fade in
     entryPop() {
       const dots = $('.vdot'), labels = $('.board .tag.mtag');
       if (!G || !dots.length) return;
@@ -231,8 +177,7 @@
         .fromTo(dots, { scale: 0.4, opacity: 0, transformOrigin: '50% 50%' }, { scale: 1, opacity: 1, duration: reduced ? 0 : 0.35, ease: 'back.out(1.8)', stagger: 0.08 }, 0.15)
         .fromTo(labels, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'sine.out', stagger: 0.05 }, '>-0.1'));
     },
-    // correct answer: a soft sparkle burst beside the shape (no check-mark icons anywhere - success is shown with green
-    // highlights, glows, gentle bounces, sparkles and the success sound)
+    // screen 35, once the right angles are found: a soft sparkle burst beside the shape (no check-mark icons)
     okCheck() {
       const g = $('.okcheck')[0];
       if (!G || !g) return;
@@ -240,13 +185,12 @@
       add(() => G.fromTo(spk, { scale: 0, opacity: 1, transformOrigin: '50% 50%' }, { scale: 1.3, opacity: 0, duration: 0.9, ease: 'power2.out', stagger: 0.08 }));
     },
 
-    // screen 23 "Let's look at its angles": A -> B -> C -> D, each arc draws itself round its corner while its value
-    // glides in toward that corner (A top-left, B top-right, C bottom-right, D bottom-left) and settles
+    // screen 23 without the protractor walk (reduced motion, or no walker): A -> B -> C -> D, each arc draws
+    // round its corner, its filled angle grows out and its value glides in toward the corner
     anglesIn() {
       if (!G) return;
-      // each value glides toward its own vertex from a little deeper inside the shape (along the angle's bisector):
-      // going deeper only adds room from both sides, so the label stays inside the trapezium for the whole motion.
-      // The arcs are clipped to the shape (index.html #shapeClip), so their draw-in can never paint outside it either.
+      // each value starts a little further inside the shape, along the line from its corner, so it stays inside
+      // the trapezium as it moves (the arcs are clipped to the shape by index.html #shapeClip)
       const dots = $('.vdot'), order = ['A', 'B', 'C', 'D'];
       const dir = {};
       order.forEach((k, i) => {
@@ -261,7 +205,7 @@
         order.forEach((k, i) => {
           const arc = $('.arc.a' + k)[0], lab = $('.tag.alab.l' + k)[0], at = i * 0.55;
           if (arc) tl.fromTo(arc, { opacity: 1, strokeDasharray: 100, strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.45, ease: 'power2.out' }, at);
-          // screen 23 (wedges): as on screen 40, the filled angle grows out of its corner with a soft overshoot, then a glow
+          // the filled angle grows out of its corner with a soft overshoot, then glows once (as in wedgeGrow)
           const wd = $('.wedge.w' + k)[0], dot = dots[i];
           if (wd && dot) tl.fromTo(wd, { opacity: 1, scale: 0, svgOrigin: dot.getAttribute('cx') + ' ' + dot.getAttribute('cy') }, { scale: 1, duration: reduced ? 0 : 0.5, ease: 'back.out(1.6)' }, at)
             .to(wd, { filter: 'drop-shadow(0px 0px 5px ' + ({ A: 'rgba(240,138,36,0.8)', B: 'rgba(142,68,214,0.7)', C: 'rgba(43,123,214,0.7)', D: 'rgba(245,197,66,0.9)' })[k] + ')', duration: 0.3, yoyo: true, repeat: 1 }, at + 0.45);
@@ -272,8 +216,24 @@
       });
     },
 
-    // a named angle in focus (screen 25 "∠A ... ∠D"): the other angles dim, this arc redraws round its corner (0.5 s)
-    // and gives one gentle pulse, its value pulses with it
+    // screen 23, one corner at a time: as Swiftee holds the protractor on corner k (js/angle-walker.js), its arc
+    // draws, its filled angle grows out and glows once, and its value pops in; all of it stays
+    angleIn(k) {
+      if (!G) return;
+      const i = ['A', 'B', 'C', 'D'].indexOf(k), dot = $('.vdot')[i];
+      const arc = $('.arc.a' + k)[0], wd = $('.wedge.w' + k)[0], lab = $('.tag.alab.l' + k)[0];
+      const C = { A: 'rgba(240,138,36,0.8)', B: 'rgba(142,68,214,0.7)', C: 'rgba(43,123,214,0.7)', D: 'rgba(245,197,66,0.9)' };
+      add(() => {
+        const tl = G.timeline();
+        if (arc) tl.fromTo(arc, { opacity: 1, strokeDasharray: 100, strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.45, ease: 'power2.out' }, 0);
+        if (wd && dot) tl.fromTo(wd, { opacity: 1, scale: 0, svgOrigin: dot.getAttribute('cx') + ' ' + dot.getAttribute('cy') }, { scale: 1, duration: reduced ? 0 : 0.5, ease: 'back.out(1.6)' }, 0)
+          .to(wd, { filter: 'drop-shadow(0px 0px 5px ' + C[k] + ')', duration: 0.3, yoyo: true, repeat: 1 }, 0.45);
+        if (lab) tl.fromTo(lab, { opacity: 0, xPercent: -50, yPercent: -50, scale: 0.3 }, { opacity: 1, scale: 1, duration: reduced ? 0 : 0.42, ease: 'back.out(2.2)' }, 0.12);
+        return tl;
+      });
+    },
+    // screen 27, as each angle is named: the other angles dim, this arc redraws round its corner and pulses once,
+    // and its filled angle grows in and its value pulses with it
     angleFocus(k) {
       if (!G) return;
       const arc = $('.arc.a' + k)[0], lab = $('.tag.alab.l' + k)[0];
@@ -289,12 +249,11 @@
         return tl;
       });
     },
-    // screen 25 "∠A and ∠D add up to 180°": the sum is built in the formula box. eqStart: "∠A + ∠D = ?" rises in;
-    // eqFly ("add"): 120° then 60° fly from the shape to the answer side, replacing the "?"; eqResult ("180"): they add
-    // up into 180°, leaving "∠A + ∠D = 180°".
-    // Each step completes the ones before it if a cue comes early; everything here is removed by clear().
-    // the build lives in its own layer outside the template runtime's markup (the runtime must never meet nodes it
-    // did not make), laid exactly over the stage and scaled with it, so its children use stage coordinates
+    // ---------- the equation build (screen 25; two boxes on screen 30) ----------
+    // eqStart as the line starts: "∠A + ∠D = ?" rises in; eqFly on "add": the two values fly in and replace the "?";
+    // eqResult on "180": they add up to 180°. A cue that arrives early first completes the steps before it.
+    // The build has its own layer outside the runtime's markup (the runtime must not meet nodes it did not make),
+    // laid over the stage and scaled with it, so its children use stage coordinates. clear() removes it.
     eqLayer() {
       const stage = document.querySelector('.stage');
       if (!stage) return null;
@@ -304,8 +263,8 @@
       L.style.left = r.left + 'px'; L.style.top = r.top + 'px'; L.style.transform = 'scale(' + k + ')';
       return L;
     },
-    // spec: { i: box number, keys: 'AD' | 'BC', dx: offset from the formula row's centre, pair: two boxes side by side,
-    // dim: start faded (its turn comes later) }. Screen 25 uses box 0 alone; screen 30 two boxes (sumSteps).
+    // eqStartAt(spec): { i: box number, keys: 'AD' | 'BC', dx: offset from the formula row's centre,
+    // pair: one of two boxes side by side, dim: start faded until its turn }. Screen 25 uses box 0, screen 30 both.
     eqBox(i) { return document.querySelector('.eq-build[data-i="' + (i || 0) + '"]'); },
     eqStart() { this.eqStartAt({ i: 0, keys: 'AD' }); },
     eqStartAt(sp) {
@@ -314,19 +273,18 @@
       if (!row || !stage) return;
       const box = document.createElement('div'), K = sp.keys || 'AD';
       box.className = 'chip gold eq-build eqpair-' + K + (sp.pair ? ' eq-pair' : ''); box.dataset.i = sp.i || 0; box.dataset.keys = K;
-      // "∠A + ∠D =" stays; the answer side starts as "?" and is where the values land ("120° + 60°") and then add up
-      // ("180°") - all three states share one fixed-width cell, so the equation never shifts
+      // the answer side goes "?" -> "120° + 60°" -> "180°" in one fixed-width cell, so the equation never shifts
       box.innerHTML = '<span>∠' + K[0] + '</span><span class="eq-op">+</span><span>∠' + K[1] + '</span><span class="eq-op">=</span>' +
         '<span class="eq-r"><span class="eq-q">?</span><span class="eq-sum"><span class="eq-v1"></span><span class="eq-op eq-plus">+</span><span class="eq-v2"></span></span><span class="eq-res">180°</span></span>';
-      // centred on the formula row (stage coordinates: the row's own left/top/size)
+      // centred on the formula row (in stage coordinates)
       box.style.left = (row.offsetLeft + row.offsetWidth / 2 + (sp.dx || 0)) + 'px'; box.style.top = (row.offsetTop + row.offsetHeight / 2) + 'px';
       stage.appendChild(box);
       add(() => G.timeline()
         .fromTo(box, { xPercent: -50, yPercent: -50, opacity: 0, y: 14, scale: 0.94 }, { opacity: sp.dim ? 0.5 : 1, y: 0, scale: 1, duration: 0.35, ease: 'power2.out' }, 0.15)
         .fromTo(box.querySelector('.eq-q'), { scale: 1 }, { scale: 1.25, color: '#d9640a', duration: 0.3, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 0.6));
     },
-    // "add": copies of 120° (from A) and then 60° (from D) lift off the shape and fly, one after the other, to the
-    // answer side; the first replaces the "?", the "+" appears, the second lands beside it
+    // "add": copies of the two values lift off the shape and fly, one after the other, to the answer side;
+    // the first replaces the "?", then the "+" appears and the second lands beside it
     eqFly() { this.eqFlyAt(0); },
     eqFlyAt(i) {
       if (!G) return;
@@ -338,18 +296,18 @@
       const local = (r) => ({ x: (r.left - sr.left + r.width / 2) / k, y: (r.top - sr.top + r.height / 2) / k });
       const K = box.dataset.keys, txt = (k) => (($('.board .tag.alab.l' + k)[0] || {}).textContent || '').trim();
       box.querySelector('.eq-v1').textContent = txt(K[0]); box.querySelector('.eq-v2').textContent = txt(K[1]);
-      if (+getComputedStyle(box).opacity < 0.99) G.to(box, { opacity: 1, duration: 0.3 }); // its turn: full strength
+      if (+getComputedStyle(box).opacity < 0.99) G.to(box, { opacity: 1, duration: 0.3 }); // a dimmed box comes up to full strength for its turn
       add(() => {
         const tl = G.timeline({ onComplete: () => { box.dataset.landed = '1'; if (box._after) box._after(); } });
         [[K[0], '.eq-v1'], [K[1], '.eq-v2']].forEach(([v, sel], i) => {
           const src = $('.board .tag.alab.l' + v)[0], dst = box.querySelector(sel);
           if (!src || !dst) return;
-          // measure the landing spot with the answer side laid out (it is invisible until now)
+          // the answer side is already laid out (just invisible), so the landing spot can be measured
           const from = local(src.getBoundingClientRect()), to = local(dst.getBoundingClientRect());
           const c = document.createElement('div');
           c.className = 'tag alab eq-fly' + (box.classList.contains('eq-pair') ? ' small' : ''); c.textContent = src.textContent.trim(); c.style.left = from.x + 'px'; c.style.top = from.y + 'px';
           stage.appendChild(c);
-          const at = i * 1.05, grow = 28 / 17; // one after the other; the label type grows to the formula's on the way
+          const at = i * 1.05, grow = 28 / 17; // 1.05 s apart; the text grows from label size to formula size in flight
           tl.fromTo(c, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1, opacity: 0 }, { opacity: 1, y: -8, scale: 1.12, boxShadow: '0 6px 14px rgba(11,91,112,.22)', duration: 0.25, ease: 'power2.out' }, at)
             .fromTo(src, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.2, duration: 0.2, yoyo: true, repeat: 1 }, at)
             .to(c, { x: to.x - from.x, y: to.y - from.y, scale: grow, backgroundColor: 'rgba(255,255,255,0)', boxShadow: '0 0 0 rgba(0,0,0,0)', duration: 0.7, ease: 'power2.inOut' }, at + 0.25)
@@ -362,8 +320,7 @@
         return tl;
       });
     },
-    // "180": the two values slide together and add up - they melt into "180°", which pops with a warm halo, leaving
-    // "∠A + ∠D = 180°"
+    // "180": the two values slide together and merge into "180°", which pops with a warm halo
     eqResult(onPop) { this.eqResultAt(0, onPop); },
     eqResultAt(i, onPop) {
       if (!G) return;
@@ -382,23 +339,17 @@
           .fromTo(res, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.8)' }, 0.38)
           .fromTo(box, { boxShadow: '0 0 0 0 rgba(255,196,60,0)' }, { boxShadow: '0 0 0 6px rgba(255,214,110,.5)', duration: 0.35, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.45)
           .to(res, { scale: 1.15, duration: 0.2, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.9)
-          // the answer cell closes up to the sum's width (the faded values leave the layout), so the finished equation
-          // sits centred with no gap
+          // the answer cell shrinks to the width of "180°" (the faded values leave the layout), so the equation
+          // stays centred
           .set(box.querySelector('.eq-r'), { width: box.querySelector('.eq-r').offsetWidth, minWidth: 0 }, 0.44)
           .set(box.querySelector('.eq-sum'), { position: 'absolute' }, 0.44)
           .to(box.querySelector('.eq-r'), { width: res.offsetWidth, duration: 0.45, ease: 'power2.inOut' }, 0.5));
       };
-      // a value still in flight lands first
+      // wait for the values to land first
       if (box.dataset.landed) go();
       else { box._after = go; if (!box.dataset.flown) this.eqFlyAt(i); }
     },
-    // screen 30: the values arrive in a sum box (a soft lift-in of the box's text)
-    sumValues(i) {
-      const c = $('.chip-row .chip')[i];
-      if (!G || !c) return;
-      add(() => G.fromTo(c, { scale: 1 }, { scale: 1.04, duration: 0.2, ease: 'sine.out', yoyo: true, repeat: 1 }));
-    },
-    // one angle steps forward: its arc thickens and its value pops (screen 34 "another right angle")
+    // screen 34, on "another": the second right angle steps forward - its arc thickens and its value pops
     anglePop(k) {
       const arc = $('.arc.a' + k)[0], lab = $('.tag.alab.l' + k)[0];
       if (!G) return;
@@ -409,13 +360,13 @@
         return tl;
       });
     },
-    // screen 31: the angle values turn into their names (∠A...) with a soft pop, all four together
+    // screen 31: the angle values turn into their names (∠A...) with a soft pop
     angleNames() {
       const labs = $('.board .tag.alab');
       if (!G || !labs.length) return;
       add(() => G.fromTo(labs, { xPercent: -50, yPercent: -50, scale: 0.7 }, { scale: 1, duration: 0.4, ease: 'back.out(1.8)', stagger: 0.06 }));
     },
-    // ...and its result resolves: "180°" pops, the box gets a soft warm halo (strong: a second, slightly bigger pulse)
+    // screen 31: sum box i resolves - "= 180°" pops in and the box gets a warm halo (strong: an extra pulse)
     sumResolve(i, strong) {
       const c = $('.chip-row .chip')[i], r = c && c.querySelector('.chip-res');
       if (!G || !c || !r) return;
@@ -428,19 +379,19 @@
       });
     },
     // ---------- side-length labels and the definition story (screens 13, 16, 17, 18, 21) ----------
-    // the whole shape pops once about its centre (board only)
+    // screens 17 and 21, on "trapezium": the whole shape pops once about its centre
     shapePop() {
       const P = window.__trapP && window.__trapP();
       if (P) this.pop((P.A.x + P.B.x + P.C.x + P.D.x) / 4, (P.A.y + P.B.y + P.C.y + P.D.y) / 4);
     },
-    // length labels (.mAB/.mBC/.mCD/.mDA, hidden by .len-pre) pop in one after another, each with its side glowing
+    // the length labels (hidden by .len-pre) pop in `gap` s apart, each side glowing as its label lands
     lensIn(keys, gap) {
       if (!G) return;
       add(() => {
         const tl = G.timeline();
         keys.forEach((k, i) => {
           const lab = lenTag(k), e = $('.e' + k)[0], at = i * gap;
-          // data-in keeps it shown: the template runtime rewrites the label's style on every redraw, attributes survive
+          // data-in keeps it shown: the runtime rewrites the label's style on every redraw but leaves attributes alone
           if (lab) tl.call(() => lab.setAttribute('data-in', '1'), null, at).fromTo(lab, { opacity: 0, scale: 0.5, xPercent: -50, yPercent: -50 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2.2)' }, at);
           if (e) tl.to(e, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 5px rgba(142,68,214,0.6))', duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
             .set(e, { clearProps: 'strokeWidth,filter' }, at + 0.55);
@@ -448,18 +399,17 @@
         return tl;
       });
     },
-    // screen 17 "...has sides of different lengths": AB, BC, CD, DA in turn
+    // screen 17, on "sides": AB, BC, CD, DA in turn
     lensSeq() { this.lensIn(['AB', 'BC', 'CD', 'DA'], 0.45); },
-    // screen 16 "...all the sides ... are of different lengths": the same rhythm as screen 17's lensSeq - AB, BC, CD, DA
-    // in turn (0.45 s apart), each side glows while its length pops (0.5 -> 1 with the same back-out ease, as if it
-    // arrived again) and takes its own colour
+    // screen 16, on "sides": the same rhythm as lensSeq - each side glows in turn while its length pops and
+    // takes the side's own colour
     lenColors() {
       if (!G) return;
       add(() => {
         const tl = G.timeline();
         ['AB', 'BC', 'CD', 'DA'].forEach((k, i) => {
           const lab = lenTag(k), e = $('.e' + k)[0], at = i * 0.45;
-          if (lab) tl.call(() => lab.setAttribute('data-col', k), null, at) // colours in CSS (.tag.mtag[data-col]) so a redraw keeps them
+          if (lab) tl.call(() => lab.setAttribute('data-col', k), null, at) // the colour comes from CSS (.tag.mtag[data-col]), so a redraw keeps it
             .fromTo(lab, { xPercent: -50, yPercent: -50, scale: 0.5 }, { scale: 1, duration: 0.4, ease: 'back.out(2.2)' }, at);
           if (e) tl.to(e, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 5px rgba(142,68,214,0.6))', duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
             .set(e, { clearProps: 'strokeWidth,filter' }, at + 0.55);
@@ -467,8 +417,7 @@
         return tl;
       });
     },
-    // screen 18 "...legs are of different length": both legs light up together (held through the line) and their
-    // two lengths pop once
+    // screen 18, on "different": both legs light up for a moment and their two lengths pop once
     legsPop() {
       const legs = [$('.eDA')[0], $('.eBC')[0]].filter(Boolean), labs = ['DA', 'BC'].map((k) => lenTag(k)).filter(Boolean);
       if (!G) return;
@@ -478,8 +427,8 @@
         .to(legs, { strokeWidth: 5, filter: NOGLOW, duration: 0.45, ease: 'sine.inOut' }, 1.8)
         .set(legs, { clearProps: 'strokeWidth,filter' }));
     },
-    // screen 21 "...isosceles trapezium": the two equal lengths shrink into their legs and become the equal marks
-    // (the ticks, hidden by .tick-pre until now)
+    // screen 21, on "isosceles": the two equal lengths shrink into their legs and turn into the equal marks
+    // (hidden by .tick-pre until now)
     lensToTicks() {
       const labs = ['DA', 'BC'].map((k) => lenTag(k)).filter(Boolean), ticks = $('.ticks'), P = window.__trapP && window.__trapP();
       if (G) G.killTweensOf(labs);
@@ -498,7 +447,7 @@
         return tl;
       });
     },
-    // screen 13 "A quadrilateral...": the four sides trace in one after the other (AB, BC, CD, DA)
+    // screens 13 ("quadrilateral") and 35 ("trapezium"): the four sides trace in one after another
     defTrace() {
       if (!G) return;
       const len = (e) => Math.hypot(+e.getAttribute('x2') - +e.getAttribute('x1'), +e.getAttribute('y2') - +e.getAttribute('y1')) || 1;
@@ -517,7 +466,7 @@
         return tl;
       });
     },
-    // the named sides give one light, soft glow together (thicker line + gentle halo in their own colour, then back)
+    // screen 8: before the bases extend, the named sides glow once together (thicker line, soft purple halo)
     softGlow(keys) {
       const els = keys.map((k) => $('.e' + k)[0]).filter(Boolean);
       if (!G || !els.length) return;
@@ -526,10 +475,10 @@
         .to(els, { strokeWidth: 5, filter: NOGLOW, duration: 0.35, ease: 'sine.in' })
         .set(els, { clearProps: 'strokeWidth,filter' }));
     },
-    // the whole shape (outline, fill, corners, letters) fades in with a soft scale-up - a CSS animation on data-in
-    // (.shape-pre), so a redraw of the shape mid-way can never cut it short
+    // screen 22: the whole shape fades in with a soft scale-up. It is a CSS animation keyed on data-in
+    // (.shape-pre), so a redraw mid-way cannot cut it short.
     shapeIn() { $('.pop-g').forEach((e) => e.setAttribute('data-in', '1')); },
-    // the parallel arrows (hidden by .chev-pre) pop onto their sides
+    // screens 22 and 35: the parallel arrows (hidden by .chev-pre) pop onto their sides
     chevIn() {
       const chev = $('.chev');
       if (G && chev.length) add(() => G.timeline()
@@ -537,14 +486,13 @@
         .fromTo(chev, { opacity: 0, scale: 0.3, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2.4)' })
         .to(chev, { scale: 1.25, duration: 0.2, yoyo: true, repeat: 1 }));
     },
-    // screen 35 "right angles": both 90° marks draw into their corners with their labels, then glow gold
+    // screen 35, on "right": both 90° marks draw into their corners with their labels, then glow gold
     rightBoth() {
       this.rightMark('A');
       add(() => G.delayedCall(0.3, () => this.rightMark('D')));
       add(() => G.delayedCall(0.9, () => this.rightGlow()));
     },
-    // screen 13 "...one pair of parallel sides": AB and DC glow together, then the parallel arrows (hidden by .chev-pre)
-    // pop onto the two sides (no dashed extensions)
+    // screen 13, on "parallel": AB and DC glow together, then the parallel arrows (hidden by .chev-pre) pop on
     defParallel() {
       const sides = [$('.eAB')[0], $('.eCD')[0]].filter(Boolean), chev = $('.chev');
       if (!G || !sides.length) return;
@@ -555,10 +503,9 @@
         .to(chev, { scale: 1.25, duration: 0.2, yoyo: true, repeat: 1 }, 1.05)
         .set(sides, { clearProps: 'strokeWidth,filter' }));
     },
-    // the name label below the shape pops in (holdChips) and pulses (screens 13, 17, 21: showTitle -> titlePop)
 
-    // Screen 40's angle fill, for any angle: the filled wedge grows out of its corner (scale 0 -> 1, soft overshoot) and
-    // glows once in its own colour. keys: 'AD' / ['B'] ..., one after another (0.3 s apart), after delay s
+    // the filled angle of each key grows out of its corner (soft overshoot) and glows once in its own colour.
+    // keys: 'AD' or ['B'] ...; 0.3 s apart, after `delay` s
     wedgeGrow(keys, delay) {
       const P = window.__trapP && window.__trapP(), K = typeof keys === 'string' ? keys.split('') : keys;
       const C = { A: 'rgba(240,138,36,0.8)', B: 'rgba(142,68,214,0.7)', C: 'rgba(43,123,214,0.7)', D: 'rgba(245,197,66,0.9)' };
@@ -575,12 +522,12 @@
         return tl;
       });
     },
-    // angles that were dimmed on the previous screen start this one dimmed (set at once, before the first paint)
+    // angles dimmed on the previous screen start this one dimmed (dimIn, screens 25 and 26), set before first paint
     dimAngles(keys) {
       const els = keys.split('').map((x) => $('.arc.a' + x)[0]).concat(keys.split('').map((x) => $('.tag.alab.l' + x)[0]), keys.split('').map((x) => $('.wedge.w' + x)[0])).filter(Boolean);
       if (G && els.length) add(() => G.set(els, { opacity: 0.35 }));
     },
-    // the named pair together (on "180"): both arcs and values pulse at once, then every angle comes back to full
+    // screen 27: the named pair pulses together (arcs and values), then every angle returns to full strength
     anglesTogether(keys) {
       if (!G || !keys.length) return;
       const arcs = keys.map((k) => $('.arc.a' + k)[0]).filter(Boolean), labs = keys.map((k) => $('.tag.alab.l' + k)[0]).filter(Boolean);
@@ -592,13 +539,7 @@
         .to(all, { opacity: 1, duration: 0.45, ease: 'sine.inOut' }, '>+0.8')
         .set(all, { clearProps: 'opacity,strokeWidth,strokeDasharray,strokeDashoffset' }));
     },
-    // after a line that focused angles without a sum: every angle eases back to full
-    anglesRestore() {
-      const all = $('.arc').concat($('.board .tag.alab'), $('.wedge'));
-      if (G && all.length) add(() => G.timeline().to(all, { opacity: 1, duration: 0.45, ease: 'sine.inOut' }).set(all, { clearProps: 'opacity,strokeWidth,strokeDasharray,strokeDashoffset' }));
-    },
-    // the sum label arriving: a soft pop (90% -> 100%, slight lift)
-    // a name label arriving: 85% -> 105% -> 100%, then one gentle pulse
+    // a name label arriving (showTitle: screens 13, 17, 21, 22, 35): 85% -> 105% -> 100%, then one gentle pulse
     titlePop() {
       const els = $('.chip'), el = els[els.length - 1];
       if (!G || !el) return;
@@ -608,37 +549,29 @@
         .to(el, { scale: 1.04, boxShadow: '0 0 0 6px rgba(92,198,207,0.3), 0 4px 14px rgba(11,91,112,0.12)', duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, '>+0.15')
         .set(el, { clearProps: 'boxShadow' }));
     },
+    // a new label arriving: a soft pop with a slight lift
     chipPop() {
       const els = $('.chip');
       const el = els[els.length - 1];
       if (G && el) add(() => G.fromTo(el, { opacity: 0, scale: 0.85, y: 8 }, { opacity: 1, scale: 1, y: 0, duration: reduced ? 0 : 0.5, ease: 'back.out(1.6)' }));
     },
 
-    // screen 34 finale: Swiftee flies from her usual spot in a gentle arc to centre stage and settles into a soft
-    // hover; a warm glow fades up behind her, two small stars pop in at her sides and a few sparkles twinkle
+    // screen 43 (end): Swiftee flies in a gentle arc from her usual spot to centre stage, then hovers softly
     heroIn() {
       const sw = $('.swiftee')[0];
       if (!G || !sw) return;
-      const glow = $('.hglow'), stars = $('.bs.s1').concat($('.bs.s3')), spk = $('.hspk');
       add(() => {
         const tl = G.timeline(), fly = reduced ? 0 : 1.1;
         tl.fromTo(sw, { x: -440, scale: 0.9 }, { x: 0, scale: 1, duration: fly, ease: 'power2.inOut' }, 0)
           .fromTo(sw, { y: 0 }, { y: -110, duration: fly / 2, ease: 'sine.out' }, 0)
           .to(sw, { y: 0, duration: fly / 2, ease: 'sine.in' }, fly / 2)
-          .to(glow, { opacity: 1, duration: 0.7, ease: 'sine.out' }, fly - 0.2)
-          .fromTo(stars, { opacity: 0, scale: 0.3, rotation: -30, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, rotation: 0, duration: 0.55, ease: 'back.out(1.8)', stagger: 0.15 }, fly)
-          .fromTo(spk, { opacity: 0, scale: 0.2 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)', stagger: 0.08 }, fly + 0.15)
-          // then: a soft hover and gently twinkling sparkles, until the screen changes
-          .call(() => {
-            G.to(sw, { y: -12, duration: 1.4, ease: 'sine.inOut', yoyo: true, repeat: -1 });
-            spk.forEach((s, i) => G.to(s, { opacity: 0.35, scale: 0.7, duration: 0.9 + i * 0.17, ease: 'sine.inOut', yoyo: true, repeat: -1 }));
-          });
+          .call(() => G.to(sw, { y: -12, duration: 1.4, ease: 'sine.inOut', yoyo: true, repeat: -1 }));
         return tl;
       });
     },
 
-    // screen 26 "That means they are supplementary angles."
-    // 1. as the line starts: A (orange) and D (yellow) pulse gently, B and C dim
+    // ---------- screen 26 "That means they are supplementary angles." ----------
+    // as the line starts: A and D pulse gently (their filled angles grow in) while B and C dim
     suppStart() {
       if (!G) return;
       const focus = ['A', 'D'].map((k) => $('.arc.a' + k)[0]).filter(Boolean), flab = ['A', 'D'].map((k) => $('.tag.alab.l' + k)[0]).filter(Boolean);
@@ -649,94 +582,24 @@
         .to(focus, { strokeWidth: 10, duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.1)
         .fromTo(flab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.12, duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.1));
     },
-    // 2. "supplementary": copies of the 120 deg and 60 deg wedges lift off corners A and D and fly to the free side of
-    //    the panel, where they lock together on one straight line - a 180 deg angle - with its label
-    suppSectors() {
-      if (!G) return;
-      const st = document.querySelector('.stage'), sr = st.getBoundingClientRect(), k = sr.width / 1280;
-      const svg = document.querySelector('.stage svg[viewBox="0 0 520 420"]'), m = svg && svg.getScreenCTM(), P = window.__trapP && window.__trapP();
-      const at = (key) => { if (!m || !P) return [0, 0]; const q = svg.createSVGPoint(); q.x = P[key].x; q.y = P[key].y; const s = q.matrixTransform(m); return [(s.x - sr.left) / k, (s.y - sr.top) / k]; };
-      const V = [1163, 398], a = at('A'), d = at('D');
-      const ga = $('.sv-a')[0], gd = $('.sv-d')[0], base = $('.sv-base')[0], lbl = $('.sv-180')[0];
-      add(() => G.timeline()
-        // the orange wedge sits at A turned the way corner A opens (180 deg round), the yellow one at D already matches
-        .fromTo(ga, { opacity: 0, x: a[0] - V[0], y: a[1] - V[1], rotation: 180, scale: 0.6, svgOrigin: V[0] + ' ' + V[1] },
-          { opacity: 1, x: 0, y: 0, rotation: 0, scale: 1, duration: reduced ? 0 : 0.6, ease: 'power2.inOut' }, 0)
-        .fromTo(gd, { opacity: 0, x: d[0] - V[0], y: d[1] - V[1], scale: 0.6, svgOrigin: V[0] + ' ' + V[1] },
-          { opacity: 1, x: 0, y: 0, scale: 1, duration: reduced ? 0 : 0.6, ease: 'power2.inOut' }, 0.25)
-        .fromTo(base, { opacity: 0, scaleX: 0.2, svgOrigin: V[0] + ' ' + V[1] }, { opacity: 1, scaleX: 1, duration: 0.4, ease: 'sine.out' }, 0.75)
-        .fromTo(lbl, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.4, ease: 'sine.out' }, 0.95));
-    },
-    // 3. "angles": the equation gets a soft success glow; the figure stays a moment, then fades and all angles return
+    // on "angles": the equation glows softly; a little later every angle returns to full strength
     suppConfirm() {
       if (!G) return;
       const chips = $('.chip'), chip = chips[chips.length - 1];
-      const fig = $('.sv-a').concat($('.sv-d'), $('.sv-base'), $('.sv-180'));
       const all = $('.arc').concat($('.board .tag.alab'), $('.wedge'));
       add(() => {
         const tl = G.timeline();
         if (chip) tl.to(chip, { scale: 1.06, boxShadow: '0 0 0 6px rgba(92,198,207,0.35), 0 4px 18px rgba(46,158,79,0.35)', duration: 0.3, ease: 'sine.out' }, 0)
           .to(chip, { scale: 1, boxShadow: '0 4px 12px rgba(11,91,112,0.10)', duration: 0.5, ease: 'sine.inOut' }, 0.35);
-        tl.to(fig, { opacity: 0, duration: 0.5, ease: 'sine.inOut' }, 2.6)
-          .to(all, { opacity: 1, duration: 0.5, ease: 'sine.inOut' }, 2.6)
+        tl.to(all, { opacity: 1, duration: 0.5, ease: 'sine.inOut' }, 2.6)
           .set(all, { clearProps: 'opacity,strokeWidth' });
         return tl;
       });
     },
 
-    // the screen 26 story for any pair on one leg (screen 27, right answer: B and C): copies of the two angle wedges,
-    // in their arc colours and with their values, lift off their corners and fly to the free side of the panel, where
-    // they lock together on one straight line - a 180° angle - with its label; after a moment the figure fades
-    suppPair(keys) {
-      const layer = this.eqLayer(), P = window.__trapP && window.__trapP();
-      const svgB = document.querySelector('.stage svg[viewBox="0 0 520 420"]');
-      if (!G || !layer || !P || !svgB) return;
-      const COL = { A: '#f08a24', B: '#8e44d6', C: '#2b7bd6', D: '#F5C542' }, ns = 'http://www.w3.org/2000/svg';
-      const sr = layer.getBoundingClientRect(), k = sr.width / 1280 || 1, m = svgB.getScreenCTM();
-      const at = (key) => { const q = svgB.createSVGPoint(); q.x = P[key].x; q.y = P[key].y; const s = q.matrixTransform(m); return [(s.x - sr.left) / k, (s.y - sr.top) / k]; };
-      const val = (key) => parseFloat((($('.board .tag.alab.l' + key)[0] || {}).textContent) || '90');
-      const V = [1163, 398], R = 52, pt = (deg, r) => [V[0] + r * Math.cos(deg * Math.PI / 180), V[1] - r * Math.sin(deg * Math.PI / 180)];
-      const svg = document.createElementNS(ns, 'svg');
-      svg.setAttribute('class', 'supp-pair'); svg.setAttribute('width', '1280'); svg.setAttribute('height', '720'); svg.setAttribute('viewBox', '0 0 1280 720');
-      svg.style.cssText = 'position:absolute;left:0;top:0;overflow:visible;pointer-events:none';
-      layer.appendChild(svg);
-      // wedge 1 opens from the left (180°) by its angle, wedge 2 takes the rest of the straight angle
-      const a1 = val(keys[0]), spans = [[180, 180 - a1], [180 - a1, 0]];
-      const wedges = keys.map((key, i) => {
-        const [s, e] = spans[i], p1 = pt(s, R), p2 = pt(e, R), mid = pt((s + e) / 2, 31);
-        const g = document.createElementNS(ns, 'g');
-        g.innerHTML = '<path d="M' + V[0] + ',' + V[1] + ' L' + p1[0].toFixed(1) + ',' + p1[1].toFixed(1) + ' A' + R + ',' + R + ' 0 0 1 ' + p2[0].toFixed(1) + ',' + p2[1].toFixed(1) + ' Z" fill="' + COL[key] + '" fill-opacity="1" stroke="#ffffff" stroke-width="1.5"></path>' +
-          '<text x="' + mid[0].toFixed(1) + '" y="' + (mid[1] + 5).toFixed(1) + '" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="13" fill="#ffffff">' + val(key) + '°</text>';
-        svg.appendChild(g); return g;
-      });
-      const base = document.createElementNS(ns, 'line');
-      base.setAttribute('x1', V[0] - 74); base.setAttribute('y1', V[1]); base.setAttribute('x2', V[0] + 74); base.setAttribute('y2', V[1]);
-      base.setAttribute('stroke', '#0b5b70'); base.setAttribute('stroke-width', '4'); base.setAttribute('stroke-linecap', 'round');
-      svg.appendChild(base);
-      const lbl = document.createElementNS(ns, 'text');
-      lbl.setAttribute('x', V[0]); lbl.setAttribute('y', V[1] + 30); lbl.setAttribute('text-anchor', 'middle'); lbl.setAttribute('font-family', 'Nunito, sans-serif');
-      lbl.setAttribute('font-weight', '900'); lbl.setAttribute('font-size', '20'); lbl.setAttribute('fill', '#0b5b70'); lbl.textContent = '180°';
-      svg.appendChild(lbl);
-      add(() => {
-        const tl = G.timeline();
-        wedges.forEach((g, i) => {
-          const c = at(keys[i]);
-          tl.fromTo(g, { opacity: 0, x: c[0] - V[0], y: c[1] - V[1], scale: 0.6, svgOrigin: V[0] + ' ' + V[1] },
-            { opacity: 1, x: 0, y: 0, scale: 1, duration: reduced ? 0 : 0.65, ease: 'power2.inOut' }, 0.15 + i * 0.3);
-        });
-        tl.fromTo(base, { opacity: 0, scaleX: 0.2, svgOrigin: V[0] + ' ' + V[1] }, { opacity: 1, scaleX: 1, duration: 0.4, ease: 'sine.out' }, 0.95)
-          .fromTo(lbl, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.4, ease: 'sine.out' }, 1.15)
-          .to(lbl, { scale: 1.2, svgOrigin: V[0] + ' ' + (V[1] + 24), duration: 0.22, yoyo: true, repeat: 1 }, 1.6)
-          .to(svg, { opacity: 0, duration: 0.5, ease: 'sine.inOut', onComplete: () => svg.remove() }, 4.2);
-        return tl;
-      });
-    },
-    suppBC() { this.suppPair(['B', 'C']); },
-    // supplementary angles shown on the shape itself (screens 26, 27): the bottom base extends past the lower corner S as
-    // a dashed line; a copy of the upper angle T (same colour) slides down the leg to S and turns over (a half-turn
-    // about S) so it sits on the extension, beside S's own angle - together they fill a straight angle, which gets a
-    // half-circle and a "180°" label. Geometry: the half-turn maps T's rays (along its base, along the leg) onto the
-    // extension and back up the leg, so the copy is exact for any shape. Removed after a hold (and by clear()).
+    // screens 26 and 27, on the shape: the bottom base extends past corner S as a dashed line; a copy of the upper
+    // angle T slides down the leg to S and makes a half-turn about S, landing on the extension beside S's own angle,
+    // so the two fill a straight angle (half-circle + "180°"). The half-turn makes the copy exact for any shape.
     suppAt(T, S) {
       const P = window.__trapP && window.__trapP(), e = $('.eAB')[0];
       if (!G || !P || !e) return;
@@ -759,7 +622,7 @@
       half.setAttribute('d', 'M' + a0.x.toFixed(1) + ',' + a0.y.toFixed(1) + ' A' + r2 + ',' + r2 + ' 0 0 ' + (side > 0 ? 1 : 0) + ' ' + a1.x.toFixed(1) + ',' + a1.y.toFixed(1));
       half.setAttribute('fill', 'none'); half.setAttribute('stroke', '#0b5b70'); half.setAttribute('stroke-width', '2.5'); half.setAttribute('stroke-linecap', 'round');
       const lbl = document.createElementNS(ns, 'text');
-      // above the half-circle, nudged outward - clear of the corner letter (below) and the angle value (inside the shape)
+      // above the half-circle, nudged outward, clear of the corner letter and the angle value
       lbl.setAttribute('x', (s.x + ex.x * 16).toFixed(1)); lbl.setAttribute('y', (s.y - r2 - 10).toFixed(1)); lbl.setAttribute('text-anchor', 'middle');
       lbl.setAttribute('font-family', 'Nunito, sans-serif'); lbl.setAttribute('font-weight', '900'); lbl.setAttribute('font-size', '20'); lbl.setAttribute('fill', '#0b5b70'); lbl.textContent = '180°';
       [line, own, copy, half, lbl].forEach((n) => root.appendChild(n));
@@ -770,7 +633,7 @@
         .to(line, { attr: { x2: s.x + ex.x * L, y2: s.y + ex.y * L }, duration: reduced ? 0 : 0.45, ease: 'power2.out' }, 0)
         .fromTo(own, { opacity: 0, scale: 0, svgOrigin: s.x + ' ' + s.y }, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.6)' }, 0.25)
         .fromTo(copy, { opacity: 0 }, { opacity: 1, duration: 0.25 }, 0.55)
-        // down the leg (from above), then the half-turn into place on the extension
+        // down the leg, then the half-turn onto the extension
         .to(o, { x: s.x, y: s.y, duration: reduced ? 0 : 0.85, ease: 'power2.inOut', onUpdate: place }, 0.7)
         .to(o, { r: 180, duration: reduced ? 0 : 0.6, ease: 'power2.inOut', onUpdate: place }, 1.6)
         .fromTo(half, { opacity: 0, strokeDasharray: 200, strokeDashoffset: 200 }, { opacity: 1, strokeDashoffset: 0, duration: 0.45, ease: 'sine.out' }, 2.25)
@@ -780,7 +643,7 @@
     },
     suppAtAD() { this.suppAt('A', 'D'); },
     suppAtBC() { this.suppAt('B', 'C'); },
-    // a question label arriving: pops down into place, then one soft shine across it
+    // screen 27: the question label drops into place, then glows once
     askIn() {
       const chips = $('.chip'), el = chips[chips.length - 1];
       if (!G || !el) return;
@@ -788,7 +651,7 @@
         .fromTo(el, { opacity: 0, y: -14, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: reduced ? 0 : 0.5, ease: 'back.out(1.7)' })
         .to(el, { boxShadow: '0 0 0 5px rgba(92,198,207,0.30), 0 4px 14px rgba(18,59,99,0.14)', duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, '>+0.05'));
     },
-    // a soft success glow round the latest label (optionally after a delay)
+    // a soft success glow round the latest label, after `delay` s (screen 27's right answer)
     chipGlow(delay) {
       const chips = $('.chip'), el = chips[chips.length - 1];
       if (!G || !el) return;
@@ -797,7 +660,7 @@
         .to(el, { scale: 1, boxShadow: '0 4px 12px rgba(11,91,112,0.10)', duration: 0.5, ease: 'sine.inOut' }, '>+0.05'));
     },
 
-    // screen 28 "What if we...": a small anticipation squash on the shape
+    // screen 28, as the line starts: the shape gives a small squash, as if about to change
     whatIfStart() {
       const g = $('svg g.pop-g')[0], d = $('div.pop-g')[0];
       if (!G || reduced) return;
@@ -805,12 +668,12 @@
         .to([g, d].filter(Boolean), { scaleY: 0.97, scaleX: 1.02, transformOrigin: '50% 80%', duration: 0.25, ease: 'sine.out' })
         .to([g, d].filter(Boolean), { scaleY: 1, scaleX: 1, duration: 0.45, ease: 'elastic.out(1, 0.5)' }));
     },
-    // the four corner dots pulse once, one after another
+    // the corner dots pulse once, one after another (screen 32 on "90", and as screen 28's morph starts)
     vertexPulse() {
       const dots = $('.vdot');
       if (G && dots.length) add(() => G.fromTo(dots, { scale: 1, transformOrigin: '50% 50%' }, { scale: 1.6, duration: 0.18, ease: 'sine.out', yoyo: true, repeat: 1, stagger: 0.07 }));
     },
-    // tween the top corners through each frame (soft elastic ease, a soft sound as each glide starts)
+    // screen 28, on "change": the top corners A and B glide through each frame; onSeg fires as each glide starts
     morph(from, frames, onUpdate, onSeg, onDone) {
       if (!G) { const f = frames[frames.length - 1]; onUpdate({ A: f.A, B: f.B }); onDone(); return; }
       const o = { A: from.A, B: from.B };
@@ -820,8 +683,7 @@
         return tl;
       });
     },
-    // settle: the reshaped trapezium lands with a gentle bounce about its centre (nothing else moves - the shape change
-    // is the whole story here)
+    // screen 28, on "trapezium": the reshaped trapezium settles with a gentle bounce about its centre
     settleShape(cx, cy) {
       if (!G) return;
       const g = $('svg g.pop-g')[0], d = $('div.pop-g')[0];
@@ -833,7 +695,7 @@
       });
     },
 
-    // screen 29 "Notice the sum of angles": A + D pulse and the left panel glows, then B + C and the right panel
+    // screen 29, on "sum": A and D pulse with the left sum panel, then B and C with the right one
     sumPanels() {
       if (!G) return;
       const L = $('.tag.sumL')[0], R = $('.tag.sumR')[0];
@@ -845,16 +707,7 @@
       };
       add(() => { const tl = G.timeline(); pulse(['A', 'D'], L, 0, tl); pulse(['B', 'C'], R, 0.8, tl); return tl; });
     },
-    // the first real drag: both 180° panels give one soft success glow together
-    sumsGlow() {
-      const els = $('.tag.sumL').concat($('.tag.sumR'));
-      if (G && els.length) add(() => G.timeline()
-        .fromTo(els, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.1, boxShadow: '0 0 0 5px rgba(46,158,79,0.25), 0 4px 14px rgba(46,158,79,0.3)', duration: 0.3, ease: 'back.out(2)' })
-        .to(els, { scale: 1, boxShadow: '0 3px 0 rgba(0,0,0,0.06)', duration: 0.5, ease: 'sine.inOut' }, '>+0.3'));
-    },
 
-    // screen 33: right-angle markers and their 90° labels wait hidden for the voice
-    rightPrep() { const els = $('.rmark').concat($('.tag.r90')); if (G && els.length) add(() => G.set(els, { opacity: 0 })); },
     // a right-angle marker draws itself into its corner and its 90° label pops in
     rightMark(k) {
       const m = $('.rm' + k)[0], lab = $('.tag.r90' + k)[0];
@@ -867,18 +720,7 @@
         return tl;
       });
     },
-    rightMarkA() { this.rightMark('A'); },
-    // "...is a right angle": the two sides meeting at A light up as an L, then D's marker follows
-    rightL() {
-      const sides = [$('.eDA')[0], $('.eAB')[0]].filter(Boolean);
-      if (!G) return;
-      add(() => G.timeline()
-        .to(sides, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 5px rgba(46,158,79,0.6))', duration: 0.3, ease: 'sine.out' })
-        .to(sides, { strokeWidth: 5, filter: NOGLOW, duration: 0.45, ease: 'sine.inOut' }, '>+0.35')
-        .set(sides, { clearProps: 'strokeWidth,filter' })
-        .call(() => this.rightMark('D'), null, 0.55));
-    },
-    // screen 35 "right angles": both right angles get the lesson's soft gold focus glow (marker and 90° label), and keep it
+    // screen 35: both right-angle markers and their 90° labels take a soft gold glow and keep it
     rightGlow() {
       const ms = $('.rmark'), labs = $('.tag.r90');
       if (!G) return;
@@ -887,7 +729,7 @@
         .to(labs, { boxShadow: '0 0 0 3px rgba(255,214,110,.55), 0 0 14px 3px rgba(255,184,40,.45)', duration: 0.4, ease: 'sine.out', stagger: 0.12 }, 0)
         .to(ms, { filter: 'drop-shadow(0px 0px 5px rgba(255,184,40,0.85))', duration: 0.4, ease: 'sine.out', stagger: 0.12 }, 0));
     },
-    // the name label below the shape pulses twice, gently (after it has popped in)
+    // screen 35, on "angled": the name label below the shape pulses twice, gently
     titlePulse() {
       const els = $('.chip'), el = els[els.length - 1];
       if (!G || !el) return;
@@ -895,7 +737,7 @@
         .to(el, { scale: 1.06, boxShadow: '0 0 0 6px rgba(92,198,207,0.32), 0 4px 14px rgba(11,91,112,0.12)', duration: 0.35, ease: 'sine.inOut', yoyo: true, repeat: 3 })
         .set(el, { clearProps: 'boxShadow' }));
     },
-    // tapping a found corner: marker + label give a soft green pulse
+    // screen 35, a right angle tapped: its marker and 90° label give a soft green pulse
     rightFound(k) {
       const m = $('.rm' + k)[0], lab = $('.tag.r90' + k)[0];
       if (!G) return;
@@ -903,7 +745,7 @@
         .to(m, { strokeWidth: 5, filter: 'drop-shadow(0px 0px 5px rgba(46,158,79,0.8))', duration: 0.2, yoyo: true, repeat: 1 }, 0)
         .fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.3, duration: 0.2, ease: 'sine.out', yoyo: true, repeat: 1 }, 0));
     },
-    // both 90° corners found: the vertical side glows once
+    // screen 35, both right angles found: the vertical side glows once
     rightAll() {
       const s = $('.eDA')[0];
       if (G && s) add(() => G.timeline()
@@ -912,7 +754,7 @@
         .set(s, { clearProps: 'strokeWidth,filter' }));
     },
 
-    // ---------- screen 38 (check 3) ----------
+    // ---------- screen 40 (check 3: find ∠D) ----------
     // entrance: outline draws, fill fades in, corners and letters pop, the parallel arrows slide into place
     q3In() {
       if (!G) return;
@@ -924,9 +766,9 @@
         .fromTo($('.q3-dot').concat($('.q3-lab')), { opacity: 0, scale: 0.4, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: 0.3, ease: 'back.out(2)', stagger: 0.05 }, 0.7)
         .fromTo($('.q3-chev'), { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.45, ease: 'power2.out' }, 1.0));
     },
-    // "In this trapezium": one gentle pulse of the whole shape
+    // "trapezium": one gentle pulse of the whole shape
     q3Shape() { const s = $('.q3')[0]; if (G && s) add(() => G.fromTo(s, { scale: 1 }, { scale: 1.03, transformOrigin: '50% 50%', duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 })); },
-    // "∠A = 120°": the orange wedge opens from A, its value pops, one soft glow
+    // "120": ∠A's orange wedge opens from A, its value pops in and the wedge glows once
     q3A() {
       if (!G) return;
       add(() => G.timeline()
@@ -934,8 +776,8 @@
         .fromTo($('.q3-vA'), { opacity: 0, scale: 0.6, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(2)' }, 0.25)
         .to($('.q3-wA'), { filter: 'drop-shadow(0px 0px 6px rgba(240,138,36,0.8))', duration: 0.3, yoyo: true, repeat: 1 }, 0.6));
     },
-    // "What is the value of ∠D?": a light travels down AD, D's yellow wedge opens, a big "?" pops and pulses,
-    // then A and D glow together (60° stays hidden)
+    // "value": a light runs down AD, D's yellow wedge opens, a big "?" pops and pulses, then A and D glow
+    // together (60° stays hidden)
     q3D() {
       if (!G) return;
       const ad = $('.q3-ad')[0], L = 177;
@@ -947,7 +789,7 @@
         .to($('.q3-q'), { scale: 1.15, duration: 0.35, ease: 'sine.inOut', yoyo: true, repeat: 3 }, 1.3)
         .to($('.q3-wA').concat($('.q3-wD')), { filter: 'drop-shadow(0px 0px 6px rgba(240,170,36,0.8))', duration: 0.3, yoyo: true, repeat: 1 }, 1.4));
     },
-    // after the question: AD glows once and the relationship cue "120° + ? = 180°" appears above the shape
+    // AD glows once and the hint equation "120° + ? = 180°" appears above the shape (after a miss, or with the right answer)
     q3Hint() {
       if (!G) return;
       const ad = $('.q3-ad')[0];
@@ -956,14 +798,13 @@
         .fromTo($('.q3-hint'), { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.45, ease: 'back.out(1.6)' }, 0.2)
         .fromTo($('.q3h-sa').concat($('.q3h-sd')), { opacity: 0, scale: 0.4, transformOrigin: '50% 100%' }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(2)', stagger: 0.15 }, 0.55));
     },
-    // a wrong answer: the hint is said first ("Angles on the same leg add up to 180°."), then the equation comes in at
-    // the top as its picture - "120° + ? = 180°" (q3Hint), once. It never changes form; later misses pulse it again
+    // a wrong answer: once the spoken hint has played, the hint equation comes in (q3Hint); later misses pulse it again
     q3Wrong() {
       if (!G) return;
       const h = $('.q3-hint')[0], shown = h && +getComputedStyle(h).opacity > 0.5;
       add(() => {
         const tl = G.timeline();
-        if (!shown) tl.call(() => this.q3Hint(), null, 1.9); // after the hint line
+        if (!shown) tl.call(() => this.q3Hint(), null, 1.9);
         else tl.fromTo($('.q3h-a').concat($('.q3h-s')), { scale: 1 }, { scale: 1.25, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1, stagger: 0.2 }, 0.4);
         return tl;
       });
@@ -975,7 +816,7 @@
         .to($('.q3-q'), { scale: 1.2, transformOrigin: '50% 50%', duration: 0.3, yoyo: true, repeat: 1 }, 0)
         .to($('.q3-hint'), { boxShadow: '0 0 0 6px rgba(92,198,207,0.35), 0 4px 14px rgba(11,91,112,0.12)', duration: 0.3, yoyo: true, repeat: 1 }, 0.1));
     },
-    // the right answer: 60° flies from the chosen card to D, replaces the "?", A + D glow, the cue reads
+    // the right answer: 60° flies from its card to D and replaces the "?", A and D glow, the hint equation reads
     // "120° + 60° = 180°" and its two wedges close into a straight angle
     q3Correct() {
       if (!G) return;
@@ -1004,8 +845,8 @@
         .fromTo($('.q3h-sd'), { x: 8 }, { x: 0, duration: 0.4, ease: 'back.out(2)' }, 1.0));
     },
 
-    // ---------- screen 39 (check 4) ----------
-    // entrance: each shape draws its outline then fills, top to bottom; arrows slide in; the drop boxes pop
+    // ---------- screen 41 (check 4: label the trapeziums) ----------
+    // entrance: each shape draws its outline then fills, top to bottom; arrows slide in; the cards and drop boxes pop
     q4In() {
       if (!G) return;
       add(() => {
@@ -1028,8 +869,8 @@
         return tl;
       });
     },
-    // each shape's defining property, as a clue (never its name): 0 scalene - each leg traced separately (unequal);
-    // 1 isosceles - both legs glow together and the ticks pop; 2 right - the squares draw and the vertical leg glows
+    // shape i's clue (never its name): 0 scalene - each leg traced in turn; 1 isosceles - both legs glow together
+    // and the ticks pop; 2 right - the right-angle squares draw and the vertical leg glows
     q4Clue(i, tl0, at0) {
       const s = $('.q4s' + i)[0];
       if (!G || !s) return;
@@ -1050,7 +891,7 @@
       if (tl0) return run(tl0, at0);
       add(() => run(G.timeline(), 0));
     },
-    // "Label each trapezium...": the shapes light up one after another, each showing its clue
+    // "drag": the shapes light up one after another, each showing its clue
     q4Shapes() {
       if (!G) return;
       add(() => {
@@ -1062,9 +903,7 @@
         return tl;
       });
     },
-    // second instruction line: "Drag a label" - the chips glow one by one; "onto a shape" - the rows and slots glow;
-    // "tap a label and then tap a box" - one chip shows the selected glow, then all the slots answer it
-    q4HiLabels() { const l = $('.lab'); if (G && l.length) add(() => G.fromTo(l, { boxShadow: '0 4px 0 #d9b04c' }, { boxShadow: '0 0 0 6px rgba(240,160,32,0.35), 0 4px 0 #d9b04c', duration: 0.25, yoyo: true, repeat: 1, stagger: 0.15 })); },
+    // "place": the cards and drop boxes pulse in turn
     q4HiShapes() {
       if (!G) return;
       add(() => G.timeline()
@@ -1072,21 +911,12 @@
         .fromTo($('.slot'), { boxShadow: '0 0 0 0 rgba(63,163,232,0)' }, { boxShadow: '0 0 0 6px rgba(63,163,232,0.3)', duration: 0.25, yoyo: true, repeat: 1, stagger: 0.15 }, 0.1)
         .set($('.slot'), { clearProps: 'boxShadow' }));
     },
-    q4HiTap() {
-      const lab = $('.lab')[1];
-      if (!G || !lab) return;
-      add(() => G.timeline()
-        .to(lab, { y: -4, boxShadow: '0 0 0 5px rgba(63,163,232,0.4), 0 6px 0 #d9b04c', duration: 0.25, ease: 'sine.out' }, 0)
-        .fromTo($('.slot'), { boxShadow: '0 0 0 0 rgba(63,163,232,0)' }, { boxShadow: '0 0 0 6px rgba(63,163,232,0.3)', duration: 0.25, yoyo: true, repeat: 1 }, 0.45)
-        .to(lab, { y: 0, boxShadow: '0 4px 0 #d9b04c', duration: 0.3 }, 1.1)
-        .set([lab].concat($('.slot')), { clearProps: 'boxShadow,transform' }));
-    },
-    // the three labels rise in with a soft spring, one after another
+    // "labels": the three labels rise in with a soft spring, one after another
     q4Labels() {
       const labs = $('.lab');
       if (G && labs.length) add(() => G.fromTo(labs, { opacity: 0, y: 24, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: 'back.out(1.7)', stagger: 0.12, clearProps: 'transform' }));
     },
-    // a right match: the box pulses green, the shape glows and shows its clue again
+    // a right match: the box pulses, its row glows green, the shape glows and shows its clue again
     q4Ok(i) {
       const box = $('.slot')[i], s = $('.q4s' + i)[0];
       if (!G) return;
@@ -1119,9 +949,8 @@
       add(() => G.fromTo($('.q4s'), { filter: 'drop-shadow(0px 0px 0px rgba(46,158,79,0))' }, { filter: 'drop-shadow(0px 0px 9px rgba(46,158,79,0.7))', duration: 0.3, yoyo: true, repeat: 1, stagger: 0.25 }));
     },
 
-    // screen 4: as Swiftee starts speaking the whole shape (outline, fill, corners, letters) grows to 120% about its own
-    // centre (0.8 s), holds 0.5 s, and returns to exactly its original size (0.8 s) - ease-in-out, no bounce. Lines keep
-    // their thickness while it grows (non-scaling stroke for the duration). Once per line playback.
+    // screen 4, as the first line starts: the whole shape grows to 120% about its centre, holds, and returns to
+    // its exact size. Lines use non-scaling-stroke meanwhile so they keep their thickness.
     growFocus() {
       const g = $('svg g.pop-g')[0], d = $('div.pop-g')[0], P = window.__trapP && window.__trapP();
       if (!G || !P) return;
@@ -1139,35 +968,7 @@
       });
     },
 
-    // each side in turn (0.65 s apart): it thickens with a soft purple glow while its length label pulses, then settles
-    sideTour(list, together, labelsTogether) {
-      if (!G) return;
-      const tags = $('.board .tag.mtag');
-      add(() => {
-        const tl = G.timeline();
-        if (together) {
-          const at = list.length * 0.65 + 0.1, els = together.map((k) => $('.e' + k)[0]).filter(Boolean);
-          const labs = (labelsTogether || list.filter(([k]) => together.indexOf(k) >= 0).map(([, l]) => l)).map((l) => tags.find((x) => x.textContent.trim() === l && getComputedStyle(x).display !== 'none')).filter(Boolean);
-          tl.to(els, { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(142,68,214,0.7))', duration: 0.35, ease: 'sine.out' }, at)
-            .to(els, { strokeWidth: 5, filter: NOGLOW, duration: 0.45, ease: 'sine.inOut' }, at + 0.7)
-            .set(els, { clearProps: 'strokeWidth,filter' }, at + 1.2);
-          if (labs.length) tl.fromTo(labs, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.2, boxShadow: '0 0 0 4px rgba(142,68,214,0.3)', duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
-            .set(labs, { clearProps: 'boxShadow' }, at + 0.65);
-        }
-        list.forEach(([k, len], i) => {
-          const e = $('.e' + k)[0], lab = tags.find((x) => x.textContent.trim() === len && getComputedStyle(x).display !== 'none'), at = i * 0.65;
-          if (e) tl.to(e, { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(142,68,214,0.7))', duration: 0.25, ease: 'sine.out' }, at)
-            .to(e, { strokeWidth: 5, filter: NOGLOW, duration: 0.35, ease: 'sine.inOut' }, at + 0.3)
-            .set(e, { clearProps: 'strokeWidth,filter' }, at + 0.66);
-          if (lab) tl.fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.2, boxShadow: '0 0 0 4px rgba(142,68,214,0.3)', duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
-            .set(lab, { clearProps: 'boxShadow' }, at + 0.55);
-        });
-        return tl;
-      });
-    },
-
-    // legs compared side by side: each leg (with its length) lights up `gap` s after the last and they all stay lit
-    // until `hold` s, so the comparison is still on screen while Swiftee says "different" / "same"; then they settle together
+    // screen 18, on "legs": each leg and its length light up (`gap` s apart) and stay lit until `hold` s, then settle
     legsHold(list, gap, hold) {
       if (!G) return;
       const tags = $('.board .tag.mtag');
@@ -1186,17 +987,7 @@
       });
     },
 
-    // Swiftee's laugh: a small bounce with a head tilt (her canvas only - her spot never changes) and a bubble wiggle
-    laughBounce() {
-      const sw = $('.swiftee canvas, .swiftee img'), bub = $('.bubble')[0];
-      if (!G || reduced) return;
-      add(() => G.timeline()
-        .to(sw, { y: -10, rotation: -5, transformOrigin: '50% 90%', duration: 0.14, ease: 'sine.out', yoyo: true, repeat: 5 }, 0)
-        .set(sw, { clearProps: 'transform' })
-        .to(bub, { rotation: 2, duration: 0.1, ease: 'sine.inOut', yoyo: true, repeat: 5 }, 0)
-        .set(bub, { clearProps: 'rotate,transform' }));
-    },
-    // a very subtle emphasis on the shape (board only, about 2%)
+    // screen 18, on "find": a very slight (2%) pulse of the shape
     boardPulse() {
       const g = $('svg g.pop-g')[0], d = $('div.pop-g')[0], P = window.__trapP && window.__trapP();
       if (!G || !P) return;
@@ -1210,17 +1001,14 @@
       });
     },
 
-    // the parallel-arrow marks return once both parallel sides are back
-    arrowsIn() { const els = $('.chev'); if (G && els.length) add(() => G.to(els, { opacity: 1, duration: 0.45, ease: 'sine.out', overwrite: 'auto' })); },
-
-    // soft exit (no cut) for labels leaving with the screen change, e.g. numbers and letters on screen 3
-    // screen 3 starts with every corner letter waiting (hidden) for its cue again
-    // every screen starts with the cue marks (data-in / data-gone / data-col) cleared - the elements are reused
+    // every screen starts with the cue marks (data-in / data-gone / data-col) cleared: the elements are reused
     cueReset() { document.querySelectorAll('.stage [data-in], .stage [data-gone], .stage [data-col]').forEach((e) => { e.removeAttribute('data-in'); e.removeAttribute('data-gone'); e.removeAttribute('data-col'); }); },
+    // screen 3 starts with every corner letter hidden again, waiting for its cue
     lettersReset() { $('.tag.vlab').forEach((e) => e.removeAttribute('data-landed')); },
+    // a soft exit for labels leaving with the screen change (the side numbers on screen 3)
     fadeOut(sel) { const els = $(sel); if (G && els.length) add(() => G.to(els, { opacity: 0, duration: 0.35, ease: 'sine.out' })); },
 
-    // screen 3: a corner letter arrives on its voice cue from its own corner, then a soft glow settles on it once
+    // screen 3: a corner letter flies in from its own corner as it is said, then glows once
     letterIn(k, onLand) {
       const el = $('.tag.vlab.c' + k)[0];
       if (el) el.setAttribute('data-landed', '1'); // stays shown through the hand-over to the next screen (CSS .vlab.vin)
@@ -1236,62 +1024,7 @@
       });
     },
 
-    // screen 4: the previous shape fades out, then the four sides fly in - top from above, right from the right,
-    // bottom from below, left from the left - each a glowing stroke that settles into the outline, starting just
-    // before the previous one lands; a glow settles on the closed outline, then the corner dots and the fill fade in
-    assemble() {
-      if (!G) return;
-      const sides = [['.eAB', 0, -64], ['.eBC', 64, 0], ['.eCD', 0, 64], ['.eDA', -64, 0]];
-      add(() => {
-        const tl = G.timeline();
-        const edges = sides.map((s) => $(s[0])[0]).filter(Boolean), dots = $('.vdot'), fill = $('.shape-fill'), labels = $('.board .tag.vlab');
-        tl.to(edges.concat(dots, fill, labels), { opacity: 0, duration: 0.3, ease: 'sine.out' }, 0);
-        sides.forEach((s, i) => {
-          const el = $(s[0])[0]; if (!el) return;
-          // immediateRender off: the side keeps fading out with the old shape until its own entrance starts
-          tl.fromTo(el, { opacity: 0, x: s[1], y: s[2], strokeWidth: 7, filter: GLOW },
-            { opacity: 1, x: 0, y: 0, duration: reduced ? 0 : 0.55, ease: 'power3.out', immediateRender: false }, 0.45 + i * 0.6)
-            .to(el, { strokeWidth: 5, filter: NOGLOW, duration: 0.3, ease: 'sine.out' }, '>-0.05');
-        });
-        tl.fromTo($('.outline-settle'), { opacity: 0 }, { opacity: 0.75, duration: 0.45, ease: 'sine.out' }, 3.0)
-          .to($('.outline-settle'), { opacity: 0, duration: 0.85, ease: 'sine.inOut' }, '>')
-          .to(dots, { opacity: 1, duration: 0.45, ease: 'sine.out' }, 3.1)
-          .to(fill, { opacity: 1, duration: 0.9, ease: 'sine.out' }, 3.1);
-        return tl;
-      });
-    },
-
-    // screen 4: while the sides assemble, the whole shape is held slightly small and soft (it is still forming).
-    // Applied only once the previous shape has faded out (assemble's 0.3 s exit), so the size change is never seen
-    // and screen 3 -> 4 hands over without a jump.
-    holdSmall(cx, cy) {
-      if (!G) return;
-      const g = $('svg g.pop-g')[0], d = $('div.pop-g')[0];
-      add(() => {
-        const tl = G.timeline();
-        if (g) tl.set(g, { scale: 0.88, opacity: 0.85, svgOrigin: cx + ' ' + cy }, 0.32);
-        if (d) tl.set(d, { scale: 0.88, opacity: 0.85, transformOrigin: cx + 'px ' + cy + 'px' }, 0.32);
-        return tl;
-      });
-    },
-    // ...then, on Swiftee's cue, it comes forward once: 88% -> 100%, opacity up, a soft glow that swells and settles.
-    // Ends exactly at scale 1 / opacity 1 / no glow, and stays still.
-    growIn(cx, cy) {
-      if (!G) return;
-      const g = $('svg g.pop-g')[0], d = $('div.pop-g')[0];
-      add(() => {
-        const tl = G.timeline(), dur = reduced ? 0 : 0.9;
-        if (g) {
-          tl.to(g, { scale: 1, opacity: 1, svgOrigin: cx + ' ' + cy, duration: dur, ease: 'power2.out' }, 0)
-            .fromTo(g, { filter: 'drop-shadow(0px 0px 0px rgba(232,40,122,0))' },
-              { filter: 'drop-shadow(0px 0px 12px rgba(232,40,122,0.45))', duration: dur * 0.45, ease: 'sine.out', yoyo: true, repeat: 1 }, 0);
-        }
-        if (d) tl.to(d, { scale: 1, opacity: 1, transformOrigin: cx + 'px ' + cy + 'px', duration: dur, ease: 'power2.out' }, 0);
-        return tl;
-      });
-    },
-
-    // "We call this a trapezium": the shape (and its labels) zooms up once about its own centre and eases back
+    // screen 12, on "trapezium" (and via shapePop): the shape and its labels zoom up once about (cx, cy) and ease back
     pop(cx, cy) {
       if (!G || reduced) return;
       const g = $('svg g.pop-g')[0], d = $('div.pop-g')[0];
@@ -1303,7 +1036,7 @@
       });
     },
 
-    // dragged the wrong way: that side gives one short, small wiggle about its middle
+    // a wrong move (dragged the wrong way, or a tapped corner that is not 90°): that side gives one small wiggle
     wiggle(side) {
       const el = $('.e' + side)[0];
       if (!G || !el || reduced) return;

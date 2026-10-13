@@ -1,4 +1,4 @@
-// Scales the 1920x1080 stage to fit the window (letterboxed, centred).
+// Scales the 1920x1080 stage (#dc-root) to fit the window, letterboxed and centred.
 (function () {
   function fit() {
     var r = document.getElementById('dc-root');
@@ -10,5 +10,6 @@
   }
   addEventListener('resize', fit);
   addEventListener('orientationchange', fit);
+  // fit again every 50 ms for about 2 s: #dc-root may be rendered after this script runs
   var n = 0, t = setInterval(function () { fit(); if (++n > 40) clearInterval(t); }, 50);
 })();

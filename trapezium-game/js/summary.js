@@ -1,253 +1,508 @@
 // =====================================================================
-// SUMMARY — screen 35, the animated trapezium summary.
-// One large ice card at a time, explanation only (nothing to tap): Definition -> Parts -> Types -> Angles. On each
-// card the shape pops in, Swiftee (peeking from behind the card's left edge) explains with the game's voice, the parts
-// she names light up and the card's text appears on her words; then the card shrinks into the collection row below
-// (a mini card appears there only once collected). After all four, the collected cards open into a 2x2 recap and
-// Swiftee closes with one celebration.
+// SUMMARY — screen 37, "Let's recall what we learnt today" (a port of the Summary Kit).
+// One card per idea, in the order the lesson taught them. Each card goes through these states, strictly in turn:
+//   CARD_ENTER      the card comes into the middle
+//   CONCEPT_REVEAL  its idea is drawn on the trapezium
+//   SWIFTEE_ENTER   Swiftee rises from behind the card (she is under the card layer, so the card hides her body)
+//   EXPLANATION     she says one line; key words light up the part of the card they name
+//   READING_PAUSE   a short breath
+//   SWIFTEE_EXIT    she sinks back behind the card
+//   CARD_COLLECT    the card shrinks into a 2 x 2 album at the side
+//   NEXT_CONCEPT    then the next card
+// After the last card: FINAL_SUMMARY (albums gather in, she says the closing line), then READY (Next glows; tapping a card
+// replays it). Each state waits for the one before, so lines never overlap and nothing can be tapped while she talks.
+// Coordinates are the kit's 1000 x 562 board, scaled to the 1280 x 720 stage. Reduced motion: same states, no movement.
+// Engine: Summary.enter(engine) when the screen opens, Summary.start(engine) once the opening line is said,
+// Summary.stop() on every screen change.
 // =====================================================================
 (function () {
-  const G = window.gsap;
-  const reduced = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
-  const NS = 'http://www.w3.org/2000/svg';
-  const PINK = '#e8287a', FILL = 'rgba(229,205,234,0.92)', PU = '#8e44d6', OR = '#f08a24', YEL = '#F5C542', GR = '#2e9e4f', NAVY = '#123b63';
-  // pacing: every animation runs at PACE x its base time; Swiftee pauses LINE_PAUSE s after each line; a finished card
-  // stays HOLD s before it is collected - so there is time to read and take it in
-  const PACE = 1.35, LINE_PAUSE = 0.9, HOLD = 2.2;
-  const D = (s) => (reduced ? 0 : s * PACE);
+  const G = window.gsap, NS = 'http://www.w3.org/2000/svg', W = 1000, H = 562, PX = 1280 / W;
+  const reduced = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 
-  // ---------- card geometry (card SVG is 680 x 440; bases at y 130 / 300, so AB is parallel to DC) ----------
-  const TOP = 130, BOT = 300;
-  const SHAPES = {
-    gen: { A: 250, B: 450, C: 530, D: 150 },          // a general trapezium
-    scal: { A: 270, B: 470, C: 540, D: 140 },         // legs 214 vs 184 px: unequal, no right angle
-    iso: { A: 240, B: 440, C: 540, D: 140 },          // both legs run 100 px: equal
-    right: { A: 160, B: 420, C: 540, D: 160 },        // AD vertical: 90 at A and D
-    ang: { A: 221.88, B: 441.85, C: 540, D: 160 }     // D 70 / A 110 on the left leg, C 60 / B 120 on the right
+  // ---------- layout in board units (1000 x 562), and timings ----------
+  const SUM = {
+    card: { cx: 500, cy: 322, w: 300 },
+    mini: { w: 132, x: [[80, 224], [776, 920]], y: [200, 378], zoom: 1.12, plate: { w: 118, h: 27, size: 15.5, rim: 2 } },
+    enterMs: 420, collectMs: 580, pauseMs: 200
   };
+  const FRAME = { src: 'assets/images/summary-card.webp', w: 1024, h: 984 };
+  const WARM = 'rgba(255, 150, 40, 0.85)';
+  // name-tag colours, for the ideas that have a tone
+  const TONE = {
+    convex: { deep: '#0f6f86', wash: '#e4f8fc', ink: '#0b5566' },
+    concave: { deep: '#95590a', wash: '#fff3dd', ink: '#6d4100' },
+    regular: { deep: '#a04e0a', wash: '#fff0e0', ink: '#7a3300' },
+    irregular: { deep: '#54399e', wash: '#f1ebfe', ink: '#3d2775' }
+  };
+  // the lesson's colours: pink bases, purple legs, lilac fill, orange parallel arrows; one colour per angle
+  const INK = { base: '#e8287a', leg: '#8e44d6', fill: 'rgba(229,205,234,0.95)', chev: '#f08a24', navy: '#123b63' };
+  const ANG = { A: '#f08a24', B: '#8e44d6', C: '#2b7bd6', D: '#f5c542' };
+  // Swiftee's two spots: 'peek' over the card's top edge, 'middle' between the albums. y = offset in stage px from her
+  // CSS position, s = scale of her 259 px box, hide = how far she sinks to be out of sight
+  const SPOT = { peek: { y: 0, s: 218 / 259, hide: 154 }, middle: { y: 69, s: 320 / 259, hide: 333 } };
+
+  // ---------- the trapeziums on the cards (board units): AB at y = TOP, DC at y = BOT, so AB is parallel to DC ----------
+  const TOP = 276, BOT = 378, HT = BOT - TOP;
+  const SHAPES = {
+    gen: { A: 440, B: 548, C: 596, D: 404 },
+    scal: { A: 434, B: 530, C: 598, D: 402 },    // all four sides different
+    iso: { A: 446, B: 554, C: 598, D: 402 },     // legs equal
+    right: { A: 404, B: 530, C: 596, D: 404 },   // AD upright: right angles at A and D
+    // the same angles as the lesson: D 60, A 120, C 75, B 105
+    ang: { A: 404 + HT / Math.tan(Math.PI / 3), B: 596 - HT / Math.tan(75 * Math.PI / 180), C: 596, D: 404 }
+  };
+  const SIDES = { AB: ['A', 'B'], BC: ['B', 'C'], DC: ['D', 'C'], DA: ['D', 'A'] };
+
+  // ---------- the ideas, in teaching order. card() draws any of them from this data ----------
+  //   visual: shape; draw (outline draws itself); chev (parallel arrows); lit (sides that glow); ticks ('all' = one tick
+  //           count per length, 'legs' = the equal legs); right (right-angle marks); wedges (angles with their values)
+  //   cue:    spoken word -> what it highlights (see cue() below)
+  const IDEAS = [
+    { id: 'trapezium', label: 'Trapezium', t: 'A trapezium is a quadrilateral with one pair of parallel sides.',
+      visual: { shape: 'gen', draw: true, chev: true }, cue: { quadrilateral: 'outline', parallel: 'pair' } },
+    { id: 'bases', label: 'Bases', t: 'The parallel sides are called the bases.',
+      visual: { shape: 'gen', chev: true, lit: ['AB', 'DC'] }, cue: { parallel: 'chev', bases: 'lit' } },
+    { id: 'legs', label: 'Legs', t: 'The other two sides are called the legs.',
+      visual: { shape: 'gen', lit: ['DA', 'BC'] }, cue: { legs: 'lit' } },
+    { id: 'scalene', label: 'Scalene', tone: 'irregular', t: 'A scalene trapezium has sides of different lengths.',
+      visual: { shape: 'scal', ticks: 'all' }, cue: { scalene: 'tag', sides: 'outline', different: 'ticks' } },
+    { id: 'isosceles', label: 'Isosceles', tone: 'convex', t: 'An isosceles trapezium has legs of the same length.',
+      visual: { shape: 'iso', ticks: 'legs' }, cue: { isosceles: 'tag', legs: 'legs', same: 'ticks' } },
+    { id: 'right', label: 'Right', tone: 'regular', t: 'A right trapezium has two adjacent right angles.',
+      visual: { shape: 'right', right: ['A', 'D'] }, cue: { right: 'tag', angles: 'right' } },
+    { id: 'angleSum', label: 'Angle sum', tone: 'concave', t: 'Angles on the same leg add up to 180°.',
+      visual: { shape: 'ang', lit: ['DA'], wedges: ['A', 'D'] }, cue: { angles: 'wedges', leg: 'lit', 180: 'values' } },
+    { id: 'supplementary', label: 'Supplementary', tone: 'concave', t: 'Two angles that add up to 180° are supplementary.',
+      visual: { shape: 'ang', lit: ['BC'], wedges: ['B', 'C'] }, cue: { angles: 'wedges', 180: 'values', supplementary: 'tag' } }
+  ];
+  // the closing line (the opening line comes from lesson-data, 'recap')
+  const DONE = { m: 'celebrating', t: 'Wonderful! You remember everything about trapeziums!', cue: { trapeziums: 'all' } };
+
+  // ---------- small helpers ----------
+  // make an SVG element: null attributes are skipped, attrs.text becomes its text
+  function mk(tag, attrs, parent) {
+    const el = document.createElementNS(NS, tag);
+    Object.keys(attrs || {}).forEach((k) => { if (attrs[k] == null) return; if (k === 'text') el.textContent = attrs[k]; else el.setAttribute(k, attrs[k]); });
+    if (parent) parent.appendChild(el);
+    return el;
+  }
   const pt = (X, k) => ({ x: X[k], y: k === 'A' || k === 'B' ? TOP : BOT });
-  const NB = { A: ['D', 'B'], B: ['A', 'C'], C: ['B', 'D'], D: ['C', 'A'] };
-  const unit = (p, q) => { const L = Math.hypot(q.x - p.x, q.y - p.y) || 1; return { x: (q.x - p.x) / L, y: (q.y - p.y) / L }; };
-  const angle = (X, k) => { const v = pt(X, k), u = unit(v, pt(X, NB[k][0])), w = unit(v, pt(X, NB[k][1])); return Math.round(Math.acos(u.x * w.x + u.y * w.y) * 180 / Math.PI); };
   const f1 = (n) => +n.toFixed(1);
 
-  // ---------- tiny DOM helpers ----------
-  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); Object.keys(attrs || {}).forEach((a) => e.setAttribute(a, attrs[a])); if (parent) parent.appendChild(e); return e; };
-  const div = (cls, html, parent) => { const e = document.createElement('div'); e.className = cls; if (html != null) e.innerHTML = html; if (parent) parent.appendChild(e); return e; };
-
-  // the whole shape lives in one <g>; render(X) moves every part for corner x positions X
-  function Diagram(svg) {
-    const g = el('g', { class: 'sm-shape' }, svg);
-    const fill = el('polygon', { fill: FILL }, g);
-    const hi = {}, side = {}, hit = {};
-    ['AB', 'BC', 'CD', 'DA'].forEach((s) => { hi[s] = el('line', { class: 'sm-hi', stroke: YEL, 'stroke-width': 16, 'stroke-linecap': 'round', opacity: 0 }, g); });
-    ['AB', 'BC', 'CD', 'DA'].forEach((s) => { side[s] = el('line', { stroke: s === 'AB' || s === 'CD' ? PINK : PU, 'stroke-width': 5, 'stroke-linecap': 'round' }, g); });
-    const chev = el('path', { fill: 'none', stroke: OR, 'stroke-width': 3.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: 0 }, g);
-    const ticks = el('path', { fill: 'none', stroke: PU, 'stroke-width': 3, 'stroke-linecap': 'round', opacity: 0 }, g);
-    const rmarks = el('path', { fill: 'none', stroke: GR, 'stroke-width': 3, opacity: 0 }, g);
-    const arcs = {}, vals = {}, fills = {};
-    // each angle filled in its own colour (as on the lesson screens and Screen 40), drawn under its arc
-    [['A', OR], ['B', PU], ['C', '#2b7bd6'], ['D', YEL]].forEach(([k, c]) => { fills[k] = el('path', { fill: c, 'fill-opacity': 1, stroke: 'none', opacity: 0 }, g); });
-    [['A', OR], ['B', PU], ['C', '#2b7bd6'], ['D', YEL]].forEach(([k, c]) => { arcs[k] = el('path', { fill: 'none', stroke: c, 'stroke-width': 7, 'stroke-linecap': 'round', pathLength: 100, opacity: 0 }, g); });
-    ['A', 'B', 'C', 'D'].forEach((k) => { vals[k] = el('text', { 'text-anchor': 'middle', 'font-family': 'Nunito, sans-serif', 'font-weight': 900, 'font-size': 17, fill: NAVY, opacity: 0 }, g); });
-    const dots = {}, labs = {};
-    ['A', 'B', 'C', 'D'].forEach((k) => {
-      dots[k] = el('circle', { r: 7, fill: '#fff', stroke: PINK, 'stroke-width': 3 }, g);
-      labs[k] = el('text', { 'text-anchor': 'middle', 'font-family': 'Nunito, sans-serif', 'font-weight': 900, 'font-size': 21, fill: NAVY }, g); labs[k].textContent = k;
-    });
-    // generous invisible tap targets along each side (the visible line stays precise)
-    ['AB', 'BC', 'CD', 'DA'].forEach((s) => { hit[s] = el('line', { stroke: 'rgba(0,0,0,0.001)', 'stroke-width': 34, 'stroke-linecap': 'round', class: 'sm-hit', 'data-side': s }, g); });
-    let X = Object.assign({}, SHAPES.gen);
-    function render(next) {
-      if (next) X = Object.assign({}, next);
-      const P = { A: pt(X, 'A'), B: pt(X, 'B'), C: pt(X, 'C'), D: pt(X, 'D') };
-      const cx = (X.A + X.B + X.C + X.D) / 4, cy = (TOP + BOT) / 2;
-      fill.setAttribute('points', ['A', 'B', 'C', 'D'].map((k) => f1(P[k].x) + ',' + P[k].y).join(' '));
-      const ends = { AB: ['A', 'B'], BC: ['B', 'C'], CD: ['D', 'C'], DA: ['D', 'A'] };
-      Object.keys(ends).forEach((s) => { const a = P[ends[s][0]], b = P[ends[s][1]];
-        [side[s], hi[s], hit[s]].forEach((l) => { l.setAttribute('x1', f1(a.x)); l.setAttribute('y1', a.y); l.setAttribute('x2', f1(b.x)); l.setAttribute('y2', b.y); }); });
-      const chv = (y, x) => 'M' + f1(x - 7) + ',' + (y - 6) + ' L' + f1(x - 1) + ',' + y + ' L' + f1(x - 7) + ',' + (y + 6) + ' M' + f1(x + 1) + ',' + (y - 6) + ' L' + f1(x + 7) + ',' + y + ' L' + f1(x + 1) + ',' + (y + 6);
-      chev.setAttribute('d', chv(TOP, (X.A + X.B) / 2) + ' ' + chv(BOT, (X.D + X.C) / 2));
-      const tick = (a, b, n) => { const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, t = unit(a, b), nn = { x: -t.y, y: t.x };
-        const offs = n === 1 ? [0] : [-4, 4];
-        return offs.map((o) => 'M' + f1(mx + t.x * o - nn.x * 9) + ',' + f1(my + t.y * o - nn.y * 9) + ' L' + f1(mx + t.x * o + nn.x * 9) + ',' + f1(my + t.y * o + nn.y * 9)).join(' '); };
-      ticks._d = { same: tick(P.D, P.A, 2) + ' ' + tick(P.B, P.C, 2), diff: tick(P.D, P.A, 1) + ' ' + tick(P.B, P.C, 2) };
-      ticks.setAttribute('d', ticks._mode === 'diff' ? ticks._d.diff : ticks._d.same);
-      let rm = '';
-      ['A', 'B', 'C', 'D'].forEach((k) => {
-        const v = P[k], u = unit(v, P[NB[k][0]]), w = unit(v, P[NB[k][1]]), R = 26, cross = u.x * w.y - u.y * w.x;
-        arcs[k].setAttribute('d', 'M' + f1(v.x + u.x * R) + ',' + f1(v.y + u.y * R) + ' A' + R + ',' + R + ' 0 0 ' + (cross > 0 ? 1 : 0) + ' ' + f1(v.x + w.x * R) + ',' + f1(v.y + w.y * R));
-        const RW = R + 3.5; fills[k].setAttribute('d', 'M' + f1(v.x) + ',' + f1(v.y) + ' L' + f1(v.x + u.x * RW) + ',' + f1(v.y + u.y * RW) + ' A' + RW + ',' + RW + ' 0 0 ' + (cross > 0 ? 1 : 0) + ' ' + f1(v.x + w.x * RW) + ',' + f1(v.y + w.y * RW) + ' Z'); fills[k]._v = v;
-        let bx = u.x + w.x, by = u.y + w.y; const bl = Math.hypot(bx, by) || 1; bx /= bl; by /= bl;
-        vals[k].setAttribute('x', f1(v.x + bx * 58)); vals[k].setAttribute('y', f1(v.y + by * 58 + 6)); vals[k].textContent = angle(X, k) + '°';
-        dots[k].setAttribute('cx', f1(v.x)); dots[k].setAttribute('cy', v.y);
-        labs[k].setAttribute('x', f1(v.x - bx * 24)); labs[k].setAttribute('y', f1(v.y - by * 24 + 7));
-        if (angle(X, k) === 90) { const s = 15; rm += 'M' + f1(v.x + u.x * s) + ',' + f1(v.y + u.y * s) + ' L' + f1(v.x + u.x * s + w.x * s) + ',' + f1(v.y + u.y * s + w.y * s) + ' L' + f1(v.x + w.x * s) + ',' + f1(v.y + w.y * s) + ' '; }
-      });
-      rmarks.setAttribute('d', rm || 'M0,0');
-      g.setAttribute('data-cx', f1(cx)); g.setAttribute('data-cy', cy);
-    }
-    render();
-    return { g, fill, hi, side, hit, chev, ticks, rmarks, arcs, fills, vals, dots, labs, render, get X() { return X; } };
-  }
-
-  // a small shape icon (for the collection cards and the type choices)
-  function icon(kind, w) {
-    const X = { def: SHAPES.gen, parts: SHAPES.gen, scal: SHAPES.scal, iso: SHAPES.iso, right: SHAPES.right, types: SHAPES.iso, ang: SHAPES.ang }[kind];
-    const pts = ['A', 'B', 'C', 'D'].map((k) => f1(pt(X, k).x) + ',' + pt(X, k).y).join(' ');
-    let extra = '';
-    if (kind === 'parts') extra = `<line x1="${X.A}" y1="${TOP}" x2="${X.B}" y2="${TOP}" stroke="${YEL}" stroke-width="12" stroke-linecap="round"/><line x1="${X.D}" y1="${BOT}" x2="${X.C}" y2="${BOT}" stroke="${YEL}" stroke-width="12" stroke-linecap="round"/><line x1="${X.D}" y1="${BOT}" x2="${X.A}" y2="${TOP}" stroke="${PU}" stroke-width="12" stroke-linecap="round"/><line x1="${X.C}" y1="${BOT}" x2="${X.B}" y2="${TOP}" stroke="${PU}" stroke-width="12" stroke-linecap="round"/>`;
-    if (kind === 'def') extra = `<path d="M${(X.A + X.B) / 2 - 14},${TOP - 14} l14,14 l-14,14 M${(X.D + X.C) / 2 - 14},${BOT - 14} l14,14 l-14,14" fill="none" stroke="${OR}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>`;
-    if (kind === 'ang') { const u = unit(pt(X, 'D'), pt(X, 'A'));
-      extra = `<path d="M${X.D + 55},${BOT} A55,55 0 0 0 ${f1(X.D + u.x * 55)},${f1(BOT + u.y * 55)}" fill="none" stroke="${YEL}" stroke-width="16"/><path d="M${f1(X.A - u.x * 55)},${f1(TOP - u.y * 55)} A55,55 0 0 0 ${X.A + 55},${TOP}" fill="none" stroke="${OR}" stroke-width="16"/>`; }
-    return `<svg viewBox="110 100 460 230" width="${w}" height="${Math.round(w / 2)}" aria-hidden="true"><polygon points="${pts}" fill="${FILL}" stroke="${PINK}" stroke-width="10" stroke-linejoin="round"/>${extra}</svg>`;
-  }
-
-  const CARDS = [
-    { key: 'def', title: 'Definition', recap: 'One pair of parallel sides.' },
-    { key: 'parts', title: 'Parts', recap: 'Bases, legs, vertices.' },
-    { key: 'types', title: 'Types', recap: 'Scalene, isosceles, right.' },
-    { key: 'ang', title: 'Angles', recap: 'Same-leg angles add to 180°.' }
-  ];
-
   const Summary = {
-    run: 0,
-    start(engine) {
-      const root = document.querySelector('.stage .sum-root');
-      if (!root || !G) return;
+    run: 0, S: null,
+    get state() { return this.S ? this.S.state : null; },
+
+    // ---------- screen opens: build the card layer; Swiftee rises in the middle for the opening line ----------
+    enter(engine) {
       this.stop();
+      const root = document.querySelector('.stage .sum-root');
+      if (!root) return;
       const run = ++this.run, eng = engine, tok = eng.stepTok;
+      this.eng = eng;
+      // live() turns false once the screen changes; every async step checks it, so nothing runs late
       const live = () => run === this.run && tok === eng.stepTok && root.isConnected;
-      const ctx = G.context(() => {});
-      this.ctx = ctx;
-      const tw = (fn) => new Promise((res) => { if (!live()) return; ctx.add(() => { const t = fn(); if (!t) { res(); return; } t.eventCallback('onComplete', () => res()); }); });
-      const wait = (s) => new Promise((res) => { if (!live()) return; ctx.add(() => G.delayedCall(s, () => res())); });
-      const say = (t, m, cues) => new Promise((res) => { if (!live()) return; eng.say({ m: m || 'happy', t: t, cueAt: cues }, () => { if (live()) ctx.add(() => G.delayedCall(LINE_PAUSE, res)); }); });
-      const sfx = (k) => live() && eng.sfx(k);
-
-      // ---------- build the stage pieces ----------
+      this.live = live;
+      this.ctx = G ? G.context(() => {}) : null;
+      this.timers = [];
       root.innerHTML = '';
-      const card = div('sm-card', '<div class="sm-wave"></div>', root);
-      const head = div('sm-head', '', card);
-      const svg = el('svg', { class: 'sm-svg', viewBox: '0 0 680 440' }, card);
-      const cap = div('sm-cap', '', card);          // the card's text: appears in step with Swiftee's words
-      const dg = Diagram(svg);
-      const row = div('sm-row', null, root);
-      // collected cards: nothing is shown until a card has actually been collected (no empty placeholders)
-      const slots = CARDS.map((c) => { const s = div('sm-slot', `<div class="sm-mini"><span class="sm-ico">${icon(c.key, 70)}</span><b>${c.title}</b><i>${c.recap}</i></div>`, row); return s; });
-      const allParts = () => [dg.chev, dg.ticks, dg.rmarks].concat(Object.values(dg.arcs), Object.values(dg.fills), Object.values(dg.vals), Object.values(dg.hi));
-      const resetParts = () => { G.set(allParts(), { opacity: 0 }); dg.ticks._mode = 'same'; };
-      G.set(card, { opacity: 0 }); G.set(slots, { opacity: 0 });
-
-      // ---------- shared pieces ----------
-      const glowPair = (a, b, color) => { [a, b].forEach((s) => dg.hi[s].setAttribute('stroke', color)); return G.to([dg.hi[a], dg.hi[b]], { opacity: 0.85, duration: D(0.35) }); };
-      const glow = (s, color) => { dg.hi[s].setAttribute('stroke', color); return G.to(dg.hi[s], { opacity: 0.85, duration: D(0.35) }); };
-      const hide = (list) => G.to(list.map((s) => dg.hi[s]), { opacity: 0, duration: D(0.3) });
-      // add one piece of text to the card's caption line (each piece pops in on its word)
-      const capAdd = (html, cls) => { const s = document.createElement('span'); s.className = 'sm-cp ' + (cls || ''); s.innerHTML = html; cap.appendChild(s); G.fromTo(s, { opacity: 0, y: 10, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: D(0.5), ease: 'back.out(1.8)' }); sfx('pop'); };
-      const capSet = (html, cls) => { cap.innerHTML = ''; capAdd(html, cls); };
-      const morph = (to) => tw(() => G.to(Object.assign({}, dg.X), Object.assign({}, to, { duration: D(0.9), ease: 'power2.inOut', onUpdate() { dg.render(this.targets()[0]); } })));
-      // the arc draws round while its filled angle grows out of the corner (Screen 40's fill)
-      const arc = (k) => { const v = dg.fills[k]._v; G.fromTo(dg.fills[k], { opacity: 1, scale: 0, svgOrigin: v.x + ' ' + v.y }, { scale: 1, duration: D(0.5), ease: 'back.out(1.6)' }); return G.fromTo(dg.arcs[k], { opacity: 1, strokeDasharray: 100, strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: D(0.45) }); };
-
-      const enterCard = async (title, X) => {
-        await wait(D(0.5)); // a short breath between cards
-        resetParts(); head.textContent = title; cap.innerHTML = ''; dg.render(X);
-        await tw(() => G.timeline()
-          .fromTo(card, { opacity: 0, scale: 0.82, x: 0, y: 0 }, { opacity: 1, scale: 1, duration: D(0.55), ease: 'back.out(1.5)' })
-          .fromTo(dg.g, { scale: 0.6, opacity: 0, svgOrigin: dg.g.getAttribute('data-cx') + ' ' + dg.g.getAttribute('data-cy') }, { scale: 1, opacity: 1, duration: D(0.45), ease: 'back.out(1.7)' }, D(0.3)));
-        sfx('pop');
-      };
-      // the card shrinks into its place in the row; only then does that mini card appear
-      const collect = async (i) => {
-        sfx('chime');
-        G.set(slots[i], { opacity: 1 }); G.set(slots[i].firstChild, { opacity: 0 });
-        const st = document.querySelector('.stage').getBoundingClientRect(), k = st.width / 1280;
-        const c = card.getBoundingClientRect(), s = slots[i].getBoundingClientRect();
-        const dx = ((s.left + s.width / 2) - (c.left + c.width / 2)) / k, dy = ((s.top + s.height / 2) - (c.top + c.height / 2)) / k;
-        await tw(() => G.timeline()
-          .to(card, { scale: 1.03, duration: D(0.18), yoyo: true, repeat: 1 })
-          .to(card, { x: dx, y: dy, scale: s.width / c.width, opacity: 0.5, duration: D(0.65), ease: 'power2.inOut' })
-          .set(card, { opacity: 0 })
-          .fromTo(slots[i].firstChild, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: D(0.35), ease: 'back.out(2)' })
-          .fromTo(slots[i], { y: 0 }, { y: -6, duration: D(0.15), yoyo: true, repeat: 1 }, '<'));
-      };
-
-      // ---------- the sequence (explanation only - nothing to tap) ----------
-      (async () => {
-        const sw = document.querySelector('.stage .swiftee');
-        G.set(sw, { x: -220, opacity: 0 });
-        await tw(() => G.to(sw, { x: 0, opacity: 1, duration: D(0.6), ease: 'power2.out' }));
-
-        // ---- 1 DEFINITION ----
-        await enterCard('What is a trapezium?', SHAPES.gen);
-        await say("Let's remember! A trapezium is a quadrilateral with one pair of opposite sides parallel.", 'happy', {
-          quadrilateral: () => { G.fromTo(Object.values(dg.side), { attr: { 'stroke-width': 5 } }, { attr: { 'stroke-width': 8 }, duration: 0.25, yoyo: true, repeat: 1 }); capSet('4 sides'); },
-          parallel: () => { glowPair('AB', 'CD', YEL); G.to(dg.chev, { opacity: 1, duration: 0.4 }); capAdd('one pair of <b>parallel sides</b>', 'hl'); } });
-        await say('These two sides are parallel. They never meet!', 'curious', { meet: () => capAdd('AB ∥ DC', 'eq') });
-        hide(['AB', 'CD']);
-        await wait(HOLD); await collect(0);
-
-        // ---- 2 PARTS ----
-        await enterCard('Parts of a trapezium', SHAPES.gen);
-        await say('The parallel sides are called the bases.', 'happy', { bases: () => { glowPair('AB', 'CD', YEL); capSet('Bases', 'base'); } });
-        hide(['AB', 'CD']);
-        await say('The other two sides are called the legs.', 'happy', { legs: () => { glowPair('DA', 'BC', PU); capAdd('Legs', 'leg'); } });
-        hide(['DA', 'BC']);
-        await say('And these four corners are called vertices.', 'happy', { corners: () => { G.fromTo(['A', 'B', 'C', 'D'].map((k) => dg.dots[k]), { attr: { r: 7 } }, { attr: { r: 12 }, duration: 0.35, yoyo: true, repeat: 1, stagger: 0.35 }); capAdd('Vertices', 'vtx'); } });
-        await wait(HOLD); await collect(1);
-
-        // ---- 3 TYPES (one shape changes from type to type) ----
-        await enterCard('Types of trapezium', SHAPES.scal);
-        dg.ticks._mode = 'diff'; dg.render();
-        await say('A scalene trapezium has legs of different lengths.', 'happy', { scalene: () => capSet('Scalene'), different: () => { glowPair('DA', 'BC', PU); G.to(dg.ticks, { opacity: 1, duration: 0.3 }); } });
-        hide(['DA', 'BC']); G.to(dg.ticks, { opacity: 0, duration: 0.25 });
-        await morph(SHAPES.iso); dg.ticks._mode = 'same'; dg.render();
-        await say('An isosceles trapezium has two equal legs.', 'happy', { isosceles: () => capAdd('Isosceles'), equal: () => G.fromTo(dg.ticks, { opacity: 0 }, { opacity: 1, duration: 0.35 }) });
-        G.to(dg.ticks, { opacity: 0, duration: 0.25 });
-        await morph(SHAPES.right);
-        await say('A right trapezium has two right angles.', 'happy', { right: () => { capAdd('Right'); G.fromTo(dg.rmarks, { opacity: 0 }, { opacity: 1, duration: 0.35 }); } });
-        await wait(HOLD); await collect(2);
-
-        // ---- 4 ANGLES ----
-        await enterCard('An important angle property', SHAPES.ang);
-        await say('Here is an important property!', 'surprised', { property: () => { glowPair('AB', 'CD', YEL); G.to(dg.chev, { opacity: 1, duration: 0.3 }); } });
-        hide(['AB', 'CD']);
-        await say('The two angles on the same leg add up to 180 degrees.', 'happy', {
-          angles: () => { glow('DA', PU); arc('A'); arc('D'); G.to([dg.vals.A, dg.vals.D], { opacity: 1, duration: 0.3, stagger: 0.25 }); },
-          180: () => capSet('110° + 70° = <b>180°</b>', 'eq') });
-        hide(['DA']);
-        await say('On the other leg too: 120 plus 60 is 180.', 'happy', {
-          other: () => { glow('BC', PU); arc('B'); arc('C'); G.to([dg.vals.B, dg.vals.C], { opacity: 1, duration: 0.3, stagger: 0.25 }); },
-          180: () => capAdd('120° + 60° = <b>180°</b>', 'eq') });
-        hide(['BC']);
-        await say('That means these angles are supplementary.', 'happy', { supplementary: () => capAdd('Supplementary angles', 'hl') });
-        await wait(HOLD); await collect(3);
-
-        // ---- FINAL RECAP: the collected cards open into a 2x2 grid, one at a time ----
-        const sr = document.querySelector('.stage').getBoundingClientRect(), k = sr.width / 1280;
-        const gx = [452, 828], gy = [92, 336];
-        G.set(card, { display: 'none' });
-        for (let i = 0; i < 4; i++) {
-          const s = slots[i], r = s.getBoundingClientRect();
-          const fx = (r.left - sr.left) / k, fy = (r.top - sr.top) / k;
-          root.appendChild(s); s.classList.add('sm-big');
-          await tw(() => G.fromTo(s, { left: fx, top: fy, width: 150, height: 96, position: 'absolute' }, { left: gx[i % 2], top: gy[i >> 1], width: 360, height: 228, duration: D(0.55), ease: 'power2.inOut' }));
-          sfx('pop');
-        }
-        const pulse = (i) => () => G.fromTo(slots[i], { scale: 1 }, { scale: 1.04, duration: 0.2, yoyo: true, repeat: 1 });
-        await say('Wonderful! You learned what a trapezium is, its parts, its types, and its special angle property!', 'celebrating',
-          { trapezium: pulse(0), parts: pulse(1), types: pulse(2), angle: pulse(3) });
-        await wait(0.6);
-        await say('You are ready for the next adventure!', 'happy');
-        if (live()) eng.cheer();                        // one celebration at the very end
-      })();
+      const svg = mk('svg', { viewBox: '0 0 ' + W + ' ' + H, width: 1280, height: 720, 'aria-label': 'Summary', role: 'img' }, root);
+      this.svg = svg;
+      this.defs = mk('defs', {}, svg);
+      this.layer = mk('g', {}, svg);
+      this.fx = mk('g', { 'pointer-events': 'none' }, svg);
+      this.root = root;
+      this.S = { cards: {}, collected: [], active: null, state: 'SUMMARY_START' };
+      this.busy = false;
+      this.setState('SUMMARY_START');
+      this.layer.addEventListener('pointerdown', (e) => {
+        const g = e.target.closest && e.target.closest('.summary-card');
+        if (g && this.S && this.S.state === 'READY') this.replay(g.getAttribute('data-concept'));
+      });
+      this.place('middle', true, 0);
+      this.rise('middle');
     },
+    // after the opening line: each card in turn, then the finale. A step that resolves false (screen changed) ends the chain
+    start(engine) {
+      if (!this.S || engine !== this.eng || !this.live()) { this.enter(engine); }
+      const live = this.live;
+      if (!live()) return;
+      this.hush();
+      let chain = this.sink().then(() => live());
+      IDEAS.forEach((c) => {
+        chain = chain.then((ok) => ok && this.show(c))
+          .then((ok) => { if (!ok) return false; this.setState('SWIFTEE_ENTER', c.id); return this.rise('peek'); })
+          .then((ok) => { if (!ok) return false; this.setState('EXPLANATION', c.id); return this.say(c); })
+          .then((ok) => { if (!ok) return false; this.setState('READING_PAUSE', c.id); this.hush(); return this.hold(SUM.pauseMs); })
+          .then((ok) => { if (!ok) return false; this.setState('SWIFTEE_EXIT', c.id); return this.sink(); })
+          .then((ok) => ok && this.collect(c.id));
+      });
+      return chain.then((ok) => ok && this.hold(400))
+        .then((ok) => ok && this.gather())
+        .then((ok) => ok && this.rise('middle'))
+        .then((ok) => ok && this.say(DONE))
+        .then((ok) => { if (ok && live()) { this.hush(); this.ready(); } return ok; });
+    },
+    // screen change: cancel timers and tweens, put Swiftee and her bubble back, clear the layer
     stop() {
       this.run++;
+      (this.timers || []).forEach(clearTimeout); this.timers = [];
       if (this.ctx) { this.ctx.revert(); this.ctx = null; }
-      const sw = document.querySelector('.stage .swiftee');
-      if (sw && G) G.set(sw, { clearProps: 'transform,opacity,translate' });
+      const sw = document.querySelector('.stage .swiftee'), bub = document.querySelector('.stage .bubble');
+      if (sw && G) G.set(sw, { clearProps: 'transform,opacity' });
+      if (bub) bub.style.marginBottom = '';
+      if (this.root) this.root.innerHTML = '';
+      this.root = null; this.S = null; this.busy = false;
+    },
+    // also written to the root as data-state, for debugging
+    setState(state, id) {
+      if (!this.S) return;
+      this.S.state = state;
+      if (this.root) this.root.setAttribute('data-state', state + (id ? ':' + id : ''));
+    },
+
+    // ---------- timing: no timer fires after the screen has changed ----------
+    // hold(ms) resolves true after ms, or false if the screen changed (later() then never fires, so a second timer settles it)
+    later(ms, fn) { const live = this.live, t = setTimeout(() => { if (live()) fn(); }, ms); this.timers.push(t); return t; },
+    hold(ms) { const live = this.live; return new Promise((r) => { if (reduced() || !ms) { r(live()); return; } this.later(ms, () => r(true)); this.timers.push(setTimeout(() => { if (!live()) r(false); }, ms + 20)); }); },
+    sfx(k) { if (this.live && this.live()) this.eng.sfx(k); },
+
+    // ---------- Swiftee: the game's own mascot element, moved between the two SPOTs ----------
+    place(where, down, ms) {
+      const sw = document.querySelector('.stage .swiftee'), bub = document.querySelector('.stage .bubble');
+      this.spot = where || this.spot || 'middle';
+      const P = SPOT[this.spot];
+      if (bub) bub.style.marginBottom = (-P.y) + 'px'; // keep her speech bubble above her head
+      if (!sw || !G) return Promise.resolve(this.live());
+      const to = { y: P.y + (down ? P.hide : 0), scale: P.s, opacity: down ? 0 : 1 };
+      if (!ms || reduced()) { this.ctx.add(() => G.set(sw, to)); return Promise.resolve(this.live()); }
+      return new Promise((res) => this.ctx.add(() => G.to(sw, Object.assign(to, { duration: ms / 1000, ease: down ? 'power2.in' : 'power3.out', onComplete: () => res(this.live()) }))));
+    },
+    // rise: start out of sight, come up (340 ms). sink: drop out of sight (300 ms)
+    rise(where) { this.place(where, true, 0); this.eng.pose('happy'); return this.place(where, false, 340); },
+    sink() { return this.place(null, true, 300); },
+    // say one line in the game's voice; each cue word calls cue() as it is spoken. Resolves when the line ends
+    say(c) {
+      const live = this.live;
+      return new Promise((res) => {
+        if (!live()) { res(false); return; }
+        const cueAt = {};
+        Object.keys(c.cue || {}).forEach((w) => { cueAt[w] = () => this.cue(c.cue[w]); });
+        this.eng.say({ m: c.m || 'happy', t: c.t, noEmph: 1, cueAt: cueAt }, () => res(live()));
+      });
+    },
+    // hide the speech bubble
+    hush() { if (this.live && this.live()) this.eng.setState({ bubOff: true }); },
+
+    // ---------- build one card: the frame image, the trapezium (hidden until reveal) and its name tag ----------
+    card(c) {
+      const V = c.visual || {}, w = SUM.card.w, h = w * FRAME.h / FRAME.w, x = SUM.card.cx - w / 2, y = SUM.card.cy - h / 2;
+      const g = mk('g', { 'class': 'summary-card', 'data-concept': c.id }, this.layer);
+      g._rect = { x: x, y: y, w: w, h: h }; g._c = c;
+      const pp = mk('g', {}, g); g._pop = pp;           // animations run on the inner group, the collect transform on the outer
+      const img = mk('image', { x: x, y: y, width: w, height: h, preserveAspectRatio: 'none', href: FRAME.src }, pp);
+      img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', FRAME.src); // older browsers only read xlink:href
+      const vis = mk('g', {}, pp); g._vis = vis;
+      const X = SHAPES[V.shape || 'gen'], P = { A: pt(X, 'A'), B: pt(X, 'B'), C: pt(X, 'C'), D: pt(X, 'D') };
+      g._P = P;
+      g._fill = mk('polygon', { points: ['A', 'B', 'C', 'D'].map((k) => f1(P[k].x) + ',' + P[k].y).join(' '), fill: INK.fill, opacity: 0 }, vis);
+      g._bands = mk('g', {}, vis);                       // highlight bands, under the side lines
+      g._wedgeG = mk('g', {}, vis);
+      g._sides = {};
+      Object.keys(SIDES).forEach((s) => {
+        const a = P[SIDES[s][0]], b = P[SIDES[s][1]];
+        g._sides[s] = mk('line', { x1: a.x, y1: a.y, x2: b.x, y2: b.y, stroke: s === 'AB' || s === 'DC' ? INK.base : INK.leg, 'stroke-width': 3.5, 'stroke-linecap': 'round', opacity: 0 }, vis);
+      });
+      g._marks = mk('g', {}, vis);
+      g._dots = ['A', 'B', 'C', 'D'].map((k) => mk('circle', { cx: P[k].x, cy: P[k].y, r: 4.2, fill: '#fff', stroke: INK.base, 'stroke-width': 2.2, opacity: 0 }, vis));
+      g._tag = this.nameTag(pp, SUM.card.cx, y + h + 4, c.label, c.tone);
+      g._tag.setAttribute('opacity', 0);
+      return g;
+    },
+    // a rounded name plate sized to its text; o sets height, font size, minimum width and rim (the album plates)
+    nameTag(parent, x, y, text, tone, o) {
+      const c = TONE[tone] || null, g = mk('g', { 'class': 'badge' }, parent);
+      const H0 = (o && o.h) || 50, fs = (o && o.size) || 26;
+      const t = mk('text', { x: x, y: y + fs * 0.35, 'text-anchor': 'middle', 'font-size': fs, 'font-weight': 900,
+        'font-family': 'Nunito, system-ui, sans-serif', fill: c ? c.ink : '#0b3f7a', text: text }, g);
+      let w = 0; try { w = t.getComputedTextLength(); } catch (e) {}
+      if (!w) w = text.length * fs * 0.54; // could not measure the text: estimate
+      const bw = (o && o.w) ? Math.max(o.w, w + 14) : (w + 52);
+      g.insertBefore(mk('rect', { x: x - bw / 2, y: y - H0 / 2, width: bw, height: H0, rx: H0 * 0.44,
+        fill: c ? c.wash : '#f3fcff', stroke: c ? c.deep : '#0b4f9e', 'stroke-width': (o && o.rim) || 3 }), t);
+      return g;
+    },
+    // pop an element in (overshoot, then settle); fill 'backwards' keeps it hidden during the delay
+    pop(el, delay, big) {
+      el.setAttribute('opacity', 1);
+      if (reduced() || !el.animate) return;
+      el.style.transformBox = 'fill-box'; el.style.transformOrigin = 'center';
+      try { el.animate([{ opacity: 0, scale: '.3' }, { opacity: 1, scale: big ? '1.35' : '1.2', offset: 0.6 }, { opacity: 1, scale: '1' }],
+        { duration: 320, delay: delay || 0, easing: 'cubic-bezier(.3,1.3,.5,1)', fill: 'backwards' }); } catch (e) {}
+    },
+    // a short warm grow-and-glow on each element, slightly staggered
+    warmPulse(els, peak) {
+      (els || []).filter(Boolean).forEach((e, i) => {
+        if (reduced() || !e.animate) return;
+        e.style.transformBox = 'fill-box'; e.style.transformOrigin = 'center';
+        try { e.animate([{ scale: '1', filter: 'brightness(1)' }, { scale: peak || '1.4', filter: 'brightness(1.12) drop-shadow(0 0 7px ' + WARM + ')', offset: 0.4 }, { scale: '1', filter: 'brightness(1)' }],
+          { duration: 480, delay: i * 60, easing: 'cubic-bezier(.3,1.25,.45,1)' }); } catch (x) {}
+      });
+    },
+    // a warm stroke runs along each line and fades. It is a copy in the fx layer, mapped through the card's transform,
+    // so the line itself is never changed
+    trace(lines) {
+      (lines || []).filter(Boolean).forEach((src, i) => {
+        if (reduced()) return;
+        const a = { x: +src.getAttribute('x1'), y: +src.getAttribute('y1') }, b = { x: +src.getAttribute('x2'), y: +src.getAttribute('y2') };
+        const m = src.getCTM && this.svg.getCTM ? this.svg.getCTM().inverse().multiply(src.getCTM()) : null;
+        const P = (p) => (m ? { x: m.a * p.x + m.c * p.y + m.e, y: m.b * p.x + m.d * p.y + m.f } : p);
+        const A2 = P(a), B2 = P(b), len = Math.hypot(B2.x - A2.x, B2.y - A2.y) || 1;
+        const ln = mk('line', { x1: A2.x, y1: A2.y, x2: B2.x, y2: B2.y, stroke: WARM, 'stroke-width': 7, 'stroke-linecap': 'round' }, this.fx);
+        ln.style.strokeDasharray = len + ' ' + len;
+        try {
+          const an = ln.animate([{ strokeDashoffset: len + 'px', opacity: 1 }, { strokeDashoffset: '0px', opacity: 1, offset: 0.6 }, { strokeDashoffset: '0px', opacity: 0 }],
+            { duration: 900, delay: i * 120, easing: 'ease-out', fill: 'both' });
+          an.onfinish = () => ln.remove();
+        } catch (e) { ln.remove(); }
+      });
+    },
+    // grow a line from a to b over ms, after delay
+    growLine(line, a, b, ms, delay) {
+      const set = (t) => { line.setAttribute('x2', f1(a.x + (b.x - a.x) * t)); line.setAttribute('y2', f1(a.y + (b.y - a.y) * t)); };
+      line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
+      if (reduced()) { set(1); line.setAttribute('opacity', 1); return; }
+      set(0);
+      const run = this.run;
+      this.later(delay || 0, () => {
+        line.setAttribute('opacity', 1);
+        let t0 = null;
+        const step = (now) => { if (run !== this.run) return; if (t0 == null) t0 = now; const t = Math.min(1, (now - t0) / ms); set(1 - Math.pow(1 - t, 3)); if (t < 1) requestAnimationFrame(step); };
+        requestAnimationFrame(step);
+      });
+    },
+
+    // ---------- reveal a card's idea one part at a time, in the order a teacher would draw it. Returns the time in ms ----------
+    reveal(g) {
+      const V = g._c.visual || {}, P = g._P;
+      let t = 0;
+      const sides = ['DA', 'AB', 'BC', 'DC'];
+      if (V.draw && !reduced()) { // the outline draws itself round D -> A -> B -> C -> D, then the fill comes in
+        sides.forEach((s, i) => { const L = g._sides[s], ab = SIDES[s], from = s === 'DC' ? P.C : P[ab[0]], to = s === 'DC' ? P.D : P[ab[1]]; this.growLine(L, from, to, 150, i * 140); L.setAttribute('x1', from.x); L.setAttribute('y1', from.y); });
+        this.later(80, () => this.sfx('draw'));
+        g._dots.forEach((d, i) => this.pop(d, i * 140));
+        this.later(560, () => { g._fill.setAttribute('opacity', 1); if (g._fill.animate && !reduced()) try { g._fill.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260 }); } catch (e) {} });
+        t = 680;
+      } else {
+        [g._fill].concat(sides.map((s) => g._sides[s]), g._dots).forEach((el) => el.setAttribute('opacity', 1));
+        if (!reduced() && g._vis.animate) try { g._vis.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, fill: 'backwards' }); } catch (e) {}
+        t = 160;
+      }
+      if (V.chev) {
+        const chv = (y, x) => 'M' + f1(x - 7) + ',' + (y - 5.5) + ' L' + f1(x - 1.5) + ',' + y + ' L' + f1(x - 7) + ',' + (y + 5.5) + ' M' + f1(x + 0.5) + ',' + (y - 5.5) + ' L' + f1(x + 6) + ',' + y + ' L' + f1(x + 0.5) + ',' + (y + 5.5);
+        g._chev = [chv(TOP, (P.A.x + P.B.x) / 2), chv(BOT, (P.D.x + P.C.x) / 2)].map((d) =>
+          mk('path', { d: d, fill: 'none', stroke: INK.chev, 'stroke-width': 2.6, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: 0, style: 'filter: drop-shadow(0 0 1.5px #fff)' }, g._marks));
+        g._chev.forEach((el, i) => this.pop(el, t + i * 120, true));
+        this.later(t, () => this.sfx('pop')); t += 360;
+      }
+      if (V.lit) { // glow bands grow along the lit sides, under the side lines so their colour still shows
+        g._lit = V.lit.map((s) => {
+          const ab = SIDES[s], a = P[ab[0]], b = P[ab[1]];
+          const band = mk('line', { x1: a.x, y1: a.y, x2: a.x, y2: a.y, stroke: '#ffe27a', 'stroke-width': 10, 'stroke-linecap': 'round', opacity: 0, style: 'filter: drop-shadow(0 0 3px #ffb020)' }, g._bands);
+          this.growLine(band, a, b, 300, t);
+          return g._sides[s];
+        });
+        this.later(t, () => this.sfx('draw')); t += 340;
+      }
+      if (V.wedges) { // each angle pops in as a coloured wedge at its corner, then its value
+        g._wedges = []; g._values = [];
+        V.wedges.forEach((k, i) => {
+          const nb = { A: ['D', 'B'], B: ['A', 'C'], C: ['B', 'D'], D: ['C', 'A'] }[k], p = P[k], q = P[nb[0]], r = P[nb[1]], R = 22;
+          let a1 = Math.atan2(q.y - p.y, q.x - p.x), a2 = Math.atan2(r.y - p.y, r.x - p.x);
+          let sweep = ((a2 - a1) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+          if (sweep > Math.PI) { const t0 = a1; a1 = a2; a2 = t0; sweep = 2 * Math.PI - sweep; } // use the angle inside the shape
+          const large = 0;
+          const s = { x: p.x + Math.cos(a1) * R, y: p.y + Math.sin(a1) * R }, e = { x: p.x + Math.cos(a2) * R, y: p.y + Math.sin(a2) * R };
+          const wg = mk('g', { opacity: 0 }, g._wedgeG);
+          mk('path', { d: 'M' + p.x + ' ' + p.y + ' L' + f1(s.x) + ' ' + f1(s.y) + ' A' + R + ' ' + R + ' 0 ' + large + ' 1 ' + f1(e.x) + ' ' + f1(e.y) + ' Z', fill: ANG[k], 'fill-opacity': 0.92 }, wg);
+          g._wedges.push(wg);
+          const deg = Math.round(sweep * 180 / Math.PI), mid = a1 + sweep / 2, dl = deg < 70 ? 44 : 36;
+          const v = mk('text', { x: f1(p.x + Math.cos(mid) * dl), y: f1(p.y + Math.sin(mid) * dl + 4.5), 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 900,
+            'font-family': 'Nunito, system-ui, sans-serif', fill: INK.navy, stroke: '#fff', 'stroke-width': 3.2, 'paint-order': 'stroke', 'stroke-linejoin': 'round', opacity: 0, text: deg + '°' }, g._marks);
+          g._values.push(v);
+          this.pop(wg, t + i * 260, true); this.pop(v, t + i * 260 + 160);
+          this.later(t + i * 260, () => this.sfx('tick'));
+        });
+        t += V.wedges.length * 260 + 260;
+      }
+      if (V.right) { // the right-angle squares
+        g._right = V.right.map((k, i) => {
+          const nb = { A: ['D', 'B'], B: ['A', 'C'], C: ['B', 'D'], D: ['C', 'A'] }[k], p = P[k], q = P[nb[0]], r = P[nb[1]], s = 13;
+          const u = { x: (q.x - p.x) / Math.hypot(q.x - p.x, q.y - p.y), y: (q.y - p.y) / Math.hypot(q.x - p.x, q.y - p.y) };
+          const v = { x: (r.x - p.x) / Math.hypot(r.x - p.x, r.y - p.y), y: (r.y - p.y) / Math.hypot(r.x - p.x, r.y - p.y) };
+          const d = 'M' + f1(p.x) + ',' + f1(p.y) + ' L' + f1(p.x + u.x * s) + ',' + f1(p.y + u.y * s) + ' L' + f1(p.x + u.x * s + v.x * s) + ',' + f1(p.y + u.y * s + v.y * s) + ' L' + f1(p.x + v.x * s) + ',' + f1(p.y + v.y * s) + ' Z';
+          const el = mk('path', { d: d, fill: '#ffd24a', 'fill-opacity': 0.9, stroke: '#b07a00', 'stroke-width': 1.6, 'stroke-linejoin': 'round', opacity: 0 }, g._wedgeG);
+          this.pop(el, t + i * 200, true);
+          return el;
+        });
+        this.later(t, () => this.sfx('tick')); t += V.right.length * 200 + 240;
+      }
+      if (V.ticks) { this.later(t, () => { this.marks(g, V.ticks); this.sfx('shimmer'); }); t += 80 * 6 + 380; }
+      // move the corner dots to the top so nothing covers them
+      g._dots.forEach((d) => g._vis.appendChild(d));
+      return t;
+    },
+    // tick marks as in the lesson: 'all' gives sides of one length (within 6 units) the same count; 'legs' marks the equal legs
+    marks(g, which) {
+      const P = g._P, list = which === 'legs' ? ['DA', 'BC'] : ['AB', 'BC', 'DC', 'DA'];
+      const len = (s) => { const ab = SIDES[s]; return Math.hypot(P[ab[1]].x - P[ab[0]].x, P[ab[1]].y - P[ab[0]].y); };
+      const reps = [], count = list.map((s) => { const L = len(s); for (let k = 0; k < reps.length; k++) if (Math.abs(reps[k] - L) <= 6) return k + 1; reps.push(L); return reps.length; });
+      g._ticks = [];
+      list.forEach((s, i) => {
+        const ab = SIDES[s], a = P[ab[0]], b = P[ab[1]], L = len(s) || 1, ux = (b.x - a.x) / L, uy = (b.y - a.y) / L, nx = -uy, ny = ux;
+        const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, cnt = which === 'legs' ? 2 : count[i];
+        for (let k = 0; k < cnt; k++) {
+          const off = (k - (cnt - 1) / 2) * 6;
+          g._ticks.push(mk('line', { x1: f1(mx + ux * off - nx * 7), y1: f1(my + uy * off - ny * 7), x2: f1(mx + ux * off + nx * 7), y2: f1(my + uy * off + ny * 7),
+            stroke: INK.navy, 'stroke-width': 2.6, 'stroke-linecap': 'round', opacity: 0, style: 'filter: drop-shadow(0 0 1.5px #fff)' }, g._marks));
+        }
+      });
+      g._ticks.forEach((k, j) => this.pop(k, j * 80));
+    },
+
+    // ---------- word cues: highlight the part of the active card a spoken word names ('all' pulses every album card) ----------
+    cue(kind) {
+      const S = this.S, c = S && S.active ? S.cards[S.active] : null;
+      if (kind === 'all') { this.warmPulse(S.collected.map((k) => S.cards[k]._pop), '1.05'); return; }
+      if (!c) return;
+      const sd = c._sides;
+      if (kind === 'outline') this.trace([sd.DA, sd.AB, sd.BC, sd.DC]);
+      else if (kind === 'pair') { this.trace([sd.AB, sd.DC]); this.warmPulse(c._chev, '1.5'); }
+      else if (kind === 'chev') this.warmPulse(c._chev, '1.5');
+      else if (kind === 'lit') this.trace(c._lit);
+      else if (kind === 'legs') this.trace([sd.DA, sd.BC]);
+      else if (kind === 'ticks') this.warmPulse(c._ticks, '1.4');
+      else if (kind === 'right') this.warmPulse(c._right, '1.4');
+      else if (kind === 'wedges') this.warmPulse(c._wedges, '1.3');
+      else if (kind === 'values') this.warmPulse(c._values, '1.35');
+      else if (kind === 'tag') this.warmPulse([c._tag], '1.08');
+    },
+
+    // ---------- a card coming in, and going to the albums ----------
+    // CARD_ENTER, then CONCEPT_REVEAL, then its name tag
+    show(c) {
+      const S = this.S, g = S.cards[c.id] || (S.cards[c.id] = this.card(c));
+      S.active = c.id; this.setState('CARD_ENTER', c.id); this.sfx('whoosh');
+      if (!reduced() && g._pop.animate) {
+        g._pop.style.transformBox = 'fill-box'; g._pop.style.transformOrigin = 'center';
+        try { g._pop.animate([{ opacity: 0, scale: '.82', translate: '0 14px' }, { opacity: 1, scale: '1.03', translate: '0 0', offset: 0.62 }, { opacity: 1, scale: '1', translate: '0 0' }], { duration: SUM.enterMs, easing: 'cubic-bezier(.22,1,.36,1)' }); } catch (e) {}
+      }
+      return this.hold(SUM.enterMs).then((ok) => {
+        if (!ok) return false;
+        this.setState('CONCEPT_REVEAL', c.id);
+        return this.hold(this.reveal(g) + 60).then((ok2) => { if (!ok2) return false; this.pop(g._tag, 0); return this.hold(260); });
+      });
+    },
+    // a collected card's slot: the first half go on the left, 2 x 2, the rest on the right
+    slot(id) {
+      const order = IDEAS.map((k) => k.id), i = Math.max(0, order.indexOf(id)), half = Math.ceil(order.length / 2) || 4;
+      const col = i < half ? 0 : 1, k = col ? i - half : i;
+      return { x: SUM.mini.x[col][k % 2], y: SUM.mini.y[Math.floor(k / 2)], col: col };
+    },
+    // CARD_COLLECT: the card shrinks along a small arc into its slot (now = jump straight there). Its shape is
+    // zoomed up to SUM.mini.zoom so it still reads at album size
+    collect(id, now) {
+      const S = this.S, c = S.cards[id];
+      if (!c || c._done) return Promise.resolve(true);
+      c._done = true; if (S.active === id) S.active = null;
+      this.setState('CARD_COLLECT', id);
+      const r = c._rect, cx0 = r.x + r.w / 2, cy0 = r.y + r.h / 2, sl = this.slot(id), k = SUM.mini.w / r.w;
+      const zoom = (e) => { const z = 1 + (SUM.mini.zoom - 1) * e, sx = 500, sy = 327; c._vis.setAttribute('transform', 'translate(' + sx + ',' + sy + ') scale(' + z.toFixed(4) + ') translate(' + (-sx) + ',' + (-sy) + ')'); };
+      const land = () => {
+        c.setAttribute('transform', 'translate(' + sl.x + ',' + sl.y + ') scale(' + k.toFixed(4) + ') translate(' + (-cx0) + ',' + (-cy0) + ')');
+        c._slot = sl; zoom(1);
+        const P0 = SUM.mini.plate;
+        c._mini = this.nameTag(this.layer, sl.x, sl.y + r.h * k / 2 + 1, c._c.label, c._c.tone, { h: P0.h, size: P0.size, w: P0.w, rim: P0.rim });
+        if (!now) this.pop(c._mini, 0);
+        if (S.collected.indexOf(id) < 0) S.collected.push(id);
+        this.setState('NEXT_CONCEPT', id);
+      };
+      c._tag.setAttribute('opacity', 0);
+      if (now || reduced()) { land(); return Promise.resolve(true); }
+      this.sfx('whoosh');
+      const run = this.run;
+      return new Promise((resolve) => {
+        let t0 = null;
+        const step = (ts) => {
+          if (run !== this.run || !this.live()) { resolve(false); return; }
+          if (t0 == null) t0 = ts;
+          const t = Math.min(1, (ts - t0) / SUM.collectMs), e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, s = 1 + (k - 1) * e;
+          zoom(e);
+          const x = cx0 + (sl.x - cx0) * e, y = cy0 + (sl.y - cy0) * e - 40 * Math.sin(Math.PI * e);
+          c.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ') scale(' + s.toFixed(4) + ') translate(' + (-cx0) + ',' + (-cy0) + ')');
+          if (t < 1) { requestAnimationFrame(step); return; }
+          land(); this.sfx('pop'); resolve(true);
+        };
+        requestAnimationFrame(step);
+      });
+    },
+    // FINAL_SUMMARY: the album cards hop 16 px toward the middle, one after another
+    gather() {
+      const S = this.S;
+      this.setState('FINAL_SUMMARY'); this.sfx('shimmer');
+      S.collected.forEach((id, i) => {
+        const c = S.cards[id], dx = c._slot && c._slot.col ? -16 : 16;
+        this.later(reduced() ? 0 : i * 70, () => {
+          [c, c._mini].forEach((el) => {
+            if (!el) return;
+            if (reduced() || !el.animate) { el.style.translate = dx + 'px 0'; return; }
+            try {
+              const hop = el.animate([{ translate: '0 0' }, { translate: (dx / 2) + 'px -12px', offset: 0.45 }, { translate: dx + 'px 0' }], { duration: 440, easing: 'cubic-bezier(.3,1.2,.5,1)', fill: 'forwards' });
+              hop.onfinish = () => { el.style.translate = dx + 'px 0'; hop.cancel(); };
+            } catch (e) { el.style.translate = dx + 'px 0'; }
+          });
+        });
+      });
+      return this.hold(S.collected.length * 70 + 460);
+    },
+
+    // ---------- READY: the cards become tappable and a glowing ring goes round the top-right Next ----------
+    ready() {
+      const S = this.S;
+      this.setState('READY');
+      S.collected.forEach((id) => S.cards[id].classList.add('tappable'));
+      const nx = document.querySelector('.stage [data-qa="nav-next"]'), b = nx && this.eng.elBox(nx);
+      if (b && this.root) {
+        const ring = document.createElement('div');
+        ring.className = 'sk-ready';
+        ring.style.cssText = 'left:' + b.x + 'px;top:' + b.y + 'px;width:' + b.w + 'px;height:' + b.h + 'px';
+        this.root.appendChild(ring);
+      }
+    },
+    // a tapped card: dim the others to 42 %, redraw its idea, say its line again, then back to READY.
+    // busy blocks other taps until it is done
+    replay(id) {
+      const S = this.S;
+      if (!S || this.busy || S.state !== 'READY' || !S.cards[id]) return Promise.resolve(false);
+      this.busy = true;
+      const c = S.cards[id], live = this.live;
+      this.eng.sfx('tap');
+      this.setState('CARD_SELECTED', id);
+      S.collected.forEach((k) => { const o = k === id ? '' : '.42'; [S.cards[k], S.cards[k]._mini].forEach((el) => { el.style.transition = 'opacity 240ms ease'; el.style.opacity = o; }); });
+      if (!reduced() && c._pop.animate) { try { c._pop.animate([{ scale: '1' }, { scale: '1.06', offset: 0.45 }, { scale: '1' }], { duration: 360, easing: 'cubic-bezier(.3,1.4,.5,1)' }); } catch (e) {} }
+      this.setState('REPLAY_EXPLANATION', id);
+      // reset the card to its starting state so reveal() can draw it again
+      [c._bands, c._wedgeG, c._marks].forEach((el) => { while (el.firstChild) el.removeChild(el.firstChild); });
+      c._chev = c._lit = c._wedges = c._values = c._right = c._ticks = null;
+      [c._fill].concat(Object.keys(c._sides).map((s) => c._sides[s]), c._dots).forEach((el) => el.setAttribute('opacity', 0));
+      S.active = id;
+      const ms = this.reveal(c);
+      return this.hold(ms + 200).then((ok) => ok && this.say(c._c)).then((ok) => {
+        if (!live()) return false;
+        this.hush(); S.active = null; this.eng.pose('happy');
+        S.collected.forEach((k) => { [S.cards[k], S.cards[k]._mini].forEach((el) => { el.style.opacity = ''; }); });
+        this.busy = false; this.setState('READY'); return ok;
+      });
     }
   };
   window.Summary = Summary;

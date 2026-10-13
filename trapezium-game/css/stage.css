@@ -1,4 +1,4 @@
-/* Page shell: letterboxes the 1920x1080 stage in any window (see js/stage-fit.js) */
+/* page shell: the 1920x1080 stage is letterboxed into any window (js/stage-fit.js) */
 html, body { margin: 0; height: 100%; overflow: hidden; background: #0d2236; touch-action: none; }
-/* fixed: the 1920px stage never widens the page, so phones keep their real viewport (no zoom-out) and the fit stays exact */
+/* fixed, so the 1920px stage never widens the page and phones keep their real viewport */
 #dc-root { position: fixed; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
