@@ -6,6 +6,8 @@
 <title>Trapezium lesson game</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@600;700;800;900&amp;display=swap">
+<!-- only the ∥ and ∠ symbols (the game fonts draw them too thin), listed first in the CSS font stacks -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Math&amp;text=%E2%88%A5%E2%88%A0&amp;display=swap">
 <link rel="stylesheet" href="css/stage.css">
 <link rel="stylesheet" href="css/game.css">
 <script>window.__resources = {}; /* template is inline below; the runtime need not re-fetch this page */</script>
@@ -58,10 +60,10 @@
 <path sc-camel-d="{{g.rC.p}}" class="fadein rmark rmC" sc-camel-display="{{g.rC.d}}" fill="none" stroke="#2e9e4f" stroke-width="3"></path>
 <path sc-camel-d="{{g.rD.p}}" class="fadein rmark rmD" sc-camel-display="{{g.rD.d}}" fill="none" stroke="#2e9e4f" stroke-width="3"></path>
 </g>
-<line sc-camel-x1="{{g.eAB.x1}}" sc-camel-y1="{{g.eAB.y1}}" sc-camel-x2="{{g.eAB.x2}}" sc-camel-y2="{{g.eAB.y2}}" sc-camel-display="{{g.eAB.d}}" class="edge {{g.eAB.cls}}"style="stroke: {{g.eAB.c}}" stroke-width="5" stroke-linecap="round"></line>
-<line sc-camel-x1="{{g.eBC.x1}}" sc-camel-y1="{{g.eBC.y1}}" sc-camel-x2="{{g.eBC.x2}}" sc-camel-y2="{{g.eBC.y2}}" sc-camel-display="{{g.eBC.d}}" class="edge {{g.eBC.cls}}"style="stroke: {{g.eBC.c}}" stroke-width="5" stroke-linecap="round"></line>
-<line sc-camel-x1="{{g.eCD.x1}}" sc-camel-y1="{{g.eCD.y1}}" sc-camel-x2="{{g.eCD.x2}}" sc-camel-y2="{{g.eCD.y2}}" sc-camel-display="{{g.eCD.d}}" class="edge {{g.eCD.cls}}"style="stroke: {{g.eCD.c}}" stroke-width="5" stroke-linecap="round"></line>
-<line sc-camel-x1="{{g.eDA.x1}}" sc-camel-y1="{{g.eDA.y1}}" sc-camel-x2="{{g.eDA.x2}}" sc-camel-y2="{{g.eDA.y2}}" sc-camel-display="{{g.eDA.d}}" class="edge {{g.eDA.cls}}"style="stroke: {{g.eDA.c}}" stroke-width="5" stroke-linecap="round"></line>
+<line sc-camel-x1="{{g.eAB.x1}}" sc-camel-y1="{{g.eAB.y1}}" sc-camel-x2="{{g.eAB.x2}}" sc-camel-y2="{{g.eAB.y2}}" sc-camel-display="{{g.eAB.d}}" class="edge {{g.eAB.cls}}" style="stroke: {{g.eAB.c}}" stroke-width="5" stroke-linecap="round"></line>
+<line sc-camel-x1="{{g.eBC.x1}}" sc-camel-y1="{{g.eBC.y1}}" sc-camel-x2="{{g.eBC.x2}}" sc-camel-y2="{{g.eBC.y2}}" sc-camel-display="{{g.eBC.d}}" class="edge {{g.eBC.cls}}" style="stroke: {{g.eBC.c}}" stroke-width="5" stroke-linecap="round"></line>
+<line sc-camel-x1="{{g.eCD.x1}}" sc-camel-y1="{{g.eCD.y1}}" sc-camel-x2="{{g.eCD.x2}}" sc-camel-y2="{{g.eCD.y2}}" sc-camel-display="{{g.eCD.d}}" class="edge {{g.eCD.cls}}" style="stroke: {{g.eCD.c}}" stroke-width="5" stroke-linecap="round"></line>
+<line sc-camel-x1="{{g.eDA.x1}}" sc-camel-y1="{{g.eDA.y1}}" sc-camel-x2="{{g.eDA.x2}}" sc-camel-y2="{{g.eDA.y2}}" sc-camel-display="{{g.eDA.d}}" class="edge {{g.eDA.cls}}" style="stroke: {{g.eDA.c}}" stroke-width="5" stroke-linecap="round"></line>
 <line sc-camel-x1="{{g.trace.x1}}" sc-camel-y1="{{g.trace.y1}}" sc-camel-x2="{{g.trace.x2}}" sc-camel-y2="{{g.trace.y2}}" sc-camel-display="{{g.trace.d}}" class="{{g.trace.cls}}" stroke="#e8287a" stroke-width="6" stroke-linecap="round" pointer-events="none"></line>
 <polygon class="outline-settle" sc-camel-points="{{g.poly}}" sc-camel-display="{{g.ol.d}}" fill="none" stroke="#e8287a" stroke-width="6" stroke-linejoin="round" pointer-events="none"></polygon>
 <path sc-camel-d="{{g.tape.p}}" sc-camel-display="{{g.tape.d}}" class="tape" fill="none" stroke="#f7c531" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"></path>
