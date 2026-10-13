@@ -29,8 +29,11 @@ window.AngleWalker = class AngleWalker {
   // an angle in degrees, wrapped to -180..180
   static norm(a) { return ((a % 360) + 540) % 360 - 180; }
   // offset from the protractor's centre to her torso, for `frame` turned to `rotation` (stage px)
+  // the protractor's real centre in a drawing (cell px)
+  centreOf(frame) { return this.F.poses[frame].centre || this.F.anchor; }
   bodyOffset(frame, rotation, k) {
-    const P = this.F.poses[frame], o = P.bodyOffset, a = (rotation - P.angle) * Math.PI / 180, s = this.S * (k || 1);
+    const P = this.F.poses[frame], c = this.centreOf(frame), A = this.F.anchor, a = (rotation - P.angle) * Math.PI / 180, s = this.S * (k || 1);
+    const o = { x: P.bodyOffset.x + A.x - c.x, y: P.bodyOffset.y + A.y - c.y }; // (bodyOffset is measured from anchor)
     return { x: (Math.cos(a) * o.x - Math.sin(a) * o.y) * s, y: (Math.sin(a) * o.x + Math.cos(a) * o.y) * s };
   }
   // switch drawings without moving her: the pose shifts so the torso stays put; only the wing and protractor change
@@ -97,7 +100,8 @@ window.AngleWalker = class AngleWalker {
       [rotation, other].forEach((rot) => F.poses.forEach((d, j) => {
         const dl = Math.abs(AngleWalker.norm(rot - d.angle));
         if (dl > C.tiltMax) return;
-        const ang = (rot - d.angle) * Math.PI / 180, bo = d.bodyOffset, s = this.S;
+        const ang = (rot - d.angle) * Math.PI / 180, dc = d.centre || F.anchor, s = this.S;
+        const bo = { x: d.bodyOffset.x + F.anchor.x - dc.x, y: d.bodyOffset.y + F.anchor.y - dc.y };
         const body = { x: p.x + (Math.cos(ang) * bo.x - Math.sin(ang) * bo.y) * s, y: p.y + (Math.sin(ang) * bo.x + Math.cos(ang) * bo.y) * s };
         const score = (AngleWalker.inside(v, body) ? 1000 : 0) + dl;
         if (!best || score < best.score) best = { score: score, rot: rot, frame: j };
@@ -123,8 +127,15 @@ window.AngleWalker = class AngleWalker {
       } : null, hop, first ? walk.steps : 0)
         .then((ok) => ok && this.tween({ x: p.x, y: p.y }, C.placeMs))                 // POSITION_PROTRACTOR: centre on the vertex
         .then((ok) => ok && this.tween({ rotation: rotation }, C.alignMs))              // ALIGN: baseline along the side
-        .then((ok) => { if (ok && o.onReading) o.onReading(i); return ok && this.tween({}, C.measureMs + C.holdMs); }) // MEASURE + HOLD
-        .then((ok) => ok && this.tween(carry, C.liftMs))                                // LIFT
+        // MEASURE + HOLD: the angle is traced on the protractor's face, from one side round to the other
+        .then((ok) => {
+          if (!ok) return false;
+          const trace = { p: p, a: a, sweep: sweep, col: (o.colors || [])[i] || '#ffb020', t: 0 };
+          this.trace = trace;
+          return this.tween({}, C.measureMs + C.holdMs, (e, t) => { trace.t = Math.min(1, t * (C.measureMs + C.holdMs) / (C.measureMs + C.holdMs * 0.55)); });
+        })
+        // LIFT: the reading comes in as the protractor comes off the corner
+        .then((ok) => { this.trace = null; if (ok && o.onReading) o.onReading(i); return ok && this.tween(carry, C.liftMs); })
         .then((ok) => {
           if (!ok) return false;
           if (i < n - 1) return corner(i + 1);
@@ -145,6 +156,7 @@ window.AngleWalker = class AngleWalker {
   }
   // clear her pose and show the mascot element again
   finish() {
+    this.trace = null;
     this.pose = null; this.alpha = 0;
     if (this.homeEl) this.homeEl.style.opacity = '';
     this.homeEl = null;
@@ -180,7 +192,18 @@ window.AngleWalker = class AngleWalker {
       c.translate(P.x, P.y);
       c.rotate((P.rotation - F.poses[f].angle) * Math.PI / 180); // turn only by the difference from how the frame was drawn
       c.globalAlpha = this.alpha;
-      c.drawImage(im, (f % F.cols) * cell, Math.floor(f / F.cols) * cell, cell, cell, -F.anchor.x * s, -F.anchor.y * s, cell * s, cell * s);
+      const pc = this.centreOf(f); // the protractor's own centre goes on the point
+      c.drawImage(im, (f % F.cols) * cell, Math.floor(f / F.cols) * cell, cell, cell, -pc.x * s, -pc.y * s, cell * s, cell * s);
+      c.globalAlpha = 1;
+    }
+    const tr = this.trace;
+    if (tr && tr.t > 0) { // the angle being read, in its own colour, over the protractor's face
+      const r = (this.F.poses[this.frame].faceR || 60) * this.S * CONFIG.angleWalk.traceK, end = tr.a + tr.sweep * tr.t;
+      c.setTransform(k, 0, 0, k, 0, 0);
+      c.beginPath(); c.moveTo(tr.p.x, tr.p.y); c.arc(tr.p.x, tr.p.y, r, tr.a, end, tr.sweep < 0); c.closePath();
+      c.globalAlpha = 0.16; c.fillStyle = tr.col; c.fill();
+      c.globalAlpha = 0.95; c.lineWidth = 3; c.lineCap = 'round'; c.strokeStyle = tr.col;
+      c.beginPath(); c.arc(tr.p.x, tr.p.y, r, tr.a, end, tr.sweep < 0); c.stroke();
       c.globalAlpha = 1;
     }
     this.sparks.forEach((sp) => {

@@ -38,9 +38,9 @@
   // the lesson's colours: pink bases, purple legs, lilac fill, orange parallel arrows; one colour per angle
   const INK = { base: '#e8287a', leg: '#8e44d6', fill: 'rgba(229,205,234,0.95)', chev: '#f08a24', navy: '#123b63' };
   const ANG = { A: '#f08a24', B: '#8e44d6', C: '#2b7bd6', D: '#f5c542' };
-  // Swiftee's two spots: 'peek' over the card's top edge, 'middle' between the albums. y = offset in stage px from her
+  // Swiftee's two spots: 'peek' over the card's top edge, 'middle' standing on the snow between the albums. y = offset in stage px from her
   // CSS position, s = scale of her 259 px box, hide = how far she sinks to be out of sight
-  const SPOT = { peek: { y: 0, s: 218 / 259, hide: 154 }, middle: { y: 69, s: 320 / 259, hide: 333 } };
+  const SPOT = { peek: { y: 0, s: 218 / 259, hide: 154 }, middle: { y: 186, s: 300 / 259, hide: 300 } };
 
   // ---------- the trapeziums on the cards (board units): AB at y = TOP, DC at y = BOT, so AB is parallel to DC ----------
   // the shape sits in the upper part of the card, leaving the bottom band for its name plate (inside the frame)
@@ -60,7 +60,7 @@
   //           count per length, 'legs' = the equal legs); right (right-angle marks); wedges (angles with their values)
   //   cue:    spoken word -> what it highlights (see cue() below)
   const IDEAS = [
-    { id: 'trapezium', label: 'Trapezium', t: 'A trapezium is a quadrilateral with one pair of parallel sides.',
+    { id: 'trapezium', label: 'Trapezium', t: 'A trapezium is a quadrilateral with at least one pair of parallel sides.',
       visual: { shape: 'gen', draw: true, chev: true }, cue: { quadrilateral: 'outline', parallel: 'pair' } },
     { id: 'bases', label: 'Bases', t: 'The parallel sides are called the bases.',
       visual: { shape: 'gen', chev: true, lit: ['AB', 'DC'] }, cue: { parallel: 'chev', bases: 'lit' } },
@@ -70,12 +70,12 @@
       visual: { shape: 'scal', ticks: 'all' }, cue: { scalene: 'tag', sides: 'outline', different: 'ticks' } },
     { id: 'isosceles', label: 'Isosceles', tone: 'convex', t: 'An isosceles trapezium has legs of the same length.',
       visual: { shape: 'iso', ticks: 'legs' }, cue: { isosceles: 'tag', legs: 'legs', same: 'ticks' } },
-    { id: 'right', label: 'Right', tone: 'regular', t: 'A right trapezium has two adjacent right angles.',
-      visual: { shape: 'right', right: ['A', 'D'] }, cue: { right: 'tag', angles: 'right' } },
     { id: 'angleSum', label: 'Angle sum', tone: 'concave', t: 'Angles on the same leg add up to 180°.',
       visual: { shape: 'ang', lit: ['DA'], wedges: ['A', 'D'] }, cue: { angles: 'wedges', leg: 'lit', 180: 'values' } },
     { id: 'supplementary', label: 'Supplementary', tone: 'concave', t: 'Two angles that add up to 180° are supplementary.',
-      visual: { shape: 'ang', lit: ['BC'], wedges: ['B', 'C'] }, cue: { angles: 'wedges', 180: 'values', supplementary: 'tag' } }
+      visual: { shape: 'ang', lit: ['BC'], wedges: ['B', 'C'] }, cue: { angles: 'wedges', 180: 'values', supplementary: 'tag' } },
+    { id: 'right', label: 'Right', tone: 'regular', t: 'A right trapezium has two adjacent right angles.',
+      visual: { shape: 'right', right: ['A', 'D'] }, cue: { right: 'tag', adjacent: 'side', angles: 'right' } }
   ];
   // the closing line (the opening line comes from lesson-data, 'recap')
   const DONE = { m: 'celebrating', t: 'Wonderful! You remember everything about trapeziums!', cue: { trapeziums: 'all' } };
@@ -152,7 +152,7 @@
       if (this.ctx) { this.ctx.revert(); this.ctx = null; }
       const sw = document.querySelector('.stage .swiftee'), bub = document.querySelector('.stage .bubble');
       if (sw && G) G.set(sw, { clearProps: 'transform,opacity' });
-      if (bub) bub.style.marginBottom = '';
+      if (bub) { bub.style.marginBottom = ''; bub.style.maxWidth = ''; }
       if (this.root) this.root.innerHTML = '';
       this.root = null; this.S = null; this.busy = false;
     },
@@ -174,7 +174,8 @@
       const sw = document.querySelector('.stage .swiftee'), bub = document.querySelector('.stage .bubble');
       this.spot = where || this.spot || 'middle';
       const P = SPOT[this.spot];
-      if (bub) bub.style.marginBottom = (-P.y) + 'px'; // keep her speech bubble above her head
+      // keep her speech bubble above her head; in the middle it stays narrow enough to fit between the albums
+      if (bub) { bub.style.marginBottom = (-P.y) + 'px'; bub.style.maxWidth = this.spot === 'middle' ? '470px' : ''; }
       if (!sw || !G) return Promise.resolve(this.live());
       const to = { y: P.y + (down ? P.hide : 0), scale: P.s, opacity: down ? 0 : 1 };
       if (!ms || reduced()) { this.ctx.add(() => G.set(sw, to)); return Promise.resolve(this.live()); }
@@ -384,6 +385,7 @@
       else if (kind === 'chev') this.warmPulse(c._chev, '1.5');
       else if (kind === 'lit') this.trace(c._lit);
       else if (kind === 'legs') this.trace([sd.DA, sd.BC]);
+      else if (kind === 'side') this.trace([sd.DA]); // the side the two right angles share (they are adjacent)
       else if (kind === 'ticks') this.warmPulse(c._ticks, '1.4');
       else if (kind === 'right') this.warmPulse(c._right, '1.4');
       else if (kind === 'wedges') this.warmPulse(c._wedges, '1.3');

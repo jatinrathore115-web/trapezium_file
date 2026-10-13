@@ -669,6 +669,17 @@
         .to([g, d].filter(Boolean), { scaleY: 1, scaleX: 1, duration: 0.45, ease: 'elastic.out(1, 0.5)' }));
     },
     // the corner dots pulse once, one after another (screen 32 on "90", and as screen 28's morph starts)
+    // Swiftee's happy hop: a quick squash, a jump and a bouncy landing (discoveries, excitement, a correct answer).
+    // Only her sprite canvas moves, so her spot on the screen never changes
+    hop() {
+      const c = $('.swiftee canvas')[0];
+      if (!G || !c || reduced) return;
+      add(() => G.timeline()
+        .to(c, { scaleY: 0.86, scaleX: 1.08, y: 6, transformOrigin: '50% 95%', duration: 0.1, ease: 'sine.out' })
+        .to(c, { scaleY: 1.06, scaleX: 0.96, y: -26, duration: 0.2, ease: 'power2.out' })
+        .to(c, { scaleY: 1, scaleX: 1, y: 0, duration: 0.42, ease: 'bounce.out' })
+        .set(c, { clearProps: 'transform' }));
+    },
     vertexPulse() {
       const dots = $('.vdot');
       if (G && dots.length) add(() => G.fromTo(dots, { scale: 1, transformOrigin: '50% 50%' }, { scale: 1.6, duration: 0.18, ease: 'sine.out', yoyo: true, repeat: 1, stagger: 0.07 }));

@@ -4,6 +4,7 @@
 // =====================================================================
 const CONFIG = {
   pxPerCm: 40,                       // board scale: 1 cm = 40 board px
+  board: { x: 640, y: 104 },         // where index.html puts the board (its svg's left / top, stage px)
   start: { D: 45, C: 405, baseY: 340, height: 195.96, legAD: 7, legBC: 5 }, // opening shape: AB 3, BC 5, CD 9, AD 7 cm (height = √24 cm)
   limits: { minTop: 90, minBottom: 160, maxLegRun: 243, minX: 16, maxX: 478 }, // drag limits: shortest top / bottom base, longest sideways leg run, corner x range
   // screen 35: the right trapezium (A and D at 90°, so DA is vertical)
@@ -42,13 +43,14 @@ const CONFIG = {
   focus: { holdMs: 3000, fadeMs: 350, moveMs: 700, handMs: 5000 },
   // screen 16 measuring walk: her size on the shape, fallback home spot and size, walk time per cm measured,
   // pause between sides, stroll speed to and from the shape (px per ms)
-  walker: { size: 110, homeX: 199, homeY: 639, homeSize: 259, msPerCm: 380, pauseMs: 550, strollPxPerMs: 0.42,
+  walker: { size: 135, homeX: 199, homeY: 639, homeSize: 259, msPerCm: 380, pauseMs: 550, strollPxPerMs: 0.42,
     tips: [[488, 272], [484, 281], [494, 273], [489, 270], [486, 278], [483, 279], [491, 281], [489, 281]] }, // tape exit per walk frame (@2x cell px)
-  // screen 23 protractor walk (js/angle-walker.js): scale = stage px per kit board unit; homeK = her home size
+  // screen 23 protractor walk (js/angle-walker.js): scale = stage px per kit board unit (sized so the protractor
+  // covers the drawn angle); traceK = radius of the angle traced on it while she holds it, as a share of the protractor's radius; homeK = her home size
   // against her size on the board; carryPx = protractor offset from the vertex between corners; hop = how far her
   // path bows out round a side; bob = px of bob every stepPx; tiltMax = most a drawing may turn (deg);
   // leadMs = wait after her line; firstMs = shortest walk to or from her spot; the rest are move timings
-  angleWalk: { scale: 1.28, homeK: 1.9, carryPx: 20, hop: 50, stepPx: 45, bob: 5, tiltMax: 33, leadMs: 900,
+  angleWalk: { scale: 1.6, homeK: 1.52, carryPx: 28, hop: 60, traceK: 0.78, stepPx: 45, bob: 5, tiltMax: 33, leadMs: 900,
     firstMs: 950, moveMs: 600, placeMs: 400, alignMs: 420, measureMs: 300, holdMs: 900, liftMs: 350, fadeMs: 250 },
   hand: { idleMs: 8000, showMs: 4400, maxShows: 4, // hand nudge: wait with no touch, time on screen, showings per step
     onceDelayMs: 500, onceMs: 2300 },                 // handOnce screens: delay after the line, time on screen

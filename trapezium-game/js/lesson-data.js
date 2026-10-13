@@ -125,10 +125,10 @@ const LESSON = {
     { id: 'quadName', letterIn: 1, autoNext: 2200, lines: [{ m: 'happy', t: 'We can call it\nquadrilateral ABCD.', s: 'We can call it quadrilateral, A, B, C, D.', letters: 1 }] },
     // growFocus: the shape grows to 120% and back as she starts
     { id: 'special', lines: [{ m: 'happy', t: 'This is a special type\nof quadrilateral.', onStart: 'growFocus' },
-      { m: 'curious', t: "Let's see what\nmakes it special." }] },
-    { id: 'meet', lines: [{ m: 'curious', t: 'These two sides look like they will meet.' }], f: { legGlow: 1 } },
+      { m: 'curious', t: "Let's see what\nmakes it special.", cueAt: { special: 'shapePop' } }] },
+    { id: 'meet', lines: [{ m: 'curious', t: 'These two sides look like they will meet.', noEmph: 1, cueAt: { sides: 'glowLegs' } }], f: { legGlow: 1 } },
     // instruction only, nothing to do
-    { id: 'extendSay', autoAdvance: 1, locked: 1, lines: [{ m: 'curious', t: "Let's extend them." }], f: { legGlow: 1 } },
+    { id: 'extendSay', autoAdvance: 1, locked: 1, lines: [{ m: 'curious', t: "Let's extend them.", cueAt: { extend: 'glowLegs' } }], f: { legGlow: 1 } },
     // opens with the shape at centre stage, no line; D->A then C->B glow and extend dotted until they meet
     { id: 'extend', layout: 'focus', lines: [], task: 'extLegs', auto: 1,
       after: [{ m: 'surprised', t: 'Woah! The sides meet.', s: 'Whoa! The sides meet.' }] },
@@ -137,7 +137,7 @@ const LESSON = {
     // the parallel sides and their extensions pulse on "pair" and again on "meet"
     { id: 'parallel', swapCol: 1, parStrong: 1, lines: [{ m: 'surprised', t: 'This pair of sides\ndoes not meet.', noEmph: 1, cueAt: { pair: 'parPulse', meet: 'parPulse' } }], f: { baseExt: 1 } },
     // second line is voice only; its label appears once "A B" and "C D" have both been said
-    { id: 'abcd', lines: [{ t: 'This means the sides are parallel to each other.' },
+    { id: 'abcd', lines: [{ t: 'This means the sides are parallel to each other.', cueAt: { parallel: 'parPulse' } },
       { keep: 1, s: 'A B is parallel to C D.', chipsAfterParts: ['AB', 'CD'], chips: [{ t: 'AB ∥ CD', k: 'white' }] }], f: { par: 1 } },
     { id: 'onePair', lines: [{ t: "So this quadrilateral has\none pair of parallel sides.", noEmph: 1, cueAt: { parallel: 'parPulse' }, chips: [{ t: 'AB ∥ CD', k: 'white' }] }], f: { par: 1 } },
     { id: 'def', lines: [{ t: 'We call this a trapezium.', pulse: 1, pulseAt: 'trapezium', chipsAt: 'trapezium', chipsAfterPulse: 1, holdChips: 1, chips: [{ t: 'Trapezium', k: 'name' }] }], f: { par: 1 } },
@@ -161,7 +161,7 @@ const LESSON = {
       { m: 'curious', t: 'What if the legs were\nthe same length?', noEmph: 1, cueAt: { legs: 'legsTogether' } },
       { m: 'excited', t: "Let's find out.", cueAt: { find: 'findOut' } }],
       f: { par: 1, legLen: 1, sideLen: 1 } },
-    { id: 'equal', lines: [{ m: 'curious', t: "Let's change its\nshape a little." }], f: { par: 1, legLen: 1, sideLen: 1 } },
+    { id: 'equal', lines: [{ m: 'curious', t: "Let's change its\nshape a little.", cueAt: { change: 'vertexPulse' } }], f: { par: 1, legLen: 1, sideLen: 1 } },
     // one demo hand after the line. Dragging A right (the wrong way) wiggles BC: A has only ~0.75 cm
     // before B stops it, so the limit is 0.5 cm. Equal legs snap into place and finish the task
     { id: 'equalDrag', lines: [{ m: 'curious', t: 'Drag vertex A so that both\nthe legs are of equal length.' }],
@@ -179,7 +179,7 @@ const LESSON = {
     // after the line Swiftee carries a protractor round A, B, C, D; each angle appears as she holds it there
     { id: 'angles', room: 'measure', anglesIn: 1, task: 'measureAngles', auto: 1, lines: [{ m: 'curious', t: "Let's measure its angles." }], f: { par: 1, arcs: 'ABCD' } },
     // 120° (A) and 60° (D) in focus: the pair the next screen adds up
-    { id: 'notice', lines: [{ m: 'thinking', t: 'Did you notice something?' }], f: { par: 1, arcs: 'ABCD', focusAng: 'AD' } },
+    { id: 'notice', lines: [{ m: 'thinking', t: 'Did you notice something?', cueAt: { notice: 'growAD' } }], f: { par: 1, arcs: 'ABCD', focusAng: 'AD' } },
     // "∠A + ∠D = ?" rises in; on "add" the two values fly from the shape into it; on "180" it resolves
     { id: 'sumAD', dimIn: 'BC', lines: [{ m: 'surprised', t: '∠A and ∠D add up to 180°.', noEmph: 1, onStart: 'eqStart',
       cueAt: { add: 'eqFly', 180: { fn: 'eqResult', sfx: 'snap' } } }], f: { par: 1, arcs: 'ABCD', focusAng: 'AD' } },

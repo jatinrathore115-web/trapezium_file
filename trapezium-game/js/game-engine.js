@@ -3,6 +3,8 @@
 // Loads after js/vendor/dc-runtime.js (which provides DCLogic) and the data files.
 // index.html binds to the values returned by renderVals().
 // =====================================================================
+// the lesson's vocabulary: shown in orange in Swiftee's bubble (a word, cleaned of punctuation, in lower case)
+const KEY_WORDS = /^(polygon|quadrilaterals?|trapeziums?|parallel|bases?|legs?|sides?|scalene|isosceles|right|angled|adjacent|angles?|supplementary|vertex|vertices|equal|same|different|meet|180°|90°)$/;
 window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   constructor(props) {
     super(props);
@@ -475,6 +477,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       started = true; tStart = performance.now();
       showCard(); mouth(true);
       if (L.onStart && Motion[L.onStart]) Motion[L.onStart](); // an animation that starts with the line
+      if (/^(surprised|excited|celebrating)$/.test(L.m || '')) Motion.hop(); // a discovery or a cheer: she hops
       if (letterCues.length) { // estimated letter times, in case the voice sends no word boundaries
         const est = words.reduce((t, w) => t + nominal(w), 0) * (this.paceK || 1.18);
         letterCues.forEach((c) => this.tm(() => { if (!bMode) fireLetter(c); }, est * c.at / Math.max(1, sp.length)));
@@ -834,6 +837,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     this.sfx('good');
     if (window.Confetti) window.Confetti.burst();
     this.react(CONFIG.swiftee.praise);
+    Motion.hop();
   }
   // Move a finished screen on by itself, a set time after its last line. Called whenever narration goes quiet;
   // does nothing until the screen's task or check is done, and never leaves the last screen.
@@ -871,21 +875,23 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   // a side's two corners, in the order Swiftee walks them
   walkEnds(leg) { const P = this.state.P; return { AB: [P.A, P.B], BC: [P.B, P.C], CD: [P.C, P.D], DA: [P.D, P.A] }[leg]; }
   // convert between board (SVG) coordinates and stage px
+  // Board px <-> stage px, worked out from the same values renderVals() puts in boardTf (where the board sits and how
+  // big it is on this screen), not measured from the page: some browsers misreport an SVG's on-screen position under
+  // CSS transforms, which put Swiftee off the shape while she measured
+  boardMap() {
+    const st = this.cur(), O = CONFIG.board;
+    if (st.room === 'measure') { const R = CONFIG.measureRoom; return { x: O.x + R.tx, y: O.y + R.ty, s: R.scale }; }
+    return { x: O.x + CONFIG.scene.boardX, y: O.y + (st.boardShiftY || 0), s: 1 };
+  }
   boardToStage(p) {
-    const svg = typeof document !== 'undefined' && document.querySelector('.stage svg[aria-label="Trapezium ABCD"]');
-    const stage = svg && document.querySelector('.stage');
-    if (!svg || !stage) return null;
-    const m = svg.getScreenCTM(), sr = stage.getBoundingClientRect(), k = sr.width / 1280 || 1;
-    const pt = svg.createSVGPoint(); pt.x = p.x; pt.y = p.y;
-    const q = pt.matrixTransform(m);
-    return { x: (q.x - sr.left) / k, y: (q.y - sr.top) / k };
+    if (!p) return null;
+    const m = this.boardMap();
+    return { x: m.x + p.x * m.s, y: m.y + p.y * m.s };
   }
   stageToBoard(p) {
-    const svg = p && typeof document !== 'undefined' && document.querySelector('.stage svg[aria-label="Trapezium ABCD"]');
-    if (!svg) return null;
-    const sr = document.querySelector('.stage').getBoundingClientRect(), k = sr.width / 1280 || 1;
-    const pt = svg.createSVGPoint(); pt.x = sr.left + p.x * k; pt.y = sr.top + p.y * k;
-    return pt.matrixTransform(svg.getScreenCTM().inverse());
+    if (!p) return null;
+    const m = this.boardMap();
+    return { x: (p.x - m.x) / m.s, y: (p.y - m.y) / m.s };
   }
   // Screens 7 and 8: one side at a time, a glowing line draws along the side, then its dotted extension
   // draws on (legs AD then BC, or bases AB then CD). On screen 7 it waits for the shape to reach centre stage.
@@ -980,6 +986,9 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       Motion.value(x0 + dx, x0, 0.75, 'back.out(1.4)', setX, () => { if (tok === this.stepTok) this.setState({ hand: null }); });
     }));
   }
+  // small word cues for lines that name a part: the legs glow once (screens 5, 6); angles A and D grow again (24)
+  glowLegs() { Motion.softGlow(['DA', 'BC']); }
+  growAD() { Motion.wedgeGrow('AD'); }
   // screen 18, on "legs": both legs glow together and their lengths pulse
   legsTogether() {
     const P = this.state.P, d = (a, b) => this.cm(this.dist(P[a], P[b]));
@@ -1072,7 +1081,13 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       if (!live()) return;
       const tap = Object.assign({}, this.state.tap); tap[leg] = true;
       // the tape lies flat along the whole side until the next side starts
-      this.setState({ tap: tap, tape: Object.assign({}, this.state.tape, { t: 1, tip: null }) });
+      // the length lands with a sparkle (as each angle reading does on screen 23)
+      this.setState({ tap: tap, tape: Object.assign({}, this.state.tape, { t: 1, tip: null }) }, () => {
+        if (typeof document === 'undefined') return;
+        const lab = [...document.querySelectorAll('.stage .board .tag.mtag.m' + leg)].find((e) => getComputedStyle(e).display !== 'none' && !e.classList.contains('off'));
+        const c = lab && this.elToStage(lab), aw = c && this.angleWalker();
+        if (aw) aw.sparkle(c.x, c.y);
+      });
       this.sfx('pop');
       this.rulerBusy = false;
       if (tap.AB && tap.BC && tap.CD && tap.DA) {
@@ -1113,7 +1128,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const end = () => { if (live()) this.finishTask(); };
     if (!aw || Motion.reduced || verts.some((v) => !v)) { this.sfx('pop'); Motion.anglesIn(); this.tm(end, 2600); return; }
     aw.start({
-      verts: verts, home: this.homeBody(), homeEl: document.querySelector('.stage .swiftee'),
+      verts: verts, home: this.homeBody(), homeEl: document.querySelector('.stage .swiftee'), colors: ['#f08a24', '#8e44d6', '#2b7bd6', '#f5c542'],
       onReading: (i) => {
         if (!live()) return;
         const k = keys[i], lab = document.querySelector('.stage .tag.alab.l' + k);
@@ -1488,9 +1503,10 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       const tp = s.tape, ends = tp ? this.walkEnds(tp.leg) : null;
       if (ends) {
         const L = this.dist(ends[0], ends[1]) || 1, ux = (ends[1].x - ends[0].x) / L, uy = (ends[1].y - ends[0].y) / L;
-        const cx = (A.x + B.x + C.x + D.x) / 4, cy = (A.y + B.y + C.y + D.y) / 4;
-        let nx = -uy, ny = ux; if (nx * (ends[0].x - cx) + ny * (ends[0].y - cy) < 0) { nx = -nx; ny = -ny; }
-        const off = 7, p0 = { x: ends[0].x + nx * off, y: ends[0].y + ny * off }; // the tape lies alongside the side, outside it
+        // the tape lies along the side on the side Swiftee is standing on (she walks upright, so that is the screen-up side):
+        // from the start corner under her feet and up into her hand, never crossing the line
+        let nx = -uy, ny = ux; if (ny > 0 || (ny === 0 && nx < 0)) { nx = -nx; ny = -ny; }
+        const off = 6, p0 = { x: ends[0].x + nx * off, y: ends[0].y + ny * off };
         const foot = { x: p0.x + ux * L * tp.t, y: p0.y + uy * L * tp.t }, tip = tp.tip || foot;
         g.tape = { p: 'M' + r1(p0.x) + ',' + r1(p0.y) + ' L' + r1(foot.x) + ',' + r1(foot.y) + ' L' + r1(tip.x) + ',' + r1(tip.y), d: 'inline' };
         let tk = '';
@@ -1744,9 +1760,11 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     // a newline forces a break in the bubble; the break is not a word, so reveal timing is unchanged
     let wi = 0;
     const words = [];
+    // the lesson's key words stay orange in the bubble (KEY_WORDS)
+    const isKey = (w) => KEY_WORDS.test(w.replace(/[^A-Za-z0-9°-]/g, '').toLowerCase());
     (s.line || '').split('\n').forEach((part, li) => {
       if (li) words.push({ t: '', cls: 'brk' });
-      this.toWords(part).forEach((w) => { const i = wi++; words.push({ t: w, cls: i < s.reveal - 1 ? 'on' : (i === s.reveal - 1 ? (s.talking ? 'cur' : 'on') : '') }); });
+      this.toWords(part).forEach((w) => { const i = wi++; words.push({ t: w, cls: (i < s.reveal - 1 ? 'on' : (i === s.reveal - 1 ? (s.talking ? 'cur' : 'on') : '')) + (isKey(w) ? ' key' : '') }); });
     });
     const G = isLesson ? this.geo() : { g: {}, tags: [], V: {} };
     const chips = s.chips.slice();
