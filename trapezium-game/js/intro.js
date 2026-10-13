@@ -1,22 +1,29 @@
 // =====================================================================
-// INTRO - the little story between the front page and screen 1. After Play the camera pushes in on Swiftee's
-// snowy cabin; a golden bell drops in and the learner rings it (or it rings by itself); the door swings open
-// with warm light and a jingle; Swiftee hops out onto the steps and says hello; then the camera pulls back, the
-// cabin shrinks into the little cabin on the lesson's landscape and Swiftee hops down to her usual spot, so the
-// last frame is exactly the lesson's first one. Skip ends it at once.
-// The scene lives in .intro-root (index.html); Swiftee and her bubble are the game's own (engine.say), so her
-// voice, lip-sync and orange key words work here too. Engine hooks: startIntro() / endIntro().
+// INTRO - the little story between the front page and screen 1. After Play the screen glows white with snow and
+// clears onto Swiftee's cabin as the camera pushes in; the doorbell rings (a two-tone chime, the lantern flares,
+// golden ripples spread from the door, snow shakes off the porch roof); the door swings open inward with warm
+// light; Swiftee hops out onto the steps and says hello; then the camera pulls back through a snowy white-out
+// onto the lesson's landscape while she hops down to her usual spot, so the last frame is the lesson's first one.
+// Nothing to tap: it plays by itself, and Skip ends it at once.
+// The door: the two cabin pictures are the same except round the doorway, so the open picture is shown as soon as
+// the door starts to move, and the closed door is laid over it in two cut-outs taken from the closed picture -
+// the arched door leaf (it swings on its right-hand hinge) and the rest of the doorway (it fades).
+// Swiftee and her bubble are the game's own (engine.say): voice, lip-sync and orange key words work here too.
+// Engine hooks: startIntro() / endIntro().
 // =====================================================================
 (function () {
   const G = window.gsap;
   const reduced = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
-  // the cabin pictures (1672 x 941) fill the stage: 1 picture px = K stage px
+  // the cabin pictures are 1672 x 941; they fill the stage, so 1 picture px = K stage px
   const K = 1280 / 1672;
-  // the door leaf in the picture (its arch top, sides and sill), and where the camera pushes in to
-  const DOOR = { x: 705 * K, y: 388 * K, w: 245 * K, h: 404 * K, archH: 92 * K };
+  // stage px: the door leaf's hinge (its right edge, half way up), the top middle of the doorway, the lantern
+  const HINGE = { x: 953 * K, y: 575 * K };
+  const DOOR_TOP = { x: 828 * K, y: 380 * K };
+  const LANTERN = { x: 645 * K, y: 468 * K };
+  // where the camera pushes in to, and how close
   const CAM = { x: 634, y: 452, zoom: 1.28 };
-  // the cabin on the lesson's background (stage px): where the close-up shrinks to as the camera pulls back
-  const LAND = { x: 67, y: 467, zoom: 2.6 };
+  // the cabin on the lesson's background: the landscape starts zoomed in on it and pulls back to the full view
+  const LAND = { x: 67, y: 467, zoom: 2.2 };
   // Swiftee's poses, as offsets from her intro spot (CSS .stage.intro .swiftee: left 514, top 496, 259 px box):
   // in the doorway, on the steps, and her usual lesson spot (left 70, top 412, full size)
   const POSE = { door: { x: 39, y: 13, scale: 0.62 }, step: { x: 0, y: 0, scale: 0.92 }, home: { x: -444, y: -84, scale: 1 } };
@@ -26,21 +33,9 @@
     { m: 'curious', t: 'Today I have a special\nshape to show you.' },
     { m: 'excited', t: "It's called a trapezium.\nLet's go and explore it!" }
   ];
-  const BELL_WAIT_MS = 6000; // it rings by itself if nobody taps it
 
   const el = (tag, cls, parent, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (parent) parent.appendChild(e); return e; };
-  const BELL_SVG = '<svg viewBox="0 0 90 110" aria-hidden="true"><defs>' +
-    '<linearGradient id="ibGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff2a8"/><stop offset=".45" stop-color="#f6c638"/><stop offset="1" stop-color="#c47f0c"/></linearGradient>' +
-    '<linearGradient id="ibRed" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff5d5d"/><stop offset="1" stop-color="#c3121e"/></linearGradient></defs>' +
-    '<path d="M45 30 C28 30 22 44 21 60 C20 74 14 80 10 86 L80 86 C76 80 70 74 69 60 C68 44 62 30 45 30 Z" fill="url(#ibGold)" stroke="#9a5d06" stroke-width="2.5" stroke-linejoin="round"/>' +
-    '<path d="M31 44 C30 54 29 64 26 74" fill="none" stroke="#fffbe0" stroke-width="5" stroke-linecap="round" opacity=".75"/>' +
-    '<rect x="9" y="84" width="72" height="8" rx="4" fill="#e0a21a" stroke="#9a5d06" stroke-width="2"/>' +
-    '<circle cx="45" cy="98" r="8" fill="url(#ibGold)" stroke="#9a5d06" stroke-width="2.5"/>' +
-    '<path d="M45 30 C34 18 18 18 20 28 C22 36 36 34 45 30 Z M45 30 C56 18 72 18 70 28 C68 36 54 34 45 30 Z" fill="url(#ibRed)" stroke="#8d0b14" stroke-width="2" stroke-linejoin="round"/>' +
-    '<path d="M42 32 L34 46 M48 32 L56 46" stroke="#c3121e" stroke-width="5" stroke-linecap="round"/>' +
-    '<circle cx="45" cy="30" r="5" fill="#ff6b6b" stroke="#8d0b14" stroke-width="2"/>' +
-    '<path d="M30 14 C36 6 44 8 45 14 C38 14 34 16 30 14 Z M60 14 C54 6 46 8 45 14 C52 14 56 16 60 14 Z" fill="#2e9e4f" stroke="#1d6b35" stroke-width="1.5"/>' +
-    '<circle cx="45" cy="13" r="3.5" fill="#e8282f"/></svg>';
+  const at = (e, p) => { e.style.left = p.x + 'px'; e.style.top = p.y + 'px'; };
 
   const Intro = {
     run: 0,
@@ -50,12 +45,9 @@
       if (!root) { done(); return; }
       const run = ++this.run, eng = engine;
       const live = () => run === this.run && root.isConnected;
-      this.live = live; this.eng = eng; this.done = done; this.root = root;
+      this.live = live; this.done = done; this.root = root;
       this.ctx = G ? G.context(() => {}) : null;
-      this.timers = [];
-      const R = reduced();
-      const D = (s) => (R ? 0 : s);
-      const later = (ms, fn) => { const t = setTimeout(() => { if (live()) fn(); }, R ? 0 : ms); this.timers.push(t); };
+      const R = reduced() || !G, D = (s) => (R ? 0 : s);
       const tl = (fn) => new Promise((res) => { if (!live()) return; if (!G) { res(); return; } this.ctx.add(() => { const t = fn(); t.eventCallback('onComplete', () => res()); }); });
       const say = (L) => new Promise((res) => { if (!live()) return; eng.say(L, () => res()); });
 
@@ -63,101 +55,88 @@
       root.innerHTML = '';
       const land = el('img', 'intro-land', root); land.src = 'assets/images/winter-background.webp'; land.alt = '';
       const cam = el('div', 'intro-cam', root);
-      const closed = el('img', 'intro-pic', cam); closed.src = 'assets/images/cabin-door-closed.webp'; closed.alt = "Swiftee's snowy cabin with its door closed";
-      const open = el('img', 'intro-pic intro-open', cam); open.src = 'assets/images/cabin-door-open.webp'; open.alt = '';
+      const closed = el('img', 'intro-pic', cam); closed.src = 'assets/images/cabin-door-closed.webp'; closed.alt = "Swiftee's snowy cabin";
+      const open = el('img', 'intro-pic', cam); open.src = 'assets/images/cabin-door-open.webp'; open.alt = '';
+      const frame = el('div', 'intro-cut intro-frame', cam);
+      const leaf = el('div', 'intro-cut intro-leaf', cam);
       const glow = el('div', 'intro-glow', cam);
-      const hinge = el('div', 'intro-hinge', cam);
-      const leaf = el('div', 'intro-leaf', hinge);
-      [hinge, glow].forEach((e) => { e.style.left = DOOR.x + 'px'; e.style.top = DOOR.y + 'px'; e.style.width = DOOR.w + 'px'; e.style.height = DOOR.h + 'px'; });
-      leaf.style.backgroundPosition = (-DOOR.x) + 'px ' + (-DOOR.y) + 'px';
-      leaf.style.borderRadius = '50% 50% 0 0 / ' + DOOR.archH + 'px ' + DOOR.archH + 'px 0 0';
+      const lamp = el('div', 'intro-lamp', cam); at(lamp, LANTERN);
+      const rings = [0, 1, 2].map(() => { const r = el('i', 'intro-ring', cam); at(r, DOOR_TOP); return r; });
       el('canvas', 'snowfall-cover intro-snow', root).setAttribute('aria-hidden', 'true');
-      const bell = el('button', 'intro-bell', root, BELL_SVG); bell.type = 'button'; bell.setAttribute('aria-label', 'Ring the bell');
-      const cap = el('div', 'intro-cap', root, 'Ring the bell!');
-      const hand = el('div', 'intro-hand', root, '<img src="assets/images/hand-nudge.webp" alt="">');
+      const mist = el('div', 'intro-mist', root);
       const skip = el('button', 'navbtn intro-skip', root, 'Skip'); skip.type = 'button';
       skip.addEventListener('click', () => { if (live()) { eng.sfx('tap'); this.finish(); } });
       const sw = document.querySelector('.stage .swiftee');
       if (G) this.ctx.add(() => {
         G.set(cam, { transformOrigin: CAM.x + 'px ' + CAM.y + 'px' });
         G.set(land, { transformOrigin: LAND.x + 'px ' + LAND.y + 'px', scale: LAND.zoom });
-        G.set([bell, cap, hand, open], { opacity: 0 });
-        G.set(leaf, { transformPerspective: 900, transformOrigin: '100% 50%' }); // hinged on its right, swings out
+        G.set(open, { opacity: 0 });
+        G.set(leaf, { transformPerspective: 1100, transformOrigin: HINGE.x + 'px ' + HINGE.y + 'px' });
+        G.set([lamp, glow].concat(rings), { opacity: 0 });
         if (sw) G.set(sw, Object.assign({ transformOrigin: '0 0', opacity: 0 }, POSE.door));
       });
-
-      // sparkles: little stars flying out from a point (stage px)
-      const sparkle = (x, y, n) => {
-        if (!G || R) return;
-        for (let i = 0; i < n; i++) {
-          const s = el('i', 'intro-star', root), a = (i / n) * Math.PI * 2 + Math.random() * 0.5, d = 40 + Math.random() * 40;
-          s.style.left = x + 'px'; s.style.top = y + 'px'; if (i % 2) s.style.background = '#fff';
-          this.ctx.add(() => G.fromTo(s, { x: 0, y: 0, scale: 0.4, opacity: 1 }, { x: Math.cos(a) * d, y: Math.sin(a) * d, scale: 1, opacity: 0, duration: 0.8, ease: 'power2.out', onComplete: () => s.remove() }));
+      // a few flakes of snow shaken off the porch roof (stage px)
+      const flurry = () => {
+        if (R) return;
+        for (let i = 0; i < 14; i++) {
+          const f = el('i', 'intro-flake', cam), x = 520 + Math.random() * 230, y = 200 + Math.random() * 20;
+          f.style.left = x + 'px'; f.style.top = y + 'px'; f.style.width = f.style.height = (3 + Math.random() * 4) + 'px';
+          this.ctx.add(() => G.fromTo(f, { y: 0, x: 0, opacity: 1 }, { y: 120 + Math.random() * 90, x: (Math.random() - 0.5) * 50, opacity: 0, duration: 1.3 + Math.random() * 0.6, delay: Math.random() * 0.3, ease: 'power1.in', onComplete: () => f.remove() }));
         }
       };
 
-      // ---------- 1. push in on the cabin, the bell drops in ----------
-      let bellShown = false; // taps before the bell has dropped in are ignored
-      const ring = new Promise((resolve) => {
-        let rung = false;
-        const go = () => { if (rung || !live()) return; rung = true; resolve(); };
-        bell.addEventListener('click', () => { if (!bellShown) return; eng.unlockAudio(); go(); });
-        later(2300 + BELL_WAIT_MS, go);
-      });
-      tl(() => G.timeline().to(cam, { scale: CAM.zoom, duration: D(2.3), ease: 'power2.inOut' }))
+      // ---------- 1. out of the white, the camera pushes in on the cabin ----------
+      tl(() => G.timeline()
+        .to(mist, { opacity: 0, duration: D(1), ease: 'sine.out' }, D(0.15))
+        .fromTo(cam, { scale: 1.06 }, { scale: CAM.zoom, duration: D(2.6), ease: 'power2.inOut' }, 0))
+        // ---------- 2. ding-dong: the doorbell rings ----------
         .then(() => {
           if (!live()) return;
-          eng.sfx('pop'); bellShown = true;
-          this.ctx.add(() => {
-            G.fromTo(bell, { y: -70, opacity: 0, rotation: -10 }, { y: 0, opacity: 1, rotation: 0, duration: D(0.7), ease: 'bounce.out' });
-            G.to(bell, { rotation: 6, duration: 0.9, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 0.8, transformOrigin: '50% 8%' });
-            G.fromTo(cap, { y: 10, scale: 0.85, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: D(0.45), delay: D(0.4), ease: 'back.out(2)' });
-            G.to(hand, { opacity: 1, duration: 0.3, delay: D(0.9) });
-          });
-        });
-
-      // ---------- 2. ding dong: the bell rings, the door swings open ----------
-      ring.then(() => {
-        if (!live()) return;
-        eng.sfx('dingdong');
-        const b = bell.getBoundingClientRect(), st = document.querySelector('.stage').getBoundingClientRect(), k = st.width / 1280;
-        sparkle((b.left + b.width / 2 - st.left) / k, (b.top + b.height * 0.6 - st.top) / k, 10);
-        return tl(() => G.timeline()
-          .to([cap, hand], { opacity: 0, duration: 0.25 }, 0)
-          .to(bell, { keyframes: [{ rotation: 26 }, { rotation: -22 }, { rotation: 16 }, { rotation: -10 }, { rotation: 0 }], duration: D(1), ease: 'sine.inOut', transformOrigin: '50% 8%' }, 0)
-          .to(bell, { opacity: 0, y: -30, duration: D(0.4) }, D(1.1))
-          .call(() => { eng.sfx('whoosh'); later(350, () => eng.sfx('flourish')); }, null, D(0.8))
-          .to(leaf, { rotationY: 78, duration: D(1.1), ease: 'power2.out' }, D(0.8))
-          .to(open, { opacity: 1, duration: D(0.45) }, D(1.35))
-          .to(leaf, { opacity: 0, duration: D(0.3) }, D(1.6))
-          .fromTo(glow, { opacity: 0 }, { opacity: 0.85, duration: D(0.5), ease: 'sine.out' }, D(1))
-          .to(glow, { opacity: 0.3, duration: D(1.2), ease: 'sine.inOut' }, D(1.6)));
-      })
-        // ---------- 3. Swiftee hops out onto the steps ----------
+          eng.sfx('dingdong'); flurry();
+          return tl(() => G.timeline()
+            .to(lamp, { keyframes: [{ opacity: 1, scale: 1.15 }, { opacity: 0.45, scale: 1 }, { opacity: 1, scale: 1.15 }, { opacity: 0, scale: 1 }], duration: D(1.3), ease: 'sine.inOut' }, 0)
+            .fromTo(rings, { scale: 0.25, opacity: 0.9 }, { scale: 2.4, opacity: 0, duration: D(1.1), ease: 'power1.out', stagger: D(0.3) }, 0)
+            .to({}, { duration: D(0.35) }));
+        })
+        // ---------- 3. the door swings open inward ----------
+        .then(() => {
+          if (!live()) return;
+          eng.sfx('door');
+          return tl(() => G.timeline()
+            .set(open, { opacity: 1 }).set(closed, { opacity: 0 })        // the same picture outside the doorway
+            .fromTo(leaf, { rotationY: 0, filter: 'brightness(1)' }, { rotationY: -74, filter: 'brightness(0.72)', duration: D(1.35), ease: 'power2.inOut' }, 0)
+            .to(leaf, { opacity: 0, duration: D(0.4), ease: 'sine.in' }, D(1.0))
+            .to(frame, { opacity: 0, duration: D(1.1), ease: 'sine.inOut' }, D(0.1))
+            .fromTo(glow, { opacity: 0 }, { opacity: 0.8, duration: D(0.6), ease: 'sine.out' }, D(0.35))
+            .to(glow, { opacity: 0.25, duration: D(1.2), ease: 'sine.inOut' }, D(0.95)));
+        })
+        // ---------- 4. Swiftee hops out onto the steps ----------
         .then(() => {
           if (!live() || !sw) return;
-          eng.pose('excited');
+          eng.pose('excited'); eng.sfx('jingle');
           return tl(() => G.timeline()
             .to(sw, { opacity: 1, duration: D(0.3) })
-            .to(sw, Object.assign({ duration: D(0.75), ease: 'power2.out' }, POSE.step), D(0.25))
-            .to(sw, { keyframes: [{ y: -40, ease: 'power2.out' }, { y: 0, ease: 'bounce.out' }], duration: D(0.75) }, D(0.25))
-            .call(() => eng.sfx('pop'), null, D(0.9)));
+            .to(sw, Object.assign({ duration: D(0.75), ease: 'power2.out' }, POSE.step), D(0.2))
+            .to(sw, { keyframes: [{ y: -40, ease: 'power2.out' }, { y: 0, ease: 'bounce.out' }], duration: D(0.75) }, D(0.2))
+            .call(() => eng.sfx('pop'), null, D(0.85)));
         })
-        // ---------- 4. hello! ----------
+        // ---------- 5. hello! ----------
         .then(() => LINES.reduce((p, L) => p.then(() => say(L)), Promise.resolve()))
-        // ---------- 5. the camera pulls back to the landscape; Swiftee hops down to her spot ----------
+        // ---------- 6. Swiftee flies off; the camera pulls back through a snowy white-out onto the landscape ----------
         .then(() => {
           if (!live()) return;
-          eng.setState({ bubOff: true }); eng.pose('happy'); eng.sfx('whoosh');
-          if (R || !G) return;
-          this.ctx.add(() => G.set(cam, { maskImage: 'radial-gradient(ellipse 50% 50% at ' + CAM.x + 'px ' + CAM.y + 'px, #000 62%, transparent 100%)', webkitMaskImage: 'radial-gradient(ellipse 50% 50% at ' + CAM.x + 'px ' + CAM.y + 'px, #000 62%, transparent 100%)', maskSize: '400% 400%', webkitMaskSize: '400% 400%', maskPosition: 'center', webkitMaskPosition: 'center', maskRepeat: 'no-repeat', webkitMaskRepeat: 'no-repeat' }));
+          eng.setState({ bubOff: true }); eng.pose('flapping'); eng.sfx('whoosh');
+          setTimeout(() => { if (live()) eng.pose('happy'); }, R ? 0 : 2050); // landed
           return tl(() => G.timeline()
-            .to(cam, { scale: 0.3, x: LAND.x - CAM.x, y: LAND.y - CAM.y, duration: 2.1, ease: 'power2.inOut' }, 0)
-            .to(cam, { maskSize: '100% 100%', webkitMaskSize: '100% 100%', duration: 1.2, ease: 'sine.in' }, 0)
-            .to(cam, { opacity: 0, duration: 1.1, ease: 'sine.in' }, 0.7)
-            .to(land, { scale: 1, duration: 2.1, ease: 'power2.inOut' }, 0)
-            .to(sw, Object.assign({ duration: 1.5, ease: 'power2.inOut' }, POSE.home), 0.35)
-            .to(sw, { keyframes: [{ y: POSE.home.y - 120, ease: 'power2.out' }, { y: POSE.home.y, ease: 'bounce.out' }], duration: 1.5 }, 0.35));
+            .to(cam, { scale: 1, duration: D(0.9), ease: 'power1.in' }, 0)
+            .to(mist, { opacity: 1, duration: D(0.85), ease: 'sine.in' }, 0)
+            .set(cam, { opacity: 0 }, D(0.9))                                 // swapped while the screen is white
+            .to(mist, { opacity: 0, duration: D(1.2), ease: 'sine.out' }, D(1))
+            .to(land, { scale: 1, duration: D(1.8), ease: 'power2.out' }, D(0.9))
+            // the flight: up off the steps, a wide arc to the left, and a soft landing on her spot
+            .to(sw, { x: POSE.home.x, scale: POSE.home.scale, duration: D(2), ease: 'sine.inOut' }, D(0.1))
+            .to(sw, { keyframes: [{ y: -210, ease: 'power2.out' }, { y: POSE.home.y, ease: 'power2.in' }], duration: D(2) }, D(0.1))
+            .to(sw, { keyframes: [{ rotation: -8 }, { rotation: 4 }, { rotation: 0 }], duration: D(2), ease: 'sine.inOut' }, D(0.1)));
         })
         .then(() => { if (live()) this.finish(); });
     },
@@ -170,7 +149,6 @@
     },
     stop() {
       this.run++;
-      (this.timers || []).forEach(clearTimeout); this.timers = [];
       if (this.ctx) { this.ctx.revert(); this.ctx = null; }
       const sw = document.querySelector('.stage .swiftee');
       if (sw && G) G.set(sw, { clearProps: 'transform,opacity' });

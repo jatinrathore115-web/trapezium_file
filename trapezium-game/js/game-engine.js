@@ -55,7 +55,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (window.SwifteeMascot) {
       this.sw = new window.SwifteeMascot({ base: C.base, idle: C.idle, minHoldMs: C.minHoldMs, find: () => document.querySelector('.swiftee') });
       // preload every expression the lesson uses, so reactions never wait on the network
-      const want = ['measuring', C.talk, C.waiting, C.praise, C.correct, C.wrong, C.nudge, C.done];
+      const want = ['measuring', 'flapping', 'excited', 'waving', C.talk, C.waiting, C.praise, C.correct, C.wrong, C.nudge, C.done];
       LESSON.steps.forEach((st) => (st.lines || []).concat(st.after || []).forEach((L) => { if (L.m) want.push(L.m); }));
       this.sw.warm(want.filter((x, i) => want.indexOf(x) === i));
     }

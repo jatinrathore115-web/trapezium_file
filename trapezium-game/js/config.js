@@ -15,7 +15,9 @@ const CONFIG = {
   // rightAngleDeg: screen 33 snaps a corner to 90° within this many degrees
   snap: { exactCm: 0.05, rightAngleDeg: 5 },
   // recorded effects (the rest are synthesised): good = every correct action, bad = every wrong one
-  sounds: { good: 'assets/audio/correct.mp3', bad: 'assets/audio/incorrect.mp3' },
+  sounds: { good: 'assets/audio/correct.mp3', bad: 'assets/audio/incorrect.mp3',
+    // the intro: the cabin doorbell, the door opening (latch, creak, air), sleigh bells as Swiftee steps out
+    dingdong: 'assets/audio/doorbell.m4a', door: 'assets/audio/door-open.m4a', jingle: 'assets/audio/sleigh-bells.m4a' },
   soundVolume: 0.9,
   drag: { wrongGapMs: 1200 },        // wrong-way drag feedback (wiggle + sound) at most once per this long
   // a part named in the voice-over grows briefly and holds this long before easing back

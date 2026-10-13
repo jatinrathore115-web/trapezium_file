@@ -77,9 +77,11 @@ trapezium-game/
   Skipping an unfinished drag applies its result, so later screens still match the shape.
 - **Shapes.** The bases always stay parallel: corners only slide sideways, within limits that keep the shape readable.
 - **Front page.** The banner fills the stage; the Play button unlocks sound and starts the intro.
-- **Intro** (`js/intro.js`). The camera pushes in on Swiftee's cabin, the learner rings the doorbell (it rings by itself
-  after a few seconds), the door swings open and Swiftee hops out to say hello; then the camera pulls back to the
-  lesson's landscape and screen 1 begins. Skip jumps straight to screen 1. `CONFIG.flow.intro: false` turns it off.
+- **Intro** (`js/intro.js`). It plays by itself: out of a snowy white the camera pushes in on Swiftee's cabin, the
+  doorbell rings, the door swings open and Swiftee hops out to say hello; then she flies off as the camera pulls back
+  through the white onto the lesson's landscape, landing on her spot as screen 1 begins. Skip jumps straight to
+  screen 1. `CONFIG.flow.intro: false` turns it off. Sounds: `assets/audio/doorbell.m4a`, `door-open.m4a`,
+  `sleigh-bells.m4a`.
 
 ## Tests
 
