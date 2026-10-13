@@ -21,9 +21,9 @@
 
   // ---------- layout in board units (1000 x 562), and timings ----------
   const SUM = {
-    // inset: the frame's decorated rim (board units) - name plates sit inside it, pad clear of it (~24 stage px)
-    card: { cx: 500, cy: 322, w: 300, inset: 17, pad: 19 },
-    mini: { w: 132, x: [[80, 224], [776, 920]], y: [200, 378], zoom: 1.12, plate: { w: 108, h: 27, size: 14.5, rim: 2 }, pad: 5 },
+    // each card's name plate sits centred on its bottom edge
+    card: { cx: 500, cy: 322, w: 300 },
+    mini: { w: 132, x: [[80, 224], [776, 920]], y: [200, 378], zoom: 1.12, plate: { w: 118, h: 27, size: 15.5, rim: 2 } },
     enterMs: 420, collectMs: 580, pauseMs: 200
   };
   const FRAME = { src: 'assets/images/summary-card.webp', w: 1024, h: 984 };
@@ -43,8 +43,8 @@
   const SPOT = { peek: { y: 0, s: 218 / 259, hide: 154 }, middle: { y: 186, s: 300 / 259, hide: 300 } };
 
   // ---------- the trapeziums on the cards (board units): AB at y = TOP, DC at y = BOT, so AB is parallel to DC ----------
-  // the shape sits in the upper part of the card, leaving the bottom band for its name plate (inside the frame)
-  const TOP = 244, BOT = 346, HT = BOT - TOP;
+  // the shape sits in the middle of the card
+  const TOP = 276, BOT = 378, HT = BOT - TOP;
   const SHAPES = {
     gen: { A: 440, B: 548, C: 596, D: 404 },
     scal: { A: 434, B: 530, C: 598, D: 402 },    // all four sides different
@@ -71,9 +71,9 @@
     { id: 'isosceles', label: 'Isosceles', tone: 'convex', t: 'An isosceles trapezium has legs of the same length.',
       visual: { shape: 'iso', ticks: 'legs' }, cue: { isosceles: 'tag', legs: 'legs', same: 'ticks' } },
     { id: 'angleSum', label: 'Angle sum', tone: 'concave', t: 'Angles on the same leg add up to 180°.',
-      visual: { shape: 'ang', lit: ['DA'], wedges: ['A', 'D'] }, cue: { angles: 'wedges', leg: 'lit', 180: 'values' } },
+      visual: { shape: 'ang', lit: ['DA'], wedges: ['A', 'D'] }, cue: { angles: 'wedges', leg: 'lit', 180: 'sum' } },
     { id: 'supplementary', label: 'Supplementary', tone: 'concave', t: 'Two angles that add up to 180° are supplementary.',
-      visual: { shape: 'ang', lit: ['BC'], wedges: ['B', 'C'] }, cue: { angles: 'wedges', 180: 'values', supplementary: 'tag' } },
+      visual: { shape: 'ang', lit: ['BC'], wedges: ['B', 'C'] }, cue: { angles: 'wedges', 180: 'sum', supplementary: 'tag' } },
     { id: 'right', label: 'Right', tone: 'regular', t: 'A right trapezium has two adjacent right angles.',
       visual: { shape: 'right', right: ['A', 'D'] }, cue: { right: 'tag', adjacent: 'side', angles: 'right' } }
   ];
@@ -218,8 +218,8 @@
       });
       g._marks = mk('g', {}, vis);
       g._dots = ['A', 'B', 'C', 'D'].map((k) => mk('circle', { cx: P[k].x, cy: P[k].y, r: 4.2, fill: '#fff', stroke: INK.base, 'stroke-width': 2.2, opacity: 0 }, vis));
-      // the name plate inside the card's bottom: its bottom edge pad above the frame's inner edge (never on the rim)
-      g._tag = this.nameTag(pp, SUM.card.cx, y + h - SUM.card.inset - SUM.card.pad - 25, c.label, c.tone);
+      // the name plate centred on the card's bottom edge
+      g._tag = this.nameTag(pp, SUM.card.cx, y + h + 4, c.label, c.tone);
       g._tag.setAttribute('opacity', 0);
       return g;
     },
@@ -249,24 +249,25 @@
       (els || []).filter(Boolean).forEach((e, i) => {
         if (reduced() || !e.animate) return;
         e.style.transformBox = 'fill-box'; e.style.transformOrigin = 'center';
-        try { e.animate([{ scale: '1', filter: 'brightness(1)' }, { scale: peak || '1.4', filter: 'brightness(1.12) drop-shadow(0 0 7px ' + WARM + ')', offset: 0.4 }, { scale: '1', filter: 'brightness(1)' }],
-          { duration: 480, delay: i * 60, easing: 'cubic-bezier(.3,1.25,.45,1)' }); } catch (x) {}
+        const glow = 'brightness(1.15) drop-shadow(0 0 8px ' + WARM + ')', p = peak || '1.4';
+        try { e.animate([{ scale: '1', filter: 'brightness(1)' }, { scale: p, filter: glow, offset: 0.22 }, { scale: '1', filter: glow, offset: 0.45 }, { scale: p, filter: glow, offset: 0.67 }, { scale: '1', filter: 'brightness(1)' }],
+          { duration: 1100, delay: i * 90, easing: 'ease-in-out' }); } catch (x) {}
       });
     },
     // a warm stroke runs along each line and fades. It is a copy in the fx layer, mapped through the card's transform,
     // so the line itself is never changed
-    trace(lines) {
+    trace(lines, together) {
       (lines || []).filter(Boolean).forEach((src, i) => {
         if (reduced()) return;
         const a = { x: +src.getAttribute('x1'), y: +src.getAttribute('y1') }, b = { x: +src.getAttribute('x2'), y: +src.getAttribute('y2') };
         const m = src.getCTM && this.svg.getCTM ? this.svg.getCTM().inverse().multiply(src.getCTM()) : null;
         const P = (p) => (m ? { x: m.a * p.x + m.c * p.y + m.e, y: m.b * p.x + m.d * p.y + m.f } : p);
         const A2 = P(a), B2 = P(b), len = Math.hypot(B2.x - A2.x, B2.y - A2.y) || 1;
-        const ln = mk('line', { x1: A2.x, y1: A2.y, x2: B2.x, y2: B2.y, stroke: WARM, 'stroke-width': 7, 'stroke-linecap': 'round' }, this.fx);
+        const ln = mk('line', { x1: A2.x, y1: A2.y, x2: B2.x, y2: B2.y, stroke: WARM, 'stroke-width': 10, 'stroke-linecap': 'round', style: 'filter: drop-shadow(0 0 5px rgba(255,170,40,.9))' }, this.fx);
         ln.style.strokeDasharray = len + ' ' + len;
         try {
-          const an = ln.animate([{ strokeDashoffset: len + 'px', opacity: 1 }, { strokeDashoffset: '0px', opacity: 1, offset: 0.6 }, { strokeDashoffset: '0px', opacity: 0 }],
-            { duration: 900, delay: i * 120, easing: 'ease-out', fill: 'both' });
+          const an = ln.animate([{ strokeDashoffset: len + 'px', opacity: 1 }, { strokeDashoffset: '0px', opacity: 1, offset: 0.35 }, { strokeDashoffset: '0px', opacity: 0.55, offset: 0.55 }, { strokeDashoffset: '0px', opacity: 1, offset: 0.75 }, { strokeDashoffset: '0px', opacity: 0 }],
+            { duration: 1700, delay: together ? 0 : i * 220, easing: 'ease-out', fill: 'both' });
           an.onfinish = () => ln.remove();
         } catch (e) { ln.remove(); }
       });
@@ -381,16 +382,33 @@
       if (!c) return;
       const sd = c._sides;
       if (kind === 'outline') this.trace([sd.DA, sd.AB, sd.BC, sd.DC]);
-      else if (kind === 'pair') { this.trace([sd.AB, sd.DC]); this.warmPulse(c._chev, '1.5'); }
-      else if (kind === 'chev') this.warmPulse(c._chev, '1.5');
-      else if (kind === 'lit') this.trace(c._lit);
-      else if (kind === 'legs') this.trace([sd.DA, sd.BC]);
+      else if (kind === 'pair') { this.trace([sd.AB, sd.DC], true); this.warmPulse(c._chev, '1.7'); } // both parallel sides at once
+      else if (kind === 'chev') this.warmPulse(c._chev, '1.7');
+      else if (kind === 'lit') this.trace(c._lit, true);
+      else if (kind === 'legs') { this.trace([sd.DA, sd.BC], true); this.warmPulse(c._ticks, '1.5'); }
       else if (kind === 'side') this.trace([sd.DA]); // the side the two right angles share (they are adjacent)
-      else if (kind === 'ticks') this.warmPulse(c._ticks, '1.4');
-      else if (kind === 'right') this.warmPulse(c._right, '1.4');
-      else if (kind === 'wedges') this.warmPulse(c._wedges, '1.3');
-      else if (kind === 'values') this.warmPulse(c._values, '1.35');
-      else if (kind === 'tag') this.warmPulse([c._tag], '1.08');
+      else if (kind === 'ticks') { this.warmPulse(c._ticks, '1.6'); if (c._c.visual.ticks === 'all') this.trace([sd.AB, sd.BC, sd.DC, sd.DA]); }
+      else if (kind === 'right') this.warmPulse(c._right, '1.6');
+      else if (kind === 'wedges') this.warmPulse(c._wedges, '1.45');
+      else if (kind === 'values') this.warmPulse(c._values, '1.5');
+      else if (kind === 'sum') this.sum(c);
+      else if (kind === 'tag') this.warmPulse([c._tag], '1.12');
+    },
+    // "180°": the two angle values pulse, then their sum pops in on the card under the shape: 120° + 60° = 180°
+    sum(c) {
+      this.warmPulse(c._values, '1.5');
+      if (!c._sum) {
+        const v = (c._values || []).map((e) => parseInt(e.textContent, 10)).filter((n) => !isNaN(n));
+        if (v.length < 2) return;
+        v[1] = 180 - v[0]; // same-leg angles of a trapezium: shown exactly
+        const ink = (k) => (k === 'D' ? '#b88300' : ANG[k]); // each value in its angle's colour (D's yellow, darkened to read on white)
+        const tx = mk('text', { x: SUM.card.cx, y: BOT + 44, 'text-anchor': 'middle', 'font-size': 19, 'font-weight': 900, 'font-family': 'Nunito, system-ui, sans-serif',
+          fill: INK.navy, stroke: '#fff', 'stroke-width': 4, 'paint-order': 'stroke', 'stroke-linejoin': 'round', opacity: 0 }, c._marks);
+        [[v[0] + '°', ink(c._c.visual.wedges[0])], [' + ', INK.navy], [v[1] + '°', ink(c._c.visual.wedges[1])], [' = ', INK.navy], ['180°', '#e06600']].forEach(([s, col]) => mk('tspan', { fill: col, text: s }, tx));
+        c._sum = tx;
+      }
+      this.later(350, () => { this.pop(c._sum, 0, true); this.sfx('chime'); });
+      this.later(700, () => this.warmPulse([c._sum], '1.15'));
     },
 
     // ---------- a card coming in, and going to the albums ----------
@@ -427,8 +445,8 @@
         c.setAttribute('transform', 'translate(' + sl.x + ',' + sl.y + ') scale(' + k.toFixed(4) + ') translate(' + (-cx0) + ',' + (-cy0) + ')');
         c._slot = sl; zoom(1);
         const P0 = SUM.mini.plate;
-        // the album plate inside its small card's bottom, clear of the scaled rim
-        c._mini = this.nameTag(this.layer, sl.x, sl.y + (r.h / 2 - SUM.card.inset) * k - SUM.mini.pad - P0.h / 2, c._c.label, c._c.tone, { h: P0.h, size: P0.size, w: P0.w, rim: P0.rim });
+        // the album plate centred on its small card's bottom edge
+        c._mini = this.nameTag(this.layer, sl.x, sl.y + r.h * k / 2 + 1, c._c.label, c._c.tone, { h: P0.h, size: P0.size, w: P0.w, rim: P0.rim });
         if (!now) this.pop(c._mini, 0);
         if (S.collected.indexOf(id) < 0) S.collected.push(id);
         this.setState('NEXT_CONCEPT', id);
