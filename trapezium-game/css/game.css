@@ -587,10 +587,109 @@ a{color:#123b63}a:hover{color:#0b2742}
   border:3px solid rgba(255,228,150,.9);box-shadow:0 0 14px rgba(255,200,90,.7),inset 0 0 10px rgba(255,220,140,.5)}
 .intro-flake{position:absolute;border-radius:50%;background:#fff;box-shadow:0 0 4px #fff;pointer-events:none}
 .intro-snow{position:absolute;left:0;top:0;width:1280px;height:720px;pointer-events:none}
-/* the soft snowy white the scenes change through, so two pictures never show at once */
-.intro-mist{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,#ffffff 0%,#f1f8ff 50%,#d6eafb 100%)}
+/* the gust of snow the scenes change through: a soft veil (opacity at most .6) under a canvas of blowing flakes,
+   with the picture behind blurred, so two pictures never show at once */
+.intro-mist{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.95) 0%,rgba(236,245,255,.9) 55%,rgba(205,226,248,.85) 100%)}
+.intro-blizzard{position:absolute;left:0;top:0;width:1280px;height:720px;pointer-events:none}
 .navbtn.intro-skip{position:absolute;right:24px;top:16px;z-index:2}
 .stage.scene.intro .swiftee{left:514px!important;top:496px!important;z-index:10;animation:none!important}
 .stage.scene.intro .bubble{left:0!important;right:0!important;margin:0 auto;top:auto!important;bottom:250px!important;max-width:520px;z-index:11;transform-origin:50% 100%}
 .stage.scene.intro .bubble .bubble-tail{left:calc(50% - 15px)}
 .stage.scene.intro .panel-img,.stage.intro .topnav,.stage.intro .screens-btn{opacity:0;pointer-events:none}
+
+/* ---------- fun and festive touches ---------- */
+/* game-style reveals (Motion.stampIn / burst): a gold ring and a burst of stars round a reading as it lands */
+.eq-layer .fx-ring{position:absolute;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;pointer-events:none;
+  border:3px solid rgba(255,206,70,.95);box-shadow:0 0 12px rgba(255,190,60,.8),inset 0 0 8px rgba(255,220,120,.6)}
+.eq-layer .fx-star{position:absolute;width:14px;height:14px;margin:-7px 0 0 -7px;background:#ffc93c;pointer-events:none;
+  clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);filter:drop-shadow(0 0 3px rgba(255,200,60,.9))}
+.eq-layer .fx-star.w{background:#fff;width:10px;height:10px;margin:-5px 0 0 -5px}
+/* the measuring room's lengths land with the stamp (game-engine measureLeg), not the plain CSS pop */
+.stage.measure-room .tag.mtag{animation:none}
+/* the running readout that rides along the tape while Swiftee measures (geo: tag .live-len) */
+.tag.mtag.live-len{background:#fff6d6;border-color:#f0a020;color:#8a4a00;font-size:19px;box-shadow:0 0 0 3px rgba(255,214,110,.45),0 0 14px rgba(255,190,60,.55);animation:none;transition:none}
+/* Swiftee dozing: soft z's drift up from her head (Motion.zzz) */
+.eq-layer .zzz{position:absolute;width:60px;height:80px;pointer-events:none}
+.eq-layer .zzz i{position:absolute;left:0;bottom:0;font:800 22px 'Baloo 2',system-ui,sans-serif;font-style:normal;color:#5b8fd6;
+  text-shadow:0 0 6px #fff,0 0 2px #fff;opacity:0;animation:zzzUp 2.4s ease-in infinite}
+.eq-layer .zzz i:nth-child(2){font-size:28px;animation-delay:.8s}
+.eq-layer .zzz i:nth-child(3){font-size:34px;animation-delay:1.6s}
+@keyframes zzzUp{0%{opacity:0;transform:translate(0,0) rotate(-10deg) scale(.6)}20%{opacity:1}100%{opacity:0;transform:translate(26px,-70px) rotate(12deg) scale(1.1)}}
+/* Chilly the snowman (js/chilly.js): pops up from the snow between Swiftee and the ice panel */
+.chilly-root{position:absolute;left:0;top:0;width:1280px;height:720px;pointer-events:none;z-index:7;overflow:hidden}
+.chilly{position:absolute;left:277px;top:441px;width:236px;height:236px;background:url(../assets/images/snowman.webp) 0 0/400% 100% no-repeat}
+/* the snow drift in front of him: his base sinks into it, on the same ground as Swiftee */
+.chilly-drift{position:absolute;left:255px;top:622px;width:280px;height:96px;background:url(../assets/images/snow-drift.webp) 0 0/100% 100% no-repeat}
+.chilly-bubble{position:absolute;left:250px;bottom:276px;max-width:300px;width:max-content;box-sizing:border-box;padding:12px 18px 13px;opacity:0;
+  background:#f4fbff;border:3px solid #5aa9e6;border-radius:20px;box-shadow:0 6px 16px rgba(18,59,99,.16);transform-origin:40% 100%;
+  font:800 21px/1.25 'Nunito','Noto Sans Math',system-ui,sans-serif;color:#123b63;text-align:center}
+.chilly-bubble::after{content:'';position:absolute;left:96px;bottom:-14px;width:22px;height:22px;background:#f4fbff;border:3px solid #5aa9e6;
+  border-top:0;border-left:0;transform:rotate(45deg);border-bottom-right-radius:5px}
+.chilly-bubble .key{color:#e06600}
+.chilly-puff{position:absolute;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff 0 45%,#e3f0fc 75%,#bcd6ef 100%);box-shadow:0 2px 5px rgba(40,90,150,.35),0 0 8px rgba(255,255,255,.9);pointer-events:none}
+/* in the intro he says hello beside Swiftee's cabin steps, in front of the cabin */
+.stage.intro .chilly-root{z-index:10}
+.chilly-root.cabin .chilly{left:900px;top:462px}
+.chilly-root.cabin .chilly-drift{left:878px;top:643px}
+.chilly-root.cabin .chilly-bubble{left:873px;bottom:261px}
+@media (prefers-reduced-motion: reduce){.eq-layer .zzz i{animation:none;opacity:.8}}
+/* ---------- the Snowflake Challenge (screens 38-43): one snowflake per check ---------- */
+.flake-bar{position:absolute;left:640px;top:12px;transform:translateX(-50%);display:flex;gap:10px;padding:6px 14px;border-radius:32px;z-index:6;pointer-events:none;
+  background:rgba(255,255,255,.55);box-shadow:0 4px 14px rgba(18,59,99,.18),inset 0 0 0 2px rgba(255,255,255,.8)}
+.flake{width:46px;height:46px;border-radius:50%;background:rgba(220,234,248,.7);box-shadow:inset 0 0 0 2px #c4d8ee}
+.flake svg{display:block}
+.flake path{stroke:#a9c2dc}
+.flake.now{background:#fff;box-shadow:inset 0 0 0 3px #5aa9e6;animation:flakeNow 1.4s ease-in-out infinite}
+.flake.now path{stroke:#5aa9e6}
+.flake.won{background:radial-gradient(circle at 38% 32%,#ffffff 0,#d9eeff 60%,#a9d4fb 100%);box-shadow:inset 0 0 0 3px #2b7bd6,0 0 10px rgba(43,123,214,.45)}
+.flake.won path{stroke:#1f63b8}
+.flake.won.gold{background:radial-gradient(circle at 38% 32%,#fffbe8 0,#ffe48a 60%,#f5c542 100%);box-shadow:inset 0 0 0 3px #d99a00,0 0 12px rgba(245,180,30,.6)}
+.flake.won.gold path{stroke:#b36b00}
+@keyframes flakeNow{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+/* the end screen: the snowflakes the learner won, large, above Swiftee */
+.stage.scene.endhero .flake-bar{top:96px;transform:translateX(-50%) scale(1.45);transform-origin:50% 0}
+.eq-layer .fx-flake{position:absolute;width:46px;height:46px;margin:-23px 0 0 -23px;pointer-events:none;filter:drop-shadow(0 0 6px rgba(255,255,255,.95)) drop-shadow(0 0 10px rgba(90,169,230,.8))}
+.eq-layer .fx-flake path{stroke:#2b7bd6}
+.eq-layer .fx-flake.gold path{stroke:#d98a00}
+@media (prefers-reduced-motion: reduce){.flake.now{animation:none}}
+/* checks: the marks that prove the answer appear once it is found (check 1), or when a clue is needed (checks 2, 5) */
+.q1-par,.q1-chev,.q2-eq,.q5-leg,.q5-bc,.q5-hab,.q5-hcd,.q5-hl{opacity:0}
+.eq-layer .fx-fly{position:absolute;padding:2px 12px;border-radius:14px;background:#fff;border:3px solid #2e9e4f;color:#1d6b35;white-space:nowrap;pointer-events:none;
+  font:900 22px 'Nunito','Noto Sans Math',system-ui,sans-serif;box-shadow:0 4px 12px rgba(18,59,99,.25)}
+/* on the end screen he pops up beside Swiftee, centre stage */
+.chilly-root.end .chilly{left:800px;top:330px}
+.chilly-root.end .chilly-drift{left:778px;top:511px}
+.chilly-root.end .chilly-bubble{left:773px;bottom:393px}
+/* ---------- the end screen's cartoon closer (js/finale.js) ----------
+   --x / --y / --r: the iris (stage px); --a: the sunburst's turn */
+.finale-root{position:absolute;left:0;top:0;width:1280px;height:720px;z-index:40;pointer-events:none}
+.finale-root:empty{display:none}
+.fin-bg{position:absolute;inset:0;pointer-events:auto;
+  -webkit-mask-image:radial-gradient(circle var(--r) at var(--x) var(--y),transparent 99.6%,#000 100%);mask-image:radial-gradient(circle var(--r) at var(--x) var(--y),transparent 99.6%,#000 100%)}
+.fin-dark,.fin-sun{position:absolute;inset:0}
+.fin-dark{background:#24130a}
+.fin-sun{background:repeating-conic-gradient(from var(--a) at var(--x) var(--y),rgba(255,255,255,.17) 0deg 7deg,rgba(255,255,255,0) 7deg 18deg),
+  linear-gradient(100deg,#f6b252 0%,#ef8a5e 38%,#e2697a 68%,#c24b8e 100%)}
+.fin-ring{position:absolute;left:calc(var(--x) - var(--r));top:calc(var(--y) - var(--r));width:calc(var(--r) * 2);height:calc(var(--r) * 2);border-radius:50%;
+  box-shadow:inset 0 0 0 4px #3b1f0a,0 0 0 11px #fdf0d5,0 0 0 16px #3b1f0a,0 10px 30px 14px rgba(80,20,40,.25)}
+.fin-title{position:absolute;left:742px;top:318px;white-space:nowrap;font:800 122px/1 'Baloo 2',system-ui,sans-serif;letter-spacing:1px}
+.fin-ch{position:relative;display:inline-block}
+.fin-ch.sp{width:30px}
+.fin-ch b{display:block;font-weight:800}
+.fin-ch .o{color:#3b1f0a;-webkit-text-stroke:18px #3b1f0a;filter:drop-shadow(0 8px 0 rgba(59,31,10,.35))}
+.fin-ch .f{position:absolute;left:0;top:0;background:linear-gradient(180deg,#fffaf0 15%,#fbe3a0 60%,#f2c45a 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.fin-spark{position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;background:#fff3d6;
+  clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);filter:drop-shadow(0 0 6px rgba(255,240,200,.9))}
+.fin-again{position:absolute;left:1132px;top:572px;width:96px;height:96px;border-radius:50%;border:0;cursor:pointer;pointer-events:auto;color:#fff;
+  display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 35% 30%,#ffd27a 0,#f39a2e 55%,#d96a10 100%);
+  box-shadow:0 0 0 5px #fdf0d5,0 0 0 9px #3b1f0a,0 8px 18px rgba(80,20,40,.35)}
+.fin-again:hover{filter:brightness(1.06)}
+.fin-again:focus-visible{outline:4px solid #fff;outline-offset:8px}
+.fin-again-lab{position:absolute;left:1180px;top:678px;transform:translateX(-50%);white-space:nowrap;font:800 20px/1 'Baloo 2',system-ui,sans-serif;color:#fffaf0;
+  text-shadow:0 0 3px #3b1f0a,0 2px 0 #3b1f0a,2px 0 0 #3b1f0a,-2px 0 0 #3b1f0a,0 -2px 0 #3b1f0a}
+/* while it plays: the lesson's bar, buttons and bubble step aside; the screen list stays on top, to jump to any screen */
+.stage .flake-bar,.stage .topnav{transition:opacity .4s ease}
+.stage:has(.finale-root:not(:empty)) .flake-bar,.stage:has(.finale-root:not(:empty)) .topnav,.stage:has(.finale-root:not(:empty)) .bubble{opacity:0!important;pointer-events:none}
+.stage:has(.finale-root:not(:empty)) .screens-btn{z-index:41}
+.stage:has(.finale-root:not(:empty)) .screens-scrim{z-index:42}
+.stage:has(.finale-root:not(:empty)) .screens-panel{z-index:43}

@@ -22,9 +22,9 @@
   // CSS centres labels on their point with translate(-50%, -50%); GSAP must keep that once it owns the transform
   const centred = (els) => G.set(els, { xPercent: -50, yPercent: -50, x: 0, y: 0 });
   // every element Motion animates; clear() wipes the animated properties from all of them
-  const ANIMATED = '.tag.snum, .tag.vlab, .edge, .vdot, .shape-fill, .outline-settle, .pop-g, .chev, .calp > *, .ticks, .tag.mtag, .okcheck *, .tag.alab, .arc, .wedge, .chip, .chip-res, .xleg, .swiftee, .swiftee canvas, .swiftee img, .bubble, .rmark, .tag.r90, .q3, .q3 *, .q3-hint, .q3-hint *, .q3-fly, .q4s, .q4s *, .slot, .lab, .q4-strip, .q4-card, .q4-link';
+  const ANIMATED = '.tag.snum, .tag.vlab, .edge, .vdot, .shape-fill, .outline-settle, .pop-g, .chev, .calp > *, .ticks, .tag.mtag, .okcheck *, .tag.alab, .arc, .wedge, .chip, .chip-res, .xleg, .swiftee, .swiftee canvas, .swiftee img, .bubble, .rmark, .tag.r90, .q3, .q3 *, .q3-hint, .q3-hint *, .q3-fly, .q4s, .q4s *, .slot, .lab, .q4-strip, .q4-card, .q4-link, .flake, .flake-bar, .opt svg, .qshape, .q1-par, .q1-chev, .q2-leg, .q2-tick, .q2-eq, .q5-leg, .q5-tick, .q5-ad, .q5-q, .q5-bc, .q5-ab, .q5-cd, .q5-hab, .q5-hcd, .q5-hl';
   // the SVG ones among them (clear() removes transform-origin and stroke-dasharray from these by hand)
-  const ANIMATED_SVG = '.wedge, .edge, .vdot, .shape-fill, .outline-settle, svg g.pop-g, .chev, .calp > *, .ticks, .okcheck *, .arc, .rmark';
+  const ANIMATED_SVG = '.wedge, .edge, .vdot, .shape-fill, .outline-settle, svg g.pop-g, .chev, .calp > *, .ticks, .okcheck *, .arc, .rmark, .q1-par, .q1-chev, .q2-leg, .q2-tick, .q2-eq, .q5-leg, .q5-tick, .q5-ad, .q5-q, .q5-bc, .q5-ab, .q5-cd, .q5-hab, .q5-hcd, .q5-hl';
 
   const Motion = {
     ok: !!G,
@@ -228,7 +228,7 @@
         if (arc) tl.fromTo(arc, { opacity: 1, strokeDasharray: 100, strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.45, ease: 'power2.out' }, 0);
         if (wd && dot) tl.fromTo(wd, { opacity: 1, scale: 0, svgOrigin: dot.getAttribute('cx') + ' ' + dot.getAttribute('cy') }, { scale: 1, duration: reduced ? 0 : 0.5, ease: 'back.out(1.6)' }, 0)
           .to(wd, { filter: 'drop-shadow(0px 0px 5px ' + C[k] + ')', duration: 0.3, yoyo: true, repeat: 1 }, 0.45);
-        if (lab) tl.fromTo(lab, { opacity: 0, xPercent: -50, yPercent: -50, scale: 0.3 }, { opacity: 1, scale: 1, duration: reduced ? 0 : 0.42, ease: 'back.out(2.2)' }, 0.12);
+        if (lab) tl.call(() => this.stampIn(lab), null, 0.12);
         return tl;
       });
     },
@@ -392,7 +392,7 @@
         keys.forEach((k, i) => {
           const lab = lenTag(k), e = $('.e' + k)[0], at = i * gap;
           // data-in keeps it shown: the runtime rewrites the label's style on every redraw but leaves attributes alone
-          if (lab) tl.call(() => lab.setAttribute('data-in', '1'), null, at).fromTo(lab, { opacity: 0, scale: 0.5, xPercent: -50, yPercent: -50 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2.2)' }, at);
+          if (lab) tl.call(() => { lab.setAttribute('data-in', '1'); this.stampIn(lab); }, null, at);
           if (e) tl.to(e, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 5px rgba(142,68,214,0.6))', duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
             .set(e, { clearProps: 'strokeWidth,filter' }, at + 0.55);
         });
@@ -409,8 +409,7 @@
         const tl = G.timeline();
         ['AB', 'BC', 'CD', 'DA'].forEach((k, i) => {
           const lab = lenTag(k), e = $('.e' + k)[0], at = i * 0.45;
-          if (lab) tl.call(() => lab.setAttribute('data-col', k), null, at) // the colour comes from CSS (.tag.mtag[data-col]), so a redraw keeps it
-            .fromTo(lab, { xPercent: -50, yPercent: -50, scale: 0.5 }, { scale: 1, duration: 0.4, ease: 'back.out(2.2)' }, at);
+          if (lab) tl.call(() => { lab.setAttribute('data-col', k); this.stampIn(lab); }, null, at); // the colour comes from CSS (.tag.mtag[data-col]), so a redraw keeps it
           if (e) tl.to(e, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 5px rgba(142,68,214,0.6))', duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
             .set(e, { clearProps: 'strokeWidth,filter' }, at + 0.55);
         });
@@ -441,8 +440,7 @@
           tl.to(lab, { x: mid[k].x - parseFloat(lab.style.left), y: mid[k].y - parseFloat(lab.style.top), scale: 0.3, opacity: 0, duration: 0.55, ease: 'power2.in' }, 0)
             .call(() => lab.setAttribute('data-gone', '1'), null, 0.55);
         });
-        tl.call(() => ticks.forEach((t) => t.setAttribute('data-in', '1')), null, 0.45)
-          .fromTo(ticks, { opacity: 0, scale: 0.4, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2.4)' }, 0.45)
+        tl.call(() => { ticks.forEach((t) => t.setAttribute('data-in', '1')); this.drawOn(ticks, 0, 0.4); }, null, 0.45)
           .to(ticks, { filter: 'drop-shadow(0px 0px 4px rgba(142,68,214,0.8))', duration: 0.25, yoyo: true, repeat: 1 }, 0.85);
         return tl;
       });
@@ -481,10 +479,10 @@
     // screens 22 and 35: the parallel arrows (hidden by .chev-pre) pop onto their sides
     chevIn() {
       const chev = $('.chev');
-      if (G && chev.length) add(() => G.timeline()
-        .call(() => chev.forEach((c) => c.setAttribute('data-in', '1')))
-        .fromTo(chev, { opacity: 0, scale: 0.3, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2.4)' })
-        .to(chev, { scale: 1.25, duration: 0.2, yoyo: true, repeat: 1 }));
+      if (!G || !chev.length) return;
+      chev.forEach((c) => c.setAttribute('data-in', '1'));
+      this.drawOn(chev, 0, 0.45);
+      add(() => G.to(chev, { filter: 'drop-shadow(0px 0px 5px rgba(240,138,36,0.9))', duration: 0.25, yoyo: true, repeat: 1, delay: 0.45 }));
     },
     // screen 35, on "right": both 90° marks draw into their corners with their labels, then glow gold
     rightBoth() {
@@ -498,9 +496,8 @@
       if (!G || !sides.length) return;
       add(() => G.timeline()
         .to(sides, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 6px rgba(142,68,214,0.6))', duration: 0.3, yoyo: true, repeat: 1 }, 0)
-        .call(() => chev.forEach((c) => c.setAttribute('data-in', '1')), null, 0.6)
-        .fromTo(chev, { opacity: 0, scale: 0.3, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2.4)' }, 0.6)
-        .to(chev, { scale: 1.25, duration: 0.2, yoyo: true, repeat: 1 }, 1.05)
+        .call(() => { chev.forEach((c) => c.setAttribute('data-in', '1')); this.drawOn(chev, 0, 0.45); }, null, 0.6)
+        .to(chev, { filter: 'drop-shadow(0px 0px 5px rgba(240,138,36,0.9))', duration: 0.25, yoyo: true, repeat: 1 }, 1.05)
         .set(sides, { clearProps: 'strokeWidth,filter' }));
     },
 
@@ -669,6 +666,175 @@
         .to([g, d].filter(Boolean), { scaleY: 1, scaleX: 1, duration: 0.45, ease: 'elastic.out(1, 0.5)' }));
     },
     // the corner dots pulse once, one after another (screen 32 on "90", and as screen 28's morph starts)
+    // ---------- game-style reveals ----------
+    // a reading or label lands like a stamp: it drops in big and tilted, settles with a bounce, a gold ring spreads
+    // from it and a few stars burst out (labels are centred on their point, so xPercent / yPercent stay -50)
+    stampIn(els, delay) {
+      const list = (Array.isArray(els) ? els : [els]).filter(Boolean);
+      if (!G || !list.length) return;
+      add(() => {
+        const tl = G.timeline({ delay: delay || 0 });
+        list.forEach((el, i) => {
+          tl.fromTo(el, { opacity: 0, xPercent: -50, yPercent: -50, scale: 1.9, rotation: -10 },
+            { opacity: 1, scale: 1, rotation: 0, duration: reduced ? 0 : 0.42, ease: 'back.out(2.6)' }, i * 0.12)
+            .call(() => this.burst(el), null, i * 0.12 + 0.22);
+        });
+        return tl;
+      });
+    },
+    // the gold ring and star burst round an element (in the eq-layer, over the stage)
+    burst(el) {
+      if (!G || reduced || !el) return;
+      const L = this.eqLayer(), st = document.querySelector('.stage');
+      if (!L || !st) return;
+      const r = el.getBoundingClientRect(), s = st.getBoundingClientRect(), k = s.width / 1280;
+      const x = (r.left + r.width / 2 - s.left) / k, y = (r.top + r.height / 2 - s.top) / k;
+      const ring = document.createElement('div'); ring.className = 'fx-ring'; ring.style.left = x + 'px'; ring.style.top = y + 'px'; L.appendChild(ring);
+      add(() => G.fromTo(ring, { scale: 0.4, opacity: 0.95 }, { scale: 2.3, opacity: 0, duration: 0.6, ease: 'power2.out', onComplete: () => ring.remove() }));
+      for (let j = 0; j < 7; j++) {
+        const a = (j / 7) * Math.PI * 2 + 0.3, d = 34 + (j % 2) * 14, star = document.createElement('i');
+        star.className = 'fx-star' + (j % 2 ? ' w' : ''); star.style.left = x + 'px'; star.style.top = y + 'px'; L.appendChild(star);
+        add(() => G.fromTo(star, { x: 0, y: 0, scale: 0.3, opacity: 1, rotation: 0 }, { x: Math.cos(a) * d, y: Math.sin(a) * d, scale: 1, rotation: 90, opacity: 0, duration: 0.7, ease: 'power2.out', onComplete: () => star.remove() }));
+      }
+    },
+    // marks are drawn like pen strokes rather than popping: each path's stroke runs on from its start
+    drawOn(paths, delay, dur) {
+      const list = paths.filter(Boolean);
+      if (!G || !list.length) return;
+      add(() => {
+        const tl = G.timeline({ delay: delay || 0 });
+        list.forEach((p) => {
+          let L = 0; try { L = p.getTotalLength(); } catch (e) {}
+          if (!L) { tl.set(p, { opacity: 1 }, 0); return; }
+          tl.fromTo(p, { opacity: 1, strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: reduced ? 0 : (dur || 0.5), ease: 'power2.inOut' }, 0)
+            .set(p, { clearProps: 'strokeDasharray,strokeDashoffset' });
+        });
+        return tl;
+      });
+    },
+    // ---------- the Snowflake Challenge (screens 38-43) ----------
+    // stage px of an element's centre
+    centreOf(el) {
+      const st = document.querySelector('.stage'); if (!st || !el) return null;
+      const s = st.getBoundingClientRect(), r = el.getBoundingClientRect(), k = s.width / 1280;
+      return { x: (r.left + r.width / 2 - s.left) / k, y: (r.top + r.height / 2 - s.top) / k };
+    },
+    // a badge lands: it drops in big and tilted, settles, and bursts
+    flakeLand(el) {
+      if (!G || !el) return;
+      add(() => G.fromTo(el, { scale: 1.8, rotation: -30 }, { scale: 1, rotation: 0, duration: reduced ? 0 : 0.5, ease: 'back.out(2.6)' }));
+      this.burst(el);
+    },
+    // "Snowflake Challenge": the five badges pop in one by one
+    flakesIn() {
+      if (!G) return;
+      add(() => G.fromTo($('.flake'), { scale: 0, rotation: -90 }, { scale: 1, rotation: 0, duration: reduced ? 0 : 0.45, ease: 'back.out(2.2)', stagger: reduced ? 0 : 0.12 }));
+    },
+    flakesHide(sel) { if (G) add(() => G.set($(sel || '.flake'), sel === '.flake-bar' ? { opacity: 0 } : { scale: 0 })); },
+    // a right answer: a snowflake spins up from the answer to its badge in the bar; onLand fills the badge
+    flakeWin(i, gold, from, onLand) {
+      const badge = $('.flake')[i], L = this.eqLayer();
+      const a = this.centreOf(from) || { x: 870, y: 360 }, b = this.centreOf(badge);
+      if (!G || reduced || !L || !b) { if (onLand) onLand(); return; }
+      const f = document.createElement('div'); f.className = 'fx-flake' + (gold ? ' gold' : '');
+      f.innerHTML = badge.innerHTML; f.style.left = a.x + 'px'; f.style.top = a.y + 'px'; L.appendChild(f);
+      add(() => G.timeline({ delay: 0.35, onComplete: () => { f.remove(); if (onLand) onLand(); } })
+        .fromTo(f, { scale: 0.3, opacity: 0 }, { scale: 1.6, opacity: 1, duration: 0.3, ease: 'back.out(2)' }, 0)
+        .to(f, { left: b.x, duration: 0.8, ease: 'power1.in' }, 0.3)
+        .to(f, { top: b.y, duration: 0.8, ease: 'back.in(1.6)' }, 0.3)
+        .to(f, { rotation: 360, scale: 1, duration: 0.8, ease: 'sine.inOut' }, 0.3));
+    },
+    // the end screen: the won snowflakes land one after another
+    flakesEnd() {
+      if (!G) return;
+      const won = $('.flake.won');
+      add(() => {
+        const tl = G.timeline();
+        G.set(won, { scale: 0 });
+        tl.to($('.flake-bar'), { opacity: 1, duration: reduced ? 0 : 0.35 }, 0);
+        won.forEach((el, i) => tl.call(() => this.flakeLand(el), null, 0.3 + i * 0.28));
+        return tl;
+      });
+    },
+
+    // ---------- the checks: show why ----------
+    // check 1 found: the two parallel sides light up and their arrows draw on
+    q1Correct() {
+      if (!G) return;
+      add(() => G.timeline()
+        .fromTo($('.q1-par'), { opacity: 0 }, { opacity: 0.9, duration: 0.3 }, 0.2)
+        .to($('.q1-par'), { opacity: 0, duration: 0.6 }, 2.2));
+      this.drawOn($('.q1-par'), 0.2, 0.5);
+      this.drawOn($('.q1-chev'), 0.75, 0.4);
+    },
+    // the questions: each part lights up as Swiftee reads it out
+    q1Cards() { if (G) add(() => G.fromTo($('.opt'), { y: 0 }, { y: -14, duration: 0.18, ease: 'power2.out', yoyo: true, repeat: 1, stagger: 0.14 })); },
+    q1Look() { if (G) add(() => G.fromTo($('.opt svg'), { filter: 'drop-shadow(0px 0px 0px rgba(240,138,36,0))' }, { filter: 'drop-shadow(0px 0px 8px rgba(240,138,36,0.9))', duration: 0.35, yoyo: true, repeat: 1, stagger: 0.18 })); },
+    q2Shape() { if (G) add(() => G.fromTo($('.qshape'), { filter: 'drop-shadow(0px 0px 0px rgba(142,68,214,0))' }, { filter: 'drop-shadow(0px 0px 10px rgba(142,68,214,0.75))', duration: 0.4, yoyo: true, repeat: 1 })); },
+    q5Say(lab, line) {
+      if (!G) return;
+      add(() => G.timeline()
+        .fromTo($(lab), { scale: 1, transformOrigin: '50% 50%' }, { scale: 1.4, fill: '#d9640a', duration: 0.25, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 0)
+        .fromTo($(line), { opacity: 0 }, { opacity: 0.85, duration: 0.25, yoyo: true, repeat: 1, repeatDelay: 0.2 }, 0));
+    },
+    q5AB() { this.q5Say('.q5-ab', '.q5-hab'); },
+    q5CD() { this.q5Say('.q5-cd', '.q5-hcd'); },
+    q5AD() { this.q5Say('.q5-ad', '.q5-hl.ad'); },
+    q5BC() { this.q5Say('.q5-q', '.q5-hl.bc'); },
+    // check 2: a wrong type - the legs and their equal marks flash, which is the clue
+    q2Wrong() {
+      if (!G) return;
+      add(() => G.timeline()
+        .fromTo($('.q2-leg'), { strokeWidth: 5 }, { strokeWidth: 10, stroke: '#f08a24', duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 0)
+        .fromTo($('.q2-tick'), { scale: 1, transformOrigin: '50% 50%' }, { scale: 1.6, stroke: '#f08a24', duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 0));
+    },
+    // check 2 right: the legs glow and "AD = BC" stamps in
+    q2Correct() {
+      if (!G) return;
+      const eq = $('.q2-eq')[0];
+      add(() => G.timeline()
+        .to($('.q2-leg'), { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(142,68,214,0.8))', duration: 0.3, yoyo: true, repeat: 1 }, 0)
+        .fromTo(eq, { opacity: 0, scale: 1.9, rotation: -10, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, rotation: 0, duration: reduced ? 0 : 0.45, ease: 'back.out(2.6)' }, 0.4)
+        .call(() => this.burst(eq), null, 0.65));
+    },
+    // check 5: a wrong length - both legs light up with their equal marks, and AD's 5 cm pulses: "BC is a leg, like AD"
+    q5Wrong() {
+      if (!G) return;
+      add(() => G.timeline()
+        .to($('.q5-leg'), { opacity: 1, duration: 0.3 }, 0)
+        .fromTo($('.q5-tick'), { scale: 1, transformOrigin: '50% 50%' }, { scale: 1.6, stroke: '#f08a24', duration: 0.3, yoyo: true, repeat: 3 }, 0.2)
+        .fromTo($('.q5-ad'), { scale: 1, transformOrigin: '50% 50%' }, { scale: 1.35, fill: '#d9640a', duration: 0.3, yoyo: true, repeat: 3 }, 0.2));
+    },
+    // check 5 right: the 5 cm on AD flies across to BC
+    q5Correct() {
+      if (!G) return;
+      const L = this.eqLayer(), ad = $('.q5-ad')[0], q = $('.q5-q')[0], bc = $('.q5-bc')[0];
+      const a = this.centreOf(ad), b = this.centreOf(q);
+      if (!L || !a || !b) return;
+      const f = document.createElement('div'); f.className = 'fx-fly'; f.textContent = '5 cm';
+      f.style.left = a.x + 'px'; f.style.top = a.y + 'px'; L.appendChild(f);
+      add(() => G.timeline({ onComplete: () => f.remove() })
+        .to($('.q5-leg'), { opacity: 1, duration: 0.3 }, 0)
+        .fromTo(f, { xPercent: -50, yPercent: -50, scale: 0.8, opacity: 0 }, { scale: 1.3, opacity: 1, duration: 0.25 }, 0.2)
+        .to(f, { left: b.x, duration: reduced ? 0 : 0.8, ease: 'power1.inOut' }, 0.45)
+        .to(f, { keyframes: [{ top: Math.min(a.y, b.y) - 70, ease: 'power2.out' }, { top: b.y, ease: 'power2.in' }], duration: reduced ? 0 : 0.8 }, 0.45)
+        .to(q, { opacity: 0, duration: 0.15 }, 1.15)
+        .to(f, { opacity: 0, duration: 0.12 }, 1.25)
+        .fromTo(bc, { opacity: 0, scale: 1.9, rotation: -10, transformOrigin: '0% 50%' }, { opacity: 1, scale: 1, rotation: 0, duration: 0.42, ease: 'back.out(2.6)' }, 1.25)
+        .call(() => this.burst(bc), null, 1.45));
+    },
+    // Swiftee dozing (an idle antic): three soft "z"s float up from her head, over and over, until zzz(false)
+    zzz(on) {
+      document.querySelectorAll('.eq-layer .zzz').forEach((e) => e.remove());
+      if (!on || reduced) return;
+      const L = this.eqLayer(), sw = $('.swiftee .swiftee-still')[0], st = document.querySelector('.stage');
+      if (!L || !sw || !st) return;
+      const r = sw.getBoundingClientRect(), s = st.getBoundingClientRect(), k = s.width / 1280;
+      const z = document.createElement('div'); z.className = 'zzz';
+      z.style.left = ((r.right - s.left) / k - 34) + 'px'; z.style.top = ((r.top - s.top) / k + 6) + 'px';
+      z.innerHTML = '<i>z</i><i>z</i><i>Z</i>';
+      L.appendChild(z);
+    },
     // Swiftee's happy hop: a quick squash, a jump and a bouncy landing (discoveries, excitement, a correct answer).
     // Only her sprite canvas moves, so her spot on the screen never changes
     hop() {

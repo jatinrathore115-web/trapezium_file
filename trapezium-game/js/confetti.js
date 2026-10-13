@@ -8,7 +8,7 @@
   var W = 1280, H = 720;
   var N = 70;                       // pieces per burst
   var FADE_FROM = 230, FADE_TO = 470; // pieces are fully visible above FADE_FROM and gone by FADE_TO (stage px)
-  var COLORS = ['#f2b51c', '#2b7bd6', '#e8643c', '#2e9e4f', '#8e44d6', '#56bdf4', '#e8287a'];
+  var COLORS = ['#e8282f', '#2e9e4f', '#f2b51c', '#ffffff', '#c3121e', '#3fd27a', '#ffd34d']; // Christmas red, green, gold and snow white
   var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   var rnd = function (a, b) { return a + Math.random() * (b - a); };

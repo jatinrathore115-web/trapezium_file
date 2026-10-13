@@ -23,6 +23,8 @@
 <script src="js/motion.js"></script>
 <script src="js/summary.js"></script>
 <script src="js/intro.js"></script>
+<script src="js/chilly.js"></script>
+<script src="js/finale.js"></script>
 <script src="js/game-engine.js"></script>
 </head>
 <body>
@@ -112,7 +114,7 @@
 <sc-if value="{{isCfu1}}" hint-placeholder-val="{{ false }}">
 <div class="{{fadeCls}}" style="position: absolute; left: 636px; top: 153px; width: 480px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
 <button data-qa="opt-A" class="opt {{c1.A.cls}}" disabled="{{c1.A.dis}}" onClick="{{c1.A.pick}}" aria-label="Shape A" style="position: relative; height: 184px; display: flex; align-items: center; justify-content: center">
-<svg width="200" height="120" viewBox="0 0 200 120" aria-hidden="true"><polygon points="28,98 172,98 138,26 62,26" fill="#ffd66b" stroke="#b5870f" stroke-width="3.5" stroke-linejoin="round"></polygon><path d="M96,20 L102,26 L96,32 M96,92 L102,98 L96,104" fill="none" stroke="#d9640a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<svg width="200" height="120" viewBox="0 0 200 120" aria-hidden="true"><polygon points="28,98 172,98 138,26 62,26" fill="#ffd66b" stroke="#b5870f" stroke-width="3.5" stroke-linejoin="round"></polygon><line class="q1-par" x1="62" y1="26" x2="138" y2="26" stroke="#f08a24" stroke-width="6" stroke-linecap="round"></line><line class="q1-par" x1="28" y1="98" x2="172" y2="98" stroke="#f08a24" stroke-width="6" stroke-linecap="round"></line><path class="q1-chev" d="M96,20 L102,26 L96,32 M96,92 L102,98 L96,104" fill="none" stroke="#d9640a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 </button>
 <button data-qa="opt-B" class="opt {{c1.B.cls}}" disabled="{{c1.B.dis}}" onClick="{{c1.B.pick}}" aria-label="Shape B" style="position: relative; height: 184px; display: flex; align-items: center; justify-content: center">
 <svg width="200" height="120" viewBox="0 0 200 120" aria-hidden="true"><polygon points="26,92 158,108 180,16 80,46" fill="#f7a8c8" stroke="#b8457a" stroke-width="3.5" stroke-linejoin="round"></polygon><line class="sd s1" x1="26" y1="92" x2="158" y2="108" stroke="#b8457a" stroke-width="6" stroke-linecap="round"></line><line class="sd s2" x1="158" y1="108" x2="180" y2="16" stroke="#b8457a" stroke-width="6" stroke-linecap="round"></line><line class="sd s3" x1="180" y1="16" x2="80" y2="46" stroke="#b8457a" stroke-width="6" stroke-linecap="round"></line><line class="sd s4" x1="80" y1="46" x2="26" y2="92" stroke="#b8457a" stroke-width="6" stroke-linecap="round"></line></svg>
@@ -129,15 +131,16 @@
 <sc-if value="{{isCfu2}}" hint-placeholder-val="{{ false }}">
 <svg class="{{fadeCls}} qshape" width="500" height="230" viewBox="0 0 500 230" style="position: absolute; left: {{qx}}px; top: {{qy}}px" aria-label="Trapezium ABCD with equal legs">
 <polygon points="180,60 320,60 420,195 80,195" fill="rgba(229,205,234,0.92)" stroke="#e8287a" stroke-width="5" stroke-linejoin="round"></polygon>
-<line x1="180" y1="60" x2="80" y2="195" stroke="#8e44d6" stroke-width="5" stroke-linecap="round"></line>
-<line x1="320" y1="60" x2="420" y2="195" stroke="#8e44d6" stroke-width="5" stroke-linecap="round"></line>
-<path d="M139.0,130.4 L124.6,119.7 M135.4,135.3 L121.0,124.6 M375.4,119.7 L361.0,130.4 M379.0,124.6 L364.6,135.3" stroke="#8e44d6" stroke-width="3" stroke-linecap="round"></path>
+<line class="q2-leg" x1="180" y1="60" x2="80" y2="195" stroke="#8e44d6" stroke-width="5" stroke-linecap="round"></line>
+<line class="q2-leg" x1="320" y1="60" x2="420" y2="195" stroke="#8e44d6" stroke-width="5" stroke-linecap="round"></line>
+<path class="q2-tick" d="M139.0,130.4 L124.6,119.7 M135.4,135.3 L121.0,124.6 M375.4,119.7 L361.0,130.4 M379.0,124.6 L364.6,135.3" stroke="#8e44d6" stroke-width="3" stroke-linecap="round"></path>
 <path d="M244,54 L250,60 L244,66 M252,54 L258,60 L252,66 M244,189 L250,195 L244,201 M252,189 L258,195 L252,201" fill="none" stroke="#f08a24" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"></path>
 <circle cx="180" cy="60" r="7" fill="#fff" stroke="#e8287a" stroke-width="3"></circle><circle cx="320" cy="60" r="7" fill="#fff" stroke="#e8287a" stroke-width="3"></circle><circle cx="420" cy="195" r="7" fill="#fff" stroke="#e8287a" stroke-width="3"></circle><circle cx="80" cy="195" r="7" fill="#fff" stroke="#e8287a" stroke-width="3"></circle>
 <text x="166" y="42" font-family="Nunito, sans-serif" font-weight="900" font-size="21" fill="#123b63">A</text>
 <text x="324" y="42" font-family="Nunito, sans-serif" font-weight="900" font-size="21" fill="#123b63">B</text>
 <text x="426" y="222" font-family="Nunito, sans-serif" font-weight="900" font-size="21" fill="#123b63">C</text>
 <text x="60" y="222" font-family="Nunito, sans-serif" font-weight="900" font-size="21" fill="#123b63">D</text>
+<text class="q2-eq" x="250" y="138" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="26" fill="#6a2bb0">AD = BC</text>
 </svg>
 </sc-if>
 
@@ -168,17 +171,20 @@
 <sc-if value="{{isCfu5}}" hint-placeholder-val="{{ false }}">
 <svg class="{{fadeCls}}" width="500" height="230" viewBox="0 0 500 230" style="position: absolute; left: 617px; top: 171px" aria-label="Isosceles trapezium ABCD with AB 6 cm, CD 10 cm, AD 5 cm and BC unknown">
 <polygon points="154,48.4 346,48.4 410,195 90,195" fill="rgba(229,205,234,0.92)" stroke="#e8287a" stroke-width="5" stroke-linejoin="round"></polygon>
-<path d="M131.4,122.5 L115.0,115.3 M129.0,128.0 L112.6,120.8 M385.0,115.3 L368.6,122.5 M387.4,120.8 L371.0,128.0" stroke="#8e44d6" stroke-width="3" stroke-linecap="round"></path>
+<line class="q5-leg" x1="154" y1="48.4" x2="90" y2="195" stroke="#8e44d6" stroke-width="7" stroke-linecap="round"></line><line class="q5-leg" x1="346" y1="48.4" x2="410" y2="195" stroke="#8e44d6" stroke-width="7" stroke-linecap="round"></line>
+<path class="q5-tick" d="M131.4,122.5 L115.0,115.3 M129.0,128.0 L112.6,120.8 M385.0,115.3 L368.6,122.5 M387.4,120.8 L371.0,128.0" stroke="#8e44d6" stroke-width="3" stroke-linecap="round"></path>
 <path d="M244,42.4 L250,48.4 L244,54.4 M244,189 L250,195 L244,201" fill="none" stroke="#f08a24" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"></path>
 <circle cx="154" cy="48.4" r="7" fill="#fff" stroke="#e8287a" stroke-width="3"></circle><circle cx="346" cy="48.4" r="7" fill="#fff" stroke="#e8287a" stroke-width="3"></circle><circle cx="410" cy="195" r="7" fill="#fff" stroke="#e8287a" stroke-width="3"></circle><circle cx="90" cy="195" r="7" fill="#fff" stroke="#e8287a" stroke-width="3"></circle>
 <text x="136" y="32" font-family="Nunito, sans-serif" font-weight="900" font-size="21" fill="#123b63">A</text>
 <text x="352" y="32" font-family="Nunito, sans-serif" font-weight="900" font-size="21" fill="#123b63">B</text>
 <text x="416" y="222" font-family="Nunito, sans-serif" font-weight="900" font-size="21" fill="#123b63">C</text>
 <text x="68" y="222" font-family="Nunito, sans-serif" font-weight="900" font-size="21" fill="#123b63">D</text>
-<text x="250" y="36" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="19" fill="#123b63">6 cm</text>
-<text x="250" y="222" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="19" fill="#123b63">10 cm</text>
-<text x="96" y="118" text-anchor="end" font-family="Nunito, sans-serif" font-weight="900" font-size="19" fill="#123b63">5 cm</text>
-<text x="404" y="118" font-family="Nunito, sans-serif" font-weight="900" font-size="26" fill="#6a2bb0">?</text>
+<line class="q5-hab" x1="154" y1="48.4" x2="346" y2="48.4" stroke="#f08a24" stroke-width="9" stroke-linecap="round"></line><line class="q5-hcd" x1="90" y1="195" x2="410" y2="195" stroke="#f08a24" stroke-width="9" stroke-linecap="round"></line><line class="q5-hl ad" x1="154" y1="48.4" x2="90" y2="195" stroke="#f08a24" stroke-width="9" stroke-linecap="round"></line><line class="q5-hl bc" x1="346" y1="48.4" x2="410" y2="195" stroke="#f08a24" stroke-width="9" stroke-linecap="round"></line>
+<text class="q5-ab" x="250" y="36" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="19" fill="#123b63">6 cm</text>
+<text class="q5-cd" x="250" y="222" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="19" fill="#123b63">10 cm</text>
+<text class="q5-ad" x="96" y="118" text-anchor="end" font-family="Nunito, sans-serif" font-weight="900" font-size="19" fill="#123b63">5 cm</text>
+<text class="q5-q" x="404" y="118" font-family="Nunito, sans-serif" font-weight="900" font-size="26" fill="#6a2bb0">?</text>
+<text class="q5-bc" x="404" y="118" font-family="Nunito, sans-serif" font-weight="900" font-size="19" fill="#1d6b35">5 cm</text>
 </svg>
 </sc-if>
 
@@ -245,6 +251,11 @@
 <div class="intro-root"></div>
 </sc-if>
 
+<!-- Chilly the snowman's visits (js/chilly.js fills it) -->
+<div class="chilly-root"></div>
+<!-- the end screen's cartoon closer, "The End" (js/finale.js fills it) -->
+<div class="finale-root"></div>
+
 <sc-if value="{{isEnd}}" hint-placeholder-val="{{ false }}">
 <!-- end screen: a full-stage layer over the hero layout (Swiftee centre stage) -->
 <div class="end-hero {{fadeCls}}">
@@ -277,6 +288,15 @@
 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
 </button>
 <button class="next {{nextCls}}" data-qa="next" disabled="{{nextDisabled}}" onClick="{{next}}">{{nextLabel}}<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
+</div>
+</sc-if>
+
+<!-- the Snowflake Challenge (screens 38-43): one snowflake per check, won when it is answered (gold: first try) -->
+<sc-if value="{{showFlakes}}" hint-placeholder-val="{{ false }}">
+<div class="flake-bar" role="img" aria-label="{{flakeAria}}">
+<sc-for list="{{flakes}}" as="fk" hint-placeholder-count="5">
+<div class="flake {{fk.cls}}"><svg width="46" height="46" viewBox="-23 -23 46 46" aria-hidden="true"><path d="M0,0L0.0,-16.0M5.0,-14.0L0.0,-9.0M-5.0,-14.0L0.0,-9.0M3.5,-16.5L0.0,-13.0M-3.5,-16.5L0.0,-13.0M0,0L13.9,-8.0M14.6,-2.7L7.8,-4.5M9.6,-11.3L7.8,-4.5M16.0,-5.2L11.3,-6.5M12.5,-11.3L11.3,-6.5M0,0L13.9,8.0M9.6,11.3L7.8,4.5M14.6,2.7L7.8,4.5M12.5,11.3L11.3,6.5M16.0,5.2L11.3,6.5M0,0L0.0,16.0M-5.0,14.0L0.0,9.0M5.0,14.0L0.0,9.0M-3.5,16.5L0.0,13.0M3.5,16.5L0.0,13.0M0,0L-13.9,8.0M-14.6,2.7L-7.8,4.5M-9.6,11.3L-7.8,4.5M-16.0,5.2L-11.3,6.5M-12.5,11.3L-11.3,6.5M0,0L-13.9,-8.0M-9.6,-11.3L-7.8,-4.5M-14.6,-2.7L-7.8,-4.5M-12.5,-11.3L-11.3,-6.5M-16.0,-5.2L-11.3,-6.5" fill="none" stroke-width="2.6" stroke-linecap="round"></path></svg></div>
+</sc-for>
 </div>
 </sc-if>
 

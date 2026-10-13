@@ -24,8 +24,9 @@ The stage is 1920 × 1080 and scales to fit any window. Mouse, touch and pen all
 | 16–22 | Types by sides: Swiftee measures the sides with a tape, scalene, drag A to make the legs equal, isosceles |
 | 23–35 | Angles: Swiftee measures the angles with a protractor, same-leg angles add to 180°, supplementary angles, right trapezium |
 | 36–37 | Well done, and the summary (eight idea cards) |
-| 38–42 | Five scored checks |
-| 43 | Lesson complete |
+| 38–42 | Five checks, the Snowflake Challenge (a snowflake for each right answer) |
+| 43 | Lesson complete: the snowflakes won, Chilly, goodbye |
+| 44 | The End: the cartoon closer and Play again |
 
 ## Folder
 
@@ -48,6 +49,8 @@ trapezium-game/
 │   ├── angle-frames.js   the protractor poses
 │   ├── summary.js        screen 37: the summary cards
 │   ├── intro.js          the cabin intro between the front page and screen 1
+│   ├── chilly.js         Chilly the snowman's visits (the running gag)
+│   ├── finale.js         screen 44: the cartoon closer, "The End"
 │   ├── stage-fit.js, snowfall.js, confetti.js
 ├── assets/
 │   ├── images/           backgrounds, panels, the front-page banner, buttons, Swiftee extras
@@ -73,7 +76,7 @@ trapezium-game/
 - **Narration.** Each line is spoken with the device's speech voice. Words appear as the voice reaches them, Swiftee's
   beak moves only while she speaks, and cue words (`cueAt`) fire animations at the exact word. Without a voice, the words
   are paced on a timer instead.
-- **Screens.** Navigation is manual: Back and Next sit top right, and "Screen N of 43" (top left) jumps to any screen.
+- **Screens.** Navigation is manual: Back and Next sit top right, and "Screen N of 44" (top left) jumps to any screen.
   Skipping an unfinished drag applies its result, so later screens still match the shape.
 - **Shapes.** The bases always stay parallel: corners only slide sideways, within limits that keep the shape readable.
 - **Front page.** The banner fills the stage; the Play button unlocks sound and starts the intro.

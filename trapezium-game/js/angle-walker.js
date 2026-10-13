@@ -10,7 +10,7 @@
 window.AngleWalker = class AngleWalker {
   constructor() {
     this.F = window.AngleMeasuringFrames;
-    this.run = 0; this.pose = null; this.alpha = 0; this.sparks = []; this.loopOn = false;
+    this.run = 0; this.pose = null; this.alpha = 0; this.loopOn = false;
     this.frame = this.F ? this.F.carry : 0;
     if (this.F) { const im = new Image(); im.decoding = 'async'; im.src = this.F.image; this.img = im; }
     this.draw = this.draw.bind(this);
@@ -130,7 +130,7 @@ window.AngleWalker = class AngleWalker {
         // MEASURE + HOLD: the angle is traced on the protractor's face, from one side round to the other
         .then((ok) => {
           if (!ok) return false;
-          const trace = { p: p, a: a, sweep: sweep, col: (o.colors || [])[i] || '#ffb020', t: 0 };
+          const trace = { p: p, a: a, sweep: sweep, col: (o.colors || [])[i] || '#ffb020', t: 0, lab: o.labelAt ? o.labelAt(i) : null, deg: Math.round(Math.abs(sweep) * 180 / Math.PI) };
           this.trace = trace;
           return this.tween({}, C.measureMs + C.holdMs, (e, t) => { trace.t = Math.min(1, t * (C.measureMs + C.holdMs) / (C.measureMs + C.holdMs * 0.55)); });
         })
@@ -165,23 +165,13 @@ window.AngleWalker = class AngleWalker {
   cancel() {
     this.run++;
     this.finish();
-    this.sparks = [];
     const cv = this.canvas();
     if (cv) cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
   }
-  // a small burst of gold and white sparks round a reading as it comes in (stage px)
-  sparkle(x, y) {
-    if (!isFinite(x) || !isFinite(y)) return;
-    this.sparks.push({ x: x, y: y, t0: performance.now(), run: this.run });
-    this.loop();
-  }
-
-  // ---------- drawing ----------
-  // the draw loop runs only while she or a sparkle is on screen
+  // the draw loop runs only while she is on screen
   loop() { if (!this.loopOn) { this.loopOn = true; requestAnimationFrame(this.draw); } }
   draw(now) {
     const cv = this.canvas();
-    this.sparks = this.sparks.filter((s) => s.run === this.run && now - s.t0 < 700);
     if (!cv) { this.loopOn = false; return; }
     const c = cv.getContext('2d'), k = cv.width / 1280; // the canvas has more pixels than the 1280 px stage, for sharp edges
     c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, cv.width, cv.height);
@@ -205,18 +195,13 @@ window.AngleWalker = class AngleWalker {
       c.globalAlpha = 0.95; c.lineWidth = 3; c.lineCap = 'round'; c.strokeStyle = tr.col;
       c.beginPath(); c.arc(tr.p.x, tr.p.y, r, tr.a, end, tr.sweep < 0); c.stroke();
       c.globalAlpha = 1;
-    }
-    this.sparks.forEach((sp) => {
-      const t = (now - sp.t0) / 700, r = 6 + 26 * (1 - Math.pow(1 - t, 3)), a = 1 - t;
-      c.setTransform(k, 0, 0, k, 0, 0);
-      for (let j = 0; j < 8; j++) {
-        const ang = j * Math.PI / 4 + 0.3, x = sp.x + Math.cos(ang) * r, y = sp.y + Math.sin(ang) * r, z = (j % 2 ? 3 : 4.5) * (1 - t * 0.5);
-        c.globalAlpha = a; c.fillStyle = j % 2 ? '#ffffff' : '#ffc93c';
-        c.beginPath(); c.moveTo(x, y - z); c.lineTo(x + z * 0.35, y - z * 0.35); c.lineTo(x + z, y); c.lineTo(x + z * 0.35, y + z * 0.35);
-        c.lineTo(x, y + z); c.lineTo(x - z * 0.35, y + z * 0.35); c.lineTo(x - z, y); c.lineTo(x - z * 0.35, y - z * 0.35); c.closePath(); c.fill();
+      if (tr.lab) { // the degrees count up as the angle is traced, where the value will land
+        c.font = '900 24px Nunito, system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+        c.lineWidth = 6; c.strokeStyle = '#ffffff'; c.lineJoin = 'round'; c.fillStyle = '#123b63';
+        const txt = Math.round(tr.deg * tr.t) + '°';
+        c.strokeText(txt, tr.lab.x, tr.lab.y); c.fillText(txt, tr.lab.x, tr.lab.y);
       }
-      c.globalAlpha = 1;
-    });
-    if (this.pose || this.sparks.length) requestAnimationFrame(this.draw); else this.loopOn = false;
+    }
+    if (this.pose) requestAnimationFrame(this.draw); else this.loopOn = false;
   }
 };

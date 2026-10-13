@@ -55,6 +55,8 @@ const CONFIG = {
   // leadMs = wait after her line; firstMs = shortest walk to or from her spot; the rest are move timings
   angleWalk: { scale: 1.6, homeK: 1.52, carryPx: 28, hop: 60, traceK: 0.78, stepPx: 45, bob: 5, tiltMax: 33, leadMs: 900,
     firstMs: 950, moveMs: 600, placeMs: 400, alignMs: 420, measureMs: 300, holdMs: 900, liftMs: 350, fadeMs: 250 },
+  // idle antics: after idleMs with nothing happening Swiftee amuses herself, cycling through these expressions
+  antics: { idleMs: 15000, list: ['sleeping', 'daydreaming', 'playful', 'reading'] },
   hand: { idleMs: 8000, showMs: 4400, maxShows: 4, // hand nudge: wait with no touch, time on screen, showings per step
     onceDelayMs: 500, onceMs: 2300 },                 // handOnce screens: delay after the line, time on screen
   // Swiftee's expressions (state names from swiftee-assets/atlas/swiftee.manifest.json).
