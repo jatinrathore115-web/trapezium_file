@@ -1,9 +1,8 @@
 // =====================================================================
-// CONFETTI — one short burst falling from the top of the stage, for a correct interaction.
-// window.Confetti.burst() drops a fresh set of pieces across the full width; they flutter down and fade out
-// in the upper part of the stage (gone by ~FADE_TO px), so the bubble, Swiftee and the shape are never
-// covered for long. Drawn on a canvas over the stage that ignores the pointer; runs only while pieces are live.
-// Off for prefers-reduced-motion.
+// CONFETTI — a short burst from the top of the stage on each correct action (the engine's cheer()).
+// Confetti.burst() drops pieces across the full width; they flutter down and are gone by FADE_TO, so the
+// bubble, Swiftee and the shape are only covered briefly. Drawn on the .confetti canvas (it ignores the
+// pointer); the loop runs only while pieces are falling. Off for prefers-reduced-motion.
 // =====================================================================
 (function () {
   var W = 1280, H = 720;
@@ -15,6 +14,7 @@
   var rnd = function (a, b) { return a + Math.random() * (b - a); };
   var parts = [], running = false, last = 0, cv = null, ctx = null, dpr = 1;
 
+  // find the canvas again if the stage re-rendered it
   function canvas() {
     if (cv && cv.isConnected) return cv;
     cv = document.querySelector('.stage canvas.confetti');
@@ -23,10 +23,10 @@
   }
   function burst() {
     if (reduced || !canvas()) return;
-    parts = []; // once per success: a new burst replaces any pieces still falling
+    parts = []; // a new burst replaces any pieces still falling
     for (var i = 0; i < N; i++) {
       parts.push({
-        x: (i + Math.random()) * (W / N), y: rnd(-60, -10), d: rnd(0, 0.35), // spread evenly across the top, slight stagger
+        x: (i + Math.random()) * (W / N), y: rnd(-60, -10), d: rnd(0, 0.35), // spread evenly across the top; d = start delay (s)
         vx: rnd(-30, 30), vy: rnd(150, 230), w: rnd(7, 11), h: rnd(10, 15),
         rot: rnd(0, Math.PI * 2), vr: rnd(-6, 6), sw: rnd(10, 26), sf: rnd(2, 4), ph: rnd(0, Math.PI * 2),
         c: COLORS[i % COLORS.length]
@@ -38,11 +38,11 @@
     var c = canvas();
     if (!c) { running = false; return; }
     if (!ctx) {
-      dpr = Math.min(2, (window.devicePixelRatio || 1) * 1.5); // the stage is drawn at 1.5x
+      dpr = Math.min(2, (window.devicePixelRatio || 1) * 1.5); // the stage is scaled 1.5x: match it so pieces stay sharp
       c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
       ctx = c.getContext('2d');
     }
-    var dt = Math.min(0.05, (now - (last || now)) / 1000);
+    var dt = Math.min(0.05, (now - (last || now)) / 1000); // seconds, capped so pieces do not jump after a hidden tab
     last = now;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
@@ -51,7 +51,7 @@
       var p = parts[i];
       if (p.d > 0) { p.d -= dt; live++; continue; }
       p.y += p.vy * dt; p.x += p.vx * dt; p.rot += p.vr * dt;
-      p.vy = Math.max(110, p.vy - 40 * dt); // eases into a gentle flutter
+      p.vy = Math.max(110, p.vy - 40 * dt); // slows to a gentle flutter
       if (p.y > FADE_TO) continue;
       live++;
       var a = p.y < FADE_FROM ? 1 : 1 - (p.y - FADE_FROM) / (FADE_TO - FADE_FROM);

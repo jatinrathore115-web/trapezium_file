@@ -1,6 +1,7 @@
 // Regenerates js/swiftee-manifest.js from swiftee-assets/atlas/swiftee.manifest.json (the source of truth),
-// keeping only what js/swiftee.js reads, so Swiftee also animates when index.html is opened from disk.
-// Run from this folder: node tools/build-swiftee-manifest.js
+// keeping only what js/swiftee.js and js/walker.js read. A .js file still loads when index.html is opened from disk,
+// where fetching the JSON fails.
+// Usage: node tools/build-swiftee-manifest.js
 const fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '..');
 const m = JSON.parse(fs.readFileSync(path.join(root, 'swiftee-assets/atlas/swiftee.manifest.json'), 'utf8'));

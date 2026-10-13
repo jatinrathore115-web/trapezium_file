@@ -4,10 +4,13 @@ A guided, voice-led lesson on **trapeziums** for young learners. The mascot **Sw
 shape on an ice panel draws, moves and highlights itself in step with her words. The learner taps and drags at key
 moments, then answers five scored checks.
 
-- **Front page** first: the polar bear fishing on the ice (`assets/images/start-bear.webp`) fills the screen, drifts
-  very slowly, with snow falling over it; one big **Play** button (`assets/images/play-button.webp`) sits on the ice
-  beside the fishing hole, floating gently and sending out ripples. Hover lifts it, a press squashes it; on Play it
-  pops with a chime and the scene zooms softly away into Screen 1. The tap also unlocks the voice-over and sounds.
+- **Front page** first: the **Trapezium Adventure** banner (`assets/images/banner.webp`) fills the screen. It settles in
+  from a soft zoom and drifts very slowly; the title pops in, breathes and catches a sweep of light (the banner shown
+  through the title's own shape, `banner-title-mask.png`); the stars round it and the ice trapezium twinkle, the ice
+  glows, and snow falls. One big round **Play** button (glossy orange with a snow cap, `assets/images/play-button.webp`) sits on
+  the snow between Swiftee and the ice: it spins in and floats on a warm glow that breathes with it, a soft aura
+  swells out from it, glints twinkle on its rim and a shine crosses its face. Hover lifts and brightens it, a press squashes it; on Play it pops with a
+  chime and the scene zooms softly away into Screen 1. The tap also unlocks the voice-over and sounds.
   Jumps from the screen list skip it. `CONFIG.flow.cover: false` turns it off.
 - **43 screens** in one fixed sequence: 36 learning screens, 5 checks, 1 lesson-complete screen.
 - **Navigation is manual**: the learner moves on with **Next** / **Back** (top right). Only the opening intro
@@ -37,10 +40,11 @@ Every screen uses one 16:9 composition (1280 × 720 stage, scaled to the window)
 |---|---|
 | Left, on the snow | **Swiftee** and her **speech bubble** (text appears word by word with the voice) |
 | Right | The **ice panel** — the shape, labels, answer options |
-| Top left | **"Screen N of 43"** — opens a list of screen thumbnails to jump to any screen |
+| Top left | **"Screen N of 43"** — opens a list of every screen (number and opening line) to jump to any screen |
 | Top right | **Back** / **Next** |
 
-Exception: **Screen 36** (finale) hides the ice panel — Swiftee flies to the centre on her own.
+Exceptions: **Screens 16 and 23** use the measuring slab instead (§4a); **36, 37 and 43** hide the ice panel (37 shows the
+summary cards; on 43 Swiftee flies to the centre).
 
 **Colour language (kept on every screen)**
 
@@ -81,7 +85,7 @@ Exception: **Screen 36** (finale) hides the ice panel — Swiftee flies to the c
 
 | # | Swiftee says | What happens |
 |---|---|---|
-| 16 | "Let's measure the sides of this trapezium." | **Automatic**: Swiftee flies onto the shape and walks each side with a tape measure. Lengths appear outside the shape: **3 cm, 5 cm, 9 cm, 7 cm**. Once all four are measured she reacts: "Woah! All the sides of this trapezium are of different lengths." *(after)* "Woah! All the sides … different lengths.": from "sides", as on Screen 17, AB, BC, CD, DA in turn (0.45 s apart) - each side glows while its length pops and takes its own colour. |
+| 16 | "Let's measure the sides of this trapezium." | **Measuring room** (the Measuring Kit's layout, §4a). **Automatic**: Swiftee walks out from her corner of the card to the shape and walks each side with a tape measure. Lengths appear outside the shape: **3 cm, 5 cm, 9 cm, 7 cm**. Once all four are measured she reacts: "Woah! All the sides of this trapezium are of different lengths." *(after)* "Woah! All the sides … different lengths.": from "sides", as on Screen 17, AB, BC, CD, DA in turn (0.45 s apart) - each side glows while its length pops and takes its own colour. |
 | 17 | "This type of trapezium which has sides of different lengths is called a scalene trapezium." | "trapezium": the shape pops once. The lengths start hidden; from "sides" they pop in one by one (AB, BC, CD, DA) with their side glowing. "scalene": **Scalene trapezium** pops in below and pulses. Shape lifted a little so the bottom length clears the label. |
 | 18 | "Look! Its legs are of different length too." / "What if the legs were the same length?" / "Let's find out." | "different": both legs light up together and their lengths pop once. No laugh line. "What if the legs were the same length?", "Let's find out.", then on to Screen 19 (2.6 s hold). |
 | 19 | "Let's change its shape a little." | — |
@@ -93,7 +97,7 @@ Exception: **Screen 36** (finale) hides the ice panel — Swiftee flies to the c
 
 | # | Swiftee says | What happens |
 |---|---|---|
-| 23 | "Let's look at its angles." | From "look", the four angles fill in one after another, **A → B → C → D** (0.55 s apart), with Screen 40's technique: each filled wedge, in its own arc colour (A orange, B purple, C blue, D yellow), grows out of its corner with a soft overshoot and a brief glow, while its arc draws round and its value glides in. Wedges are clipped to the shape. From here on, shown angles stay in place (no draw-in replay on later screens). |
+| 23 | "Let's measure its angles." | **Measuring room** (§4a). **Automatic**: after the line Swiftee walks out from her corner of the card with **one protractor** and measures **A → B → C → D**: at each corner its centre sits exactly on the vertex and its baseline along a side, she stands beside the shape (never on it), and while she holds it there that angle comes in - its filled wedge in its own colour (A orange, B purple, C blue, D yellow) grows out of the corner, its arc draws round, its value pops in with a sparkle - and stays. Corner to corner she hops out round the side; after D she walks home. From here on, shown angles stay in place (no draw-in replay on later screens). |
 | 24 | "Did you notice something?" | Angles already in place. After a short beat **120° (A)** and **60° (D)** get a soft warm glow; 105° and 75° fade back to 35%. |
 | 25 | "∠A and ∠D add up to 180°." | **∠A + ∠D = ?** appears; on "add" copies of 120° then 60° fly from the shape, one after the other, to the answer side, replacing the "?"; on "180" they add up into **180°** (halo, pulse), leaving **∠A + ∠D = 180°**. 120° and 60° glow; 105°, 75° faded. |
 | 26 | "That means they are supplementary angles." | As the line starts, A and D pulse (B, C fade back). "supplementary", **on the shape**: DC extends past D as a dashed line; D's 60° fills in at D; a copy of A's 120° (orange) slides down AD to D and turns over onto the extension beside it - together a straight angle, marked by a half-circle and **180°**. "angles": the **∠A + ∠D = 180°** label glows (snap). The figure fades after a few seconds. |
@@ -112,7 +116,7 @@ Exception: **Screen 36** (finale) hides the ice panel — Swiftee flies to the c
 | # | Swiftee says | What happens |
 |---|---|---|
 | 36 | "Great job! Now you know all about trapeziums." | The ice panel fades away; Swiftee stays in her usual bottom-left spot with her bubble above her, as on the lesson screens. No stars, no fly-in. |
-| 37 | "Let's recall what we learnt today." then the summary lines | **Animated summary** (§5): four big cards — Definition, Parts, Types, Angles — one at a time, explained by Swiftee with the card text in sync, each collected into a row, then a 2×2 recap. Nothing to tap. |
+| 37 | "Let's recall what we learnt today." then the summary lines | **Summary** (§5, the Summary Kit): eight idea cards one at a time, each shown, explained by Swiftee rising from behind it, and collected into albums at the sides; then the finale, Next glows, and a tap on any card replays it. |
 
 ### Part 5 — Checks (Screens 38–42, scored) and end (43)
 
@@ -158,7 +162,7 @@ Every angle-pair equation (Screens 25, 26, 27, 30, 31) uses the same cream panel
 
 ### Buttons
 
-Every clickable answer button (Screens 27, 39, 40, 42) and the top controls (Screen N, Back, Next) and Done use one **crystal-blue button** (assets/images/crystal-button.webp, a 9-slice so the bevelled corners keep their shape at any width). Navy text, centred; options equal width, 18px apart, centred on the panel. Answer buttons stay **still** (they fade in; no idle pulse, no lift or dip on hover/press - hover only brightens); correct glows green; wrong shakes with a red (or orange) halo, then greys out; disabled is grey and faded. Not used for Check 1's shape cards, Check 4's draggable labels and slots, or the round Play button.
+Every clickable answer button (Screens 27, 39, 40, 42) and the top controls (Screen N, Back, Next) and Done use one **crystal-blue button**, drawn from three pieces (`crystal-l`, `crystal-m`, `crystal-r`.webp) so the bevelled corners keep their shape at any width. Navy text, centred; options equal width, 18px apart, centred on the panel. Answer buttons stay **still** (they fade in; no idle pulse, no lift or dip on hover/press - hover only brightens); correct glows green; wrong shakes with a red (or orange) halo, then greys out; disabled is grey and faded. Not used for Check 1's shape cards, Check 4's draggable labels and slots, or the round Play button.
 
 ### 4.3 Shape dragging (Screens 20, 29, 33)
 
@@ -214,29 +218,51 @@ Every clickable answer button (Screens 27, 39, 40, 42) and the top controls (Scr
 ### 4.8 Scoring
 
 - Only the five checks (Screens 38–42) are scored; Screen 27 is practice.
-- A check counts as **right only if answered correctly on the first try**.
-- Stars on the lesson-complete screen: **5 right → 3 stars**, **3–4 → 2 stars**, **0–2 → 1 star**.
-- **Play again** restarts from Screen 1.
+- A check counts as **right only if answered correctly on the first try** (kept in `state.results`).
+- The lesson-complete screen shows Swiftee's closing line only; it doesn't display a score.
 
 ---
 
-## 5. Screen 37 — animated summary
+## 4a. Measuring room (Screens 16 and 23, the Measuring Kit's layout)
 
-Built in `js/summary.js`. Explanation only — **nothing to tap**. One **big ice card** at a time fills the right of the
-screen (glossy ice face, cyan glowing rim, white corner highlights); Swiftee peeks from behind its left edge. On each card
-the shape pops in, Swiftee explains, the parts she names light up and the card's text pops in **on her words**; then the
-card shrinks into the collection row below. A mini card appears in the row only once collected — no empty placeholders.
+The kit's wide **measuring slab** (`assets/images/measure-slab.webp`) takes the ice panel's place, the shape is drawn big in
+its middle (`CONFIG.measureRoom`), and Swiftee **stands small in the card**, in its bottom-left corner, with her line above
+her. She walks out to the shape from there and back again - never a flight. Screen 16: the tape walk (`js/walker.js`).
+Screen 23: the protractor walk (`js/angle-walker.js`, the kit's `angleMeasurer()`, poses in `js/angle-frames.js`); leaving
+the screen mid-walk stops it at once, nothing stays behind and no reading comes in later; reduced motion shows the readings
+at once. The slab and panel cross-fade and the shape glides between the two layouts.
 
-| Card | Swiftee says | Lights up / card text |
+---
+
+## 5. Screen 37 — summary (the Summary Kit)
+
+Built in `js/summary.js`, a port of the Summary Kit (POLYGON `summary-kit/index.html`): the kit's ice card
+(`assets/images/summary-card.webp`), layout numbers, animations, timings and states, on the game's own winter background,
+with the game's voice, Swiftee and buttons. Swiftee says "Let's recall what we learnt today." up in the middle, sinks, and
+then every idea the lesson taught comes in **one card at a time, in the order it was taught**, each through the same
+strict sequence - every step waits for the one before it, so no two overlap and no line plays over another:
+
+`CARD_ENTER → CONCEPT_REVEAL → SWIFTEE_ENTER → EXPLANATION → READING_PAUSE → SWIFTEE_EXIT → CARD_COLLECT → NEXT_CONCEPT`
+
+The card comes into the clear middle; its idea is **shown** on the trapezium (in the lesson's colours); Swiftee rises from
+behind the card's top edge (the card hides her body) with her bubble above her; the words appear as she says them and the
+key words light the part they name (a warm trace along the sides, a pulse on the marks); she sinks back and the card shrinks
+into a 2 × 2 **album** at the side with a small name plate.
+
+| Card | Swiftee says | Shown / lit on its words |
 |---|---|---|
-| Definition | "A trapezium is a quadrilateral with one pair of opposite sides parallel." / "These two sides are parallel. They never meet!" | sides pulse → "4 sides"; bases glow + arrows → "one pair of parallel sides"; "AB ∥ DC" |
-| Parts | bases → legs → "four corners are called vertices" | yellow bases → "Bases"; purple legs → "Legs"; corner dots grow → "Vertices" |
-| Types | scalene → isosceles → right (one shape changes) | unequal tick marks → "Scalene"; equal ticks → "Isosceles"; two 90° squares → "Right" |
-| Angles | "…same leg add up to 180 degrees" / "On the other leg too…" / "…supplementary" | A 110° + D 70° → "110° + 70° = 180°"; B 120° + C 60° → "120° + 60° = 180°"; "Supplementary angles" |
+| Trapezium | "A trapezium is a quadrilateral with one pair of parallel sides." | outline draws itself, parallel arrows pop on; "quadrilateral" traces the four sides, "parallel" the pair |
+| Bases | "The parallel sides are called the bases." | AB and DC glow; "bases" traces them |
+| Legs | "The other two sides are called the legs." | AD and BC glow; "legs" traces them |
+| Scalene | "A scalene trapezium has sides of different lengths." | 1, 2, 3, 4 ticks (all different); "different" pulses them |
+| Isosceles | "An isosceles trapezium has legs of the same length." | equal ticks on the legs; "same" pulses them |
+| Right | "A right trapezium has two adjacent right angles." | right-angle squares at A and D; "angles" pulses them |
+| Angle sum | "Angles on the same leg add up to 180°." | AD glows, A 120° and D 60° fill in; "180" pulses the values |
+| Supplementary | "Two angles that add up to 180° are supplementary." | BC glows, B 105° and C 75° fill in |
 
-Then the four collected cards open into a **2×2 recap** ("One pair of parallel sides." · "Bases, legs, vertices." ·
-"Scalene, isosceles, right." · "Same-leg angles add to 180°."), Swiftee closes with "Wonderful! … You are ready for
-the next adventure!" and one celebration plays. Next works at any time.
+Then FINAL_SUMMARY (the albums hop in, Swiftee rises in the middle and says "Wonderful! You remember everything about
+trapeziums!") and READY: a gold halo breathes round the top-right **Next**, and a tap on any collected card replays its idea
+and its line while the others rest at 42 %. Next works at any time. Reduced motion: the same states without the motion.
 
 ---
 
@@ -283,20 +309,22 @@ glows, gentle bounces, small sparkles and the success sound. (Equal-side tick ma
 | `index.html` | The page and its template (screen markup bound to the engine's values) |
 | `js/vendor/dc-runtime.js` | Template + rendering runtime (bundles React) |
 | `js/vendor/gsap.min.js` | GSAP 3.12.5 animation library (local copy) |
-| `js/config.js` | Tuning values: scale, shapes, drag limits, snapping, timings, sounds, stars |
+| `js/config.js` | Tuning values: scale, shapes, drag limits, snapping, timings, sounds, Swiftee's reactions |
 | `js/lesson-data.js` | **Every screen as data**: lines, cue words, tasks, options, feedback, per-screen options |
-| `js/game-engine.js` | The game: narration, geometry, drags, checks, scoring, navigation, rendering values |
+| `js/game-engine.js` | The game: narration, geometry, drags, checks, navigation, rendering values |
 | `js/motion.js` | All choreographed animations (GSAP); reset on every screen change |
-| `js/summary.js` | Screen 37 interactive summary (cards, questions, collection, recap) |
+| `js/summary.js` | Screen 37 summary (the Summary Kit: idea cards, albums, finale, replay) |
 | `js/swiftee.js`, `js/walker.js` | Swiftee's expressions and the Screen 16 walking/measuring sprite |
+| `js/angle-walker.js`, `js/angle-frames.js` | Screen 23 protractor walk (the Measuring Kit) and its poses |
 | `js/confetti.js`, `js/snowfall.js` | Success confetti and background snow |
 | `css/game.css` | Styles and small state transitions |
-| `tools/build-thumbs.js` | Regenerates the screen-list thumbnails (`assets/thumbs/`) in headless Chrome |
+| `qa/logic-test.js` | Headless test: plays every screen and check through the engine (Node) |
+| `tools/` | Rebuild Swiftee's measuring sheet and sprite manifest (Node) |
 
 **Editing content**: most changes are made in `js/lesson-data.js` — the text of a line (`t`), what is spoken if different
-(`s`), Swiftee's expression (`m`), cue words (`cueAt`, `pulseAt`, `growAt`, …), the task (`task`), answer options
-(`opts` with `ok` / `fb`). The comment block at the top of that file lists every option. After adding, removing or
-reordering screens, run `node tools/build-thumbs.js` to refresh the thumbnails.
+(`s`), Swiftee's expression (`m`), cue words (`cueAt`, `pulseAt`, `glowAt`, …), the task (`task`), answer options
+(`opts` with `ok` / `fb`). The comment block at the top of that file lists every option. The screen list follows it
+automatically.
 
 **Known limits**
 

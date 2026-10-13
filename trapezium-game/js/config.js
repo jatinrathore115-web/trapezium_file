@@ -1,77 +1,70 @@
 // =====================================================================
-// CONFIG — tuning values for the board, snapping, pacing and limits.
+// CONFIG - tuning values for the board, snapping, pacing and limits.
+// Screen numbers count from 1 in LESSON.steps order. Times are in ms and positions in px unless named otherwise.
 // =====================================================================
 const CONFIG = {
   pxPerCm: 40,                       // board scale: 1 cm = 40 board px
   start: { D: 45, C: 405, baseY: 340, height: 195.96, legAD: 7, legBC: 5 }, // opening shape: AB 3, BC 5, CD 9, AD 7 cm (height = √24 cm)
-  limits: { minTop: 90, minBottom: 160, maxLegRun: 243, minX: 16, maxX: 478 }, // keeps the shape readable (angles ~35°–145°)
-  // equalLegsCm: legs count as equal for the other drag screens; exactCm: screen 19 (drag A to equal legs) - the legs
-  // are equal only when AD reads exactly the same as BC on its label (labels show one decimal, so within 0.05 cm)
-  // unequalCm: screen 21 - the legs count as no longer equal once they differ by this much (their labels then differ)
-  // the trapezium for the angle screens (screen 22 on): A = 120 deg, B = 105 deg, C = 75 deg, D = 60 deg (x of each corner;
-  // the bases keep their heights). Every angle label, arc, sum and question is computed from this shape.
-  // screen 33: a right trapezium - vertical left side (90° at A and D), slanted right side
+  limits: { minTop: 90, minBottom: 160, maxLegRun: 243, minX: 16, maxX: 478 }, // drag limits: shortest top / bottom base, longest sideways leg run, corner x range
+  // screen 35: the right trapezium (A and D at 90°, so DA is vertical)
   rightShape: { A: 45, B: 300, C: 405, D: 45 },
-  // screen 21: an isosceles trapezium - AB 5 cm, CD 10 cm, both legs 5.5 cm (run 2.5 cm each side, height √24 cm)
-  isoShape: { A: 140, B: 340, C: 440, D: 40 },
+  // screen 22 on: A 120°, B 105°, C 75°, D 60° (corner x only; the bases keep their heights)
   angleShape: { A: 158.14, B: 352.49, C: 405, D: 45 },
-  snap: { equalLegsCm: 0.3, exactCm: 0.05, unequalCm: 0.2, rightAngleDeg: 5 },
-  // recorded sound effects (others are synthesised): 'good' = every correct action (with the confetti), 'bad' = every wrong one
+  // exactCm: screen 20 counts the legs equal within this (their labels show one decimal);
+  // rightAngleDeg: screen 33 snaps a corner to 90° within this many degrees
+  snap: { exactCm: 0.05, rightAngleDeg: 5 },
+  // recorded effects (the rest are synthesised): good = every correct action, bad = every wrong one
   sounds: { good: 'assets/audio/correct.mp3', bad: 'assets/audio/incorrect.mp3' },
   soundVolume: 0.9,
-  drag: { wrongGapMs: 1200 },        // wrong-way drag feedback (wiggle + incorrect sound): at most once per this long
-  // a part named in the voice-over grows (CSS .emph, ~0.3 s in / 0.3 s out) and holds this long before easing back
+  drag: { wrongGapMs: 1200 },        // wrong-way drag feedback (wiggle + sound) at most once per this long
+  // a part named in the voice-over grows briefly and holds this long before easing back
   emph: { holdMs: 650 },
-  // screen 4 leg trace: one speed (px/ms) for the glowing line and the dotted extension on both legs; pause before C->B
+  // screens 7-8: side trace and dotted extension speed (board px per ms); pause between the two sides
   trace: { pxPerMs: 0.4, gapMs: 250 },
-  // screen 1 build: pen speed round the outline, start delay after the screen opens (≈ voice start), outline glow time.
-  // (Entrance timings for the side numbers, corner letters and shape assembly live with their GSAP timelines in js/motion.js)
+  // screen 1: pen speed round the outline (board px per ms), delay after the screen opens, outline glow time
   build: { pxPerMs: 0.36, delayMs: 450, settleMs: 1300 },
-  // screen 3 corner letters: never land closer together than this, so A -> B -> C -> D keeps its rhythm
+  // screen 3: corner letters never land closer together than this
   letters: { minGapMs: 420 },
-  // qFocus check screens: the question shape starts alone in the centre of the right-hand ice panel (cx, shapeTop0;
-  // panel 512..1240 x 104..584). The bubble holds holdMs after the voice and fades (fadeMs); the shape then glides up
-  // to shapeTop to make room and the answers stagger in under it.
-  // Shape drawing spans ~y 26..222 of its 500x230 box; answers sit 24 px under it.
+  // qFocus question (screen 39): bubble hold and fade after the question; the shape's centre x and its top
+  // before and after it glides up; the answer row's top and width (stage px)
   qFocus: { holdMs: 700, fadeMs: 350, cx: 876, shapeTop0: 220, shapeTop: 171, optTop: 417, optW: 680 },
-  ruler: { home: { gap: 80, a: 0 } /* level, centred under DC, gap px below it */, flyMs: 600, holdMs: 700, returnMs: 450 },
-  // speechRate: the voice-over speed (1 = the voice's normal pace); lineGapMs: the pause after each line, so it can be
-  // read and taken in before the next one starts
+  // idleMs: no-touch wait before a spoken reminder (at most idleMaxHints per screen); navLockMs: minimum gap between
+  // Next / Back taps; speechRate: voice speed (1 = normal); lineGapMs: pause after each line
   timing: { idleMs: 9000, idleMaxHints: 3, navLockMs: 450, speechRate: 0.86, lineGapMs: 850 },
-  // flow: a finished screen moves on advanceMs after its last line (voice-over) ends. showNext / showBack bring those buttons back.
-  // autoAdvance: false = navigation is fully manual (top-right Next / Back only; a finished screen stays put)
-  // cover: the game opens on the front page (polar bear, Play button) instead of starting straight away
+  // autoAdvance false = manual navigation (a finished screen waits for Next); advanceMs = the wait when it is on;
+  // showNext / showBack: the extra Next and Back buttons (off = top-right ones only); cover: open on the front page
   flow: { autoAdvance: false, advanceMs: 2500, showNext: false, showBack: false, cover: true },
-  // spotlight screen: board moved/scaled from its usual spot (transform-origin = board top-left at 640,104).
-  // Puts the shape (board centre ~260,228) at stage (560,358): mid-height, balanced against Swiftee on the right.
-  // scene layout (screens 1-30): board nudged so the shape is centred in the right-hand panel; card row under it
+  // every screen: shape nudged right to centre it in the panel (boardX); position of the label row
   scene: { boardX: 11, chipTop: 476, chipLeft: 616 },
-  // 'top' layout: board scaled and moved so the shape (board centre ~225,242) sits at stage (640,410)
-  topLayout: { scale: 1.15, tx: -259, ty: 28 },
-  spotlight: { scale: 1.35, tx: -431, ty: -54 },
-  // focus screen (extend the legs): after the line, the bubble holds holdMs, fades (fadeMs), then the board glides
-  // to centre stage (moveMs) and the hand appears after handMs with no touch. Board centre ~(260,240) -> stage (750,358):
-  // the middle of the free space between Swiftee (right edge ~350) and the panel's inner edge (~1150), so D clears Swiftee.
-  focus: { holdMs: 3000, fadeMs: 350, moveMs: 700, handMs: 5000, scale: 1.25, tx: -215, ty: -46 },
-  // screen 13 measuring trip: walker size on the shape, home feet point/size (matches the scene layout), timings
-  walker: { size: 110, homeX: 199, homeY: 639, homeSize: 259, flyMs: 1100, msPerCm: 380, pauseMs: 550,
+  // Measuring Kit layout (screens 16 and 23): board scale and offset that put the shape in the slab
+  measureRoom: { scale: 1.25, tx: -171.25, ty: -26.5 },
+  // layout 'focus' (screen 7): bubble hold and fade after the line, the shape's move to centre, wait before the hand
+  focus: { holdMs: 3000, fadeMs: 350, moveMs: 700, handMs: 5000 },
+  // screen 16 measuring walk: her size on the shape, fallback home spot and size, walk time per cm measured,
+  // pause between sides, stroll speed to and from the shape (px per ms)
+  walker: { size: 110, homeX: 199, homeY: 639, homeSize: 259, msPerCm: 380, pauseMs: 550, strollPxPerMs: 0.42,
     tips: [[488, 272], [484, 281], [494, 273], [489, 270], [486, 278], [483, 279], [491, 281], [489, 281]] }, // tape exit per walk frame (@2x cell px)
+  // screen 23 protractor walk (js/angle-walker.js): scale = stage px per kit board unit; homeK = her home size
+  // against her size on the board; carryPx = protractor offset from the vertex between corners; hop = how far her
+  // path bows out round a side; bob = px of bob every stepPx; tiltMax = most a drawing may turn (deg);
+  // leadMs = wait after her line; firstMs = shortest walk to or from her spot; the rest are move timings
+  angleWalk: { scale: 1.28, homeK: 1.9, carryPx: 20, hop: 50, stepPx: 45, bob: 5, tiltMax: 33, leadMs: 900,
+    firstMs: 950, moveMs: 600, placeMs: 400, alignMs: 420, measureMs: 300, holdMs: 900, liftMs: 350, fadeMs: 250 },
   hand: { idleMs: 8000, showMs: 4400, maxShows: 4, // hand nudge: wait with no touch, time on screen, showings per step
-    onceDelayMs: 500, onceMs: 2300 },                 // handOnce screens: a single demo gesture this long after the line ends
-  stars: [[5, 3], [3, 2], [0, 1]],   // [first-try correct >=, stars]
+    onceDelayMs: 500, onceMs: 2300 },                 // handOnce screens: delay after the line, time on screen
   // Swiftee's expressions (state names from swiftee-assets/atlas/swiftee.manifest.json).
-  // A narration line's own m wins; these cover reactions and the pose held between lines.
+  // A line's own m wins; these cover reactions and the pose held between lines.
   swiftee: {
     base: 'swiftee-assets/',
     talk: 'talking',       // default while a line is spoken
     idle: 'blinking',      // between lines and while the learner works on a task
-    waiting: 'thinking',   // a check question is open: thinking time
+    waiting: 'thinking',   // a check question is open
     praise: 'happy',       // a task is completed
     correct: 'celebrating',// a check is answered correctly
     wrong: 'confused',     // a wrong answer or tap: encouraging, never punishing
     nudge: 'curious',      // idle hint
-    done: 'happy',         // the lesson-complete screen, after the closing line
-    reactMs: 1600,         // how long the line's expression shows after speaking (lip-sync talks during the voice)
-    minHoldMs: 900
+    done: 'happy',         // the lesson-complete screen
+    reactMs: 1600,         // how long the line's expression shows after speaking
+    minHoldMs: 900         // an expression holds at least this long, so quick lines don't flicker
   }
 };

@@ -1,3 +1,6 @@
+// Stand-in for the browser's speechSynthesis, for automated browser runs: inject it into the page before the lesson starts.
+// Word i fires onboundary at i x 300 ms and onend follows at words x 300 + 150 ms; a new speak() or cancel() interrupts
+// the current line (onerror 'interrupted'). window.__speech records the lines spoken, word timings and cancels.
 window.__speech={spoken:[],cancels:0,log:[]};
 window.SpeechSynthesisUtterance=class{constructor(t){this.text=t;}};
 const synth={speaking:false,pending:false,_cur:null,_timers:[],getVoices(){return [{name:'Fake Female',lang:'en-GB'}]},

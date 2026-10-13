@@ -1,4 +1,5 @@
-/* Trapezium lesson: game styles (bubble, Swiftee, board, tags, chips, buttons, CFUs, motion) */
+/* Trapezium lesson: game styles. The choreographed motion runs on GSAP (js/motion.js);
+   this sheet holds the looks and the small state transitions. */
 body{margin:0}
 a{color:#123b63}a:hover{color:#0b2742}
 .stage{position:relative;width:1280px;height:720px;overflow:hidden;font-family:'Nunito',system-ui,sans-serif;color:#123b63;user-select:none;-webkit-user-select:none;touch-action:none;background:#8fd0fb}
@@ -6,56 +7,44 @@ a{color:#123b63}a:hover{color:#0b2742}
 .w{opacity:0;transition:none}
 .w.on{opacity:1;transition:opacity .18s ease,color .25s ease}
 .w.cur{opacity:1;color:#c95a00;transition:opacity .18s ease,color .25s ease}
+/* bubA / bubB (and fadeA / fadeB below) are the same animation: switching between them replays it */
 .bubA{animation:bubA .26s ease-out}
 .bubB{animation:bubB .26s ease-out}
-/* Narrator speech bubble: hugs its text and grows upward from a fixed anchor, so the tail always meets Swiftee */
+/* speech bubble: hugs its text and grows upward from a fixed anchor, so the tail always meets Swiftee */
 .bubble{width:max-content;min-width:120px;max-width:380px;box-sizing:border-box;padding:14px 22px 15px;background:#fdf6e4;border:3px solid #2a9a8c;border-radius:20px;box-shadow:0 6px 16px rgba(18,59,99,.14);transform-origin:26px 100%}
 .bubble-text{display:flex;flex-wrap:wrap;justify-content:center;column-gap:.28em;font-family:'Nunito',system-ui,sans-serif;font-weight:800;line-height:1.25;color:#123b63;text-align:center}
-/* Tail sits on the inner edge of the bottom border: its fill opens the border, its edges run straight out of it,
-   and anything above the border is clipped, so the outline reads as one continuous line */
+/* tail: its fill covers the bubble's bottom border and its edges carry on from it, so the outline reads as one line */
 .bubble-tail{position:absolute;left:26px;top:100%;margin-top:-1px;display:block;overflow:hidden;filter:drop-shadow(0 4px 4px rgba(18,59,99,.10))}
 @keyframes bubA{from{transform:scale(.97);opacity:.8}to{transform:scale(1);opacity:1}}
 @keyframes bubB{from{transform:scale(.97);opacity:.8}to{transform:scale(1);opacity:1}}
-/* Swiftee is intentionally static on every screen: fixed position, no idle, talk or reaction motion */
+/* Swiftee's still image never moves: no idle, talk or reaction motion */
 .bird{animation:none!important;transform:none!important;transition:none!important}
-.hitp{animation:hitp 1.3s ease-in-out infinite}
-@keyframes hitp{0%,100%{stroke:rgba(255,160,40,.06)}50%{stroke:rgba(255,160,40,.42)}}
 .vp{animation:vp 1.3s ease-in-out infinite}
 @keyframes vp{0%,100%{fill:rgba(142,68,214,.05)}50%{fill:rgba(142,68,214,.3)}}
 .halo{animation:halo 1.2s ease-in-out infinite}
 @keyframes halo{0%,100%{stroke-opacity:.25;stroke-width:4}50%{stroke-opacity:.7;stroke-width:10}}
-.dashp{animation:dashp 1.6s ease-in-out infinite}
-@keyframes dashp{0%,100%{opacity:.35}50%{opacity:1}}
 .nudge{animation:nudge 1.1s ease-in-out infinite}
 @keyframes nudge{0%,100%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
 .tag{position:absolute;transform:translate(-50%,-50%);font-weight:800;font-size:18px;padding:5px 14px;border-radius:10px;background:#fff;white-space:nowrap;box-shadow:0 2px 6px rgba(18,59,99,.12)}
 .vlab{background:transparent;box-shadow:none;padding:0;font-size:21px;font-weight:900;color:#123b63}
 .alab{background:rgba(255,255,255,.75);box-shadow:none;padding:1px 6px;font-size:17px;font-weight:900;color:#123b63}
-.btag{border:2px solid #f08a24;color:#a8500a;animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
-.ltag,.mtag{border:2px solid #8e44d6;color:#6a2bb0;animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
-.mtag.eq{border-color:#2e9e4f;color:#1d6b35;background:#effbf1}
+.mtag{border:2px solid #8e44d6;color:#6a2bb0;animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
 @keyframes pop{from{transform:translate(-50%,-50%) scale(.75);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
 .tag.off{display:none}
 .alab,.vlab{transition:none}
 .alab{animation:fade .3s ease-out}
-/* screen 3 (letterIn): the corner letters start hidden and only appear as each flies in on its voice cue */
+/* screen 3: the corner letters stay hidden until each one flies in on its voice cue */
 .tag.vlab.vin:not([data-landed]){opacity:0}
 .chip{font-family:'Baloo 2',system-ui,sans-serif;font-weight:700;font-size:27px;line-height:1.1;padding:9px 28px 7px;border-radius:14px;border:2px solid #cfe6f7;background:#fff;color:#123b63;box-shadow:0 4px 12px rgba(18,59,99,.14);animation:chipIn .34s cubic-bezier(.2,1.25,.5,1);white-space:pre}
 .chip.long{font-size:23px;padding:8px 22px 6px}
-/* shape-name (k: 'name') and angle-sum (k: 'gold') labels share one reference style: warm cream face, a clean teal
-   border, deep-teal heavy rounded type, generous rounding. Flat and calm - no gloss, lip or glow */
+/* shape-name ('name') and angle-sum ('gold') chips share one look: cream face, teal border */
 .chip.name,.chip.gold{font-family:'Nunito',system-ui,sans-serif;font-weight:900;font-size:28px;line-height:1.15;letter-spacing:.2px;
   color:#0b5b70;background:#fbf8ee;border:4px solid #5cc6cf;border-radius:22px;padding:8px 34px 9px;
   box-shadow:0 4px 12px rgba(11,91,112,.10)}
 .chip.name.long,.chip.gold.long{font-size:24px;padding:8px 28px 9px}
-.chip.good{background:#e2f7e6;color:#1d6b35;border-color:#8fd3a1}
-.chip.bad{background:#fde6e2;color:#9b2c1f;border-color:#f2a99d}
 @keyframes chipIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
 .edge{transition:stroke .5s ease,stroke-width .3s cubic-bezier(.3,0,.3,1)}
-/* screen 4: a slanted side flashes once (thicker, soft pink glow) before its dotted extension draws */
-.edge.flash{animation:edgeFlash .8s ease-in-out}
-@keyframes edgeFlash{0%,100%{stroke-width:5px;filter:none}50%{stroke-width:9px;filter:drop-shadow(0 0 6px rgba(232,40,122,.75))}}
-@media (prefers-reduced-motion: reduce){.edge.flash{animation:none;stroke-width:8px}}
+/* angle arcs draw in; .d1-.d3 stagger them */
 .arc{stroke-dasharray:100 100;animation:arcIn .5s ease-out backwards}
 .d1{animation-delay:.15s}
 .d2{animation-delay:.3s}
@@ -77,7 +66,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 @keyframes ready{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
 .ibtn{width:48px;height:48px;border-radius:50%;border:2px solid #cfe6f7;background:#fff;color:#123b63;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;box-shadow:0 3px 0 #a9cfe8}
 .ibtn:disabled{opacity:.45;cursor:not-allowed}
-/* answer cards: a raised, glossy game button - lifts on hover, squashes down when pressed */
+/* answer cards: a raised button that lifts on hover and squashes when pressed */
 .opt{border:3px solid #bfe0f5;background:linear-gradient(180deg,#ffffff 0%,#f2f9ff 100%);color:#123b63;border-radius:18px;font-weight:800;font-size:20px;cursor:pointer;
   box-shadow:0 5px 0 #9ccbe8,0 10px 18px rgba(18,59,99,.12);transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease}
 .opt:hover{transform:translateY(-3px);border-color:#8cc8ef;box-shadow:0 8px 0 #9ccbe8,0 14px 22px rgba(18,59,99,.16)}
@@ -86,40 +75,34 @@ a{color:#123b63}a:hover{color:#0b2742}
 .opt.bad{background:#fde6e3;border-color:#d94a35;box-shadow:0 4px 0 #ad3523;animation:shake .4s ease}
 .opt:disabled{cursor:default}
 .opt:disabled:hover{transform:none}
-@keyframes bumpA{0%,100%{transform:scale(1)}40%{transform:scale(1.12)}}
-@keyframes bumpB{0%,100%{transform:scale(1)}40%{transform:scale(1.12)}}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
-/* check 4 (screen 36) label cards: raised, roomy, with a small grip so they read as "pick me up" */
+/* check 4 (screen 41) label cards; restyled further down */
 .lab{position:absolute;width:200px;height:56px;box-sizing:border-box;border-radius:14px;border:2px solid #efcb6e;background:linear-gradient(180deg,#fff7da 0%,#fdeec0 100%);color:#6e4210;font-weight:900;font-size:15px;display:flex;align-items:center;justify-content:center;cursor:grab;box-shadow:0 4px 0 #d9b04c,0 6px 12px rgba(18,59,99,.10);touch-action:none;padding:0 8px 0 22px;
   transition:left .28s cubic-bezier(.22,.8,.3,1),top .28s cubic-bezier(.22,.8,.3,1),transform .18s ease,box-shadow .18s ease}
 .lab::before{content:'';position:absolute;left:9px;top:50%;width:6px;height:14px;margin-top:-7px;opacity:.55;
   background:radial-gradient(circle,#b8862a 1.2px,transparent 1.6px) 0 0/3px 4.7px}
 .lab:hover{transform:translateY(-2px)}
 .lab.sel{border-color:#d9640a;box-shadow:0 0 0 4px rgba(217,100,10,.25),0 4px 0 #d9b04c}
-/* picked up: lifts, grows a little and tilts, follows the finger exactly (no left/top easing) */
+/* picked up: lifts and tilts; no left/top easing, so it follows the finger exactly */
 .lab.drag{cursor:grabbing;box-shadow:0 16px 26px rgba(18,59,99,.28);transform:scale(1.07) rotate(-2deg);z-index:5;transition:transform .18s ease,box-shadow .18s ease}
 .lab.lock{background:#e3f7e7;border-color:#2e9e4f;color:#1d6b35;box-shadow:0 4px 0 #23803f;cursor:default;padding:0 8px}
 .lab.lock::before{display:none}
 .lab.lock:hover{transform:none}
-/* drop zones: blank. Soft dashed outline and a faint inner glow that gently breathes so it reads as "put something here" */
+/* drop boxes: a dashed outline that breathes while empty */
 .slot{position:absolute;width:284px;height:64px;box-sizing:border-box;border-radius:16px;border:2.5px dashed #9fcbe9;background:rgba(255,255,255,.42);cursor:pointer;
   box-shadow:inset 0 2px 8px rgba(43,123,214,.07);transition:border-color .2s ease,background .2s ease,transform .2s ease,box-shadow .2s ease}
 .slot.empty{animation:slotBreathe 2.8s ease-in-out infinite}
 @keyframes slotBreathe{0%,100%{border-color:#a8d0ec;background:rgba(255,255,255,.40)}50%{border-color:#7fbbe4;background:rgba(255,255,255,.58)}}
 .slot.ready{border-color:#6fb2e2;background:rgba(236,247,255,.72)}
-/* the held label is over this box: warm highlight, a touch bigger */
+/* a label is held over this box */
 .slot.hot{border-color:#f0a020;border-style:solid;background:rgba(255,246,222,.92);transform:scale(1.03);box-shadow:0 0 0 4px rgba(240,160,32,.18)}
 .slot.filled{border-color:transparent;background:transparent;box-shadow:none}
 @media (prefers-reduced-motion: reduce){.slot.empty{animation:none}.lab,.slot{transition:none}}
-.star{color:#c9d6e0}
-.star.on{color:#f2b51c}
-.startbtn{height:68px;padding:0 40px;border-radius:999px;border:0;background:#d9640a;color:#fff;font-family:'Baloo 2',system-ui,sans-serif;font-weight:800;font-size:30px;display:flex;align-items:center;gap:12px;box-shadow:0 6px 0 #a54a05;cursor:pointer;animation:ready 1.8s ease-in-out infinite}
 /* Swiftee: sprite canvas over a still fallback; the still hides once the first frame is drawn */
 .swiftee-sprite{opacity:0;transition:opacity .2s ease}
 .swiftee[data-live] .swiftee-sprite{opacity:1}
 .swiftee[data-live] .swiftee-still{opacity:0;transition:opacity .2s ease}
-/* Hand nudge: the wrapper sits exactly on the target; the fingertip (25px, 22px into the 64x90 hand) lands on it.
-   Each showing fades in, presses a few times (or demonstrates a drag), then fades out. */
+/* hand nudge: the wrapper sits on the target, and the fingertip (25px, 22px into the 64x90 hand) lands on it */
 .hand-nudge{position:absolute;width:0;height:0;pointer-events:none;z-index:20;animation:handLife 4.4s linear forwards}
 .hand-move{position:absolute;left:-25px;top:-22px;width:64px;height:90px;transform-origin:25px 22px;filter:drop-shadow(0 4px 6px rgba(18,59,99,.28))}
 .hand-move img{display:block;width:100%;height:100%}
@@ -128,7 +111,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 .hand-nudge.tap .hand-ring{animation:handRing 1.4s ease-out infinite}
 .hand-nudge.drag .hand-move{animation:handDrag 2.1s cubic-bezier(.45,0,.3,1) infinite}
 .hand-nudge.drag .hand-ring{animation:handRingDrag 2.1s ease-out infinite}
-/* handOnce: a single drag gesture, then gone */
+/* handOnce (screen 20): one drag demo, then gone */
 .hand-nudge.once{animation-duration:2.3s}
 .hand-nudge.once .hand-move,.hand-nudge.once .hand-ring{animation-iteration-count:1}
 @keyframes handLife{0%{opacity:0}7%{opacity:1}92%{opacity:1}100%{opacity:0}}
@@ -136,41 +119,29 @@ a{color:#123b63}a:hover{color:#0b2742}
 @keyframes handRing{0%,44%{transform:scale(.35);opacity:0}52%{opacity:.9}100%{transform:scale(1.45);opacity:0}}
 @keyframes handDrag{0%{transform:translate(12px,18px);opacity:0}12%{transform:translate(0,0);opacity:1}22%{transform:translate(0,0) scale(.88)}66%{transform:translate(var(--dx),var(--dy)) scale(.88);opacity:1}76%{transform:translate(var(--dx),var(--dy)) scale(1);opacity:1}92%,100%{transform:translate(var(--dx),var(--dy)) scale(1);opacity:0}}
 @keyframes handRingDrag{0%,14%{transform:scale(.35);opacity:0}22%{opacity:.9}50%,100%{transform:scale(1.45);opacity:0}}
-/* checks: never point at an answer; the open options glow together instead */
-.opt.nudged{animation:optNudge 1.5s ease-in-out 3}
-@keyframes optNudge{0%,100%{box-shadow:0 4px 0 #9ccbe8,0 0 0 0 rgba(240,138,36,0)}50%{box-shadow:0 4px 0 #9ccbe8,0 0 0 6px rgba(240,138,36,.35)}}
 @media (prefers-reduced-motion: reduce){
-  .hand-nudge,.hand-nudge .hand-move,.hand-nudge .hand-ring,.opt.nudged{animation:none}
+  .hand-nudge,.hand-nudge .hand-move,.hand-nudge .hand-ring{animation:none}
   .hand-nudge .hand-ring{opacity:.6}
 }
-/* pointing down from above (targets at the bottom edge, e.g. Next): the hand is turned about its fingertip */
+/* pointing down (targets near the bottom edge): the hand turns about its fingertip */
 .hand-nudge.down .hand-move img{transform:rotate(180deg);transform-origin:25px 22px}
 .hand-nudge.down.tap .hand-move{animation-name:handTapDown}
 @keyframes handTapDown{0%{transform:translate(-14px,-20px)}38%{transform:translate(0,0) scale(1)}48%{transform:translate(0,0) scale(.88)}60%{transform:translate(0,0) scale(1)}100%{transform:translate(-14px,-20px)}}
-/* Spotlight screen. The board glides to centre stage and grows; its fill breathes with a soft glow.
-   Swiftee hops between home (left) and spotlight (right) with a short fade-and-rise rather than sliding across the board. */
+/* shape board: moves smoothly when its transform changes (the board <svg> sets the same transition inline) */
 .board{transform-origin:0 0;transition:transform .7s cubic-bezier(.22,.8,.3,1)}
-/* (the board <svg> takes its transform-origin/transition inline: the runtime does not bind class on the svg root) */
-.shape-fill.spot{animation:shapePulse 2.4s ease-in-out .7s infinite}
-@keyframes shapePulse{0%,100%{fill:rgba(229,205,234,.92);filter:drop-shadow(0 0 0 rgba(232,40,122,0))}50%{fill:rgba(240,176,214,.95);filter:drop-shadow(0 0 14px rgba(232,40,122,.4))}}
+/* Swiftee fades and rises into place */
 .swiftee{left:130px;animation:swHome .45s ease-out}
-.swiftee.spot{left:900px;animation:swSpot .5s ease-out}
 @keyframes swHome{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@keyframes swSpot{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .bubble.gone{display:none}
-@media (prefers-reduced-motion: reduce){.board{transition:none}.shape-fill.spot,.swiftee,.swiftee.spot{animation:none}}
-/* Leg highlight ("These two sides look like they will meet"): a yellow band under AD and BC that gently breathes */
-.leg-glow{stroke-opacity:.9;animation:legGlow 1.8s ease-in-out infinite}
-@keyframes legGlow{0%,100%{stroke-opacity:.78;stroke-width:20px}50%{stroke-opacity:1;stroke-width:25px}}
-@media (prefers-reduced-motion: reduce){.leg-glow{animation:none;stroke-opacity:.8}}
-/* Bubble leaving (focus screens): fade and sink slightly, then stop taking clicks */
+@media (prefers-reduced-motion: reduce){.board{transition:none}.swiftee{animation:none}}
+/* bubble stepping aside: fades and sinks, then hides */
 .bubble{transition:opacity .35s ease,transform .35s ease,visibility 0s}
 .bubble.away{opacity:0;transform:translateY(8px) scale(.96);visibility:hidden;transition:opacity .35s ease,transform .35s ease,visibility 0s .35s}
 @media (prefers-reduced-motion: reduce){.bubble,.bubble.away{transition:none}}
-/* screens move on by themselves: Next is taken out of the layout, so Back sits in the corner */
+/* bottom Next / Back: hidden when CONFIG.flow turns them off or the screen moves on by itself */
 .next.auto{display:none}
 .ibtn.auto{display:none}
-/* Top-right Back / Next: glossy sky-blue pills, same on every screen; press = sink + slight shrink */
+/* top-right Back / Next (the crystal button rules further down restyle them) */
 .topnav{z-index:15}
 .navbtn{position:relative;min-width:92px;height:42px;padding:0 20px;border-radius:14px;border:2px solid rgba(255,255,255,.9);
   background:linear-gradient(180deg,#9ee2ff 0%,#56bdf4 52%,#3aa7ea 100%);color:#fff;font-family:'Baloo 2',system-ui,sans-serif;
@@ -185,86 +156,66 @@ a{color:#123b63}a:hover{color:#0b2742}
 @media (prefers-reduced-motion: reduce){.navbtn{transition:none}}
 /* forced line break inside the bubble (\n in a line) */
 .w.brk{flex-basis:100%;height:0;opacity:0}
-.leg-glow{animation:legGlowIn .35s ease-out,legGlow 1.8s ease-in-out .35s infinite}
-@keyframes legGlowIn{from{stroke-opacity:0;stroke-width:12px}to{stroke-opacity:.78;stroke-width:20px}}
-@media (prefers-reduced-motion: reduce){.leg-glow{animation:none}}
-/* Base / Leg pill labels (screens 14-15) */
-.callout{filter:drop-shadow(0 3px 6px rgba(18,59,99,.16))} /* the pills come in one by one via GSAP (Motion.calloutIn) */
-/* Screen list (top-left): same pill as Back/Next; panel of live snapshots (assets/thumbs, see tools/build-thumbs.js) */
+/* Base / Leg labels (screens 14 and 15) */
+.callout{filter:drop-shadow(0 3px 6px rgba(18,59,99,.16))} /* GSAP brings the pills in (Motion.calloutIn) */
+/* screen list (top left): the Screens button opens a panel with one tile per screen */
 .screens-btn{z-index:16;min-width:0;padding:0 18px}
 .screens-scrim{position:absolute;left:0;top:0;width:1280px;height:720px;background:rgba(13,34,54,.22);z-index:17;animation:fade .2s ease-out}
 .screens-panel{position:absolute;left:24px;top:66px;width:548px;max-height:600px;overflow-y:auto;box-sizing:border-box;padding:12px;
   display:grid;grid-template-columns:repeat(3,1fr);gap:10px;background:rgba(255,255,255,.96);border:2px solid #cfe6f7;border-radius:18px;
   box-shadow:0 14px 34px rgba(18,59,99,.28);z-index:18;touch-action:pan-y;animation:panelIn .22s ease-out}
 @keyframes panelIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
-.thumb{position:relative;padding:0;border:2px solid #d6e8f5;border-radius:10px;background:#dff1fd;cursor:pointer;overflow:hidden;aspect-ratio:16/9;transition:transform .12s ease,border-color .12s ease}
-.thumb img{display:block;width:100%;height:100%;object-fit:cover}
+.thumb{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-height:76px;padding:8px 9px;box-sizing:border-box;
+  border:2px solid #d6e8f5;border-radius:10px;background:#eef8ff;cursor:pointer;overflow:hidden;text-align:left;transition:transform .12s ease,border-color .12s ease}
+.thumb-t{font-family:'Nunito',system-ui,sans-serif;font-weight:700;font-size:12.5px;line-height:1.25;color:#123b63;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .thumb:hover{transform:translateY(-2px);border-color:#56bdf4}
 .thumb:active{transform:scale(.97)}
 .thumb.cur{border-color:#d9640a;box-shadow:0 0 0 3px rgba(217,100,10,.25)}
-.thumb-n{position:absolute;left:6px;bottom:5px;min-width:22px;height:20px;padding:0 6px;box-sizing:border-box;border-radius:10px;background:rgba(18,59,99,.82);color:#fff;font-weight:800;font-size:12px;line-height:20px;text-align:center}
+.thumb-n{flex:none;min-width:22px;height:20px;padding:0 6px;box-sizing:border-box;border-radius:10px;background:rgba(18,59,99,.82);color:#fff;font-weight:800;font-size:12px;line-height:20px;text-align:center}
 .thumb.cur .thumb-n{background:#d9640a}
-/* thumbnail capture (tools/build-thumbs.js) hides the chrome */
-.thumbs-capture .screens-btn,.thumbs-capture .topnav,.thumbs-capture .hand-nudge{display:none!important}
-/* measured side: the band stops pulsing and settles to a soft, steady yellow */
-.leg-glow.done{animation:none;stroke-opacity:.5;stroke-width:18px;transition:stroke-opacity .4s ease}
-/* hand-broken lines (\n): keep exactly those lines; the bubble grows to the longest one instead of re-wrapping */
+/* hand-broken lines (\n): keep exactly those lines; the bubble widens to the longest one */
 .bubble.manual{max-width:420px}
 .bubble.manual .bubble-text{flex-wrap:wrap}
 .bubble.manual .w{white-space:nowrap}
-/* 'top' layout: Swiftee small at the panel's top-left, bubble beside her (tail points left), shape centred */
-.swiftee.top{left:112px;top:66px!important;animation:swTopIn .45s ease-out} /* same size as everywhere: only the position changes */
-@keyframes swTopIn{from{opacity:0}to{opacity:1}}
-.bubble.top{left:358px!important;top:128px!important;bottom:auto!important;max-width:640px;transform-origin:0 50%}
-.bubble.top .bubble-tail{left:-29px;top:calc(50% - 15px);margin-top:0;transform:rotate(90deg)}
-@media (prefers-reduced-motion: reduce){.swiftee.top{animation:none}}
-/* live angle sums beside the legs */
+/* live angle sums (screen 29) */
 .tag.sum{font-size:18px;padding:6px 14px;border:2px solid #2e9e4f;color:#1d6b35;background:#effbf1;transition:left .18s ease-out,top .18s ease-out}
-/* recap card: rows pop in one after another */
-.recap{background:rgba(255,255,255,.92);border:3px solid #cfe6f7;border-radius:24px;padding:20px 22px;box-shadow:0 10px 26px rgba(18,59,99,.14);animation:fade .35s ease-out}
-.recap-title{font-family:'Baloo 2',system-ui,sans-serif;font-weight:800;font-size:28px;color:#123b63;text-align:center;margin-bottom:12px}
-.recap-row{display:flex;align-items:flex-start;gap:12px;font-weight:700;font-size:17px;line-height:1.35;color:#123b63;padding:10px 12px;border-radius:14px;background:#f3f9fe;margin-top:9px;opacity:0;animation:recapIn .45s cubic-bezier(.2,1.3,.5,1) forwards}
-.recap-row b{font-weight:900}
-.recap-n{flex:none;width:30px;height:30px;border-radius:50%;background:#2b7bd6;color:#fff;font-weight:900;font-size:16px;display:flex;align-items:center;justify-content:center}
-.recap-row.r1{animation-delay:.4s}.recap-row.r2{animation-delay:1.1s}.recap-row.r3{animation-delay:1.8s}.recap-row.r4{animation-delay:2.5s}
-.recap-row.r2 .recap-n{background:#8e44d6}.recap-row.r3 .recap-n{background:#2e9e4f}.recap-row.r4 .recap-n{background:#d9640a}
-@keyframes recapIn{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion: reduce){.recap-row{animation:none;opacity:1}}
-/* "Great job!" celebration: three stars pop in, confetti falls once */
+/* confetti for "Great job!" (screen 36), falls once */
 .celebrate{position:absolute;left:0;top:0;width:1280px;height:720px;pointer-events:none;overflow:hidden}
-.big-stars{position:absolute;left:626px;top:270px;width:500px;display:flex;justify-content:center;align-items:flex-end;gap:18px}
-.bs{opacity:0;animation:starPop .6s cubic-bezier(.2,1.6,.4,1) forwards;filter:drop-shadow(0 6px 10px rgba(196,143,5,.35))}
-.bs.s1{animation-delay:.25s}.bs.s2{animation-delay:.5s;margin-bottom:22px}.bs.s3{animation-delay:.75s}
-@keyframes starPop{from{opacity:0;transform:scale(.2) rotate(-40deg)}to{opacity:1;transform:scale(1) rotate(0)}}
 .cf{position:absolute;top:-24px;width:10px;height:16px;border-radius:3px;opacity:0;animation:cfFall 2.6s cubic-bezier(.3,.6,.5,1) forwards}
 @keyframes cfFall{0%{opacity:1;translate:0 0}85%{opacity:1}100%{opacity:0;translate:-30px 760px;rotate:540deg}}
-@media (prefers-reduced-motion: reduce){.cf{display:none}.bs{animation:none;opacity:1}}
-/* Scene layout (screens 1-30): ice panel on the right, Swiftee + bubble on the snow at the left */
+@media (prefers-reduced-motion: reduce){.cf{display:none}}
+/* scene layout (every screen): ice panel on the right, Swiftee and her bubble on the snow at the left.
+   !important overrides the inline positions in index.html */
 .stage.scene .panel-img{left:512px!important;top:104px!important;width:728px!important;height:480px!important}
-.stage.scene .swiftee,.stage.scene .swiftee.top{left:70px!important;top:412px!important}
-.stage.scene .bubble,.stage.scene .bubble.top{left:87px!important;top:auto!important;bottom:290px!important;max-width:380px;transform-origin:126px 100%}
+.stage.scene .swiftee{left:70px!important;top:412px!important}
+.stage.scene .bubble{left:87px!important;top:auto!important;bottom:290px!important;max-width:380px;transform-origin:126px 100%}
 .stage.scene .bubble.manual{max-width:420px}
-.stage.scene .bubble .bubble-tail,.stage.scene .bubble.top .bubble-tail{left:120px;top:100%;margin-top:-1px;transform:none}
+.stage.scene .bubble .bubble-tail{left:120px;top:100%;margin-top:-1px;transform:none}
+/* measuring room (screens 16 and 23): the measuring slab replaces the ice panel and Swiftee stands small
+   in its bottom-left corner */
+.slab-img{opacity:0;transition:opacity .45s ease}
+.stage.scene .panel-img{transition:opacity .45s ease}
+.stage.scene.measure-room .panel-img{opacity:0}
+.stage.scene.measure-room .slab-img{opacity:1}
+.stage.scene.measure-room .swiftee{left:200px!important;top:453px!important;transform-origin:0 0;transform:scale(.55);animation:none!important;
+  transition:opacity .2s ease,left .6s cubic-bezier(.22,.8,.3,1),top .6s cubic-bezier(.22,.8,.3,1),transform .6s cubic-bezier(.22,.8,.3,1)}
+.stage.scene.measure-room .bubble{left:205px!important;top:auto!important;bottom:259px!important;max-width:420px;transform-origin:60px 100%}
+.stage.scene.measure-room .bubble .bubble-tail{left:52px;top:100%;margin-top:-1px;transform:none}
+@media (prefers-reduced-motion: reduce){.slab-img,.stage.scene .panel-img,.stage.scene.measure-room .swiftee{transition:none}}
 .stage.scene .opt{transition:transform .12s ease}
-/* snowfall layer (js/snowfall.js): hidden in thumbnail captures so snapshots stay stable */
-.thumbs-capture .snowfall{display:none}
-/* a turned-over ruler keeps its numbers upright */
-.ruler.turned text{transform:scaleY(-1);transform-box:fill-box;transform-origin:center}
-/* screen 13: home Swiftee steps away while the walker measures on the shape */
+/* screen 16: home Swiftee fades out while the walker measures the sides */
 .swiftee.away{opacity:0;transition:opacity .15s ease}
 .tape{filter:drop-shadow(0 1px 1px rgba(122,90,16,.35))}
-/* tape-measure numbers (screen 13) */
-/* home Swiftee fades out/in as the walker takes over, so the hand-off has no pop */
+/* home Swiftee fades rather than pops when the walker takes over */
 .swiftee{transition:opacity .2s ease}
-/* check 1: a wrongly picked shape traces its sides one by one, so the learner sees no pair runs the same way */
+/* check 1: a wrong shape traces its sides one by one, to show that no two are parallel */
 .opt .sd{opacity:0}
 .opt.bad .sd{animation:sideTrace 2.6s ease-in-out both}
 .opt.bad .sd.s2{animation-delay:.5s}.opt.bad .sd.s3{animation-delay:1s}.opt.bad .sd.s4{animation-delay:1.5s}
 @keyframes sideTrace{0%{opacity:0}12%{opacity:.95}35%{opacity:.95}60%,100%{opacity:0}}
 @media (prefers-reduced-motion: reduce){.opt.bad .sd{animation:none}}
-.thumbs-capture .confetti{display:none}
-/* voice-over sync (s.emph): the part being named grows, holds briefly (CONFIG.emph.holdMs), then eases back.
-   Same .3s easing for every part: angle arc (+ its degree tag), side, vertex dot */
+/* voice-over emphasis: the part being named (arc and its label, side, corner dot) grows, then eases back */
 .arc{transition:stroke-width .3s cubic-bezier(.3,0,.3,1),transform .3s cubic-bezier(.3,0,.3,1)}
 .arc.emph{stroke-width:10px;transform:scale(1.3)}
 .edge.emph{stroke-width:9px;animation:sidePulse .65s ease-in-out}
@@ -273,8 +224,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 .tag.alab.emph{transform:translate(-50%,-50%) scale(1.2)}
 .vdot{transition:r .3s cubic-bezier(.3,0,.3,1)}
 @media (prefers-reduced-motion: reduce){.arc,.edge,.tag.alab,.vdot{transition:none}.edge.emph{animation:none}}
-/* qFocus check screens (screen 34): the question shape glides to the centre once the bubble has gone,
-   then the answers come in one by one under it */
+/* check 2 (screen 39): the shape glides to the centre once the bubble has gone, then the answers come in one by one */
 .qshape{transition:left .7s cubic-bezier(.22,.8,.3,1),top .7s cubic-bezier(.22,.8,.3,1)}
 .opts-in .opt{animation:optIn .42s cubic-bezier(.2,1.2,.5,1) backwards;animation-delay:.75s}
 .opts-in .opt:nth-child(2){animation-delay:.93s}
@@ -283,62 +233,43 @@ a{color:#123b63}a:hover{color:#0b2742}
 @keyframes optIn{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
 .opts-in .opt.bad{animation:shake .4s ease}
 @media (prefers-reduced-motion: reduce){.qshape{transition:none}.opts-in .opt{animation:none}}
-.opts-in .opt.nudged{animation:optNudge 1.5s ease-in-out 3}
-/* emphasised side (no yellow band anywhere): the side itself goes a little bolder in its own colour */
+/* a lit side is drawn a little bolder in its own colour */
 .edge.lit{stroke-width:8px}
 .edge.lit.emph{stroke-width:10px}
-/* screen 4 leg trace: a soft pink glow drawn on along the leg (D->A, C->B); at the corner it fades off the side while
-   the dotted extension (xleg) draws on from the corner */
+/* a glow that runs along a side (the pen on screen 1, the extensions on screens 7 and 8) */
 .trace{opacity:.95;filter:drop-shadow(0 0 4px rgba(232,40,122,.45));transition:opacity .35s ease}
-.trace.leg{stroke:#8e44d6;filter:drop-shadow(0 0 4px rgba(142,68,214,.5))} /* along a leg the glow is the legs' purple */
+.trace.leg{stroke:#8e44d6;filter:drop-shadow(0 0 4px rgba(142,68,214,.5))} /* purple on a leg */
 .trace.out{opacity:0}
 .xleg{animation:xlegIn .2s ease both}
 @keyframes xlegIn{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion: reduce){.xleg{animation:none}.trace{transition:none}}
-/* settling glow round a finished outline (screens 1 and 4) */
-.outline-settle{opacity:0;filter:drop-shadow(0 0 7px rgba(232,40,122,.55))} /* faded in/out by GSAP (js/motion.js) */
-/* screen 2 side numbers: bold plain numerals (no box); their entrance is GSAP (Motion.sideNums) */
+/* glow round the finished outline (screen 1) */
+.outline-settle{opacity:0;filter:drop-shadow(0 0 7px rgba(232,40,122,.55))} /* GSAP fades it in and out */
+/* screen 2 side numbers: plain bold numerals; GSAP brings them in (Motion.sideNums) */
 .tag.snum{background:none;box-shadow:none;padding:0;font-family:'Nunito',system-ui,sans-serif;font-weight:900;font-size:26px;color:#123b63}
 
-/* Choreographed motion (screen 1 build glow + fill, side numbers, corner letters, shape assembly, shape zoom,
-   wrong-way wiggle, leg/base traces) runs on GSAP in js/motion.js; this sheet keeps the static looks and the small
-   hover / state transitions. */
-/* screen 23: arcs and angle values wait hidden for the voice cue (Motion.anglesIn sets them visible inline) */
+/* screen 23: arcs and angle values stay hidden until their cue (Motion.anglesIn) */
 .arc.pre,.tag.alab.pre{opacity:0;animation:none}
-/* screen 34 "hero" finale: the ice board fades away and Swiftee is the whole scene - centred, a soft hover (GSAP,
-   Motion.heroIn), her bubble centred just above her head, a warm glow behind her, two small stars at her sides and a
-   few twinkling sparkles. Everything else stays clear. */
+/* end screen (43): no panel; Swiftee flies to centre stage (Motion.heroIn) with her bubble above her */
 .stage .panel-img{transition:opacity .45s ease}
 .stage.hero .panel-img{opacity:0}
 .stage.scene.hero .swiftee{left:510px!important;top:330px!important;animation:none!important}
-.stage.scene.hero .bubble{left:640px!important;top:auto!important;bottom:372px!important;translate:-50% 0;transform-origin:50% 100%}
+.stage.scene.hero .bubble{left:0!important;right:0!important;margin:0 auto;top:auto!important;bottom:372px!important;transform-origin:50% 100%}
 .stage.scene.hero .bubble .bubble-tail{left:calc(50% - 15px)}
-.stage.hero .big-stars{left:420px;top:448px;width:440px;justify-content:space-between;gap:0}
-.stage.hero .bs{animation:none;opacity:0}
-.stage.hero .bs.s2{display:none}
-.stage.hero .bs.s1,.stage.hero .bs.s3{width:64px;height:64px}
-.hglow,.hspk{display:none}
-.stage.hero .hglow{display:block;position:absolute;left:400px;top:250px;width:480px;height:440px;border-radius:50%;
-  background:radial-gradient(closest-side,rgba(255,236,170,.55),rgba(255,236,170,.18) 60%,rgba(255,236,170,0));opacity:0}
-.stage.hero .hspk{display:block;position:absolute;width:18px;height:18px;margin:-9px 0 0 -9px;opacity:0;
-  background:#fff6c8;clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);filter:drop-shadow(0 0 4px rgba(255,214,90,.9))}
-/* screen 26 supplementary-angles figure (GSAP, Motion.supp*): hidden until its voice cue */
-.supp-viz .sv-base,.supp-viz .sv-a,.supp-viz .sv-d,.supp-viz .sv-180{opacity:0}
-/* optsAfter screens: the answers slide up one by one as soon as the question has been asked */
+/* optsAfter screens (27 and 40): the answers come in quickly, one after another */
 .opts-in.quick .opt{animation-delay:0s}
 .opts-in.quick .opt:nth-child(2){animation-delay:.16s}
 .opts-in.quick .opt:nth-child(3){animation-delay:.32s}
 .opts-in.quick .opt:nth-child(4){animation-delay:.48s}
-/* screen 28: the curious question mark beside the reshaped trapezium (GSAP, Motion.settleShape) */
-/* screen 29 sum panels: soft cream, thin outline in the pair's colours (A + D orange / yellow, B + C purple / blue) */
+/* screen 29 sum boxes: outlined in their pair's colours (A + D orange / yellow, B + C purple / blue) */
 .tag.sum.sumL,.tag.sum.sumR{background:#fffaf0;color:#123b63;font-weight:900;border-radius:14px;box-shadow:0 3px 0 rgba(0,0,0,.06)}
 .tag.sum.sumL{border:2px solid #f08a24;border-bottom-color:#F5C542;border-right-color:#F5C542}
 .tag.sum.sumR{border:2px solid #8e44d6;border-bottom-color:#2b7bd6;border-right-color:#2b7bd6}
-/* screen 33: the 90° labels inside the right-angled corners (revealed by GSAP) */
+/* screen 35: the 90° labels in the right-angled corners */
 .tag.r90{color:#1d6b35;background:rgba(239,251,241,.9);border:1.5px solid #8fd3a1}
-.r90pre .rmark,.r90pre .tag.r90{opacity:0;animation:none} /* screen 33: hidden from the first frame; GSAP reveals them on cue */
-/* screen 38 (check 3): parts the GSAP story reveals (Motion.q3*) start hidden; the relationship hint sits above the
-   shape; a wrong answer is a warm orange, not red */
+.r90pre .rmark,.r90pre .tag.r90{opacity:0;animation:none} /* hidden from the first frame until GSAP reveals them */
+/* check 3 (screen 40): parts start hidden until GSAP reveals them (Motion.q3*); the hint sits above the shape;
+   a wrong answer is warm orange, not red */
 .q3 .q3-ad,.q3 .q3-vD,.q3 .q3-q,.q3 .q3-wD,.q3 .q3-wA,.q3 .q3-vA{opacity:0}
 .q3-hint{opacity:0;translate:-50% 0;display:flex;align-items:center;gap:8px;padding:6px 16px;border-radius:16px;background:#fbf8ee;border:3px solid #5cc6cf;
   font-family:'Nunito',system-ui,sans-serif;font-weight:900;font-size:22px;color:#0b5b70;box-shadow:0 4px 12px rgba(11,91,112,.10);pointer-events:none}
@@ -347,15 +278,13 @@ a{color:#123b63}a:hover{color:#0b2742}
 .q3-fly{position:absolute;left:0;top:0;opacity:0;pointer-events:none;font-family:'Nunito',system-ui,sans-serif;font-weight:900;font-size:22px;color:#1d6b35;
   background:#e3f7e7;border:2px solid #2e9e4f;border-radius:12px;padding:2px 10px;translate:-50% -50%}
 .soft-wrong .opt.bad{background:#fff3e2;border-color:#f0a020;box-shadow:0 5px 0 #e0a24a,0 10px 18px rgba(18,59,99,.10);color:#8a4b0a}
-/* screen 39 (check 4): labels wait for the instruction; drop boxes glow blue under a held label, turn green with a
-   check once matched, pulse orange on a wrong drop (GSAP); clue lines on the legs start hidden */
+/* check 4 (screen 41): labels and leg clues start hidden; a box glows blue under a held label and turns green
+   when matched */
 .lab.pre{opacity:0;pointer-events:none}
 .q4s .q4-leg{opacity:0}
 .slot.hot{border-color:#56aee8;border-style:solid;background:rgba(230,244,255,.92);transform:scale(1.03);box-shadow:0 0 0 5px rgba(86,174,232,.22)}
 .slot.filled.ok{border:2.5px solid #2e9e4f;background:rgba(227,247,231,.7)}
-.slot.filled.ok::after{display:none;content:'';position:absolute;right:10px;top:50%;width:26px;height:26px;margin-top:-13px;border-radius:50%;background:#2e9e4f;color:#fff;font-weight:900;font-size:16px;line-height:26px;text-align:center}
-/* screen 39 redesign: each row is a "challenge strip" - the shape on its own soft card, a small connector, then its
-   answer slot; label chips are bigger and float gently while they wait */
+/* check 4 rows: the shape on its own card, a small arrow, then the answer box; waiting labels float gently */
 .q4-strip{position:absolute;width:522px;height:96px;border-radius:22px;background:rgba(255,255,255,.38);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.65),0 4px 14px rgba(18,59,99,.06);pointer-events:none}
 .q4-card{position:absolute;width:196px;height:92px;border-radius:18px;background:linear-gradient(180deg,#ffffff,#f4f9ff);box-shadow:0 4px 0 #cfe4f5,0 8px 16px rgba(18,59,99,.10);pointer-events:none}
 .q4-link{position:absolute;width:12px;height:20px;pointer-events:none;background:#8cc3e6;clip-path:polygon(0 0,100% 50%,0 100%);opacity:.75}
@@ -369,52 +298,31 @@ a{color:#123b63}a:hover{color:#0b2742}
 .stage .lab.sel{transform:translateY(-3px) scale(1.03);box-shadow:0 0 0 5px rgba(63,163,232,.35),0 6px 0 #d9b04c}
 .stage .lab.drag{transform:scale(1.04) rotate(-1.5deg)}
 @media (prefers-reduced-motion: reduce){.stage .lab{animation:none!important}}
-/* legsSet screens (13): the purple legs are drawn as they are from the first frame - no colour transition */
+/* screen 13: the purple legs are there from the first frame, with no colour transition */
 .legs-set .eDA,.legs-set .eBC{transition:none}
-/* screens 14-15: a matched pair of labels - both "Base" pills yellow, both "Leg" pills purple (the legs' colour) */
+/* screens 14 and 15: both Base pills yellow, both Leg pills purple */
 .callout.cal-bases .cal-pill{fill:#fde49b;stroke:#f3c552}
 .callout.cal-bases .cal-stem{stroke:#f3c552}
 .callout.cal-legs .cal-pill{fill:#ead7fb;stroke:#8e44d6}
 .callout.cal-legs .cal-stem{stroke:#8e44d6}
-/* screen 35 summary (js/summary.js): one big ice card at a time, Swiftee peeking from behind its left edge; collected
-   cards appear in a row below only once collected. The card recreates the supplied board art: glossy ice-blue face,
-   bright cyan glowing rim, white corner highlights, a soft wave across the bottom */
+/* summary (screen 37, js/summary.js): no panel; Swiftee rises from behind the big card. She sits under the card
+   layer (.sum-root), so the card's rim hides her body. No CSS translate or scale on her or the bubble: GSAP's
+   clean-up on a screen change would carry it over as a transform */
 .stage.summary .panel-img{opacity:0}
-.stage.scene.summary .swiftee{left:226px!important;top:332px!important;animation:none!important}
-.stage.scene.summary .bubble{left:auto!important;right:850px!important;top:auto!important;bottom:400px!important;max-width:380px;z-index:8;transform-origin:85% 100%}
-.stage.scene.summary .bubble .bubble-tail{left:auto;right:56px}
+.stage.scene.summary .swiftee{left:510.5px!important;top:123px!important;transform-origin:50% 0;opacity:0;animation:none!important}
+.stage.scene.summary .bubble{left:0!important;right:0!important;margin:0 auto;top:auto!important;bottom:607px!important;max-width:760px;z-index:8;transform-origin:50% 100%}
+.stage.scene.summary .bubble .bubble-tail{left:calc(50% - 15px)}
 .sum-root{position:absolute;left:0;top:0;width:1280px;height:720px;z-index:6;pointer-events:none}
-.sm-card{position:absolute;left:440px;top:70px;width:780px;height:510px;box-sizing:border-box;border-radius:56px;overflow:hidden;
-  background:radial-gradient(ellipse 70% 60% at 50% 38%,#e3f6fd 0%,#cdeefb 45%,#a9dcf6 100%);
-  border:4px solid #fff;box-shadow:0 0 0 5px #39c3f5,0 0 22px 6px rgba(57,195,245,.55),inset 0 0 26px rgba(57,166,230,.35)}
-.sm-card::before,.sm-card::after{content:'';position:absolute;top:14px;width:84px;height:84px;box-sizing:border-box;border-radius:50%;border:11px solid transparent;border-top-color:rgba(255,255,255,.95);pointer-events:none}
-.sm-card::before{left:14px;transform:rotate(-45deg)}
-.sm-card::after{right:14px;transform:rotate(45deg)}
-.sm-card .sm-wave{position:absolute;left:-10%;right:-10%;bottom:-36%;height:60%;border-radius:50%;background:rgba(150,212,246,.55);pointer-events:none}
-.sm-head{position:absolute;left:0;right:0;top:30px;text-align:center;font-family:'Baloo 2',system-ui,sans-serif;font-weight:800;font-size:34px;color:#123b63;z-index:1}
-.sm-svg{position:absolute;left:30px;top:26px;width:720px;height:466px;overflow:visible;z-index:1}
-.sm-cap{position:absolute;left:30px;right:30px;bottom:30px;display:flex;flex-wrap:wrap;gap:10px 14px;justify-content:center;align-items:center;z-index:1;
-  font-family:'Nunito',system-ui,sans-serif;font-weight:900;font-size:24px;color:#0b5b70}
-.sm-cp{padding:6px 18px;border-radius:18px;background:#fbf8ee;border:3px solid #5cc6cf}
-.sm-cp.hl{border-color:#f5c542}
-.sm-cp.base{background:#fde49b;border-color:#f3c552;color:#123b63}
-.sm-cp.leg{background:#ead7fb;border-color:#8e44d6;color:#123b63}
-.sm-cp.vtx{border-color:#e8287a;color:#123b63}
-.sm-cp.eq b{color:#1d6b35}
-.sm-row{position:absolute;left:478px;top:604px;display:flex;gap:14px}
-.sm-slot{width:150px;height:96px;box-sizing:border-box}
-.sm-mini{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:16px;background:#fbf8ee;box-shadow:inset 0 0 0 2.5px #5cc6cf,0 4px 10px rgba(18,59,99,.12);font-family:'Nunito',system-ui,sans-serif;color:#0b5b70}
-.sm-mini b{font-weight:900;font-size:14px}
-.sm-mini i{display:none}
-.sm-slot.sm-big{z-index:2}
-.sm-slot.sm-big .sm-mini{box-shadow:inset 0 0 0 3px #5cc6cf,0 6px 14px rgba(18,59,99,.14)}
-.sm-slot.sm-big .sm-ico svg{width:170px;height:85px}
-.sm-slot.sm-big .sm-mini b{font-size:24px}
-.sm-slot.sm-big .sm-mini i{display:block;font-style:normal;font-weight:800;font-size:18px;color:#123b63;margin-top:4px}
+.sum-root > svg{position:absolute;left:0;top:0;width:1280px;height:720px;overflow:visible}
+.sum-root .summary-card.tappable{cursor:pointer;pointer-events:visiblePainted}
+/* summary done: a soft gold halo round the top-right Next */
+.sk-ready{position:absolute;border-radius:16px;pointer-events:none;box-shadow:0 0 0 3px rgba(255,214,110,.95),0 0 18px 6px rgba(255,184,40,.6);animation:skReady 1.4s ease-in-out infinite}
+@keyframes skReady{0%,100%{opacity:.35}50%{opacity:1}}
+@media (prefers-reduced-motion: reduce){.sk-ready{animation:none;opacity:.9}}
 
-/* angles already measured (after the angles screen): they stay put instead of drawing in again on every screen */
+/* angles already measured stay put instead of drawing in again */
 .arc.still,.tag.alab.still{animation:none}
-/* focusAng: the pair to notice gets a soft warm glow behind it, the other angles step back (after a short beat) */
+/* focusAng: the pair to notice glows and the other angles step back */
 .arc.glow{animation:arcGlow .7s ease-out .35s both}
 .tag.alab.glow{animation:labGlow .7s ease-out .35s both}
 .arc.dim,.tag.alab.dim{animation:angDim .7s ease-out .35s both}
@@ -423,8 +331,8 @@ a{color:#123b63}a:hover{color:#0b2742}
 @keyframes angDim{from{opacity:1}to{opacity:.35}}
 @media (prefers-reduced-motion: reduce){.arc.glow,.tag.alab.glow,.arc.dim,.tag.alab.dim{animation-duration:.01s;animation-delay:0s}}
 
-/* screen 25: the angle sum built in the formula box (Motion.eqStart / eqFly / eqResult). Same face as the gold chip;
-   each slot stacks its symbol (∠A) and its value (120°) in one cell, so nothing shifts as they swap */
+/* screens 25 and 30: the angle sum built in its box (Motion.eqStart / eqFly / eqResult). Each slot stacks
+   the symbol and the value in one cell, so nothing shifts as they swap */
 .chip.gold.eq-build{position:absolute;z-index:6;display:flex;align-items:center;gap:9px;white-space:nowrap;pointer-events:none;animation:none}
 .eq-r{display:inline-grid;justify-items:start;align-items:center;min-width:6.4em}
 .eq-r>span{grid-area:1/1}
@@ -434,16 +342,13 @@ a{color:#123b63}a:hover{color:#0b2742}
 .tag.alab.eq-fly{z-index:7;pointer-events:none;animation:none;transition:none;background:#fff}
 .eq-layer{position:fixed;width:1280px;height:720px;transform-origin:0 0;pointer-events:none;z-index:50;font-family:'Nunito',system-ui,sans-serif;color:#123b63}
 
-/* screen 29 (explore): the two sums in a fixed row - equal fixed-width boxes, text centred, so nothing shifts as the
-   values change; the box of the leg being dragged (and its two angles) glows softly while it changes */
+/* screen 29: fixed-width sum boxes, so nothing shifts as the values change; the dragged leg's box and angles glow */
 .tag.sum.fixed{min-width:200px;text-align:center;transition:box-shadow .2s ease-out}
 .tag.sum.sumL.live{box-shadow:0 0 0 3px rgba(245,197,66,.55),0 0 14px 2px rgba(240,138,36,.35)}
 .tag.sum.sumR.live{box-shadow:0 0 0 3px rgba(142,68,214,.35),0 0 14px 2px rgba(43,123,214,.30)}
 .arc.live{filter:drop-shadow(0 0 5px rgba(255,184,40,.85));transition:filter .15s ease-out}
 .tag.alab.live{box-shadow:0 0 0 3px rgba(255,214,110,.55),0 0 14px 3px rgba(255,184,40,.45)}
-/* Done: the game's own button style, centred under the equation row; waits (dimmed) until the first drag */
-/* Done (screen 29): centred under the ice panel (x 512..1240, bottom 584), a 16px gap; appears only once the learner
-   has dragged a corner - it pops up into place with a soft glow so the next step is obvious */
+/* Done (screen 29): centred 16px under the ice panel; pops in after the first drag */
 .done-btn{position:absolute;left:876px;top:600px;translate:-50% 0;min-width:140px;height:46px;font-size:21px;z-index:6;
   animation:doneIn .5s cubic-bezier(.3,1.6,.5,1) both,doneGlow 1.8s ease-in-out .6s 2}
 .done-btn:active{transform:translateY(2px) scale(.96)}
@@ -451,14 +356,12 @@ a{color:#123b63}a:hover{color:#0b2742}
 @keyframes doneGlow{0%,100%{box-shadow:0 3px 0 #2181c4,0 6px 12px rgba(18,59,99,.18),inset 0 1px 0 rgba(255,255,255,.7)}50%{box-shadow:0 3px 0 #2181c4,0 0 0 8px rgba(86,189,244,.35),0 6px 16px rgba(18,59,99,.22),inset 0 1px 0 rgba(255,255,255,.7)}}
 @media (prefers-reduced-motion: reduce){.done-btn{animation:none}}
 
-/* screen 30 (sumSteps): fixed-width sum boxes so nothing shifts as symbols turn into values; the result part can pulse */
+/* screen 31: fixed-width sum boxes; .chip-res (the "= 180°" part) is inline-block so it can pulse on its own */
 .chip.gold.sumstep{box-sizing:border-box;width:316px;text-align:center;font-size:25px;padding:8px 20px 9px}
 .chip-res{display:inline-block}
 
-/* answer cards that can no longer be tapped look disabled, everywhere:
-   - a wrong pick: a brief warm flash and shake (feedback), then it settles flat, grey and faded - not left red.
-     Check 1's wrong shape first traces its sides (the explanation), so it settles once that trace has finished.
-   - after the right answer: the untouched cards step back too, so the correct (green) card stands out */
+/* answer cards that can't be tapped any more look disabled. A wrong pick shakes, then greys out (check 1 waits
+   for its side trace; .bad.bad only raises specificity). After a right answer the rest grey out too */
 .opt.bad,.opts-in .opt.bad,.soft-wrong .opt.bad{animation:shake .4s ease,optDisable .45s ease .55s both;cursor:not-allowed}
 .opt.bad.bad:has(.sd){animation:shake .4s ease,optDisable .45s ease 2.6s both}
 @keyframes optDisable{to{background:#eef2f6;border-color:#d5dee6;box-shadow:0 2px 0 #cfd8e0;color:#8193a4;filter:grayscale(1);opacity:.72;transform:none}}
@@ -466,50 +369,77 @@ a{color:#123b63}a:hover{color:#0b2742}
 .opt:disabled{pointer-events:auto}
 @media (prefers-reduced-motion: reduce){.opt.bad,.opts-in .opt.bad,.soft-wrong .opt.bad,.opt.bad.bad:has(.sd){animation:optDisable .01s linear both}}
 
-/* lesson complete (end screen): the same hero stage as "Great job! Now you know all about trapeziums" - no panel,
-   Swiftee centred with the warm glow - with her bubble above her and the score line and Play again below. After she
-   lands the line fades in, then the button */
-.stage.endhero .big-stars{display:none}
+/* end screen (43): the bubble sits a little higher */
 .stage.scene.hero.endhero .swiftee{top:330px!important}
 .stage.scene.hero.endhero .bubble{bottom:396px!important}
-.stage.endhero .hglow{top:250px}
 .end-hero{position:absolute;left:0;top:0;width:1280px;height:720px;pointer-events:none;z-index:4}
 
-/* ---------- front page (cover) ----------
-   The polar bear scene fills the stage and drifts very slowly (a gentle "live" zoom); snow falls over it
-   (js/snowfall.js, .snowfall-cover); the Play button sits on the ice beside the fishing hole, floats softly and sends
-   out ripples like the water. Hover lifts and brightens it, a press squashes it, and on Play it pops while the whole
-   scene zooms softly away into the lesson. */
-.cover{position:absolute;left:0;top:0;width:1280px;height:720px;overflow:hidden;z-index:60;background:#8fd0fb;animation:coverIn .5s ease-out both}
-.cover-art{position:absolute;inset:0;animation:coverDrift 22s ease-in-out infinite alternate;transform-origin:52% 46%}
-.cover-art img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none}
+/* ---------- front page ----------
+   The banner fills the stage. The title, stars and ice glow sit on the artwork (banner px x 0.7656 = stage px);
+   the title is the banner itself, cut out by banner-title-mask.png. On Play the cover zooms away (.leaving). */
+.cover{position:absolute;left:0;top:0;width:1280px;height:720px;overflow:hidden;z-index:60;background:#2a4fb8} /* solid from the first frame, so the lesson never shows through */
+.cover-art{position:absolute;inset:0;transform-origin:50% 46%;animation:coverSettle 1.3s cubic-bezier(.2,.7,.2,1) both}
+.cover-drift{position:absolute;inset:0;transform-origin:52% 46%;animation:coverDrift 22s ease-in-out 1.3s infinite alternate}
+.cover-drift img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none}
+.cover-title{position:absolute;left:329.19px;top:38.09px;width:738.76px;height:321.53px;pointer-events:none;transform-origin:50% 55%;
+  background:url(../assets/images/banner.webp) -329.19px -38.28px/1280px 720.38px no-repeat;
+  -webkit-mask:url(../assets/images/banner-title-mask.png) 0 0/100% 100% no-repeat;mask:url(../assets/images/banner-title-mask.png) 0 0/100% 100% no-repeat;
+  animation:titleIn .9s cubic-bezier(.2,.8,.2,1) .3s both,titleBreathe 3.2s ease-in-out 1.6s infinite}
+.cover-title::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,rgba(255,255,255,0) 42%,rgba(255,255,255,.85) 50%,rgba(255,255,255,0) 58%) no-repeat;
+  background-size:300% 100%;background-position:150% 0;animation:titleShine 4.2s ease-in-out 1.4s infinite}
+.cover-ice{position:absolute;left:596px;top:376px;width:470px;height:260px;border-radius:50%;pointer-events:none;mix-blend-mode:screen;
+  background:radial-gradient(ellipse at 50% 52%,rgba(150,232,255,.75),rgba(150,232,255,0) 66%);animation:iceGlow 2.8s ease-in-out .8s infinite both}
+.cover-spark{position:absolute;width:var(--s);height:var(--s);margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2);fill:#fff;pointer-events:none;opacity:0;
+  filter:drop-shadow(0 0 3px #fff) drop-shadow(0 0 7px rgba(255,214,110,.95));animation:twinkle var(--t) ease-in-out var(--d) infinite}
 .snowfall-cover{position:absolute;left:0;top:0;width:1280px;height:720px;pointer-events:none}
-.play-btn{position:absolute;left:640px;top:597px;width:150px;height:150px;margin:-75px 0 0 -75px;padding:0;border:0;background:none;cursor:pointer;
-  border-radius:50%;-webkit-tap-highlight-color:transparent;animation:playIn .6s cubic-bezier(.3,1.5,.5,1) .45s both}
-.play-btn img{position:relative;display:block;width:100%;height:100%;pointer-events:none;
-  filter:drop-shadow(0 8px 14px rgba(18,59,99,.35));animation:playFloat 2.4s ease-in-out 1.1s infinite;transition:transform .18s cubic-bezier(.3,1.6,.5,1),filter .18s ease}
-.play-btn:hover img{transform:scale(1.09);filter:drop-shadow(0 12px 18px rgba(18,59,99,.4)) brightness(1.08)}
-.play-btn:active img{transform:scale(.88);filter:drop-shadow(0 3px 6px rgba(18,59,99,.35)) brightness(.97);transition-duration:.06s}
-.play-btn:focus-visible{outline:4px solid #fff;outline-offset:6px}
-.play-ring{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;border:4px solid rgba(255,255,255,.85);
-  box-shadow:0 0 12px rgba(120,190,255,.6);opacity:0;pointer-events:none;animation:playRipple 2.4s ease-out 1.1s infinite}
-.play-ring.r2{animation-delay:2.3s}
+/* centred on the stage, on the snow below the ice slab. The art is a snow-capped circle: the box is 116 x 120 and the
+   circle's centre sits 62 px down (left/top = that centre) */
+.play-btn{position:absolute;left:640px;top:660px;width:116px;height:120px;margin:-62px 0 0 -58px;padding:0;border:0;background:none;border-radius:50%;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;animation:playIn .8s cubic-bezier(.3,1.5,.5,1) 1s both}
+/* a warm glow under the button, and an aura that swells out from it */
+.play-btn::before{content:'';position:absolute;inset:-22px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(255,206,20,.6) 40%,rgba(255,214,60,.28) 58%,rgba(255,214,60,0) 72%);animation:playGlow 2.4s ease-in-out 1.8s infinite}
+.play-aura{position:absolute;inset:0;border-radius:50%;pointer-events:none;opacity:0;
+  background:radial-gradient(circle,rgba(255,224,80,0) 48%,rgba(255,206,40,.6) 62%,rgba(255,224,80,0) 74%);animation:playAura 2.4s ease-out 2.4s infinite}
+.play-face{position:absolute;inset:0;filter:drop-shadow(0 8px 12px rgba(120,70,0,.4));
+  animation:playFloat 2.4s ease-in-out 1.8s infinite;transition:scale .22s cubic-bezier(.3,1.6,.5,1),filter .2s ease}
+.play-face img{display:block;width:100%;height:100%;pointer-events:none}
+.play-shine{position:absolute;left:0;top:3.5%;width:100%;height:96.5%;border-radius:50%;pointer-events:none;background:linear-gradient(115deg,rgba(255,255,255,0) 38%,rgba(255,255,255,.75) 50%,rgba(255,255,255,0) 62%) no-repeat;
+  background-size:280% 100%;background-position:160% 0;animation:playShine 3s ease-in-out 2.3s infinite}
+/* three glints twinkle on the rim in turn */
+.play-glints{position:absolute;inset:0;pointer-events:none;animation:playFloat 2.4s ease-in-out 1.8s infinite}
+.play-glints i{position:absolute;width:20px;height:20px;margin:-10px 0 0 -10px;background:#fff;opacity:0;
+  clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);animation:glint 3s ease-in-out infinite}
+.play-glints i:nth-child(1){left:17%;top:42%;animation-delay:2s}
+.play-glints i:nth-child(2){left:91%;top:56%;width:14px;height:14px;margin:-7px 0 0 -7px;animation-delay:3s}
+.play-glints i:nth-child(3){left:68%;top:91%;width:16px;height:16px;margin:-8px 0 0 -8px;animation-delay:4s}
+.play-btn:hover .play-face{scale:1.1;filter:drop-shadow(0 12px 16px rgba(120,70,0,.45)) brightness(1.08) saturate(1.1)}
+.play-btn:active .play-face{scale:.88;filter:drop-shadow(0 3px 6px rgba(120,70,0,.4)) brightness(.96);transition-duration:.06s}
+.play-btn:focus-visible{outline:4px solid #fff;outline-offset:8px}
 .cover.leaving{animation:coverOut .6s ease-in .22s both}
 .cover.leaving .cover-art{animation:coverZoom .8s ease-in both}
 .cover.leaving .play-btn{animation:playPop .45s ease-out both}
-.cover.leaving .play-ring{animation:none;opacity:0}
-@keyframes coverIn{from{opacity:0}to{opacity:1}}
+.cover.leaving .play-aura,.cover.leaving .play-glints,.cover.leaving .play-btn::before{animation:none;opacity:0}
+@keyframes coverSettle{from{opacity:0;transform:scale(1.08);filter:brightness(1.18) saturate(.85)}to{opacity:1;transform:none;filter:none}}
 @keyframes coverDrift{from{transform:scale(1)}to{transform:scale(1.06) translateY(-6px)}}
-@keyframes playIn{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:none}}
+@keyframes titleIn{from{opacity:0;transform:scale(1.22);filter:brightness(1.7)}to{opacity:1;transform:none;filter:none}}
+@keyframes titleBreathe{0%,100%{scale:1}50%{scale:1.025}}
+@keyframes titleShine{0%{background-position:150% 0}45%,100%{background-position:-50% 0}}
+@keyframes iceGlow{0%,100%{opacity:.25}50%{opacity:.85}}
+@keyframes twinkle{0%,100%{opacity:0;transform:scale(.3) rotate(0deg)}50%{opacity:1;transform:scale(1) rotate(45deg)}}
+@keyframes playIn{0%{opacity:0;scale:.2;rotate:-90deg}70%{opacity:1;scale:1.12;rotate:8deg}100%{opacity:1;scale:1;rotate:0deg}}
+@keyframes playGlow{0%,100%{opacity:.55;scale:.94}50%{opacity:1;scale:1.06}}
 @keyframes playFloat{0%,100%{translate:0 0}50%{translate:0 -7px}}
-@keyframes playRipple{0%{opacity:.85;transform:scale(1)}100%{opacity:0;transform:scale(1.75)}}
+@keyframes playShine{0%{background-position:160% 0}40%,100%{background-position:-60% 0}}
+@keyframes playAura{0%{opacity:.9;scale:1}100%{opacity:0;scale:1.7}}
+@keyframes glint{0%,70%,100%{opacity:0;scale:.2;rotate:0deg}82%{opacity:1;scale:1;rotate:45deg}}
 @keyframes playPop{0%{transform:scale(.88)}40%{transform:scale(1.18)}100%{transform:scale(1.35);opacity:0}}
 @keyframes coverZoom{to{transform:scale(1.14)}}
 @keyframes coverOut{to{opacity:0}}
-@media (prefers-reduced-motion: reduce){.cover-art,.play-btn img,.play-ring{animation:none}.play-ring{opacity:0}}
+@media (prefers-reduced-motion: reduce){.cover-art,.cover-drift,.cover-title,.cover-title::after,.cover-ice,.play-btn,.play-btn::before,.play-aura,.play-glints,.play-glints i,.play-face,.play-shine{animation:none}
+  .cover-spark{animation:none;opacity:.8}}
 
-/* screen 7: the point where the extended legs meet pulses - the dot gently breathes (with a soft glow) and two thin
-   rings ripple out from it, one after the other - so the eye lands on "the sides meet" */
+/* screen 7: where the extended legs meet, the dot breathes and two rings ripple out */
 .apex-dot{transform-box:fill-box;transform-origin:center;animation:fade .35s ease-out,apexBreathe 1.6s ease-in-out .35s infinite}
 .apex-ring{transform-box:fill-box;transform-origin:center;opacity:0;pointer-events:none;animation:apexRipple 1.6s ease-out .35s infinite}
 .apex-ring.r2{animation-delay:1.15s}
@@ -517,36 +447,34 @@ a{color:#123b63}a:hover{color:#0b2742}
 @keyframes apexRipple{0%{opacity:.8;transform:scale(1)}100%{opacity:0;transform:scale(3.2)}}
 @media (prefers-reduced-motion: reduce){.apex-dot{animation:fade .35s ease-out}.apex-ring{animation:none}}
 
-/* screen 9 (parStrong): the dashed extensions of the parallel sides are bolder and deeper so they read clearly */
+/* screen 9: bolder dashed extensions of the parallel sides */
 .par-strong .xleg{stroke:#d9531e;stroke-width:4px;stroke-dasharray:10 7}
 
-/* parts that wait for their voice cue (GSAP reveals them inline): len-pre - the side lengths (screens 17, 21);
-   tick-pre - the equal-leg marks (screen 21, made out of the lengths); chev-pre - the parallel arrows (screen 13) */
-/* the cue marks them with data-in (a redraw rewrites the inline style, attributes survive) */
+/* parts that wait for their voice cue: side lengths (len-pre, screens 17 and 21), equal-leg marks
+   (tick-pre, screen 21) and parallel arrows (chev-pre, screens 13, 22 and 35) */
+/* the cue sets data-in: a redraw rewrites inline styles but keeps attributes */
 .len-pre .tag.mtag:not([data-in]){opacity:0}
 .tick-pre .ticks:not([data-in]){opacity:0}
 .chev-pre .chev:not([data-in]){opacity:0}
 .tag.mtag[data-gone]{opacity:0}
-/* screen 16: each length in its own colour (lenColors) */
+/* screen 16: each length in its own colour */
 .tag.mtag[data-col]{transition:background-color .35s ease,border-color .35s ease,color .35s ease}
 .tag.mtag[data-col=AB]{background:#fff4c2;border-color:#e0a800;color:#7a5a00}
 .tag.mtag[data-col=BC]{background:#dcefff;border-color:#2b7bd6;color:#164f8f}
 .tag.mtag[data-col=CD]{background:#d8f5f2;border-color:#1fa39a;color:#0d6b65}
 .tag.mtag[data-col=DA]{background:#ffe6d4;border-color:#f08a24;color:#a8500a}
-/* screen 30: two equation builds side by side - a little smaller so both fit the panel */
+/* screen 30: two equation boxes side by side, a little smaller so both fit */
 .chip.gold.eq-build.eq-pair{font-size:22px;padding:8px 20px 9px;gap:7px}
 .eq-pair .eq-r{min-width:5.6em}
 .tag.alab.eq-fly.small{transform-origin:50% 50%}
 
-/* a right angle's square mark pops into its corner the moment the angle reaches 90° (its arc gives way to it) */
+/* a right angle's square mark pops in, replacing its arc, when the angle reaches 90° */
 .rmark{transform-box:fill-box;transform-origin:center;animation:rmarkIn .35s cubic-bezier(.3,1.6,.5,1)}
 @keyframes rmarkIn{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){.rmark{animation:none}}
 
-/* check 4 labels, redesigned: the lesson's name-card look (cream face, teal border, deep-teal heavy type) with a grip,
-   a raised edge and a gentle float - clearly something to pick up. Picked up: lifts and tilts. Dropped right: it
-   widens to fill its slot and melts into it (the slot turns soft green, the card loses its edge) so the answer reads
-   as part of the strip. Dropped wrong: orange flash + shake (Motion.q4Bad), then it glides back to the tray. */
+/* check 4 labels, final look (overrides the earlier .lab rules): a name card with a grip. Dropped right, it
+   widens and merges into its box */
 .stage .lab{width:208px;height:56px;white-space:nowrap;border:3px solid #5cc6cf;border-radius:18px;background:linear-gradient(180deg,#fffdf6 0%,#fbf6e6 100%);
   color:#0b5b70;font-family:'Nunito',system-ui,sans-serif;font-weight:900;font-size:16px;letter-spacing:0;padding:0 8px 0 22px;
   box-shadow:0 4px 0 #3aa9b3,0 9px 16px rgba(11,91,112,.16);
@@ -560,27 +488,23 @@ a{color:#123b63}a:hover{color:#0b2742}
 .stage .slot.filled.ok{border:2.5px solid #2e9e4f;background:linear-gradient(180deg,#eefbf1,#dff5e5);box-shadow:inset 0 0 0 3px rgba(255,255,255,.6),0 0 0 4px rgba(46,158,79,.12)}
 @keyframes labMerge{0%{transform:scale(1.06)}60%{transform:scale(.98)}100%{transform:none}}
 
-/* screen 22 (shapePre): the panel opens empty; on the voice the trapezium fades in with a soft, settling scale-up */
+/* screen 22: the panel opens empty, then the trapezium fades and scales in on the voice */
 .shape-pre .pop-g:not([data-in]){opacity:0}
 .shape-pre g.pop-g[data-in]{transform-box:fill-box;transform-origin:center;animation:shapeIn .8s cubic-bezier(.25,1.25,.5,1) both}
 .shape-pre div.pop-g[data-in]{animation:shapeIn .8s cubic-bezier(.25,1.25,.5,1) both}
 @keyframes shapeIn{from{opacity:0;transform:scale(.88)}60%{opacity:1}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){.shape-pre .pop-g[data-in]{animation:none}}
 
-/* screen 23 (wedges): the filled angles wait hidden for the voice cue (Motion.anglesIn grows them in from the corner) */
+/* screen 23: the filled angles stay hidden until Motion.anglesIn grows them in */
 .wedge.pre{opacity:0}
-/* the filled angles follow their arcs' focus: a focused pair glows softly, the others step back with them */
+/* the filled angles follow their arcs' focus */
 .wedge.glow{animation:arcGlow .7s ease-out .35s both}
 .wedge.dim{animation:angDim .7s ease-out .35s both}
 .wedge.live{filter:drop-shadow(0 0 5px rgba(255,184,40,.85))}
 
-/* ---------- crystal buttons (one reusable style): answer buttons (.opt.crys) and the top/Done controls (.navbtn) ----------
-   The artwork (assets/images/crystal-button.webp) is drawn as three layers - not a 9-slice, whose separately drawn
-   tiles left hairline seams once the stage is scaled: a left and a right end-cap (crystal-l/-r.webp, the full height,
-   so the bevelled corners keep their exact shape) laid over one continuous middle strip (crystal-m.webp) that runs
-   under the caps; each cap's inner 28 art px fade out over it, so there is no edge between them. Caps are 112 x 256 art
-   px = 0.4375 x the height; the strip reaches 0.11 x the height under each. The art has its own gloss, so no extra
-   background, border or highlight. Shadows use drop-shadow so they follow the crystal's outline. */
+/* ---------- crystal buttons: answers (.opt.crys) and Back / Next / Done (.navbtn) ----------
+   Drawn as a left cap, a right cap and a middle strip under them. Not a 9-slice: once the stage is scaled its
+   tiles leave hairline seams. Shadows use drop-shadow so they follow the crystal's outline. */
 .opt.crys,.navbtn{
   --bh:74px;border:0;border-radius:0;box-shadow:none;
   color:#0d2a5c;font-family:'Baloo 2',system-ui,sans-serif;font-weight:800;text-shadow:0 1px 0 rgba(255,255,255,.55);
@@ -599,44 +523,40 @@ a{color:#123b63}a:hover{color:#0b2742}
 .navbtn{--bh:44px;height:44px;min-width:104px;font-size:19px}
 .navbtn.screens-btn{--bh:44px;padding:0 22px}
 .done-btn{--bh:50px;height:50px;min-width:150px;font-size:22px}
-/* selected / nudged: a soft blue halo */
-.opt.crys.sel,.opt.crys.nudged{filter:drop-shadow(0 0 6px rgba(120,200,255,.95)) drop-shadow(0 3px 0 rgba(13,64,170,.32))}
-/* correct: the crystal glows green-gold for a moment and keeps a light green halo; text turns deep green */
+/* correct: a green-gold flash, then a light green halo */
 .opt.crys.good{color:#145c2e;animation:crysGood .9s ease-out both}
 @keyframes crysGood{0%{filter:drop-shadow(0 0 0 rgba(46,158,79,0)) drop-shadow(0 3px 0 rgba(13,64,170,.32))}35%{filter:brightness(1.12) drop-shadow(0 0 14px rgba(46,200,100,.95)) drop-shadow(0 3px 0 rgba(13,64,170,.32))}100%{filter:drop-shadow(0 0 7px rgba(46,158,79,.75)) drop-shadow(0 3px 0 rgba(13,64,170,.32))}}
-/* wrong: a short shake with a warm halo (orange on soft-wrong screens), then the muted disabled look */
+/* wrong: a shake with a red halo (orange on soft-wrong screens), then the muted look */
 .opt.crys.bad,.opts-in .opt.crys.bad,.soft-wrong .opt.crys.bad{animation:shake .4s ease,crysBad .5s ease-out,crysOff .45s ease .55s both;cursor:not-allowed}
 .soft-wrong .opt.crys.bad{animation:shake .4s ease,crysSoft .5s ease-out,crysOff .45s ease .55s both}
 @keyframes crysBad{0%,60%{filter:drop-shadow(0 0 9px rgba(217,74,53,.8)) drop-shadow(0 3px 0 rgba(13,64,170,.32))}100%{filter:drop-shadow(0 3px 0 rgba(13,64,170,.32))}}
 @keyframes crysSoft{0%,60%{filter:drop-shadow(0 0 9px rgba(240,160,32,.85)) drop-shadow(0 3px 0 rgba(13,64,170,.32))}100%{filter:drop-shadow(0 3px 0 rgba(13,64,170,.32))}}
 @keyframes crysOff{to{filter:grayscale(1) brightness(1.05);opacity:.55;color:#5d6f82;transform:none}}
-/* disabled (not chosen, or the screen is finished): muted, flat, not clickable */
+/* disabled (not chosen, or the screen is done): muted and flat */
 .opt.crys:disabled:not(.good):not(.bad),.navbtn:disabled{filter:grayscale(.85);opacity:.5;cursor:not-allowed;color:#5d6f82;background:none}
 @media (prefers-reduced-motion: reduce){.opt.crys,.navbtn{transition:none}.opt.crys.good,.opt.crys.bad{animation:none}}
-/* no rectangular backgrounds or shadows around the crystal's cut corners, in any state (older .opt/.navbtn rules) */
-.opt.crys,.opt.crys:hover,.opt.crys:active,.opt.crys:disabled,.opt.crys.good,.opt.crys.bad,.opt.crys.sel,
+/* !important overrides the older .opt / .navbtn backgrounds, borders and shadows in every state, so nothing
+   shows outside the crystal's cut corners */
+.opt.crys,.opt.crys:hover,.opt.crys:active,.opt.crys:disabled,.opt.crys.good,.opt.crys.bad,
 .navbtn,.navbtn:hover,.navbtn:active,.navbtn:disabled{box-shadow:none!important;border:0!important;background-color:transparent!important;
   background-image:url(../assets/images/crystal-l.webp),url(../assets/images/crystal-r.webp),url(../assets/images/crystal-m.webp)!important;
   background-position:left center,right center,center center!important;background-repeat:no-repeat!important;
   background-size:auto 100%,auto 100%,calc(100% - var(--bh) * .65) 100%!important}
-/* Done: pops in, then two soft glows that follow the crystal's outline */
+/* Done: pops in, then glows twice along the crystal's outline */
 .done-btn{animation:doneIn .5s cubic-bezier(.3,1.6,.5,1) both,crysGlow 1.8s ease-in-out .6s 2}
 @keyframes crysGlow{0%,100%{filter:drop-shadow(0 3px 0 rgba(13,64,170,.32)) drop-shadow(0 6px 10px rgba(18,59,99,.18))}50%{filter:brightness(1.08) drop-shadow(0 0 10px rgba(120,210,255,.95)) drop-shadow(0 3px 0 rgba(13,64,170,.32))}}
-/* check 2's word answers ("Isosceles trapezium") stay on one line, all three alike */
+/* check 2 (screen 39): the word answers stay on one line */
 .opts-in:not(.quick) .opt.crys{font-size:17px;white-space:nowrap}
-/* noPanel (screen 36): the ice panel fades away, everything else (Swiftee bottom-left, her bubble) as on the lesson screens */
+/* screen 36: no ice panel; Swiftee and her bubble stay where they usually are */
 .stage.nopanel .panel-img{opacity:0}
-.stage.nopanel .big-stars{display:none}
 
-/* answer buttons stay still: no idle nudge pulse, no lift on hover, no press dip, no slide-up entrance (they fade in).
-   Only feedback moves them - correct: green glow; incorrect: one shake, then grey. Hover just brightens a little. */
-.opt.crys.nudged,.opts-in .opt.crys.nudged{animation:none!important;filter:drop-shadow(0 3px 0 rgba(13,64,170,.32)) drop-shadow(0 6px 10px rgba(18,59,99,.18))}
+/* answer buttons don't move: hover only brightens and they fade in; feedback is the only motion */
 .opt.crys:hover:not(:disabled),.opt.crys:active:not(:disabled){transform:none!important;filter:brightness(1.06) drop-shadow(0 3px 0 rgba(13,64,170,.32)) drop-shadow(0 6px 10px rgba(18,59,99,.18))}
 .opts-in .opt.crys:not(.good):not(.bad){animation-name:crysFade}
 @keyframes crysFade{from{opacity:0}to{opacity:1}}
 
-/* pair equations (screens 25-31, as on Screen 40's hint): a small straight-angle picture after the equation - the pair's
-   two angles in their own colours, side by side on one line (∠A + ∠D: orange + yellow; ∠B + ∠C: purple + blue) */
+/* pair equations (screens 25-27, 30, 31): a small straight-angle picture in the pair's colours after the
+   equation, like the hint on check 3 */
 .eqpair-AD::after,.eqpair-BC::after{content:'';display:inline-block;width:46px;height:26px;margin-left:12px;vertical-align:-3px;flex:none;
   background:no-repeat center/contain}
 .eqpair-AD::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 26'%3E%3Cpath d='M23,24 L3,24 A20,20 0 0 1 33,6.68 Z' fill='%23f08a24'/%3E%3Cpath d='M23,24 L33,6.68 A20,20 0 0 1 43,24 Z' fill='%23F5C542'/%3E%3Cline x1='0' y1='24.6' x2='46' y2='24.6' stroke='%23123b63' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")}
