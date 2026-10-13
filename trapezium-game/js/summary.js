@@ -21,8 +21,9 @@
 
   // ---------- layout in board units (1000 x 562), and timings ----------
   const SUM = {
-    card: { cx: 500, cy: 322, w: 300 },
-    mini: { w: 132, x: [[80, 224], [776, 920]], y: [200, 378], zoom: 1.12, plate: { w: 118, h: 27, size: 15.5, rim: 2 } },
+    // inset: the frame's decorated rim (board units) - name plates sit inside it, pad clear of it (~24 stage px)
+    card: { cx: 500, cy: 322, w: 300, inset: 17, pad: 19 },
+    mini: { w: 132, x: [[80, 224], [776, 920]], y: [200, 378], zoom: 1.12, plate: { w: 108, h: 27, size: 14.5, rim: 2 }, pad: 5 },
     enterMs: 420, collectMs: 580, pauseMs: 200
   };
   const FRAME = { src: 'assets/images/summary-card.webp', w: 1024, h: 984 };
@@ -42,7 +43,8 @@
   const SPOT = { peek: { y: 0, s: 218 / 259, hide: 154 }, middle: { y: 69, s: 320 / 259, hide: 333 } };
 
   // ---------- the trapeziums on the cards (board units): AB at y = TOP, DC at y = BOT, so AB is parallel to DC ----------
-  const TOP = 276, BOT = 378, HT = BOT - TOP;
+  // the shape sits in the upper part of the card, leaving the bottom band for its name plate (inside the frame)
+  const TOP = 244, BOT = 346, HT = BOT - TOP;
   const SHAPES = {
     gen: { A: 440, B: 548, C: 596, D: 404 },
     scal: { A: 434, B: 530, C: 598, D: 402 },    // all four sides different
@@ -215,7 +217,8 @@
       });
       g._marks = mk('g', {}, vis);
       g._dots = ['A', 'B', 'C', 'D'].map((k) => mk('circle', { cx: P[k].x, cy: P[k].y, r: 4.2, fill: '#fff', stroke: INK.base, 'stroke-width': 2.2, opacity: 0 }, vis));
-      g._tag = this.nameTag(pp, SUM.card.cx, y + h + 4, c.label, c.tone);
+      // the name plate inside the card's bottom: its bottom edge pad above the frame's inner edge (never on the rim)
+      g._tag = this.nameTag(pp, SUM.card.cx, y + h - SUM.card.inset - SUM.card.pad - 25, c.label, c.tone);
       g._tag.setAttribute('opacity', 0);
       return g;
     },
@@ -417,12 +420,13 @@
       c._done = true; if (S.active === id) S.active = null;
       this.setState('CARD_COLLECT', id);
       const r = c._rect, cx0 = r.x + r.w / 2, cy0 = r.y + r.h / 2, sl = this.slot(id), k = SUM.mini.w / r.w;
-      const zoom = (e) => { const z = 1 + (SUM.mini.zoom - 1) * e, sx = 500, sy = 327; c._vis.setAttribute('transform', 'translate(' + sx + ',' + sy + ') scale(' + z.toFixed(4) + ') translate(' + (-sx) + ',' + (-sy) + ')'); };
+      const zoom = (e) => { const z = 1 + (SUM.mini.zoom - 1) * e, sx = 500, sy = (TOP + BOT) / 2; c._vis.setAttribute('transform', 'translate(' + sx + ',' + sy + ') scale(' + z.toFixed(4) + ') translate(' + (-sx) + ',' + (-sy) + ')'); };
       const land = () => {
         c.setAttribute('transform', 'translate(' + sl.x + ',' + sl.y + ') scale(' + k.toFixed(4) + ') translate(' + (-cx0) + ',' + (-cy0) + ')');
         c._slot = sl; zoom(1);
         const P0 = SUM.mini.plate;
-        c._mini = this.nameTag(this.layer, sl.x, sl.y + r.h * k / 2 + 1, c._c.label, c._c.tone, { h: P0.h, size: P0.size, w: P0.w, rim: P0.rim });
+        // the album plate inside its small card's bottom, clear of the scaled rim
+        c._mini = this.nameTag(this.layer, sl.x, sl.y + (r.h / 2 - SUM.card.inset) * k - SUM.mini.pad - P0.h / 2, c._c.label, c._c.tone, { h: P0.h, size: P0.size, w: P0.w, rim: P0.rim });
         if (!now) this.pop(c._mini, 0);
         if (S.collected.indexOf(id) < 0) S.collected.push(id);
         this.setState('NEXT_CONCEPT', id);
