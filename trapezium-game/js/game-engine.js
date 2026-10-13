@@ -57,6 +57,11 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       LESSON.steps.forEach((st) => (st.lines || []).concat(st.after || []).forEach((L) => { if (L.m) want.push(L.m); }));
       this.sw.warm(want.filter((x, i) => want.indexOf(x) === i));
     }
+    // browsers only let sound start on a real user activation - on touch screens that is the finger lifting (pointerup /
+    // touchend / click), not touching down. Resume the audio on each of those until it runs, so the first tap on a
+    // tablet is never silent
+    this.wakeAudio = () => { if (!this.actx || this.actx.state !== 'running') this.unlockAudio(); };
+    ['pointerup', 'touchend', 'click', 'keydown'].forEach((n) => document.addEventListener(n, this.wakeAudio, true));
     if (!CONFIG.flow.cover) this.start(); // otherwise the front page waits for its Play button (coverGo)
   }
   // front page Play: the button squashes and pops (CSS), the scene zooms softly away, then the lesson starts. The tap
@@ -71,7 +76,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     setTimeout(() => this.start(), 220);
     setTimeout(() => { this.coverBusy = false; this.setState({ coverLeaving: false }); }, 900);
   }
-  componentWillUnmount() { this.clearT(); this.cancelSpeech(); if (this.sw) this.sw.destroy(); }
+  componentWillUnmount() { ['pointerup', 'touchend', 'click', 'keydown'].forEach((n) => document.removeEventListener(n, this.wakeAudio, true)); this.clearT(); this.cancelSpeech(); if (this.sw) this.sw.destroy(); }
   componentDidUpdate() {
     this.fitBubble();
     // screen list just opened: bring the current screen's thumbnail into view
