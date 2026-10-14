@@ -1847,18 +1847,13 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const dk = this.dragKey();
     ['A', 'B', 'C', 'D'].forEach((k) => {
       const anyV = this.anyCorner(), Vk = P[k], drag = dk === k || anyV;
-      g['v' + k] = { x: r1(Vk.x), y: r1(Vk.y), r: vOn(k) ? (drag ? 11 : 7) + (em['v' + k] ? 6 : 0) : 0, c: em['v' + k] ? '#ffb800' : drag ? PU : NAVY, w: drag || em['v' + k] ? 4 : 3, cls: em['v' + k] && vOn(k) ? 'on' : '' }; // a named point pops gold, with a glow
+      g['v' + k] = { x: r1(Vk.x), y: r1(Vk.y), r: vOn(k) ? (drag ? 11 : 7) + (em['v' + k] ? 6 : 0) : 0, c: em['v' + k] ? '#ffb800' : drag ? PU : NAVY, w: drag || em['v' + k] ? 4 : 3, cls: (em['v' + k] && vOn(k) ? 'on' : '') + (anyV && !s.moved && !s.explored && !s.dragging ? ' drag-cue' : '') }; // a named point pops gold, with a glow; a corner to drag pulses
       // listen first (she asks for the taps); after that taps work even while she answers a wrong one. Every corner
       // gets a ring, so the learner has to find the right angles; a found one stops pulsing
       const tapV = !!st.rightTap && s.linesDone && !s.rAll;
       const pulse = tapV && !s.rFound[k];
-      // any-corner drags (screens 29, 33): ‹ › arrows on the side line either side of each corner say "slide me this
-      // way", until the learner has dragged one
-      const hx = Vk.x, hy = Vk.y;
       g['k' + k] = {
-        dh: 'M' + r1(hx - 21) + ',' + r1(hy - 8) + ' L' + r1(hx - 30) + ',' + r1(hy) + ' L' + r1(hx - 21) + ',' + r1(hy + 8) + ' M' + r1(hx + 21) + ',' + r1(hy - 8) + ' L' + r1(hx + 30) + ',' + r1(hy) + ' L' + r1(hx + 21) + ',' + r1(hy + 8),
-        dd: dsp(anyV && !s.moved && !s.explored && !s.dragging),
-        x: r1(Vk.x), y: r1(Vk.y), d: dsp(tapV || drag), cls: pulse || (anyV && !s.dragging) ? 'vp' : '',
+        x: r1(Vk.x), y: r1(Vk.y), d: dsp(tapV || drag), cls: pulse ? 'vp' : '', // the ring only marks screen 35's corners to tap
         cur: drag ? (s.dragging ? 'grabbing' : 'grab') : 'pointer',
         click: tapV ? () => this.rightTap(k) : noop,
         down: drag ? (e) => this.down(k, e) : noop
