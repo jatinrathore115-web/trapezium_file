@@ -279,7 +279,7 @@
         .set(w, { clearProps: 'transform' })
         // its value hops with it: up and a little bigger, then lands with a small bounce
         .add(lab ? G.timeline()
-          .fromTo(lab, { xPercent: -50, yPercent: -50, y: 0, scale: 1 }, { y: -16, scale: 1.3, duration: 0.22, ease: 'power2.out' })
+          .fromTo(lab, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1 }, { y: -16, scale: 1.3, duration: 0.22, ease: 'power2.out' })
           .to(lab, { y: 0, scale: 1, duration: 0.42, ease: 'bounce.out' }) : G.timeline(), 0));
     },
     // screen 27, as each angle is named: this arc redraws round its corner and pulses once, and its filled angle grows
@@ -292,7 +292,7 @@
         const tl = G.timeline();
         if (arc) tl.fromTo(arc, { strokeDasharray: 100, strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.5, ease: 'power2.out' }, 0)
           .to(arc, { strokeWidth: 7, duration: 0.2, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.5);
-        if (lab) tl.fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.15, duration: 0.2, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.5);
+        if (lab) tl.fromTo(lab, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1 }, { scale: 1.15, duration: 0.2, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.5);
         return tl;
       });
     },
@@ -327,29 +327,38 @@
       box.style.left = (row.offsetLeft + row.offsetWidth / 2 + (sp.dx || 0)) + 'px'; box.style.top = (row.offsetTop + row.offsetHeight / 2) + 'px';
       stage.appendChild(box);
       add(() => G.timeline()
-        .fromTo(box, { xPercent: -50, yPercent: -50, opacity: 0, y: 14, scale: 0.94 }, { opacity: sp.dim ? 0.5 : 1, y: 0, scale: 1, duration: 0.35, ease: 'power2.out' }, 0.15)
+        .fromTo(box, { xPercent: -50, yPercent: -50, x: 0, opacity: 0, y: 14, scale: 0.94 }, { opacity: sp.dim ? 0.5 : 1, y: 0, scale: 1, duration: 0.35, ease: 'power2.out' }, 0.15)
         .fromTo(box.querySelector('.eq-q'), { scale: 1 }, { scale: 1.25, color: '#d9640a', duration: 0.3, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 0.6));
     },
     // "add": copies of the two values lift off the shape and fly, one after the other, to the answer side;
     // the first replaces the "?", then the "+" appears and the second lands beside it
-    // screen 25, on "add": both values fly in together and land as the voice reaches "180", where they merge (eqResult)
-    eqFly() { this.eqFlyAt(0, { gap: 0.1, lift: 0.15, travel: 0.45 }); },
-    // o: { gap (s between the two values), lift, travel } - by default one value after the other (screen 30)
+    // screen 25: each value jumps into the sum as the voice names its angle (eqFlyA on "angle A", eqFlyD on "angle D");
+    // on "180" they merge (eqResult)
+    eqFlyA() { this.eqFlyAt(0, { only: 0, lift: 0.2, travel: 0.6 }); },
+    eqFlyD() { this.eqFlyAt(0, { only: 1, lift: 0.2, travel: 0.6 }); },
+    eqFly() { this.eqFlyAt(0); },
+    // o: { only (0 or 1: just that value), gap (s between the two values), lift, travel } - by default both values,
+    // one after the other (screen 30)
     eqFlyAt(i, o) {
-      const gap = (o && o.gap != null) ? o.gap : 1.05, lift = (o && o.lift) || 0.25, travel = (o && o.travel) || 0.7, land = lift + travel;
+      o = o || {};
+      const gap = o.gap != null ? o.gap : 1.05, lift = o.lift || 0.25, travel = o.travel || 0.7, land = lift + travel;
       if (!G) return;
       if (!this.eqBox(i)) this.eqStart();
       const box = this.eqBox(i), stage = this.eqLayer();
-      if (!box || box.dataset.flown) return;
-      box.dataset.flown = '1';
+      if (!box) return;
+      const which = (o.only != null ? [o.only] : [0, 1]).filter((j) => !box.dataset['f' + j]); // values not yet on their way
+      if (!which.length) return;
+      which.forEach((j) => { box.dataset['f' + j] = '1'; });
       const sr = stage.getBoundingClientRect(), k = sr.width / 1280 || 1;
       const local = (r) => ({ x: (r.left - sr.left + r.width / 2) / k, y: (r.top - sr.top + r.height / 2) / k });
       const K = box.dataset.keys, txt = (k) => (($('.board .tag.alab.l' + k)[0] || {}).textContent || '').trim();
       box.querySelector('.eq-v1').textContent = txt(K[0]); box.querySelector('.eq-v2').textContent = txt(K[1]);
       if (+getComputedStyle(box).opacity < 0.99) G.to(box, { opacity: 1, duration: 0.3 }); // a dimmed box comes up to full strength for its turn
       add(() => {
-        const tl = G.timeline({ onComplete: () => { box.dataset.landed = '1'; if (box._after) box._after(); } });
-        [[K[0], '.eq-v1'], [K[1], '.eq-v2']].forEach(([v, sel], i) => {
+        // landed: once both values are in, the merge (eqResult) may run
+        const tl = G.timeline({ onComplete: () => { which.forEach((j) => { box.dataset['l' + j] = '1'; }); if (box.dataset.l0 && box.dataset.l1) { box.dataset.landed = '1'; if (box._after) box._after(); } } });
+        which.forEach((j, i) => {
+          const v = K[j], sel = j ? '.eq-v2' : '.eq-v1';
           const src = $('.board .tag.alab.l' + v)[0], dst = box.querySelector(sel);
           if (!src || !dst) return;
           // the answer side is already laid out (just invisible), so the landing spot can be measured
@@ -358,13 +367,13 @@
           c.className = 'tag alab eq-fly' + (box.classList.contains('eq-pair') ? ' small' : ''); c.textContent = src.textContent.trim(); c.style.left = from.x + 'px'; c.style.top = from.y + 'px';
           stage.appendChild(c);
           const at = i * gap, grow = 28 / 21; // the text grows from label size to formula size in flight
-          tl.fromTo(c, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1, opacity: 0 }, { opacity: 1, y: -8, scale: 1.12, duration: lift, ease: 'power2.out' }, at)
-            .fromTo(src, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.2, duration: 0.2, yoyo: true, repeat: 1 }, at)
-            .to(c, { x: to.x - from.x, y: to.y - from.y, scale: grow, duration: travel, ease: 'power2.inOut' }, at + lift)
+          tl.fromTo(c, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1, opacity: 0 }, { opacity: 1, y: -8, scale: 1.12, duration: lift, ease: 'power2.out' }, at);
+          if (o.only == null) tl.fromTo(src, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1 }, { scale: 1.2, duration: 0.2, yoyo: true, repeat: 1 }, at); // (a single value's label is already hopping: angleJump)
+          tl.to(c, { x: to.x - from.x, y: to.y - from.y, scale: grow, duration: travel, ease: 'power2.inOut' }, at + lift)
             .fromTo(dst, { opacity: 0 }, { opacity: 1, duration: 0.15 }, at + land - 0.05)
             .to(c, { opacity: 0, duration: 0.15, onComplete: () => c.remove() }, at + land - 0.03)
             .fromTo(dst, { scale: 1 }, { scale: 1.12, duration: 0.14, ease: 'sine.out', yoyo: true, repeat: 1 }, at + land);
-          if (i === 0) tl.to(box.querySelector('.eq-q'), { opacity: 0, scale: 0.5, duration: 0.2 }, at + land - 0.15)
+          if (j === 0) tl.to(box.querySelector('.eq-q'), { opacity: 0, scale: 0.5, duration: 0.2 }, at + land - 0.15)
             .fromTo(box.querySelector('.eq-plus'), { opacity: 0 }, { opacity: 1, duration: 0.25 }, at + land + 0.05);
         });
         return tl;
@@ -397,7 +406,7 @@
       };
       // wait for the values to land first
       if (box.dataset.landed) go();
-      else { box._after = go; if (!box.dataset.flown) this.eqFlyAt(i); }
+      else { box._after = go; this.eqFlyAt(i); } // (flies any value not yet on its way)
     },
     // screen 34, on "another": the second right angle steps forward - its arc thickens and its value pops
     anglePop(k) {
@@ -405,7 +414,7 @@
       if (!G) return;
       add(() => {
         const tl = G.timeline();
-        if (lab) tl.fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.3, duration: 0.25, ease: 'back.out(2)', yoyo: true, repeat: 1 }, 0);
+        if (lab) tl.fromTo(lab, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1 }, { scale: 1.3, duration: 0.25, ease: 'back.out(2)', yoyo: true, repeat: 1 }, 0);
         if (arc) tl.fromTo(arc, { strokeWidth: 5 }, { strokeWidth: 7, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, 0);
         return tl;
       });
@@ -414,7 +423,7 @@
     angleNames() {
       const labs = $('.board .tag.alab');
       if (!G || !labs.length) return;
-      add(() => G.fromTo(labs, { xPercent: -50, yPercent: -50, scale: 0.7 }, { scale: 1, duration: 0.4, ease: 'back.out(1.8)', stagger: 0.06 }));
+      add(() => G.fromTo(labs, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 0.7 }, { scale: 1, duration: 0.4, ease: 'back.out(1.8)', stagger: 0.06 }));
     },
     // screen 31: sum box i resolves - "= 180°" pops in and the box gets a warm halo (strong: an extra pulse)
     sumResolve(i, strong) {
@@ -503,7 +512,7 @@
       const labs = ['DA', 'BC'].map((k) => lenTag(k)).filter(Boolean);
       if (!G || !labs.length) return;
       add(() => G.timeline()
-        .fromTo(labs, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.18, duration: 0.35, ease: 'sine.inOut', yoyo: true, repeat: 3 }, 0)
+        .fromTo(labs, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1 }, { scale: 1.18, duration: 0.35, ease: 'sine.inOut', yoyo: true, repeat: 3 }, 0)
         .set(labs, { clearProps: 'transform' }));
     },
     // "parallel": the arrows glide along both bases the same way, and any extension lines brighten with them
@@ -625,7 +634,7 @@
       add(() => G.timeline()
         .to(arcs.concat(labs), { opacity: 1, duration: 0.2 }, 0)
         .to(arcs, { strokeWidth: 7, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, 0)
-        .fromTo(labs, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.15, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, 0)
+        .fromTo(labs, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1 }, { scale: 1.15, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, 0)
         .to(all, { opacity: 1, duration: 0.45, ease: 'sine.inOut' }, '>+0.8')
         .set(all, { clearProps: 'opacity,strokeWidth,strokeDasharray,strokeDashoffset' }));
     },
@@ -666,7 +675,7 @@
       this.wedgeGrow('AD', 0.1);
       add(() => G.timeline()
         .to(focus, { strokeWidth: 7, duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.1)
-        .fromTo(flab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.12, duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.1));
+        .fromTo(flab, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1 }, { scale: 1.12, duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.1));
     },
     // on "angles": the equation glows softly; a little later every angle returns to full strength
     suppConfirm() {
@@ -838,7 +847,7 @@
       f.style.left = a.x + 'px'; f.style.top = a.y + 'px'; L.appendChild(f);
       add(() => G.timeline({ onComplete: () => f.remove() })
         .to($('.q5-leg'), { opacity: 1, duration: 0.3 }, 0)
-        .fromTo(f, { xPercent: -50, yPercent: -50, scale: 0.8, opacity: 0 }, { scale: 1.3, opacity: 1, duration: 0.25 }, 0.2)
+        .fromTo(f, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 0.8, opacity: 0 }, { scale: 1.3, opacity: 1, duration: 0.25 }, 0.2)
         .to(f, { left: b.x, duration: reduced ? 0 : 0.8, ease: 'power1.inOut' }, 0.45)
         .to(f, { keyframes: [{ top: Math.min(a.y, b.y) - 70, ease: 'power2.out' }, { top: b.y, ease: 'power2.in' }], duration: reduced ? 0 : 0.8 }, 0.45)
         .to(q, { opacity: 0, duration: 0.15 }, 1.15)
@@ -903,8 +912,8 @@
       const pulse = (keys, panel, at, tl) => {
         const arcs = keys.map((k) => $('.arc.a' + k)[0]).filter(Boolean), labs = keys.map((k) => $('.tag.alab.l' + k)[0]).filter(Boolean);
         tl.to(arcs, { strokeWidth: 7, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
-          .fromTo(labs, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.15, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at);
-        if (panel) tl.fromTo(panel, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.08, duration: 0.3, ease: 'back.out(2)', yoyo: true, repeat: 1 }, at + 0.2);
+          .fromTo(labs, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1 }, { scale: 1.15, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at);
+        if (panel) tl.fromTo(panel, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1 }, { scale: 1.08, duration: 0.3, ease: 'back.out(2)', yoyo: true, repeat: 1 }, at + 0.2);
       };
       add(() => { const tl = G.timeline(); pulse(['A', 'D'], L, 0, tl); pulse(['B', 'C'], R, 0.8, tl); return tl; });
     },
@@ -926,7 +935,7 @@
       const ms = $('.rmark'), labs = $('.tag.r90');
       if (!G) return;
       add(() => G.timeline()
-        .fromTo(labs, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.15, duration: 0.3, ease: 'sine.inOut', yoyo: true, repeat: 1, stagger: 0.12 }, 0)
+        .fromTo(labs, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1 }, { scale: 1.15, duration: 0.3, ease: 'sine.inOut', yoyo: true, repeat: 1, stagger: 0.12 }, 0)
         .call(() => ms.forEach((m) => this.markPing(m)), null, 0));
     },
     // screen 35, a right angle tapped: its marker and 90° label give a soft green pulse
@@ -935,7 +944,7 @@
       if (!G) return;
       add(() => G.timeline()
         .to(m, { strokeWidth: 5, duration: 0.2, yoyo: true, repeat: 1 }, 0)
-        .fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.3, duration: 0.2, ease: 'sine.out', yoyo: true, repeat: 1 }, 0));
+        .fromTo(lab, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1 }, { scale: 1.3, duration: 0.2, ease: 'sine.out', yoyo: true, repeat: 1 }, 0));
     },
     // screen 35, both right angles found: the vertical side glows once
     rightAll() {
@@ -1168,7 +1177,7 @@
         list.forEach(([k, len], i) => {
           const e = $('.e' + k)[0], lab = tags.find((x) => x.textContent.trim() === len && getComputedStyle(x).display !== 'none'), at = i * gap;
           if (e) { els.push(e); tl.to(e, { strokeWidth: 7, duration: 0.3, ease: 'sine.out' }, at); }
-          if (lab) { labs.push(lab); tl.fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.18, duration: 0.3, ease: 'sine.out' }, at); }
+          if (lab) { labs.push(lab); tl.fromTo(lab, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1 }, { scale: 1.18, duration: 0.3, ease: 'sine.out' }, at); }
         });
         tl.to(els, { strokeWidth: 5, duration: 0.45, ease: 'sine.inOut' }, hold)
           .to(labs, { scale: 1, duration: 0.45, ease: 'sine.inOut' }, hold)

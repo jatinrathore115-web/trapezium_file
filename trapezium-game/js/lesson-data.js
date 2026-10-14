@@ -185,9 +185,10 @@ const LESSON = {
     // 120° (A) and 60° (D) in focus: the pair the next screen adds up
     { id: 'notice', lines: [{ m: 'thinking', t: 'Did you notice something?', cueAt: { notice: 'growAD' } }], f: { par: 1, arcs: 'ABCD', focusAng: 'AD' } },
     // "∠A + ∠D = ?" rises in; on "add" the two values fly from the shape into it; on "180" it resolves
-    // cueTimes: measured in the recording (vo058): "angle A" 0.06-0.86 s, "angle D" 1.22-1.92, "add" 2.32, "one hundred eighty" 2.78
+    // each value jumps into the sum as its angle is named, and they add up on "180". cueTimes: measured in the recording
+    // (vo058): "angle A" 0.06-0.86 s, "angle D" 1.22-1.92, "one hundred eighty" 2.78
     { id: 'sumAD', lines: [{ m: 'surprised', t: '∠A and ∠D add up to 180°.', onStart: 'eqStart',
-      cueAt: { add: 'eqFly', 180: { fn: 'eqResult', sfx: 'snap' } }, cueTimes: { '∠A': 0.56, '∠D': 1.7, add: 2.32, '180°': 2.8 } }], f: { par: 1, arcs: 'ABCD', focusAng: 'AD' } },
+      cueAt: { '∠A': 'eqFlyA', '∠D': 'eqFlyD', 180: { fn: 'eqResult', sfx: 'snap' } }, cueTimes: { '∠A': 0.56, '∠D': 1.7, '180°': 2.8 } }], f: { par: 1, arcs: 'ABCD', focusAng: 'AD' } },
     // "supplementary": DC extends past D and a copy of 120° turns onto it beside 60°, a straight angle;
     // "angles": the equation glows
     { id: 'supp', lines: [{ m: 'happy', t: 'That means they are\nsupplementary angles.', onStart: 'suppStart',

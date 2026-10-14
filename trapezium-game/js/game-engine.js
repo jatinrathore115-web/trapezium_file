@@ -420,7 +420,9 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const timed = {};
     // cueAt: { word: fnName | { fn, sfx } }, each animation runs as the voice reaches its word
     const wordCues = Object.keys(L.cueAt || {}).map((w) => {
-      const v = L.cueAt[w], i = words.findIndex((x) => x.toLowerCase().replace(/[^a-z0-9-]/g, '').indexOf(w) >= 0); // an equation like "∠A = 120°" counts as one word
+      const v = L.cueAt[w], exact = /[^a-z0-9-]/i.test(w); // a key with a symbol ("∠A") names that exact word; a plain one any word containing it
+      const i = exact ? words.findIndex((x) => x.replace(/[.,!?;:]+$/, '').replace(/\s+/g, ' ') === w)
+        : words.findIndex((x) => x.toLowerCase().replace(/[^a-z0-9-]/g, '').indexOf(w) >= 0); // an equation like "∠A = 120°" counts as one word
       return { i: i, call: typeof v === 'function' ? v : null, fn: typeof v === 'string' ? v : v.fn, sfx: v.sfx, done: false };
     }).filter((c) => c.i >= 0);
     const fireCue = (c) => { if (c.done || tok !== this.narrTok) return; c.done = true; this.cueT = Date.now(); if (c.call) { c.call(); return; } if (c.sfx) this.sfx(c.sfx); if (typeof this[c.fn] === 'function') this[c.fn](); else if (Motion[c.fn]) Motion[c.fn](); };
@@ -1857,11 +1859,11 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       const th = this.angle(P, k) * Math.PI / 180;
       // The value sits inside its corner on the angle's bisector, pushed out just far enough to clear the arc and
       // both sides. It is sized by the value even when the name shows (screen 31), so names sit where values were.
-      const lbl = V[k] + '°', hw = (lbl.length * 11.5 + 6) / 2, hh = 13; // plain text, no box (21px bold)
+      const lbl = V[k] + '°', hw = 1.2 * (lbl.length * 11.5 + 6) / 2, hh = 1.2 * 14; // plain text (21px bold), at its 1.2x focus size
       const clearOf = (cx, cy) => {
         const sideGap = (w) => Math.abs((cx - Vk.x) * w.y - (cy - Vk.y) * w.x) - (hw * Math.abs(w.y) + hh * Math.abs(w.x));
         const near = Math.hypot(Math.max(0, Math.abs(cx - Vk.x) - hw), Math.max(0, Math.abs(cy - Vk.y) - hh));
-        return sideGap(u) >= 6 && sideGap(v) >= 6 && near >= R + 16; // clear of both sides and of the filled angle's rim
+        return sideGap(u) >= 9 && sideGap(v) >= 9 && near >= R + 16; // clear of both sides (past their stroke and its own outline) and of the filled angle's rim
       };
       let bx0 = u.x + v.x, by0 = u.y + v.y; const bl0 = Math.hypot(bx0, by0) || 1; bx0 /= bl0; by0 /= bl0;
       let dl = R + 12; while (dl < 140 && !clearOf(Vk.x + bx0 * dl, Vk.y + by0 * dl)) dl += 2;
