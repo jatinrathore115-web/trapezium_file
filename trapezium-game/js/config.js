@@ -24,7 +24,7 @@ const CONFIG = {
   // screen 1: pen speed round the outline (board px per ms), delay after the screen opens, outline glow time
   build: { pxPerMs: 0.36, delayMs: 450, settleMs: 1300 },
   // screen 3: corner letters never land closer together than this
-  letters: { minGapMs: 420 },
+  letters: { minGapMs: 260 },
   // qFocus question (screen 39): bubble hold and fade after the question; the shape's centre x and its top
   // before and after it glides up; the answer row's top and width (stage px)
   qFocus: { holdMs: 700, fadeMs: 350, cx: 876, shapeTop0: 220, shapeTop: 171, optTop: 417, optW: 680 },

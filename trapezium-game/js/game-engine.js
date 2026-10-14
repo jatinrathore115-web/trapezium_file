@@ -166,7 +166,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
 
   // ---------- audio ----------
   synth() { try { return (typeof window !== 'undefined' && window.speechSynthesis) ? window.speechSynthesis : null; } catch (e) { return null; } }
-  cancelSpeech() { const s = this.synth(); if (s) { try { s.cancel(); } catch (e) {} } }
+  cancelSpeech() { if (window.Voice) Voice.stop(); const s = this.synth(); if (s) { try { s.cancel(); } catch (e) {} } }
   pickVoice() {
     const s = this.synth(); if (!s) return;
     let vs = [];
@@ -247,6 +247,8 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     this.letterAt = at;
     const go = () => {
       Motion.letterIn(k, () => this.emphasize(['v' + k]));
+      // the bubble's ABCD gains the same letter at the same moment (A, AB, ABC, ABCD)
+      if (this.state.bubLetters != null) this.setState({ bubLetters: Math.max(this.state.bubLetters, 'ABCD'.indexOf(k) + 1) });
     };
     if (at > now) Motion.wait((at - now) / 1000, go); else go();
   }
@@ -304,6 +306,8 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (!L || (!L.t && !keep) || (keep && !L.s)) { if (done) done(); return; }
     const text = keep ? this.state.line : L.t;
     const words = this.toWords(keep ? L.s : text);
+    // letters (screen 3): the name in the bubble (ABCD) is written out letter by letter, each with its corner letter
+    this.setState({ bubLetters: L.letters ? 0 : null });
     // spoken text, and where each displayed word starts in it
     let sp, offs = null;
     if (L.s) {
@@ -481,6 +485,26 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       }
       tick();
     };
+    // recorded voice (js/voice.js): the clip is the clock. Words show by their share of the spoken line, and the
+    // corner letters by their place in the spoken text
+    const clip = !this.state.muted && window.Voice ? Voice.find(keep ? L.s : text) : null;
+    if (clip) {
+      const wt = words.map((w) => Voice.weight(this.speechOf(w)) + (/[.!?]$/.test(w) ? 6 : /[,:;]$/.test(w) ? 3 : 0));
+      const all = wt.reduce((a, b) => a + b, 0) || 1, from = []; let acc = 0;
+      wt.forEach((x) => { from.push(acc / all); acc += x; });
+      const end = () => { if (!live() || sDone) return; sDone = true; begin(); mouth(false); letterCues.forEach(fireLetter); revealAll(); finish(); };
+      Voice.play(clip, {
+        start: () => { if (!live()) return; spoke = true; bMode = true; begin(); },
+        progress: (f) => {
+          if (!live() || sDone) return;
+          letterCues.forEach((c) => { if (f >= c.at / Math.max(1, sp.length)) fireLetter(c); });
+          let k = 0; while (k < from.length && from[k] <= f) k++;
+          if (k > i) { i = k; setReveal(i); }
+        },
+        end: end
+      });
+      return;
+    }
     const s = this.synth();
     const canSpeak = !this.state.muted && s && typeof SpeechSynthesisUtterance !== 'undefined';
     if (!canSpeak) {
@@ -672,6 +696,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       if (AC && !this.actx) this.actx = new AC();
       if (this.actx && this.actx.state === 'suspended') this.actx.resume();
     } catch (e) {}
+    if (window.Voice) Voice.unlock(); // the voice-over's <audio> needs the same tap
     this.loadSounds();
   }
 
@@ -679,6 +704,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   start() {
     if (this.state.started && this.state.step === 0 && Date.now() - (this.navAt || 0) < 800) return;
     this.unlockAudio();
+    if (window.Voice) Voice.prefetch(); // every clip, quietly, one at a time
     const s = this.synth();
     if (s) { this.pickVoice(); try { s.onvoiceschanged = () => this.pickVoice(); } catch (e) {} }
     this.snaps = {};
@@ -710,7 +736,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     else P = this.clone(this.snaps[i]);
     this.setState({
       step: i, P: P, done: !st.task && !st.cfu && !st.opts, ext: { DA: 0, BC: 0, AB: 0, CD: 0 }, tap: {}, chips: [],
-      moved: false, dragging: null, picks: {}, cfuFirst: true, hand: null, bubOff: false, centered: false, glow: null, callout: null, emph: {}, qc: false, trace: null, build: null, numsGone: false, explored: false, angFocus: null, symAng: false, linesDone: false, rFound: {}, rAll: false, labsIn: false, measuring: null, tape: null, swAway: false, line: '', reveal: 0,
+      moved: false, dragging: null, picks: {}, cfuFirst: true, hand: null, bubOff: false, centered: false, glow: null, callout: null, emph: {}, qc: false, trace: null, build: null, numsGone: false, bubLetters: null, explored: false, angFocus: null, symAng: false, linesDone: false, rFound: {}, rAll: false, labsIn: false, measuring: null, tape: null, swAway: false, line: '', reveal: 0,
       c4: { at: { iso: null, right: null, scal: null }, locked: {}, sel: null, drag: null, checking: false }
     });
     if (st.layout === 'focus' && !(st.lines || []).length && !this.state.done) {
@@ -1745,8 +1771,16 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     let wi = 0;
     const words = [];
     (s.line || '').split('\n').forEach((part, li) => {
-      if (li) words.push({ t: '', cls: 'brk' });
-      this.toWords(part).forEach((w) => { const i = wi++; words.push({ t: w, cls: i < s.reveal - 1 ? 'on' : (i === s.reveal - 1 ? (s.talking ? 'cur' : 'on') : '') }); });
+      if (li) words.push({ t: '', h: '', cls: 'brk' });
+      this.toWords(part).forEach((w) => {
+        const i = wi++, cls = i < s.reveal - 1 ? 'on' : (i === s.reveal - 1 ? (s.talking ? 'cur' : 'on') : '');
+        // a vertex name being spelt out (screen 3): the letters not yet said stay invisible but keep their space, so the
+        // line never shifts; the closing full stop comes with the last letter
+        const m = s.bubLetters != null && /^([A-D]{2,})(.*)$/.exec(w);
+        // (the letters themselves decide when the name shows: from the spoken A, even before the voice reaches the word's end)
+        if (m && s.bubLetters < m[1].length) { const n = s.bubLetters; words.push({ t: w.slice(0, n), h: w.slice(n), cls: n ? (s.talking ? 'cur' : 'on') : '' }); return; }
+        words.push({ t: w, h: '', cls: cls });
+      });
     });
     const G = isLesson ? this.geo() : { g: {}, tags: [], V: {} };
     const chips = s.chips.slice();

@@ -22,6 +22,8 @@
 <script src="js/angle-walker.js"></script>
 <script src="js/motion.js"></script>
 <script src="js/summary.js"></script>
+<script src="js/vo-lines.js"></script>
+<script src="js/voice.js"></script>
 <script src="js/game-engine.js"></script>
 </head>
 <body>
@@ -258,7 +260,7 @@
 <div class="bubble {{bubCls}} {{bubHide}}" style="position: absolute; left: 240px; bottom: 322px; pointer-events: none">
 <div aria-live="polite" class="bubble-text" style="font-size: {{wordSize}}px" data-qa="bubble">
 <sc-for list="{{words}}" as="wd" hint-placeholder-count="6">
-<span class="w {{wd.cls}}">{{wd.t}}</span>
+<span class="w {{wd.cls}}">{{wd.t}}<span class="w-h">{{wd.h}}</span></span>
 </sc-for>
 </div>
 <svg class="bubble-tail" width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path d="M2,-1 L7.5,25 L26,-1" fill="#fdf6e4" stroke="#2a9a8c" stroke-width="3" stroke-linejoin="round" stroke-linecap="butt"></path></svg>

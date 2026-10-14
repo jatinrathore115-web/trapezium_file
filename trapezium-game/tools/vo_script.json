@@ -1,0 +1,1125 @@
+[
+  {
+    "id": "vo001",
+    "line": "Remember we learnt about quadrilaterals earlier.",
+    "spoken": "Remember we learnt about quadrilaterals earlier."
+  },
+  {
+    "id": "vo002",
+    "line": "Any polygon with 4 sides is called a quadrilateral.",
+    "spoken": "Any polygon with four sides is called a quadrilateral."
+  },
+  {
+    "id": "vo003",
+    "line": "We can call it quadrilateral ABCD.",
+    "spoken": "We can call it quadrilateral, A, B, C, D."
+  },
+  {
+    "id": "vo004",
+    "line": "This is a special type of quadrilateral.",
+    "spoken": "This is a special type of quadrilateral."
+  },
+  {
+    "id": "vo005",
+    "line": "Let's see what makes it special.",
+    "spoken": "Let's see what makes it special."
+  },
+  {
+    "id": "vo006",
+    "line": "These two sides look like they will meet.",
+    "spoken": "These two sides look like they will meet."
+  },
+  {
+    "id": "vo007",
+    "line": "Let's extend them.",
+    "spoken": "Let's extend them."
+  },
+  {
+    "id": "vo008",
+    "line": "Woah! The sides meet.",
+    "spoken": "Whoa! The sides meet."
+  },
+  {
+    "id": "vo009",
+    "line": "Let's check the other pair of sides.",
+    "spoken": "Let's check the other pair of sides."
+  },
+  {
+    "id": "vo010",
+    "line": "This pair of sides does not meet.",
+    "spoken": "This pair of sides does not meet."
+  },
+  {
+    "id": "vo011",
+    "line": "This means the sides are parallel to each other.",
+    "spoken": "This means the sides are parallel to each other."
+  },
+  {
+    "id": "vo012",
+    "line": "A B is parallel to C D.",
+    "spoken": "A B is parallel to C D."
+  },
+  {
+    "id": "vo013",
+    "line": "So this quadrilateral has one pair of parallel sides.",
+    "spoken": "So this quadrilateral has one pair of parallel sides."
+  },
+  {
+    "id": "vo014",
+    "line": "We call this a trapezium.",
+    "spoken": "We call this a trapezium."
+  },
+  {
+    "id": "vo015",
+    "line": "A quadrilateral with at least one pair of parallel sides is called a trapezium.",
+    "spoken": "A quadrilateral with at least one pair of parallel sides is called a trapezium."
+  },
+  {
+    "id": "vo016",
+    "line": "The parallel sides are called bases.",
+    "spoken": "The parallel sides are called bases."
+  },
+  {
+    "id": "vo017",
+    "line": "The other two sides are called legs.",
+    "spoken": "The other two sides are called legs."
+  },
+  {
+    "id": "vo018",
+    "line": "Let's measure the sides of this trapezium.",
+    "spoken": "Let's measure the sides of this trapezium."
+  },
+  {
+    "id": "vo019",
+    "line": "Woah! All the sides of this trapezium are of different lengths.",
+    "spoken": "Whoa! All the sides of this trapezium are of different lengths."
+  },
+  {
+    "id": "vo020",
+    "line": "This type of trapezium which has sides of different lengths is called a scalene trapezium.",
+    "spoken": "This type of trapezium which has sides of different lengths is called a scalene trapezium."
+  },
+  {
+    "id": "vo021",
+    "line": "Look! Its legs are of different length too.",
+    "spoken": "Look! Its legs are of different length too."
+  },
+  {
+    "id": "vo022",
+    "line": "What if the legs were the same length?",
+    "spoken": "What if the legs were the same length?"
+  },
+  {
+    "id": "vo023",
+    "line": "Let's find out.",
+    "spoken": "Let's find out."
+  },
+  {
+    "id": "vo024",
+    "line": "Let's change its shape a little.",
+    "spoken": "Let's change its shape a little."
+  },
+  {
+    "id": "vo025",
+    "line": "Drag vertex A so that both the legs are of equal length.",
+    "spoken": "Drag vertex A so that both the legs are of equal length."
+  },
+  {
+    "id": "vo026",
+    "line": "AD is 5.1 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is five point one centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo027",
+    "line": "AD is 5.2 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is five point two centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo028",
+    "line": "AD is 5.3 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is five point three centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo029",
+    "line": "AD is 5.4 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is five point four centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo030",
+    "line": "AD is 5.5 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is five point five centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo031",
+    "line": "AD is 5.6 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is five point six centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo032",
+    "line": "AD is 5.7 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is five point seven centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo033",
+    "line": "AD is 5.8 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is five point eight centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo034",
+    "line": "AD is 5.9 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is five point nine centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo035",
+    "line": "AD is 6 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is six centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo036",
+    "line": "AD is 6.1 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is six point one centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo037",
+    "line": "AD is 6.2 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is six point two centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo038",
+    "line": "AD is 6.3 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is six point three centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo039",
+    "line": "AD is 6.4 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is six point four centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo040",
+    "line": "AD is 6.5 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is six point five centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo041",
+    "line": "AD is 6.6 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is six point six centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo042",
+    "line": "AD is 6.7 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is six point seven centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo043",
+    "line": "AD is 6.8 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is six point eight centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo044",
+    "line": "AD is 6.9 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is six point nine centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo045",
+    "line": "AD is 7 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is seven centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo046",
+    "line": "AD is 7.1 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is seven point one centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo047",
+    "line": "AD is 7.2 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is seven point two centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo048",
+    "line": "AD is 7.3 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is seven point three centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo049",
+    "line": "AD is 7.4 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is seven point four centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo050",
+    "line": "AD is 7.5 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is seven point five centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo051",
+    "line": "AD is 7.6 cm. Keep dragging A until it shows exactly 5 cm.",
+    "spoken": "A D is seven point six centimetres. Keep dragging A until it shows exactly five centimetres."
+  },
+  {
+    "id": "vo052",
+    "line": "Perfect! Both legs are equal.",
+    "spoken": "Perfect! Both legs are equal."
+  },
+  {
+    "id": "vo053",
+    "line": "Drag point A along the top side.",
+    "spoken": "Drag point A along the top side."
+  },
+  {
+    "id": "vo054",
+    "line": "A trapezium where legs are of same length is called an isosceles trapezium.",
+    "spoken": "A trapezium where legs are of same length is called an isosceles trapezium."
+  },
+  {
+    "id": "vo055",
+    "line": "We know all about the sides of a trapezium.",
+    "spoken": "We know all about the sides of a trapezium."
+  },
+  {
+    "id": "vo056",
+    "line": "Let's measure its angles.",
+    "spoken": "Let's measure its angles."
+  },
+  {
+    "id": "vo057",
+    "line": "Did you notice something?",
+    "spoken": "Did you notice something?"
+  },
+  {
+    "id": "vo058",
+    "line": "∠A and ∠D add up to 180°.",
+    "spoken": "Angle A and angle D add up to one hundred and eighty degrees."
+  },
+  {
+    "id": "vo059",
+    "line": "That means they are supplementary angles.",
+    "spoken": "That means they are supplementary angles."
+  },
+  {
+    "id": "vo060",
+    "line": "What about ∠B and ∠C?",
+    "spoken": "What about angle B and angle C?"
+  },
+  {
+    "id": "vo061",
+    "line": "Not quite. Try again.",
+    "spoken": "Not quite. Try again."
+  },
+  {
+    "id": "vo062",
+    "line": "360° is the sum of all four angles. Try again.",
+    "spoken": "Three hundred and sixty degrees is the sum of all four angles. Try again."
+  },
+  {
+    "id": "vo063",
+    "line": "Correct! ∠B and ∠C are supplementary angles too.",
+    "spoken": "Correct! Angle B and angle C are supplementary angles too."
+  },
+  {
+    "id": "vo064",
+    "line": "What if we change the shape of this trapezium?",
+    "spoken": "What if we change the shape of this trapezium?"
+  },
+  {
+    "id": "vo065",
+    "line": "Drag any vertex to change the angles. Notice the sum of angles.",
+    "spoken": "Drag any vertex to change the angles. Notice the sum of angles."
+  },
+  {
+    "id": "vo066",
+    "line": "Drag any corner and watch the two sums.",
+    "spoken": "Drag any corner and watch the two sums."
+  },
+  {
+    "id": "vo067",
+    "line": "No matter the shape, the angles always add up to 180°.",
+    "spoken": "No matter the shape, the angles always add up to one hundred and eighty degrees."
+  },
+  {
+    "id": "vo068",
+    "line": "So in any trapezium, angles on the same leg always add up to 180°.",
+    "spoken": "So in any trapezium, angles on the same leg always add up to one hundred and eighty degrees."
+  },
+  {
+    "id": "vo069",
+    "line": "What if we make one of the angles 90°?",
+    "spoken": "What if we make one of the angles ninety degrees?"
+  },
+  {
+    "id": "vo070",
+    "line": "Drag any vertex to make any angle 90°.",
+    "spoken": "Drag any vertex to make any angle ninety degrees."
+  },
+  {
+    "id": "vo071",
+    "line": "∠A is",
+    "spoken": "Angle A is",
+    "part": 1
+  },
+  {
+    "id": "vo072",
+    "line": "∠B is",
+    "spoken": "Angle B is",
+    "part": 1
+  },
+  {
+    "id": "vo073",
+    "line": "∠C is",
+    "spoken": "Angle C is",
+    "part": 1
+  },
+  {
+    "id": "vo074",
+    "line": "∠D is",
+    "spoken": "Angle D is",
+    "part": 1
+  },
+  {
+    "id": "vo075",
+    "line": "39° now. Keep dragging until it shows 90°.",
+    "spoken": "Thirty-nine degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo076",
+    "line": "40° now. Keep dragging until it shows 90°.",
+    "spoken": "Forty degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo077",
+    "line": "41° now. Keep dragging until it shows 90°.",
+    "spoken": "Forty-one degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo078",
+    "line": "42° now. Keep dragging until it shows 90°.",
+    "spoken": "Forty-two degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo079",
+    "line": "43° now. Keep dragging until it shows 90°.",
+    "spoken": "Forty-three degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo080",
+    "line": "44° now. Keep dragging until it shows 90°.",
+    "spoken": "Forty-four degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo081",
+    "line": "45° now. Keep dragging until it shows 90°.",
+    "spoken": "Forty-five degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo082",
+    "line": "46° now. Keep dragging until it shows 90°.",
+    "spoken": "Forty-six degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo083",
+    "line": "47° now. Keep dragging until it shows 90°.",
+    "spoken": "Forty-seven degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo084",
+    "line": "48° now. Keep dragging until it shows 90°.",
+    "spoken": "Forty-eight degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo085",
+    "line": "49° now. Keep dragging until it shows 90°.",
+    "spoken": "Forty-nine degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo086",
+    "line": "50° now. Keep dragging until it shows 90°.",
+    "spoken": "Fifty degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo087",
+    "line": "51° now. Keep dragging until it shows 90°.",
+    "spoken": "Fifty-one degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo088",
+    "line": "52° now. Keep dragging until it shows 90°.",
+    "spoken": "Fifty-two degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo089",
+    "line": "53° now. Keep dragging until it shows 90°.",
+    "spoken": "Fifty-three degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo090",
+    "line": "54° now. Keep dragging until it shows 90°.",
+    "spoken": "Fifty-four degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo091",
+    "line": "55° now. Keep dragging until it shows 90°.",
+    "spoken": "Fifty-five degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo092",
+    "line": "56° now. Keep dragging until it shows 90°.",
+    "spoken": "Fifty-six degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo093",
+    "line": "57° now. Keep dragging until it shows 90°.",
+    "spoken": "Fifty-seven degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo094",
+    "line": "58° now. Keep dragging until it shows 90°.",
+    "spoken": "Fifty-eight degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo095",
+    "line": "59° now. Keep dragging until it shows 90°.",
+    "spoken": "Fifty-nine degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo096",
+    "line": "60° now. Keep dragging until it shows 90°.",
+    "spoken": "Sixty degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo097",
+    "line": "61° now. Keep dragging until it shows 90°.",
+    "spoken": "Sixty-one degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo098",
+    "line": "62° now. Keep dragging until it shows 90°.",
+    "spoken": "Sixty-two degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo099",
+    "line": "63° now. Keep dragging until it shows 90°.",
+    "spoken": "Sixty-three degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo100",
+    "line": "64° now. Keep dragging until it shows 90°.",
+    "spoken": "Sixty-four degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo101",
+    "line": "65° now. Keep dragging until it shows 90°.",
+    "spoken": "Sixty-five degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo102",
+    "line": "66° now. Keep dragging until it shows 90°.",
+    "spoken": "Sixty-six degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo103",
+    "line": "67° now. Keep dragging until it shows 90°.",
+    "spoken": "Sixty-seven degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo104",
+    "line": "68° now. Keep dragging until it shows 90°.",
+    "spoken": "Sixty-eight degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo105",
+    "line": "69° now. Keep dragging until it shows 90°.",
+    "spoken": "Sixty-nine degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo106",
+    "line": "70° now. Keep dragging until it shows 90°.",
+    "spoken": "Seventy degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo107",
+    "line": "71° now. Keep dragging until it shows 90°.",
+    "spoken": "Seventy-one degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo108",
+    "line": "72° now. Keep dragging until it shows 90°.",
+    "spoken": "Seventy-two degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo109",
+    "line": "73° now. Keep dragging until it shows 90°.",
+    "spoken": "Seventy-three degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo110",
+    "line": "74° now. Keep dragging until it shows 90°.",
+    "spoken": "Seventy-four degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo111",
+    "line": "75° now. Keep dragging until it shows 90°.",
+    "spoken": "Seventy-five degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo112",
+    "line": "76° now. Keep dragging until it shows 90°.",
+    "spoken": "Seventy-six degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo113",
+    "line": "77° now. Keep dragging until it shows 90°.",
+    "spoken": "Seventy-seven degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo114",
+    "line": "78° now. Keep dragging until it shows 90°.",
+    "spoken": "Seventy-eight degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo115",
+    "line": "79° now. Keep dragging until it shows 90°.",
+    "spoken": "Seventy-nine degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo116",
+    "line": "80° now. Keep dragging until it shows 90°.",
+    "spoken": "Eighty degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo117",
+    "line": "81° now. Keep dragging until it shows 90°.",
+    "spoken": "Eighty-one degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo118",
+    "line": "82° now. Keep dragging until it shows 90°.",
+    "spoken": "Eighty-two degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo119",
+    "line": "83° now. Keep dragging until it shows 90°.",
+    "spoken": "Eighty-three degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo120",
+    "line": "84° now. Keep dragging until it shows 90°.",
+    "spoken": "Eighty-four degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo121",
+    "line": "85° now. Keep dragging until it shows 90°.",
+    "spoken": "Eighty-five degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo122",
+    "line": "95° now. Keep dragging until it shows 90°.",
+    "spoken": "Ninety-five degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo123",
+    "line": "96° now. Keep dragging until it shows 90°.",
+    "spoken": "Ninety-six degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo124",
+    "line": "97° now. Keep dragging until it shows 90°.",
+    "spoken": "Ninety-seven degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo125",
+    "line": "98° now. Keep dragging until it shows 90°.",
+    "spoken": "Ninety-eight degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo126",
+    "line": "99° now. Keep dragging until it shows 90°.",
+    "spoken": "Ninety-nine degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo127",
+    "line": "100° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo128",
+    "line": "101° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and one degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo129",
+    "line": "102° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and two degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo130",
+    "line": "103° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and three degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo131",
+    "line": "104° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and four degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo132",
+    "line": "105° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and five degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo133",
+    "line": "106° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and six degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo134",
+    "line": "107° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and seven degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo135",
+    "line": "108° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and eight degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo136",
+    "line": "109° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and nine degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo137",
+    "line": "110° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and ten degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo138",
+    "line": "111° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and eleven degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo139",
+    "line": "112° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and twelve degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo140",
+    "line": "113° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and thirteen degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo141",
+    "line": "114° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and fourteen degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo142",
+    "line": "115° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and fifteen degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo143",
+    "line": "116° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and sixteen degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo144",
+    "line": "117° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and seventeen degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo145",
+    "line": "118° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and eighteen degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo146",
+    "line": "119° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and nineteen degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo147",
+    "line": "120° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and twenty degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo148",
+    "line": "121° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and twenty-one degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo149",
+    "line": "122° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and twenty-two degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo150",
+    "line": "123° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and twenty-three degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo151",
+    "line": "124° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and twenty-four degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo152",
+    "line": "125° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and twenty-five degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo153",
+    "line": "126° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and twenty-six degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo154",
+    "line": "127° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and twenty-seven degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo155",
+    "line": "128° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and twenty-eight degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo156",
+    "line": "129° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and twenty-nine degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo157",
+    "line": "130° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and thirty degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo158",
+    "line": "131° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and thirty-one degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo159",
+    "line": "132° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and thirty-two degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo160",
+    "line": "133° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and thirty-three degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo161",
+    "line": "134° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and thirty-four degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo162",
+    "line": "135° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and thirty-five degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo163",
+    "line": "136° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and thirty-six degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo164",
+    "line": "137° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and thirty-seven degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo165",
+    "line": "138° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and thirty-eight degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo166",
+    "line": "139° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and thirty-nine degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo167",
+    "line": "140° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and forty degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo168",
+    "line": "141° now. Keep dragging until it shows 90°.",
+    "spoken": "One hundred and forty-one degrees now. Keep dragging until it shows ninety degrees.",
+    "part": 1
+  },
+  {
+    "id": "vo169",
+    "line": "Great job!",
+    "spoken": "Great job!"
+  },
+  {
+    "id": "vo170",
+    "line": "Drag a corner slowly and stop when an angle shows 90°.",
+    "spoken": "Drag a corner slowly and stop when an angle shows ninety degrees."
+  },
+  {
+    "id": "vo171",
+    "line": "Woah! We got another right angle.",
+    "spoken": "Whoa! We got another right angle."
+  },
+  {
+    "id": "vo172",
+    "line": "A trapezium with two adjacent right angles is called a right angled trapezium.",
+    "spoken": "A trapezium with two adjacent right angles is called a right angled trapezium."
+  },
+  {
+    "id": "vo173",
+    "line": "That angle is not 90°. Look for the square corners.",
+    "spoken": "That angle is not ninety degrees. Look for the square corners."
+  },
+  {
+    "id": "vo174",
+    "line": "Great job! Now you know all about trapeziums.",
+    "spoken": "Great job! Now you know all about trapeziums."
+  },
+  {
+    "id": "vo175",
+    "line": "Let's recall what we learnt today.",
+    "spoken": "Let's recall what we learnt today."
+  },
+  {
+    "id": "vo176",
+    "line": "A trapezium is a quadrilateral with one pair of parallel sides.",
+    "spoken": "A trapezium is a quadrilateral with one pair of parallel sides."
+  },
+  {
+    "id": "vo177",
+    "line": "The parallel sides are called the bases.",
+    "spoken": "The parallel sides are called the bases."
+  },
+  {
+    "id": "vo178",
+    "line": "The other two sides are called the legs.",
+    "spoken": "The other two sides are called the legs."
+  },
+  {
+    "id": "vo179",
+    "line": "A scalene trapezium has sides of different lengths.",
+    "spoken": "A scalene trapezium has sides of different lengths."
+  },
+  {
+    "id": "vo180",
+    "line": "An isosceles trapezium has legs of the same length.",
+    "spoken": "An isosceles trapezium has legs of the same length."
+  },
+  {
+    "id": "vo181",
+    "line": "A right trapezium has two adjacent right angles.",
+    "spoken": "A right trapezium has two adjacent right angles."
+  },
+  {
+    "id": "vo182",
+    "line": "Angles on the same leg add up to 180°.",
+    "spoken": "Angles on the same leg add up to one hundred and eighty degrees."
+  },
+  {
+    "id": "vo183",
+    "line": "Two angles that add up to 180° are supplementary.",
+    "spoken": "Two angles that add up to one hundred and eighty degrees are supplementary."
+  },
+  {
+    "id": "vo184",
+    "line": "Wonderful! You remember everything about trapeziums!",
+    "spoken": "Wonderful! You remember everything about trapeziums!"
+  },
+  {
+    "id": "vo185",
+    "line": "Which of these quadrilaterals is a trapezium? Look for one pair of parallel sides.",
+    "spoken": "Which of these quadrilaterals is a trapezium? Look for one pair of parallel sides."
+  },
+  {
+    "id": "vo186",
+    "line": "Look at each side of this shape. No two sides are parallel, so it is not a trapezium.",
+    "spoken": "Look at each side of this shape. No two sides are parallel, so it is not a trapezium."
+  },
+  {
+    "id": "vo187",
+    "line": "This shape has no parallel sides at all.",
+    "spoken": "This shape has no parallel sides at all."
+  },
+  {
+    "id": "vo188",
+    "line": "Correct! It is a trapezium.",
+    "spoken": "Correct! It is a trapezium."
+  },
+  {
+    "id": "vo189",
+    "line": "Which type of trapezium is this?",
+    "spoken": "Which type of trapezium is this?"
+  },
+  {
+    "id": "vo190",
+    "line": "Look at the little marks on the legs. They tell us the legs are equal.",
+    "spoken": "Look at the little marks on the legs. They tell us the legs are equal."
+  },
+  {
+    "id": "vo191",
+    "line": "There are no right angles in this shape. Look at the legs instead.",
+    "spoken": "There are no right angles in this shape. Look at the legs instead."
+  },
+  {
+    "id": "vo192",
+    "line": "Right! The marks show its legs are equal, so it is an isosceles trapezium.",
+    "spoken": "Right! The marks show its legs are equal, so it is an isosceles trapezium."
+  },
+  {
+    "id": "vo193",
+    "line": "In this trapezium, ∠A = 120°. What is the value of ∠D?",
+    "spoken": "In this trapezium, angle A equals one hundred and twenty degrees. What is the value of angle D?"
+  },
+  {
+    "id": "vo194",
+    "line": "Correct! 120° + 60° = 180°.",
+    "spoken": "Correct! One hundred and twenty degrees, plus sixty degrees, equals one hundred and eighty degrees."
+  },
+  {
+    "id": "vo195",
+    "line": "Drag the labels to their correct place.",
+    "spoken": "Drag the labels to their correct place."
+  },
+  {
+    "id": "vo196",
+    "line": "Try again! Look closely at the shapes.",
+    "spoken": "Try again! Look closely at the shapes."
+  },
+  {
+    "id": "vo197",
+    "line": "Watch the glowing clue. Which shape has that mark?",
+    "spoken": "Watch the glowing clue. Which shape has that mark?"
+  },
+  {
+    "id": "vo198",
+    "line": "Some labels went back. Look for the marks: equal legs, right angles, or neither.",
+    "spoken": "Some labels went back. Look for the marks: equal legs, right angles, or neither."
+  },
+  {
+    "id": "vo199",
+    "line": "Brilliant! You labelled all three trapeziums.",
+    "spoken": "Brilliant! You labelled all three trapeziums."
+  },
+  {
+    "id": "vo200",
+    "line": "In an isosceles trapezium, AB = 6 cm, CD = 10 cm and AD = 5 cm. What is the length of BC?",
+    "spoken": "In an isosceles trapezium, A B equals six centimetres, C D equals ten centimetres, and A D equals five centimetres. What is the length of B C?"
+  },
+  {
+    "id": "vo201",
+    "line": "BC is a leg. In an isosceles trapezium, both legs are equal.",
+    "spoken": "B C is a leg. In an isosceles trapezium, both legs are equal."
+  },
+  {
+    "id": "vo202",
+    "line": "6 cm is the top base AB. BC is a leg, like AD.",
+    "spoken": "Six centimetres is the top base A B. B C is a leg, like A D."
+  },
+  {
+    "id": "vo203",
+    "line": "10 cm is the bottom base CD. BC is a leg, like AD.",
+    "spoken": "Ten centimetres is the bottom base C D. B C is a leg, like A D."
+  },
+  {
+    "id": "vo204",
+    "line": "Yes! In an isosceles trapezium the legs are equal, so BC = 5 cm.",
+    "spoken": "Yes! In an isosceles trapezium the legs are equal, so B C equals five centimetres."
+  },
+  {
+    "id": "vo205",
+    "line": "Amazing work! You know all about trapeziums now.",
+    "spoken": "Amazing work! You know all about trapeziums now."
+  }
+]

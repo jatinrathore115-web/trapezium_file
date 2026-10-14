@@ -47,12 +47,16 @@ trapezium-game/
 │   ├── angle-walker.js   screen 23: Swiftee measures the angles with one protractor
 │   ├── angle-frames.js   the protractor poses
 │   ├── summary.js        screen 37: the summary cards
+│   ├── voice.js          plays Swiftee's recorded voice-over clips
+│   ├── vo-lines.js       generated map: each line → its clip (see docs/VOICEOVER.md)
 │   ├── stage-fit.js, snowfall.js, confetti.js
 ├── assets/
 │   ├── images/           backgrounds, panels, the front-page banner, buttons, Swiftee extras
-│   └── audio/            the correct / incorrect sounds
+│   ├── audio/            the correct / incorrect sounds
+│   └── vo/               Swiftee's voice-over, one Ogg Opus clip per line (see docs/VOICEOVER.md)
 ├── swiftee-assets/       Swiftee's sprite sheets (spritesheets/1x, 2x and extra/) and their manifest
-├── tools/                Node scripts that rebuild Swiftee's measuring sheet and manifest
+├── docs/VOICEOVER.md     how the voice-over is made, and every clip
+├── tools/                Node scripts that rebuild Swiftee's measuring sheet and manifest, and the voice-over (vo_build.js)
 └── qa/                   logic-test.js (headless test of every screen) and fake-speech.js
 ```
 
@@ -69,7 +73,8 @@ trapezium-game/
 
 - **Rendering.** `index.html` is a template. `renderVals()` in `game-engine.js` returns every value it binds, and the
   runtime re-renders when the state changes.
-- **Narration.** Each line is spoken with the device's speech voice. Words appear as the voice reaches them, Swiftee's
+- **Narration.** Each line plays its recorded voice-over clip (`assets/vo/`, see [docs/VOICEOVER.md](docs/VOICEOVER.md));
+  where a clip can't play, the device's speech voice says it instead. Words appear as the voice reaches them, Swiftee's
   beak moves only while she speaks, and cue words (`cueAt`) fire animations at the exact word. Without a voice, the words
   are paced on a timer instead.
 - **Screens.** Navigation is manual: Back and Next sit top right, and "Screen N of 43" (top left) jumps to any screen.
