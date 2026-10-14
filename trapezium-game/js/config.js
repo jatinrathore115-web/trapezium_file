@@ -28,6 +28,9 @@ const CONFIG = {
   letters: { minGapMs: 420 },
   // qFocus question (screen 39): bubble hold and fade after the question; the shape's centre x and its top
   // before and after it glides up; the answer row's top and width (stage px)
+  // check 4 (screen 41): the whole task drawn larger to fill the ice card, as one group (scale k about ox, oy, then
+  // moved down ty); its drag maths converts the pointer back into the group's own px
+  q4: { k: 1.12, ox: 876, oy: 345, ty: 10 },
   qFocus: { holdMs: 700, fadeMs: 350, cx: 876, shapeTop0: 205, shapeTop: 150, optTop: 450, optW: 680 },
   // idleMs: no-touch wait before a spoken reminder (at most idleMaxHints per screen); navLockMs: minimum gap between
   // Next / Back taps; speechRate: voice speed (1 = normal); lineGapMs: pause after each line

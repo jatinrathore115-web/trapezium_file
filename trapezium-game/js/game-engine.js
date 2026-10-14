@@ -1465,6 +1465,8 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const i = this.labsDef().findIndex((l) => l.id === id);
     return { x: 556 + i * 216, y: 476 }; // three 208-wide labels, 8 apart
   }
+  // a stage point into check 4's group px (the group is drawn scaled, CONFIG.q4)
+  q4Pt(x, y) { const Q = CONFIG.q4; return { x: Q.ox + (x - Q.ox) / Q.k, y: Q.oy + (y - Q.oy - Q.ty) / Q.k }; }
   labDown(id, e) {
     const c4 = this.state.c4;
     if (this.cur().labelsAt && !this.state.labsIn) return; // labels arrive with the instruction
@@ -1474,7 +1476,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (!root) return;
     const r = root.getBoundingClientRect(), sc = r.width / 1280 || 1;
     const pos = this.labPos(id);
-    const px = (e.clientX - r.left) / sc, py = (e.clientY - r.top) / sc;
+    const q = this.q4Pt((e.clientX - r.left) / sc, (e.clientY - r.top) / sc), px = q.x, py = q.y;
     this.ld = { id: id, r: r, sc: sc, ox: px - pos.x, oy: py - pos.y, sx: e.clientX, sy: e.clientY, moved: false };
     try { tgt.setPointerCapture(e.pointerId); } catch (err) {}
     if (e.preventDefault) e.preventDefault();
@@ -1486,7 +1488,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (!L) return;
     if (!L.moved && Math.hypot(e.clientX - L.sx, e.clientY - L.sy) < 6) return;
     L.moved = true;
-    const px = (e.clientX - L.r.left) / L.sc, py = (e.clientY - L.r.top) / L.sc;
+    const q = this.q4Pt((e.clientX - L.r.left) / L.sc, (e.clientY - L.r.top) / L.sc), px = q.x, py = q.y;
     this.setState({ c4: Object.assign({}, this.state.c4, { drag: { id: L.id, x: px - L.ox, y: py - L.oy, px: px, py: py }, sel: null }) });
   }
   // A label let go without moving is a tap that selects it (then slotTap places it).
@@ -1503,7 +1505,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       this.sfx('tap');
       return;
     }
-    const px = (e.clientX - L.r.left) / L.sc, py = (e.clientY - L.r.top) / L.sc;
+    const q = this.q4Pt((e.clientX - L.r.left) / L.sc, (e.clientY - L.r.top) / L.sc), px = q.x, py = q.y;
     const slot = this.slotsDef().find((q) => px > 840 - 20 && px < 840 + 284 + 20 && py > q.y - 20 && py < q.y + 64 + 20);
     if (slot && !c4.checking) this.place(L.id, slot.id, c4);
     else { const at = Object.assign({}, c4.at); at[L.id] = null; this.setState({ c4: Object.assign(c4, { at: at }) }); }
@@ -1787,8 +1789,10 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     ['A', 'B', 'C', 'D'].forEach((k) => {
       const anyV = this.anyCorner(), Vk = P[k], drag = dk === k || anyV;
       g['v' + k] = { x: r1(Vk.x), y: r1(Vk.y), r: vOn(k) ? (drag ? 11 : 7) + (em['v' + k] ? 4 : 0) : 0, c: drag ? PU : NAVY, w: drag ? 4 : 3, ping: 'ping' + (em['v' + k] && vOn(k) ? ' on' : '') };
-      const tapV = !!st.rightTap && (s.linesDone || !s.talking); // listen first; after that taps work even while she answers a wrong one
-      const pulse = tapV && (k === 'A' || k === 'D');
+      // listen first (she asks for the taps); after that taps work even while she answers a wrong one. Every corner
+      // gets a ring, so the learner has to find the right angles; a found one stops pulsing
+      const tapV = !!st.rightTap && s.linesDone && !s.rAll;
+      const pulse = tapV && !s.rFound[k];
       // any-corner drags (screens 29, 33): ‹ › arrows on the side line either side of each corner say "slide me this
       // way", until the learner has dragged one
       const hx = Vk.x, hy = Vk.y;

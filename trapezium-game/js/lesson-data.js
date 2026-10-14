@@ -217,10 +217,13 @@ const LESSON = {
     // the learner's right angle glows; on "another" its partner on the same leg (also 90°) joins it
     { id: 'another90', lines: [{ m: 'surprised', t: 'Woah! We got another\nright angle.', noEmph: 1, cueAt: { woah: 'anotherStart', another: 'anotherReveal' } }], f: { par: 1, arcs: 'ABCD' } },
     // "trapezium": the outline traces in; "adjacent": the arrows pop on; "right": both 90° marks appear;
-    // "called": the name label. Then the learner taps the two 90° corners
+    // "called": the name label. Then Swiftee asks the learner to tap the two 90° corners: every corner gets a ring
+    // (so the learner has to find them), a found one stops pulsing, and finding both is cheered
     { id: 'right', shape: 'right', right90: 1, r90Pre: 1, chevPre: 1, rightTap: 1, okCheck: 1,
+      hint: 'Tap the two 90° corners', idle: 'Tap the two corners with the square marks.',
       lines: [{ t: 'A trapezium with two adjacent\nright angles is called a\nright angled trapezium.', noEmph: 1,
-        holdChips: 1, cueAt: { trapezium: 'defTrace', adjacent: 'chevIn', right: 'rightBoth', called: 'showTitle', angled: 'titlePulse' }, chips: [{ t: 'Right trapezium', k: 'name' }] }],
+        holdChips: 1, cueAt: { trapezium: 'defTrace', adjacent: 'chevIn', right: 'rightBoth', called: 'showTitle', angled: 'titlePulse' }, chips: [{ t: 'Right trapezium', k: 'name' }] },
+        { m: 'curious', t: 'Can you tap the two\nright angles?', holdChips: 1 }],
       f: { par: 1, right: 1 } },
     { id: 'wellDone', noBoard: 1, noPanel: 1, lines: [{ m: 'celebrating', t: 'Great job! Now you know\nall about trapeziums.' }] },
     // after this line eight idea cards are shown and explained one by one
