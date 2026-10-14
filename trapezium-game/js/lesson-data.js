@@ -36,7 +36,6 @@
 //   shapePre     the whole shape hidden until a shapeIn cue
 //   voiceDelay   ms Swiftee waits before speaking, so an opening animation can finish
 //   anglesIn     angles hidden until the protractor walk measures them
-//   dimIn        angles that start dimmed, e.g. 'BC'
 //   practice     a question that is not scored (opts / ok / okChips)
 //   optTop       y (px) of the answers
 //   chipTop      y (px) of the label row
@@ -116,7 +115,7 @@
 //   sideLen   base lengths
 //   ticks     equal-leg marks
 //   arcs      corners whose angle arc and value show, e.g. 'ABCD'
-//   focusAng  angle pair in focus with the others dimmed, e.g. 'AD'
+//   focusAng  angle pair in focus (it grows a little; the others stay as they are), e.g. 'AD'
 //   sums      the two live angle-sum panels
 //   right     right-angle marks
 // =====================================================================
@@ -186,17 +185,19 @@ const LESSON = {
     // 120° (A) and 60° (D) in focus: the pair the next screen adds up
     { id: 'notice', lines: [{ m: 'thinking', t: 'Did you notice something?', cueAt: { notice: 'growAD' } }], f: { par: 1, arcs: 'ABCD', focusAng: 'AD' } },
     // "∠A + ∠D = ?" rises in; on "add" the two values fly from the shape into it; on "180" it resolves
-    { id: 'sumAD', dimIn: 'BC', lines: [{ m: 'surprised', t: '∠A and ∠D add up to 180°.', onStart: 'eqStart',
-      cueAt: { add: 'eqFly', 180: { fn: 'eqResult', sfx: 'snap' } } }], f: { par: 1, arcs: 'ABCD', focusAng: 'AD' } },
+    // cueTimes: measured in the recording (vo058): "angle A" 0.06-0.86 s, "angle D" 1.22-1.92, "add" 2.32, "one hundred eighty" 2.78
+    { id: 'sumAD', lines: [{ m: 'surprised', t: '∠A and ∠D add up to 180°.', onStart: 'eqStart',
+      cueAt: { add: 'eqFly', 180: { fn: 'eqResult', sfx: 'snap' } }, cueTimes: { '∠A': 0.56, '∠D': 1.7, add: 2.32, '180°': 2.8 } }], f: { par: 1, arcs: 'ABCD', focusAng: 'AD' } },
     // "supplementary": DC extends past D and a copy of 120° turns onto it beside 60°, a straight angle;
     // "angles": the equation glows
-    { id: 'supp', dimIn: 'BC', lines: [{ m: 'happy', t: 'That means they are\nsupplementary angles.', onStart: 'suppStart',
+    { id: 'supp', lines: [{ m: 'happy', t: 'That means they are\nsupplementary angles.', onStart: 'suppStart',
       cueAt: { supplementary: 'suppAtAD', angles: 'suppConfirmLater' }, chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
     // ∠B then ∠C get the focus as they are named, then the answers slide in. A correct answer shows
     // the real sum, and 105° turns onto the extended base beside 75° (okFx)
     { id: 'askBC', practice: 1, fitBox: { cy: 312, h: 300 }, optTop: 486, chipTop: 100, idle: 'What about ∠B and ∠C?',
       optsAfter: 1, okSum: ['B', 'C'], okFx: 'suppAtBC',
-      lines: [{ m: 'curious', t: 'What about ∠B and ∠C?', angleCues: 1, pairEnd: ['B', 'C'], onStart: 'askIn', chips: [{ t: '∠B + ∠C = ?', k: 'white' }] }],
+      // cueTimes from the recording (vo060): "angle B" 0.90-1.66 s (B at 1.40), "angle C" 2.08-2.70 (C at 2.44)
+      lines: [{ m: 'curious', t: 'What about ∠B and ∠C?', angleCues: 1, pairEnd: ['B', 'C'], onStart: 'askIn', cueTimes: { '∠B': 1.4, '∠C': 2.44 }, chips: [{ t: '∠B + ∠C = ?', k: 'white' }] }],
       ok: 'Correct! ∠B and ∠C are\nsupplementary angles too.', okChips: [{ t: '∠B + ∠C = 180°', k: 'gold' }],
       opts: [
         { id: '90', t: '90°', fb: 'Not quite. Try again.' },
@@ -256,7 +257,10 @@ const LESSON = {
     // "120° + ? = 180°" above the shape; the right one flies 60° to D and the equation resolves
     { id: 'cfu3', cfu: 3, idle: 'In this trapezium, ∠A = 120°. What is the value of ∠D?', hint: 'Check 3 of 5 · Find the missing angle', optTop: 482,
       enterFx: 'q3In', okFx: 'q3Correct', badFx: 'q3Wrong', idleFx: 'q3Idle', optsAfter: 1, softWrong: 1, handMs: 3000, voiceDelay: 1300,
-      lines: [{ m: 'curious', t: 'In this trapezium, ∠A = 120°. What is the value of ∠D?', cueAt: { trapezium: 'q3Shape', 120: 'q3A', value: 'q3D' } }],
+      // cueTimes from the recording (vo193): "trapezium" 0.82 s, "angle A" 1.88-2.58, "one hundred twenty" 2.92, "value" 5.66,
+      // "angle D" 6.32-6.92 (D at 6.72). "∠A = 120°." is one word: at 2.5 s A's wedge opens and its 120° lands on "one hundred twenty"
+      lines: [{ m: 'curious', t: 'In this trapezium, ∠A = 120°. What is the value of ∠D?', cueAt: { trapezium: 'q3Shape', 120: 'q3A', value: 'q3D' },
+        cueTimes: { trapezium: 0.82, '∠A = 120°': 2.5, value: 5.66, '∠D': 6.72 } }],
       ok: 'Correct! 120° + 60° = 180°.',
       opts: [
         { id: 'a', t: '120°', fb: 'Angles on the same leg add up to 180°.' },

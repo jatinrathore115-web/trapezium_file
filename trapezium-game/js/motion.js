@@ -274,22 +274,22 @@
       const P = window.__trapP && window.__trapP(), w = $('.wedge.w' + k)[0], lab = $('.tag.alab.l' + k)[0];
       if (!G || reduced || !P || !w) return;
       add(() => G.timeline()
-        .fromTo(w, { scale: 1, svgOrigin: P[k].x + ' ' + P[k].y }, { scale: 1.3, duration: 0.18, ease: 'power2.out' }, 0)
-        .to(w, { scale: 1, duration: 0.35, ease: 'power2.inOut' }, 0.18)
+        .fromTo(w, { scale: 1, svgOrigin: P[k].x + ' ' + P[k].y }, { scale: 1.3, duration: 0.22, ease: 'power2.out' }, 0)
+        .to(w, { scale: 1, duration: 0.38, ease: 'power2.inOut' }, 0.22)
         .set(w, { clearProps: 'transform' })
-        .add(lab ? G.fromTo(lab, { xPercent: -50, yPercent: -50, y: 0 }, { y: -8, duration: 0.18, ease: 'power2.out', yoyo: true, repeat: 1 }) : G.timeline(), 0));
+        // its value hops with it: up and a little bigger, then lands with a small bounce
+        .add(lab ? G.timeline()
+          .fromTo(lab, { xPercent: -50, yPercent: -50, y: 0, scale: 1 }, { y: -16, scale: 1.3, duration: 0.22, ease: 'power2.out' })
+          .to(lab, { y: 0, scale: 1, duration: 0.42, ease: 'bounce.out' }) : G.timeline(), 0));
     },
-    // screen 27, as each angle is named: the other angles dim, this arc redraws round its corner and pulses once,
-    // and its filled angle grows in and its value pulses with it
+    // screen 27, as each angle is named: this arc redraws round its corner and pulses once, and its filled angle grows
+    // in and its value pulses with it (the other angles stay as they are)
     angleFocus(k) {
       if (!G) return;
       const arc = $('.arc.a' + k)[0], lab = $('.tag.alab.l' + k)[0];
       this.wedgeGrow([k]);
-      const others = ['A', 'B', 'C', 'D'].filter((x) => x !== k);
-      const dim = others.map((x) => $('.arc.a' + x)[0]).concat(others.map((x) => $('.tag.alab.l' + x)[0]), others.map((x) => $('.wedge.w' + x)[0])).filter(Boolean);
       add(() => {
         const tl = G.timeline();
-        tl.to(dim, { opacity: 0.35, duration: 0.3, ease: 'sine.out' }, 0).to([arc, lab].filter(Boolean), { opacity: 1, duration: 0.2 }, 0);
         if (arc) tl.fromTo(arc, { strokeDasharray: 100, strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.5, ease: 'power2.out' }, 0)
           .to(arc, { strokeWidth: 7, duration: 0.2, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.5);
         if (lab) tl.fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.15, duration: 0.2, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.5);
@@ -354,10 +354,10 @@
           const c = document.createElement('div');
           c.className = 'tag alab eq-fly' + (box.classList.contains('eq-pair') ? ' small' : ''); c.textContent = src.textContent.trim(); c.style.left = from.x + 'px'; c.style.top = from.y + 'px';
           stage.appendChild(c);
-          const at = i * 1.05, grow = 28 / 17; // 1.05 s apart; the text grows from label size to formula size in flight
-          tl.fromTo(c, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1, opacity: 0 }, { opacity: 1, y: -8, scale: 1.12, boxShadow: '0 6px 14px rgba(11,91,112,.22)', duration: 0.25, ease: 'power2.out' }, at)
+          const at = i * 1.05, grow = 28 / 21; // 1.05 s apart; the text grows from label size to formula size in flight
+          tl.fromTo(c, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1, opacity: 0 }, { opacity: 1, y: -8, scale: 1.12, duration: 0.25, ease: 'power2.out' }, at)
             .fromTo(src, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.2, duration: 0.2, yoyo: true, repeat: 1 }, at)
-            .to(c, { x: to.x - from.x, y: to.y - from.y, scale: grow, backgroundColor: 'rgba(255,255,255,0)', boxShadow: '0 0 0 rgba(0,0,0,0)', duration: 0.7, ease: 'power2.inOut' }, at + 0.25)
+            .to(c, { x: to.x - from.x, y: to.y - from.y, scale: grow, duration: 0.7, ease: 'power2.inOut' }, at + 0.25)
             .fromTo(dst, { opacity: 0 }, { opacity: 1, duration: 0.15 }, at + 0.9)
             .to(c, { opacity: 0, duration: 0.15, onComplete: () => c.remove() }, at + 0.92)
             .fromTo(dst, { scale: 1 }, { scale: 1.12, duration: 0.14, ease: 'sine.out', yoyo: true, repeat: 1 }, at + 0.95);
@@ -614,11 +614,6 @@
         return tl;
       });
     },
-    // angles dimmed on the previous screen start this one dimmed (dimIn, screens 25 and 26), set before first paint
-    dimAngles(keys) {
-      const els = keys.split('').map((x) => $('.arc.a' + x)[0]).concat(keys.split('').map((x) => $('.tag.alab.l' + x)[0]), keys.split('').map((x) => $('.wedge.w' + x)[0])).filter(Boolean);
-      if (G && els.length) add(() => G.set(els, { opacity: 0.35 }));
-    },
     // screen 27: the named pair pulses together (arcs and values), then every angle returns to full strength
     anglesTogether(keys) {
       if (!G || !keys.length) return;
@@ -661,14 +656,12 @@
     },
 
     // ---------- screen 26 "That means they are supplementary angles." ----------
-    // as the line starts: A and D pulse gently (their filled angles grow in) while B and C dim
+    // as the line starts: A and D pulse gently (their filled angles grow in); B and C stay fully coloured
     suppStart() {
       if (!G) return;
       const focus = ['A', 'D'].map((k) => $('.arc.a' + k)[0]).filter(Boolean), flab = ['A', 'D'].map((k) => $('.tag.alab.l' + k)[0]).filter(Boolean);
-      const dim = ['B', 'C'].map((k) => $('.arc.a' + k)[0]).concat(['B', 'C'].map((k) => $('.tag.alab.l' + k)[0]), ['B', 'C'].map((k) => $('.wedge.w' + k)[0])).filter(Boolean);
       this.wedgeGrow('AD', 0.1);
       add(() => G.timeline()
-        .to(dim, { opacity: 0.35, duration: 0.4, ease: 'sine.inOut' }, 0)
         .to(focus, { strokeWidth: 7, duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.1)
         .fromTo(flab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.12, duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.1));
     },
@@ -693,7 +686,7 @@
     suppAt(T, S) {
       const P = window.__trapP && window.__trapP(), e = $('.eAB')[0];
       if (!G || !P || !e) return;
-      const ns = 'http://www.w3.org/2000/svg', R = 30 / ((window.__boardS && window.__boardS()) || 1), COL = { A: '#ff7a00', B: '#1fcf66', C: '#12a4ff', D: '#ffb800' };
+      const ns = 'http://www.w3.org/2000/svg', R = 38 / ((window.__boardS && window.__boardS()) || 1), COL = { A: '#ff7a00', B: '#1fcf66', C: '#12a4ff', D: '#ffb800' };
       const nb = { A: 'B', B: 'A', C: 'D', D: 'C' }, unit = (p, q) => { const L = Math.hypot(q.x - p.x, q.y - p.y) || 1; return { x: (q.x - p.x) / L, y: (q.y - p.y) / L }; };
       const t = P[T], s = P[S], dT = unit(t, P[nb[T]]), dS = unit(s, P[nb[S]]), up = unit(s, t);
       const wedge = (u, v, col) => { const c = u.x * v.y - u.y * v.x, g = document.createElementNS(ns, 'path');
@@ -712,12 +705,12 @@
       const a0 = { x: s.x + ex.x * R, y: s.y + ex.y * R }, a1 = { x: s.x + dS.x * R, y: s.y + dS.y * R }, side = ex.x * up.y - ex.y * up.x;
       const rim = el('path', { d: 'M' + a0.x.toFixed(1) + ',' + a0.y.toFixed(1) + ' A' + R + ',' + R + ' 0 0 ' + (side > 0 ? 1 : 0) + ' ' + a1.x.toFixed(1) + ',' + a1.y.toFixed(1),
         fill: 'none', stroke: '#ffc400', 'stroke-width': 4, 'stroke-linecap': 'round', pathLength: 100, opacity: 0 });
-      // its "180°" label: a gold pill beyond the half-disc on the outside of the shape, between the line and the leg
+      // its "180°" label: plain text (white outline, no box) beyond the half-disc on the outside of the shape, between the line and the leg
       let bx = ex.x + up.x, by = ex.y + up.y; const bl = Math.hypot(bx, by) || 1; bx /= bl; by /= bl;
       let lx = s.x + bx * (R + 30); const ly = s.y + by * (R + 30), lbl = el('g', {});
       if (B) lx = Math.max(B.l + 46, Math.min(B.r - 46, lx)); // the pill stays inside the card too
-      lbl.appendChild(el('rect', { x: (lx - 34).toFixed(1), y: (ly - 15).toFixed(1), width: 68, height: 30, rx: 15, fill: '#fff8e3', stroke: '#f0b000', 'stroke-width': 3 }));
-      const tx = el('text', { x: lx.toFixed(1), y: (ly + 6.5).toFixed(1), 'text-anchor': 'middle', 'font-family': 'Nunito, sans-serif', 'font-weight': 900, 'font-size': 18, fill: '#6b4300' });
+      const tx = el('text', { x: lx.toFixed(1), y: (ly + 7).toFixed(1), 'text-anchor': 'middle', 'font-family': 'Nunito, sans-serif', 'font-weight': 900, 'font-size': 21, fill: '#123b63',
+        stroke: '#fff', 'stroke-width': 4, 'paint-order': 'stroke', 'stroke-linejoin': 'round' });
       tx.textContent = '180°'; lbl.appendChild(tx);
       [line, own, copy, rim, lbl].forEach((n) => root.appendChild(n));
       const dot = $('.vdot')[0];

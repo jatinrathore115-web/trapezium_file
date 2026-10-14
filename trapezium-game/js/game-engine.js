@@ -403,12 +403,21 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       if (chipsAt >= 0 && n >= chipsAt + 1) scheduleChipsAt();
       if (fAt >= 0 && n >= fAt + 1) fireFocus();
       if (lgAt >= 0 && n >= lgAt + 1) fireLegs();
-      emphCues.forEach((c) => { if (!c.done && n >= c.i + 1) { c.done = true; if (tok === this.narrTok) {
-        const ang = L.angleCues ? c.parts.filter((k) => /^a[A-D]$/.test(k)) : [];
-        if (ang.length) { this.sfx('pop'); ang.forEach((k) => Motion.angleFocus(k[1])); } else this.emphasize(c.parts, () => c.parts.forEach(showDelayedChips)); } } }); // a named part reacts as it is said
-      wordCues.forEach((c) => { if (n >= c.i + 1) fireCue(c); });
-      keyCues.forEach((c) => { if (n >= c.i + 1) fireKey(c); });
+      // (a word with a measured time in the recording waits for that time instead: cueTimes)
+      emphCues.forEach((c) => { if (timed[c.i] == null && n >= c.i + 1) fireEmph(c); }); // a named part reacts as it is said
+      wordCues.forEach((c) => { if (timed[c.i] == null && n >= c.i + 1) fireCue(c); });
+      keyCues.forEach((c) => { if (timed[c.i] == null && n >= c.i + 1) fireKey(c); });
     });
+    const fireEmph = (c) => {
+      if (c.done) return; c.done = true;
+      if (tok !== this.narrTok) return;
+      const ang = L.angleCues ? c.parts.filter((k) => /^a[A-D]$/.test(k)) : [];
+      if (ang.length) { this.sfx('pop'); ang.forEach((k) => Motion.angleFocus(k[1])); } else this.emphasize(c.parts, () => c.parts.forEach(showDelayedChips));
+    };
+    // cueTimes: { word: s } - when the recording says a word (measured from the clip). Its cues fire at that moment
+    // rather than by the word's estimated share of the line, which runs ahead on words like "∠A" ("angle A").
+    // Filled only when the recorded clip plays; otherwise every cue keeps the word timing.
+    const timed = {};
     // cueAt: { word: fnName | { fn, sfx } }, each animation runs as the voice reaches its word
     const wordCues = Object.keys(L.cueAt || {}).map((w) => {
       const v = L.cueAt[w], i = words.findIndex((x) => x.toLowerCase().replace(/[^a-z0-9-]/g, '').indexOf(w) >= 0); // an equation like "∠A = 120°" counts as one word
@@ -572,7 +581,15 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       const wt = words.map((w) => Voice.weight(this.speechOf(w)) + (/[.!?]$/.test(w) ? 6 : /[,:;]$/.test(w) ? 3 : 0));
       const all = wt.reduce((a, b) => a + b, 0) || 1, from = []; let acc = 0;
       wt.forEach((x) => { from.push(acc / all); acc += x; });
-      const end = () => { if (!live() || sDone) return; sDone = true; begin(); mouth(false); letterCues.forEach(fireLetter); revealAll(); finish(); };
+      const end = () => { if (!live() || sDone) return; sDone = true; begin(); mouth(false); letterCues.forEach(fireLetter); fireTimed(() => true); revealAll(); finish(); };
+      // (an equation word like "∠A = 120°" is joined with non-breaking spaces)
+      Object.keys(L.cueTimes || {}).forEach((w) => { const j = words.findIndex((x) => x.replace(/[.,!?;:]+$/, '').replace(/\s+/g, ' ') === w); if (j >= 0) timed[j] = L.cueTimes[w]; });
+      // (the clip's tail: anything not yet fired goes when the line ends, so a cut-short clip still completes the screen)
+      const fireTimed = (due) => {
+        emphCues.forEach((c) => { if (timed[c.i] != null && due(timed[c.i])) fireEmph(c); });
+        wordCues.forEach((c) => { if (timed[c.i] != null && due(timed[c.i])) fireCue(c); });
+        keyCues.forEach((c) => { if (timed[c.i] != null && due(timed[c.i])) fireKey(c); });
+      };
       Voice.play(clip, {
         start: () => { if (!live()) return; spoke = true; bMode = true; begin(); },
         progress: (f) => {
@@ -580,6 +597,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
           // letterTimes: when each corner letter is heard in the clip (s, measured from the recording); else its place in the text
           if (L.letterTimes) { const t = f * Math.max(0.3, clipDur - 0.35) + 0.06; letterCues.forEach((c, j) => { if (t >= L.letterTimes[j] - 0.05) fireLetter(c); }); }
           else letterCues.forEach((c) => { if (f >= c.at / Math.max(1, sp.length)) fireLetter(c); });
+          if (L.cueTimes) { const t = f * Math.max(0.3, clipDur - 0.35) + 0.06; fireTimed((s) => t >= s - 0.03); }
           let k = 0; while (k < from.length && from[k] <= f) k++;
           if (k > i) { i = k; setReveal(i); }
         },
@@ -1224,7 +1242,6 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     // screen 3: the side numbers fade out, then are dropped so no later redraw can flash them back; the corner
     // letters start hidden and fly in on their voice cues
     if (st.letterIn) { Motion.lettersReset(); Motion.fadeOut('.tag.snum'); const tok = this.stepTok; this.tm(() => { if (tok === this.stepTok) this.setState({ numsGone: true }); }, 450); }
-    if (st.dimIn) Motion.dimAngles(st.dimIn); // angles dimmed on the last screen start dimmed, with no flash
     if (st.entryPop) Motion.entryPop();
     if (st.hero && !st.finale) Motion.heroIn(); // (on 44 she is already centre stage)
     if (st.enterFx && Motion[st.enterFx]) Motion[st.enterFx]();
@@ -1814,14 +1831,14 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     ['A', 'B', 'C', 'D'].forEach((k) => {
       const n = this.nb(k), Vk = P[k], u = unit(Vk, P[n[0]]), v = unit(Vk, P[n[1]]);
       // the angle's arc: the same size on screen whatever the board's zoom (30 stage px)
-      const zs = this.boardMap().s || 1, R = 30 / zs;
+      const zs = this.boardMap().s || 1, R = 38 / zs; // every angle 38 px on screen: wide enough that even a 60° angle shows plainly round its corner dot
       const sx = Vk.x + u.x * R, sy = Vk.y + u.y * R, ex = Vk.x + v.x * R, ey = Vk.y + v.y * R;
       const cross = u.x * v.y - u.y * v.x;
       const show = arcSet.indexOf(k) >= 0;
       const isRight = Math.abs(this.angle(P, k) - 90) < 0.5;
       // when several angles light up together they draw in one after another
       const stag = (f.arcs || '').length > 1 ? ' d' + (f.arcs || '').indexOf(k) : '';
-      const look = (known && (f.arcs || '').indexOf(k) >= 0 ? ' still' : '') + (fa ? (fa.indexOf(k) >= 0 ? ' glow' : ' dim') : '') +
+      const look = (known && (f.arcs || '').indexOf(k) >= 0 ? ' still' : '') + (fa && fa.indexOf(k) >= 0 ? ' glow' : '') +
         (st.explore && s.dragging && livePair.indexOf(k) >= 0 ? ' live' : ''); // explore: the dragged leg's two angles glow while they change
       // at exactly 90° the arc gives way to the square right-angle mark
       g['a' + k] = { p: 'M' + r1(sx) + ',' + r1(sy) + ' A' + R + ',' + R + ' 0 0 ' + (cross > 0 ? 1 : 0) + ' ' + r1(ex) + ',' + r1(ey), d: dsp(show && !isRight && !(known || st.anglesIn)), cls: 'arc a' + k + stag + look + (em['a' + k] ? ' emph' : '') + (st.anglesIn ? ' pre' : ''), o: r1(Vk.x) + 'px ' + r1(Vk.y) + 'px' };
@@ -1840,7 +1857,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       const th = this.angle(P, k) * Math.PI / 180;
       // The value sits inside its corner on the angle's bisector, pushed out just far enough to clear the arc and
       // both sides. It is sized by the value even when the name shows (screen 31), so names sit where values were.
-      const lbl = V[k] + '°', hw = (lbl.length * 10.5 + 26) / 2, hh = 15;
+      const lbl = V[k] + '°', hw = (lbl.length * 11.5 + 6) / 2, hh = 13; // plain text, no box (21px bold)
       const clearOf = (cx, cy) => {
         const sideGap = (w) => Math.abs((cx - Vk.x) * w.y - (cy - Vk.y) * w.x) - (hw * Math.abs(w.y) + hh * Math.abs(w.x));
         const near = Math.hypot(Math.max(0, Math.abs(cx - Vk.x) - hw), Math.max(0, Math.abs(cy - Vk.y) - hh));
@@ -1862,8 +1879,8 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       // corner dot pulses, so the learner has to find the right angles; a found one stops pulsing and stays gold
       const tapV = !!st.rightTap && s.linesDone && !s.rAll, found = !!st.rightTap && !!s.rFound[k];
       const gold = em['v' + k] || found, big = drag || tapV || found;
-      g['v' + k] = { x: r1(Vk.x), y: r1(Vk.y), r: vOn(k) ? (drag ? 11 : big ? 9 : 7) + (em['v' + k] ? 6 : 0) : 0, c: gold ? '#ffb800' : big ? PU : NAVY, w: big || gold ? 4 : 3,
-        // (screen 35's tap dots are smaller than drag corners, so the square marks show round them)
+      g['v' + k] = { x: r1(Vk.x), y: r1(Vk.y), r: vOn(k) ? (big ? 9 : 7) + (em['v' + k] ? 6 : 0) : 0, c: gold ? '#ffb800' : big ? PU : NAVY, w: big || gold ? 4 : 3,
+        // (corners to drag or tap stay small enough that the angles and square marks show round them)
         cls: (gold && vOn(k) ? 'on' : '') + ((anyV && !s.moved && !s.explored && !s.dragging) || (tapV && !found) ? ' drag-cue' : '') }; // a named point pops gold, with a glow; a corner to drag or tap pulses
       g['k' + k] = {
         x: r1(Vk.x), y: r1(Vk.y), d: dsp(tapV || drag), cls: '',
@@ -1924,8 +1941,8 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       // it also clears the parallel arrows that sit on the side's middle
       // a leg carrying equal marks gets more room, so the tag clears the marks that cross its middle
       const marked = g.tk && g.tk.d === 'inline' && /^(DA|AD|BC|CB)$/.test(Object.keys(P).find((k) => P[k] === p) + Object.keys(P).find((k) => P[k] === q));
-      const hw = (text.length * 9.6 + 36) / 2, hh = 21;
-      const off = hw * Math.abs(nx) + hh * Math.abs(ny) + 8 + 12 * Math.abs(ny) + (marked ? 14 : 0);
+      const hw = (text.length * 11.5 + 6) / 2, hh = 13; // plain text, no box (21px bold)
+      const off = hw * Math.abs(nx) + hh * Math.abs(ny) + 10 + 12 * Math.abs(ny) + (marked ? 14 : 0); // (bases: clear of the parallel arrows)
       // outside the shape first; if the board edge would push it back onto the side, tuck it inside instead
       const need = hw * Math.abs(nx) + hh * Math.abs(ny) + 4;
       const place = (sg) => {

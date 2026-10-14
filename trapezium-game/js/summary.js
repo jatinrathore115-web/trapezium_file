@@ -43,8 +43,9 @@
   const SPOT = { peek: { y: 0, s: 218 / 259, hide: 154 }, middle: { y: 186, s: 300 / 259, hide: 300 } };
 
   // ---------- the trapeziums on the cards (board units): AB at y = TOP, DC at y = BOT, so AB is parallel to DC ----------
-  // the shape sits in the middle of the card
-  const TOP = 276, BOT = 378, HT = BOT - TOP;
+  // the shape sits in the middle of the card's open area (the name plate covers its bottom edge), leaving room under it
+  // for the angle-sum line, well clear of the plate
+  const TOP = 262, BOT = 364, HT = BOT - TOP;
   const SHAPES = {
     gen: { A: 440, B: 548, C: 596, D: 404 },
     scal: { A: 434, B: 530, C: 598, D: 402 },    // all four sides different
@@ -318,7 +319,7 @@
       if (V.lit) { // glow bands grow along the lit sides, under the side lines so their colour still shows
         g._lit = V.lit.map((s) => {
           const ab = SIDES[s], a = P[ab[0]], b = P[ab[1]];
-          const band = mk('line', { x1: a.x, y1: a.y, x2: a.x, y2: a.y, stroke: '#ffe27a', 'stroke-width': 10, 'stroke-linecap': 'round', opacity: 0, style: 'filter: drop-shadow(0 0 3px #ffb020)' }, g._bands);
+          const band = mk('line', { x1: a.x, y1: a.y, x2: a.x, y2: a.y, stroke: '#ffc629', 'stroke-width': 11, 'stroke-linecap': 'round', opacity: 0 }, g._bands); // (gold reads on the cream fill too)
           this.growLine(band, a, b, 300, t);
           return g._sides[s];
         });
@@ -397,9 +398,9 @@
       else if (kind === 'wedges') this.warmPulse(c._wedges, '1.15');
       else if (kind === 'values') this.warmPulse(c._values, '1.5');
       else if (kind === 'sum') this.sum(c);
-      else if (kind === 'tag') this.warmPulse([c._tag], '1.12');
+      else if (kind === 'tag') this.warmPulse([c._tag], '1.05');
     },
-    // "180°": the two angle values pulse, then their sum pops in on the card under the shape: 120° + 60° = 180°
+    // "180°": the two angle values pulse, then their sum fades up into place under the shape: 120° + 60° = 180°
     sum(c) {
       this.warmPulse(c._values, '1.5');
       if (!c._sum) {
@@ -407,13 +408,15 @@
         if (v.length < 2) return;
         v[1] = 180 - v[0]; // same-leg angles of a trapezium: shown exactly
         const ink = (k) => (k === 'D' ? '#b88300' : ANG[k]); // each value in its angle's colour (D's yellow, darkened to read on white)
-        const tx = mk('text', { x: SUM.card.cx, y: BOT + 44, 'text-anchor': 'middle', 'font-size': 19, 'font-weight': 900, 'font-family': 'Nunito, system-ui, sans-serif',
+        const tx = mk('text', { x: SUM.card.cx, y: BOT + 40, 'text-anchor': 'middle', 'font-size': 19, 'font-weight': 900, 'font-family': 'Nunito, system-ui, sans-serif',
           fill: INK.navy, stroke: '#fff', 'stroke-width': 4, 'paint-order': 'stroke', 'stroke-linejoin': 'round', opacity: 0 }, c._marks);
         [[v[0] + '°', ink(c._c.visual.wedges[0])], [' + ', INK.navy], [v[1] + '°', ink(c._c.visual.wedges[1])], [' = ', INK.navy], ['180°', '#e06600']].forEach(([s, col]) => mk('tspan', { fill: col, text: s }, tx));
         c._sum = tx;
       }
-      this.later(350, () => { this.pop(c._sum, 0, true); this.sfx('chime'); });
-      this.later(700, () => this.warmPulse([c._sum], '1.15'));
+      this.later(350, () => {
+        const e = c._sum; e.setAttribute('opacity', 1); this.sfx('chime');
+        if (!reduced() && e.animate) try { e.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 450, easing: 'cubic-bezier(.25,.8,.35,1)', fill: 'backwards' }); } catch (x) {}
+      });
     },
 
     // ---------- a card coming in, and going to the albums ----------

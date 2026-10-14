@@ -30,12 +30,13 @@ a{color:#123b63}a:hover{color:#0b2742}
 @keyframes nudge{0%,100%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
 .tag{position:absolute;transform:translate(-50%,-50%);font-weight:800;font-size:18px;padding:5px 14px;border-radius:10px;background:#fff;white-space:nowrap;box-shadow:0 2px 6px rgba(18,59,99,.12)}
 .vlab{background:transparent;box-shadow:none;padding:0;font-size:21px;font-weight:900;color:#123b63}
-/* an angle's value wears its angle's colour, so each number points at its angle */
-.alab{background:#fff;box-shadow:none;padding:1px 8px;font-size:17px;font-weight:900;color:#123b63;border:2.5px solid #9fb3c8;border-radius:9px}
-.alab.lA{border-color:#ff7a00}.alab.lB{border-color:#1fcf66}.alab.lC{border-color:#12a4ff}.alab.lD{border-color:#e6a400}
+/* angle values and side lengths are plain text, no box: a thin white outline keeps them readable over lines and fills.
+   An angle's value is written in its angle's colour (darker, to read on the cream fill), so each number points at its angle */
+.alab,.mtag{background:none;box-shadow:none;padding:0;border:0;border-radius:0;font-family:'Nunito',system-ui,sans-serif;font-size:21px;font-weight:900;color:#123b63;text-shadow:0 0 3px #fff,0 0 3px #fff,2px 0 0 #fff,-2px 0 0 #fff,0 2px 0 #fff,0 -2px 0 #fff,1.5px 1.5px 0 #fff,-1.5px -1.5px 0 #fff,1.5px -1.5px 0 #fff,-1.5px 1.5px 0 #fff}
+.alab.lA{color:#e0560a}.alab.lB{color:#128a44}.alab.lC{color:#0a72c4}.alab.lD{color:#a87200}
 /* length labels match their side: legs teal, bases blue; they fade in (marks are drawn, never popped) */
-.mtag{border:3px solid #00c4a7;color:#00574d;animation:fade .4s ease-out}
-.tag.mtag.mAB,.tag.mtag.mCD{border-color:#1f6bff;color:#0d3f99}
+.mtag{color:#00806d;animation:fade .4s ease-out}
+.tag.mtag.mAB,.tag.mtag.mCD{color:#1656e0}
 .tag.off{display:none}
 .alab,.vlab{transition:none}
 .alab{animation:fade .3s ease-out}
@@ -271,7 +272,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 .tag.sum.sumL{border:2px solid #ff7a00;border-bottom-color:#ffb800;border-right-color:#ffb800}
 .tag.sum.sumR{border:2px solid #1fcf66;border-bottom-color:#12a4ff;border-right-color:#12a4ff}
 /* screen 35: the 90° labels in the right-angled corners */
-.tag.r90{color:#123b63;background:#fff;border:2.5px solid #ffb800}
+.tag.r90{color:#123b63}
 .r90pre .rmark,.r90pre .tag.r90{opacity:0;animation:none} /* hidden from the first frame until GSAP reveals them */
 /* check 3 (screen 40): parts start hidden until GSAP reveals them (Motion.q3*); the hint sits above the shape;
    a wrong answer is warm orange, not red */
@@ -327,17 +328,12 @@ a{color:#123b63}a:hover{color:#0b2742}
 
 /* angles already measured stay put instead of drawing in again */
 .arc.still,.tag.alab.still{animation:none}
-/* focusAng: the pair to notice glows and the other angles step back */
+/* focusAng: the pair to notice grows a little; the other angles stay fully coloured (never faded, never looking empty) */
 .arc.glow{animation:arcGlow .7s ease-out .35s both}
 .tag.alab.glow{animation:labGlow .7s ease-out .35s both}
-.arc.dim,.tag.alab.dim{animation:angDim .7s ease-out .35s both}
-/* in focus: the arc thickens and the value takes its angle's colour (solid, no blur); the others step back */
 @keyframes arcGlow{from{stroke-width:7px}to{stroke-width:9px}}
-@keyframes labGlow{from{transform:translate(-50%,-50%) scale(1)}to{transform:translate(-50%,-50%) scale(1.08)}}
-@keyframes angDim{from{opacity:1}to{opacity:.65}} /* stepped back, but still plainly filled */
-/* one design for every angle value: a white tag in its angle's colour; in focus it only grows a little and its border thickens */
-.tag.alab.glow{border-width:3.5px}
-@media (prefers-reduced-motion: reduce){.arc.glow,.tag.alab.glow,.arc.dim,.tag.alab.dim{animation-duration:.01s;animation-delay:0s}}
+@keyframes labGlow{from{transform:translate(-50%,-50%) scale(1)}to{transform:translate(-50%,-50%) scale(1.1)}}
+@media (prefers-reduced-motion: reduce){.arc.glow,.tag.alab.glow{animation-duration:.01s;animation-delay:0s}}
 
 /* screens 25 and 30: the angle sum built in its box (Motion.eqStart / eqFly / eqResult). Each slot stacks
    the symbol and the value in one cell, so nothing shifts as they swap */
@@ -347,7 +343,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 .eq-sum{display:flex;gap:9px;align-items:center}
 .eq-v1,.eq-v2,.eq-plus,.eq-res{opacity:0;display:inline-block}
 .eq-q{display:inline-block;color:#b8860b}
-.tag.alab.eq-fly{z-index:7;pointer-events:none;animation:none;transition:none;background:#fff}
+.tag.alab.eq-fly{z-index:7;pointer-events:none;animation:none;transition:none}
 .eq-layer{position:fixed;width:1280px;height:720px;transform-origin:0 0;pointer-events:none;z-index:50;font-family:'Nunito','Noto Sans Math',system-ui,sans-serif;color:#123b63}
 
 /* screen 29: fixed-width sum boxes, so nothing shifts as the values change; the dragged leg's box and angles glow */
@@ -469,12 +465,12 @@ a{color:#123b63}a:hover{color:#0b2742}
 .chev-pre .chev:not([data-in]){opacity:0;animation:none}
 .tag.mtag[data-gone]{opacity:0}
 /* screen 16: each length in its own colour */
-.tag.mtag[data-col]{transition:background-color .35s ease,border-color .35s ease,color .35s ease}
+.tag.mtag[data-col]{transition:color .35s ease}
 /* screens 16-17, "different lengths": every side and its length take their own colour, so all four read as different */
-.tag.mtag[data-col=AB]{background:#fff4cc;border-color:#e6a400;color:#5c4300}
-.tag.mtag[data-col=BC]{background:#e3eeff;border-color:#1f6bff;color:#0d3f99}
-.tag.mtag[data-col=CD]{background:#dcf8f2;border-color:#00c4a7;color:#00574d}
-.tag.mtag[data-col=DA]{background:#ffe6d1;border-color:#ff7a00;color:#8a3f00}
+.tag.mtag[data-col=AB]{color:#a87200}
+.tag.mtag[data-col=BC]{color:#1656e0}
+.tag.mtag[data-col=CD]{color:#00806d}
+.tag.mtag[data-col=DA]{color:#e0560a}
 svg[data-lencol] .eAB{stroke:#ffb800!important}svg[data-lencol] .eBC{stroke:#1f6bff!important}
 svg[data-lencol] .eCD{stroke:#00c4a7!important}svg[data-lencol] .eDA{stroke:#ff7a00!important}
 svg[data-lencol] .edge{transition:stroke .4s ease}
@@ -513,7 +509,6 @@ svg[data-lencol] .edge{transition:stroke .4s ease}
 .wedge.pre{opacity:0}
 /* the filled angles follow their arcs' focus */
 .wedge.glow{opacity:1}
-.wedge.dim{animation:angDim .7s ease-out .35s both}
 .wedge.live{stroke:#ffd43b;stroke-width:4px;paint-order:stroke}
 
 /* ---------- crystal buttons: Back / Next / Done (.navbtn); the answers have their own look (end of file) ----------
@@ -657,7 +652,6 @@ svg[data-lencol] .edge{transition:stroke .4s ease}
 .vdot.on{filter:drop-shadow(0 0 5px rgba(255,184,0,.95))}
 .wedge,.arc,.shape-fill{transition:opacity .3s ease}
 .focusing .edge:not(.emph):not(.lit){opacity:.35}
-.focusing .wedge:not(.emph),.focusing .arc:not(.emph){opacity:.65}
 .wedge.emph{stroke:#ffd43b;stroke-width:5px;paint-order:stroke}
 @media (prefers-reduced-motion: reduce){.hl.on{animation:none;stroke-dasharray:none}}
 
