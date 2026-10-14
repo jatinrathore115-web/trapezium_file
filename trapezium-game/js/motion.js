@@ -332,8 +332,11 @@
     },
     // "add": copies of the two values lift off the shape and fly, one after the other, to the answer side;
     // the first replaces the "?", then the "+" appears and the second lands beside it
-    eqFly() { this.eqFlyAt(0); },
-    eqFlyAt(i) {
+    // screen 25, on "add": both values fly in together and land as the voice reaches "180", where they merge (eqResult)
+    eqFly() { this.eqFlyAt(0, { gap: 0.1, lift: 0.15, travel: 0.45 }); },
+    // o: { gap (s between the two values), lift, travel } - by default one value after the other (screen 30)
+    eqFlyAt(i, o) {
+      const gap = (o && o.gap != null) ? o.gap : 1.05, lift = (o && o.lift) || 0.25, travel = (o && o.travel) || 0.7, land = lift + travel;
       if (!G) return;
       if (!this.eqBox(i)) this.eqStart();
       const box = this.eqBox(i), stage = this.eqLayer();
@@ -354,15 +357,15 @@
           const c = document.createElement('div');
           c.className = 'tag alab eq-fly' + (box.classList.contains('eq-pair') ? ' small' : ''); c.textContent = src.textContent.trim(); c.style.left = from.x + 'px'; c.style.top = from.y + 'px';
           stage.appendChild(c);
-          const at = i * 1.05, grow = 28 / 21; // 1.05 s apart; the text grows from label size to formula size in flight
-          tl.fromTo(c, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1, opacity: 0 }, { opacity: 1, y: -8, scale: 1.12, duration: 0.25, ease: 'power2.out' }, at)
+          const at = i * gap, grow = 28 / 21; // the text grows from label size to formula size in flight
+          tl.fromTo(c, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1, opacity: 0 }, { opacity: 1, y: -8, scale: 1.12, duration: lift, ease: 'power2.out' }, at)
             .fromTo(src, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.2, duration: 0.2, yoyo: true, repeat: 1 }, at)
-            .to(c, { x: to.x - from.x, y: to.y - from.y, scale: grow, duration: 0.7, ease: 'power2.inOut' }, at + 0.25)
-            .fromTo(dst, { opacity: 0 }, { opacity: 1, duration: 0.15 }, at + 0.9)
-            .to(c, { opacity: 0, duration: 0.15, onComplete: () => c.remove() }, at + 0.92)
-            .fromTo(dst, { scale: 1 }, { scale: 1.12, duration: 0.14, ease: 'sine.out', yoyo: true, repeat: 1 }, at + 0.95);
-          if (i === 0) tl.to(box.querySelector('.eq-q'), { opacity: 0, scale: 0.5, duration: 0.2 }, at + 0.8)
-            .fromTo(box.querySelector('.eq-plus'), { opacity: 0 }, { opacity: 1, duration: 0.25 }, at + 1.0);
+            .to(c, { x: to.x - from.x, y: to.y - from.y, scale: grow, duration: travel, ease: 'power2.inOut' }, at + lift)
+            .fromTo(dst, { opacity: 0 }, { opacity: 1, duration: 0.15 }, at + land - 0.05)
+            .to(c, { opacity: 0, duration: 0.15, onComplete: () => c.remove() }, at + land - 0.03)
+            .fromTo(dst, { scale: 1 }, { scale: 1.12, duration: 0.14, ease: 'sine.out', yoyo: true, repeat: 1 }, at + land);
+          if (i === 0) tl.to(box.querySelector('.eq-q'), { opacity: 0, scale: 0.5, duration: 0.2 }, at + land - 0.15)
+            .fromTo(box.querySelector('.eq-plus'), { opacity: 0 }, { opacity: 1, duration: 0.25 }, at + land + 0.05);
         });
         return tl;
       });

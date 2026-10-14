@@ -189,7 +189,7 @@ window.AngleWalker = class AngleWalker {
     }
     const tr = this.trace;
     if (tr && tr.t > 0) { // the angle being read sweeps open in its own colour, exactly as the angle that stays on the shape
-      const r = CONFIG.angleWalk.angleR, end = tr.a + tr.sweep * tr.t; // stage px, the size of every angle in the lesson
+      const r = CONFIG.angleR(Math.abs(tr.deg)) + 3.5, end = tr.a + tr.sweep * tr.t; // stage px: exactly the filled angle that stays on the shape
       c.setTransform(k, 0, 0, k, 0, 0);
       c.beginPath(); c.moveTo(tr.p.x, tr.p.y); c.arc(tr.p.x, tr.p.y, r, tr.a, end, tr.sweep < 0); c.closePath();
       c.fillStyle = tr.col; c.fill();

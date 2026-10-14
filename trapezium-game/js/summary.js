@@ -328,10 +328,11 @@
       if (V.wedges) { // each angle pops in as a coloured wedge at its corner, then its value
         g._wedges = []; g._values = [];
         V.wedges.forEach((k, i) => {
-          const nb = { A: ['D', 'B'], B: ['A', 'C'], C: ['B', 'D'], D: ['C', 'A'] }[k], p = P[k], q = P[nb[0]], r = P[nb[1]], R = 22;
+          const nb = { A: ['D', 'B'], B: ['A', 'C'], C: ['B', 'D'], D: ['C', 'A'] }[k], p = P[k], q = P[nb[0]], r = P[nb[1]];
           let a1 = Math.atan2(q.y - p.y, q.x - p.x), a2 = Math.atan2(r.y - p.y, r.x - p.x);
           let sweep = ((a2 - a1) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
           if (sweep > Math.PI) { const t0 = a1; a1 = a2; a2 = t0; sweep = 2 * Math.PI - sweep; } // use the angle inside the shape
+          const R = 22 * CONFIG.angleR(sweep * 180 / Math.PI) / 38; // the same amount of colour for every angle, as in the lesson
           const large = 0;
           const s = { x: p.x + Math.cos(a1) * R, y: p.y + Math.sin(a1) * R }, e = { x: p.x + Math.cos(a2) * R, y: p.y + Math.sin(a2) * R };
           const wg = mk('g', { opacity: 0 }, g._wedgeG);

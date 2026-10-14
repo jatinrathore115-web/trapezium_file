@@ -1831,7 +1831,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     ['A', 'B', 'C', 'D'].forEach((k) => {
       const n = this.nb(k), Vk = P[k], u = unit(Vk, P[n[0]]), v = unit(Vk, P[n[1]]);
       // the angle's arc: the same size on screen whatever the board's zoom (30 stage px)
-      const zs = this.boardMap().s || 1, R = 38 / zs; // every angle 38 px on screen: wide enough that even a 60° angle shows plainly round its corner dot
+      const zs = this.boardMap().s || 1, R = CONFIG.angleR(this.angle(P, k)) / zs; // the same amount of colour for every angle, at any zoom
       const sx = Vk.x + u.x * R, sy = Vk.y + u.y * R, ex = Vk.x + v.x * R, ey = Vk.y + v.y * R;
       const cross = u.x * v.y - u.y * v.x;
       const show = arcSet.indexOf(k) >= 0;

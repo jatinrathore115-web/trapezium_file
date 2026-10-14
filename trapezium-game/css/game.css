@@ -226,8 +226,10 @@ a{color:#123b63}a:hover{color:#0b2742}
 /* a part Swiftee names: thicker, with a gentle pulse (its white casing and spark come from .hl and Motion.spark) */
 .edge.emph{stroke-width:7px;animation:sidePulse 1.2s ease-in-out}
 @keyframes sidePulse{0%,100%{stroke-width:7px}50%{stroke-width:9px}}
-.tag.alab{transition:transform .45s cubic-bezier(.3,0,.3,1)}
-.tag.alab.emph{transform:translate(-50%,-50%) scale(1.2)}
+/* a value's resting size states use the scale property, so transform stays free for its animations (a transition on
+   transform would smooth a 16 px hop down to under 2 px) */
+.tag.alab{transition:scale .45s cubic-bezier(.3,0,.3,1)}
+.tag.alab.emph{scale:1.2}
 .vdot{transition:r .45s cubic-bezier(.3,0,.3,1),stroke .3s ease,filter .3s ease}
 @media (prefers-reduced-motion: reduce){.arc,.edge,.tag.alab,.vdot{transition:none}.edge.emph{animation:none}}
 /* check 2 (screen 39): the shape glides to the centre once the bubble has gone, then the answers come in one by one */
@@ -332,7 +334,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 .arc.glow{animation:arcGlow .7s ease-out .35s both}
 .tag.alab.glow{animation:labGlow .7s ease-out .35s both}
 @keyframes arcGlow{from{stroke-width:7px}to{stroke-width:9px}}
-@keyframes labGlow{from{transform:translate(-50%,-50%) scale(1)}to{transform:translate(-50%,-50%) scale(1.1)}}
+@keyframes labGlow{from{scale:1}to{scale:1.1}} /* (the scale property, not transform: a held transform would freeze the value's hop) */
 @media (prefers-reduced-motion: reduce){.arc.glow,.tag.alab.glow{animation-duration:.01s;animation-delay:0s}}
 
 /* screens 25 and 30: the angle sum built in its box (Motion.eqStart / eqFly / eqResult). Each slot stacks
@@ -351,7 +353,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 .tag.sum.sumL.live{box-shadow:0 0 0 3px rgba(255,184,0,.55),0 0 14px 2px rgba(255,122,0,.35)}
 .tag.sum.sumR.live{box-shadow:0 0 0 3px rgba(31,207,102,.35),0 0 14px 2px rgba(18,164,255,.30)}
 .arc.live{filter:drop-shadow(0 0 5px rgba(255,184,40,.85));transition:filter .15s ease-out}
-.tag.alab.live{transform:translate(-50%,-50%) scale(1.1)}
+.tag.alab.live{scale:1.1}
 /* Done (screen 29): centred 16px under the ice panel; pops in after the first drag */
 .done-btn{position:absolute;left:876px;top:600px;translate:-50% 0;min-width:140px;height:46px;font-size:21px;z-index:6;
   animation:doneIn .5s cubic-bezier(.3,1.6,.5,1) both,doneGlow 1.8s ease-in-out .6s 2}

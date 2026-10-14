@@ -56,11 +56,11 @@ const CONFIG = {
   walker: { size: 135, homeX: 199, homeY: 639, homeSize: 259, msPerCm: 380, pauseMs: 550, strollPxPerMs: 0.42,
     tips: [[488, 272], [484, 281], [494, 273], [489, 270], [486, 278], [483, 279], [491, 281], [489, 281]] }, // tape exit per walk frame (@2x cell px)
   // screen 23 protractor walk (js/angle-walker.js): scale = stage px per kit board unit (sized so the protractor
-  // covers the drawn angle); angleR = the angle traced as she reads it (stage px, the same size as every angle in the lesson); homeK = her home size
+  // covers the drawn angle); homeK = her home size
   // against her size on the board; carryPx = protractor offset from the vertex between corners; hop = how far her
   // path bows out round a side; bob = px of bob every stepPx; tiltMax = most a drawing may turn (deg);
   // leadMs = wait after her line; firstMs = shortest walk to or from her spot; the rest are move timings
-  angleWalk: { scale: 1.6, homeK: 1.52, carryPx: 28, hop: 60, angleR: 41.5, stepPx: 45, bob: 5, tiltMax: 33, leadMs: 900,
+  angleWalk: { scale: 1.6, homeK: 1.52, carryPx: 28, hop: 60, stepPx: 45, bob: 5, tiltMax: 33, leadMs: 900,
     firstMs: 950, moveMs: 600, placeMs: 400, alignMs: 420, measureMs: 300, holdMs: 900, liftMs: 350, fadeMs: 250 },
   // idle antics: after idleMs with nothing happening Swiftee amuses herself, cycling through these expressions
   antics: { idleMs: 15000, list: ['sleeping', 'daydreaming', 'playful', 'reading'] },
@@ -82,3 +82,7 @@ const CONFIG = {
     minHoldMs: 900         // an expression holds at least this long, so quick lines don't flicker
   }
 };
+// An angle's size on screen (its arc's radius, stage px) for an angle of deg degrees. Every angle shows the same amount
+// of colour: a narrow angle reaches a little further along its sides and a wide one a little less (90° = 38 px), so a
+// 60° angle never looks smaller than a 120° one. Board, measuring trace, check 3 and the summary cards all use it.
+CONFIG.angleR = (deg) => 38 * Math.min(1.25, Math.max(0.85, Math.sqrt(90 / Math.max(1, deg))));
