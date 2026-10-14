@@ -89,6 +89,7 @@
       if (ctx) ctx.revert();
       sweeps.splice(0).forEach((s) => { if (!s.done && s.w.isConnected) s.w.setAttribute('d', s.d0); });
       document.querySelectorAll('[data-lencol]').forEach((e) => e.removeAttribute('data-lencol'));
+      document.querySelectorAll('.stage .spark').forEach((e) => e.remove()); // a spark cut short by a screen change never lingers
       if (G) G.set($(ANIMATED), { clearProps: 'opacity,transform,filter,textShadow,strokeWidth,translate,rotate,scale,backgroundColor,borderColor,color' });
       // GSAP writes transform-origin on any SVG element it touches (even when clearing), and some draws set
       // stroke-dasharray directly: remove both by hand
@@ -452,11 +453,12 @@
       const e = $('.e' + k)[0];
       if (!G || reduced || !e || getComputedStyle(e).display === 'none') return;
       const a = { x: +e.getAttribute('x1'), y: +e.getAttribute('y1') }, b = { x: +e.getAttribute('x2'), y: +e.getAttribute('y2') };
-      const ns = 'http://www.w3.org/2000/svg', g = document.createElementNS(ns, 'g');
+      // the spark's place is its circle's own cx / cy (never a transform the screen-change cleanup could strip)
+      const ns = 'http://www.w3.org/2000/svg', g = document.createElementNS(ns, 'circle');
       g.setAttribute('class', 'spark'); g.setAttribute('pointer-events', 'none');
-      g.innerHTML = '<circle r="9" fill="#ffffff" stroke="#ffb800" stroke-width="4"></circle>';
+      g.setAttribute('r', 9); g.setAttribute('fill', '#ffffff'); g.setAttribute('stroke', '#ffb800'); g.setAttribute('stroke-width', 4);
       e.parentNode.appendChild(g);
-      const p = { t: 0 }, put = () => g.setAttribute('transform', 'translate(' + (a.x + (b.x - a.x) * p.t).toFixed(1) + ',' + (a.y + (b.y - a.y) * p.t).toFixed(1) + ')');
+      const p = { t: 0 }, put = () => { g.setAttribute('cx', (a.x + (b.x - a.x) * p.t).toFixed(1)); g.setAttribute('cy', (a.y + (b.y - a.y) * p.t).toFixed(1)); };
       put();
       add(() => G.timeline({ onComplete: () => g.remove() })
         .fromTo(g, { opacity: 0 }, { opacity: 1, duration: 0.12 }, 0)
