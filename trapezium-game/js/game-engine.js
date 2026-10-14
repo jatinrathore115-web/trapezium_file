@@ -107,8 +107,14 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (st.task === 'dragA') P.A.x = P.D.x + (P.C.x - P.B.x);
     if (st.morph) { const f = st.morph[st.morph.length - 1]; P.A.x = f.A; P.B.x = f.B; }
     if (st.task === 'dragFree') P.B.x -= 40;
-    if (st.task === 'drag90') P.A.x = P.D.x;
+    if (st.task === 'drag90') this.snap90(P);
     return P;
+  }
+  // screen 33 left unfinished: A moves straight above D for the right angle, unless that would cross the top side
+  // (D dragged far right, B far left); then the standard right trapezium
+  snap90(P) {
+    if (P.D.x <= P.B.x - 60) { P.A.x = P.D.x; return; }
+    const S = CONFIG.rightShape; ['A', 'B', 'C', 'D'].forEach((k) => { P[k].x = S[k]; });
   }
   jumpTo(i) {
     if (!this.state.started) this.start(); // a jump skips the front page
@@ -271,7 +277,8 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   keyCue(w, L, words, i) {
     const st = this.cur(), f = st.f || {}, P = this.state.P;
     if (st.cfu || st.noBoard || st.hero || st.summary || st.room === 'measure' || !P) return;
-    if (st.sumSteps || st.morph || st.sideNums) return; // screens running their own animated sequence keep it uncluttered
+    if (st.sumSteps || st.morph || st.sideNums || st.rightTap) return; // screens running their own animated sequence keep it uncluttered
+    if (st.build && !(this.state.build && this.state.build.done)) return; // screen 1: no side lights up before the pen has drawn it
     if (Date.now() - (this.cueT || 0) < 1800) return; // the last animation finishes before a new one starts
     const has = (re) => words.some((x) => re.test(x.toLowerCase().replace(/[^a-z]/g, '')));
     const ALL = ['AB', 'BC', 'CD', 'DA'], BASES = ['AB', 'CD'], LEGS = ['DA', 'BC'];
@@ -482,7 +489,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     this.curLine = L;
     this.cancelSpeech();
     if (keep) this.setState({ talking: true });
-    else this.setState({ line: text, reveal: 0, talking: true, bub: this.state.bub === 'bubA' ? 'bubB' : 'bubA', bubOff: false, centered: false });
+    else this.setState({ line: text, reveal: 0, talking: true, bub: this.state.bub === 'bubA' ? 'bubB' : 'bubA', bubOff: false, centered: false, bubFresh: !this.state.line || this.state.bubOff }); // bubFresh: the bubble was hidden
     if (L.m) this.preloadPose(L.m);
     let i = 0, rDone = false, sDone = false, fin = false, bMode = false, spoke = false, started = false, mouthOn = false, tStart = 0;
     const live = () => tok === this.narrTok;
@@ -701,8 +708,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   poke() { this.idleCount = 0; this.hideHand(); this.endAntic(); this.armIdle(); }
   // ---------- idle antics ----------
   // Left alone for CONFIG.antics.idleMs with nothing happening, Swiftee amuses herself: dozes off (with floating
-  // Zzz), daydreams, plays or reads, in turn. Any touch ends it; waking from a doze she gives a little start
-  // (the first time also "Oh! I must have dozed off!").
+  // Zzz), daydreams, plays or reads, in turn. Any touch ends it; waking from a doze she gives a little start.
   armAntic() {
     if (this.anticId) { clearTimeout(this.anticId); this.T.delete(this.anticId); this.anticId = null; }
     if (!this.state.started || this.antic) return;
@@ -712,7 +718,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       const st = this.cur();
       if (tok !== this.stepTok || this.antic) return;
       if (st.summary || st.hero || this.state.swAway || this.state.navOpen) return;
-      if (this.state.talking || this.drag || this.ld || this.rulerBusy || this.q) { this.armAntic(); return; }
+      if (this.state.talking || this.drag || this.ld || this.rulerBusy || this.q || (st.auto && !this.state.done)) { this.armAntic(); return; } // (an auto task: she is measuring)
       const A = CONFIG.antics.list;
       this.antic = A[(this.anticN = ((this.anticN || 0) + 1)) % A.length];
       this.pose(this.antic);
@@ -728,7 +734,6 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (quiet) return;
     if (was === 'sleeping') {
       this.react('surprised', 1200); this.sfx('pop');
-      if (!this.wokeOnce && !this.state.talking) { this.wokeOnce = true; this.interject({ m: 'surprised', t: 'Oh! I must have dozed off!' }); }
     } else this.pose(this.restPose());
   }
 
@@ -838,6 +843,9 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     Motion.cueReset(); // clear cue marks left by the last screen
     // Stop the last screen's animations and remove their inline styles. This must run after the tokens move on,
     // so callbacks from tweens being reverted see a stale token and change nothing.
+    const was = this.cur();
+    if (this.state.started && st.noBoard && was && !was.noBoard && !was.cfu && !was.end && !was.summary && !was.room) Motion.boardGhost(); // (before clear(), with the board still as it was)
+    this.fromHero = !!(was && was.hero && !was.end && fwd); // screen 37: Swiftee is already centre stage, from screen 36
     Motion.clear();
     this.q = null;
     this.cancelSpeech();
@@ -903,7 +911,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       const st = this.cur(), P = this.clone(this.state.P);
       if (st.task === 'dragA') P.A.x = P.D.x + (P.C.x - P.B.x);
       if (st.task === 'dragFree' && !this.state.explored) P.B.x -= 40;
-      if (st.task === 'drag90') P.A.x = P.D.x;
+      if (st.task === 'drag90') this.snap90(P);
       this.setState({ P: P });
     }
     this.sfx('tap');
@@ -1201,7 +1209,9 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const f = Object.assign({}, this.state.rFound, { [k]: 1 }), all = ['A', 'B', 'C', 'D'].filter((x) => Math.abs(this.angle(P, x) - 90) < 0.5).every((x) => f[x]);
     this.sfx('pop');
     Motion.rightFound(k);
-    this.setState({ rFound: f, rAll: all }, () => { if (all) { this.cheer(); Motion.rightAll(); Motion.okCheck(); } });
+    // both found: any feedback she is still giving stops and her bubble clears, so the cheer is not paired with "not 90°"
+    if (all) { this.narrTok++; this.cancelSpeech(); }
+    this.setState(Object.assign({ rFound: f, rAll: all }, all ? { bubOff: true, talking: false } : {}), () => { if (all) { this.cheer(); Motion.rightAll(); Motion.okCheck(); } });
   }
   // what a screen animates once it is drawn (GSAP, js/motion.js)
   stepMotion(st) {
@@ -1820,7 +1830,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       const RW = R + 3.5 / zs, wsx = Vk.x + u.x * RW, wsy = Vk.y + u.y * RW, wex = Vk.x + v.x * RW, wey = Vk.y + v.y * RW;
       g['w' + k] = { p: 'M' + r1(Vk.x) + ',' + r1(Vk.y) + ' L' + r1(wsx) + ',' + r1(wsy) + ' A' + RW + ',' + RW + ' 0 0 ' + (cross > 0 ? 1 : 0) + ' ' + r1(wex) + ',' + r1(wey) + ' Z', d: dsp((known || !!st.anglesIn) && show && !isRight), cls: 'wedge w' + k + look + (em['a' + k] ? ' emph' : '') + (st.anglesIn ? ' pre' : '') };
       // the square right-angle mark
-      const q = 18 / zs; // the right-angle square, the same size on screen as the angles
+      const q = 27 / zs; // the right-angle square: big enough to show round the corner dot, even a pulsing one
       g['r' + k] = {
         // a closed square from the corner itself, so the whole square fills (its edges along the sides sit under them)
         p: 'M' + r1(Vk.x) + ',' + r1(Vk.y) + ' L' + r1(Vk.x + u.x * q) + ',' + r1(Vk.y + u.y * q) + ' L' + r1(Vk.x + u.x * q + v.x * q) + ',' + r1(Vk.y + u.y * q + v.y * q) + ' L' + r1(Vk.x + v.x * q) + ',' + r1(Vk.y + v.y * q) + ' Z',
@@ -1839,21 +1849,24 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       let bx0 = u.x + v.x, by0 = u.y + v.y; const bl0 = Math.hypot(bx0, by0) || 1; bx0 /= bl0; by0 /= bl0;
       let dl = R + 12; while (dl < 140 && !clearOf(Vk.x + bx0 * dl, Vk.y + by0 * dl)) dl += 2;
       let bx = u.x + v.x, by = u.y + v.y; const bl = Math.hypot(bx, by) || 1; bx /= bl; by /= bl;
-      // the 90° label sits beyond the right-angle square, on the corner's diagonal, clear of the square
-      if (st.right90 && isRight) r90.push({ t: '90°', x: r1(Vk.x + bx * 62), y: r1(Vk.y + by * 62), cls: 'alab r90 r90' + k });
+      // the 90° label sits just beyond the right-angle square, on the corner's diagonal: its near edge 6 units past the square
+      // (the label is about 58 x 30 board units), so it reads as the square's label without touching it
+      if (st.right90 && isRight) { const rc = (q + 21) * Math.SQRT2; r90.push({ t: '90°', x: r1(Vk.x + bx * rc), y: r1(Vk.y + by * rc), cls: 'alab r90 r90' + k }); }
       aTag[k] = { bx: bx, by: by, t: s.symAng ? '∠' + k : V[k] + '°', x: r1(Vk.x + bx * dl), y: r1(Vk.y + by * dl), cls: 'alab l' + k + stag + look + (show ? '' : ' off') + (em['a' + k] ? ' emph' : '') + (st.anglesIn ? ' pre' : '') };
     });
     // vertices: the dots and their touch targets
     const dk = this.dragKey();
     ['A', 'B', 'C', 'D'].forEach((k) => {
       const anyV = this.anyCorner(), Vk = P[k], drag = dk === k || anyV;
-      g['v' + k] = { x: r1(Vk.x), y: r1(Vk.y), r: vOn(k) ? (drag ? 11 : 7) + (em['v' + k] ? 6 : 0) : 0, c: em['v' + k] ? '#ffb800' : drag ? PU : NAVY, w: drag || em['v' + k] ? 4 : 3, cls: (em['v' + k] && vOn(k) ? 'on' : '') + (anyV && !s.moved && !s.explored && !s.dragging ? ' drag-cue' : '') }; // a named point pops gold, with a glow; a corner to drag pulses
-      // listen first (she asks for the taps); after that taps work even while she answers a wrong one. Every corner
-      // gets a ring, so the learner has to find the right angles; a found one stops pulsing
-      const tapV = !!st.rightTap && s.linesDone && !s.rAll;
-      const pulse = tapV && !s.rFound[k];
+      // screen 35: listen first (she asks for the taps); after that taps work even while she answers a wrong one. Every
+      // corner dot pulses, so the learner has to find the right angles; a found one stops pulsing and stays gold
+      const tapV = !!st.rightTap && s.linesDone && !s.rAll, found = !!st.rightTap && !!s.rFound[k];
+      const gold = em['v' + k] || found, big = drag || tapV || found;
+      g['v' + k] = { x: r1(Vk.x), y: r1(Vk.y), r: vOn(k) ? (drag ? 11 : big ? 9 : 7) + (em['v' + k] ? 6 : 0) : 0, c: gold ? '#ffb800' : big ? PU : NAVY, w: big || gold ? 4 : 3,
+        // (screen 35's tap dots are smaller than drag corners, so the square marks show round them)
+        cls: (gold && vOn(k) ? 'on' : '') + ((anyV && !s.moved && !s.explored && !s.dragging) || (tapV && !found) ? ' drag-cue' : '') }; // a named point pops gold, with a glow; a corner to drag or tap pulses
       g['k' + k] = {
-        x: r1(Vk.x), y: r1(Vk.y), d: dsp(tapV || drag), cls: pulse ? 'vp' : '', // the ring only marks screen 35's corners to tap
+        x: r1(Vk.x), y: r1(Vk.y), d: dsp(tapV || drag), cls: '',
         cur: drag ? (s.dragging ? 'grabbing' : 'grab') : 'pointer',
         click: tapV ? () => this.rightTap(k) : noop,
         down: drag ? (e) => this.down(k, e) : noop
@@ -2068,14 +2081,14 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       nextDisabled: !s.done,
       nextCls: CONFIG.flow.showNext && st.autoAdvance == null ? (s.done && !s.talking ? 'ready' : '') : 'auto', // screens move on by themselves
       nextLabel: isLastCfu ? 'Finish' : 'Next',
-      sceneCls: 'scene' + (st.noPanel ? ' nopanel' : '') + (st.hero ? ' hero' : '') + (st.hero && st.end ? ' endhero' : '') + (st.summary ? ' summary' : '') + (st.room === 'measure' ? ' measure-room' : ''), // hero (screens 43-44): Swiftee centre stage, no board
+      sceneCls: 'scene' + (st.noPanel ? ' nopanel' : '') + (st.hero ? ' hero' : '') + (st.hero && st.end ? ' endhero' : '') + (st.summary ? ' summary' : '') + (st.room === 'measure' ? ' measure-room' : ''), // hero (screens 36, 43-44): Swiftee centre stage, no board
       boardTf: st.room === 'measure' ? tf(CONFIG.measureRoom) : !st.noZoom ? tf(this.fit || CONFIG.lessonZoom) : 'translate(' + CONFIG.scene.boardX + 'px, ' + (st.boardShiftY || 0) + 'px)',
       // focusing: a part is being named, so the rest of the shape steps back
       boardCls: fadeV + (Object.keys(s.emph || {}).length ? ' focusing' : '') + (st.shapePre ? ' shape-pre' : '') + (st.parStrong ? ' par-strong' : '') + (st.lenPre ? ' len-pre' : '') + (st.tickPre ? ' tick-pre' : '') + (st.chevPre ? ' chev-pre' : '') + (st.legsSet ? ' legs-set' : '') + (st.right90 && st.r90Pre ? ' r90pre' : ''),
       // pulse: the shape and its labels zoom once about the shape's centre
       popO: s.P ? Math.round((s.P.A.x + s.P.B.x + s.P.C.x + s.P.D.x) / 4) + 'px ' + Math.round((s.P.A.y + s.P.B.y + s.P.C.y + s.P.D.y) / 4) + 'px' : 'center',
       swCls: s.swAway ? 'swiftee away' : 'swiftee',
-      bubHide: !s.line || s.swAway ? 'gone' : (s.bubOff ? 'away' : ''),
+      bubHide: !s.line || s.swAway ? 'gone' : s.bubOff ? 'away' : s.bubFresh && s.talking && !s.reveal ? 'wait' : '', // a bubble that was hidden waits for its first word, so it never shows empty
       // hand: the fingertip lands on (x, y); drags travel (dx, dy). On checks ('opts') the answers pulse instead
       handOn: !!(s.hand && s.hand.kind !== 'opts') && !(st.cfu && s.done), // no hint hand on an answered check
       hand: s.hand && s.hand.kind !== 'opts'

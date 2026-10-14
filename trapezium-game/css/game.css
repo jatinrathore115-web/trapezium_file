@@ -20,13 +20,10 @@ a{color:#123b63}a:hover{color:#0b2742}
 @keyframes bubB{from{transform:scale(.97);opacity:.8}to{transform:scale(1);opacity:1}}
 /* Swiftee's still image never moves: no idle, talk or reaction motion */
 .bird{animation:none!important;transform:none!important;transition:none!important}
-/* screen 35's corners to tap: a solid gold ring that breathes round each */
-.vp{fill:rgba(255,255,255,.001);stroke:#ffb800;stroke-width:3.5px;transform-box:fill-box;transform-origin:center;animation:vp 1.4s ease-in-out infinite}
-@keyframes vp{0%,100%{transform:scale(.78);stroke-opacity:1}50%{transform:scale(1.04);stroke-opacity:.45}}
-/* screens 29, 33: a corner to drag - the point itself pulses gently with a gold glow until the first drag */
+/* screens 29, 33: a corner to drag, screen 35: a corner to tap - the point itself pulses gently with a gold glow */
 .vdot.drag-cue{transform-box:fill-box;transform-origin:center;animation:dragCue 1.3s ease-in-out infinite}
 @keyframes dragCue{0%,100%{transform:scale(1);filter:drop-shadow(0 0 0 rgba(255,184,0,0))}50%{transform:scale(1.3);filter:drop-shadow(0 0 7px rgba(255,184,0,.95))}}
-@media (prefers-reduced-motion: reduce){.vp,.vdot.drag-cue{animation:none}}
+@media (prefers-reduced-motion: reduce){.vdot.drag-cue{animation:none}}
 .halo{animation:halo 1.2s ease-in-out infinite}
 @keyframes halo{0%,100%{stroke-opacity:.25;stroke-width:4}50%{stroke-opacity:.7;stroke-width:10}}
 .nudge{animation:nudge 1.1s ease-in-out infinite}
@@ -135,6 +132,8 @@ a{color:#123b63}a:hover{color:#0b2742}
 .swiftee{left:130px;animation:swHome .45s ease-out}
 @keyframes swHome{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .bubble.gone{display:none}
+/* a bubble that was hidden stays hidden until its first word is spoken, then fades in with it */
+.bubble.wait{opacity:0;visibility:hidden;transition:none}
 @media (prefers-reduced-motion: reduce){.board{transition:none}.swiftee{animation:none}}
 /* bubble stepping aside: fades and sinks, then hides */
 .bubble{transition:opacity .35s ease,transform .35s ease,visibility 0s}
@@ -549,7 +548,7 @@ svg[data-lencol] .edge{transition:stroke .4s ease}
 @keyframes crysGlow{0%,100%{filter:drop-shadow(0 3px 0 rgba(13,64,170,.32)) drop-shadow(0 6px 10px rgba(18,59,99,.18))}50%{filter:brightness(1.08) drop-shadow(0 0 10px rgba(120,210,255,.95)) drop-shadow(0 3px 0 rgba(13,64,170,.32))}}
 /* check 2 (screen 39): the word answers stay on one line */
 .stage .opts-in:not(.quick) .opt.crys{font-size:32px;white-space:nowrap;padding:0 16px}
-/* screen 36: no ice panel; Swiftee and her bubble stay where they usually are */
+/* screen 36: no ice panel; Swiftee is centre stage (.hero) */
 .stage.nopanel .panel-img{opacity:0}
 
 /* the answers fade in; hover lifts them and a press pushes them down */

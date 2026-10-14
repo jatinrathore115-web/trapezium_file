@@ -121,8 +121,10 @@
         const g = e.target.closest && e.target.closest('.summary-card');
         if (g && this.S && this.S.state === 'READY') this.replay(g.getAttribute('data-concept'));
       });
-      this.place('middle', true, 0);
-      this.rise('middle');
+      // from screen 36 she is already centre stage: she glides up into the middle spot instead of rising from below
+      const sw = document.querySelector('.stage .swiftee');
+      if (eng.fromHero && sw && G && !reduced()) { this.ctx.add(() => G.set(sw, { y: 207, scale: 1, opacity: 1 })); this.place('middle', false, 420); } // (207: the hero spot's top, 330, less this screen's 123)
+      else { this.place('middle', true, 0); this.rise('middle'); }
     },
     // after the opening line: each card in turn, then the finale. A step that resolves false (screen changed) ends the chain
     start(engine) {

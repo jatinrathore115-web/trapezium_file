@@ -11,7 +11,7 @@
   // a cue can fire while its screen is being left (fast Next/Back); its targets are gone, so don't warn
   if (G && G.config) G.config({ nullTargetWarn: false });
   const reduced = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
-  const $ = (sel) => Array.from(document.querySelectorAll('.stage ' + sel));
+  const $ = (sel) => Array.from(document.querySelectorAll('.stage ' + sel)).filter((e) => !e.closest('.board-ghost')); // (a fading copy of the last board is left alone)
   const GLOW = 'drop-shadow(0px 0px 6px rgba(31,107,255,0.6))', NOGLOW = 'drop-shadow(0px 0px 0px rgba(31,107,255,0))';
   // the shared timing for entrances: a soft ease-out with a slight overshoot
   const ENTER = { duration: 0.6, ease: 'back.out(1.3)' };
@@ -88,10 +88,24 @@
     // stop everything the current screen started and put every element back as the stylesheet draws it.
     // revert() alone is not enough: a tween that started from another's end state (e.g. letters faded out, then
     // flown back in) can "revert" to a hidden state, so every animated property is also cleared by hand.
+    // leaving the board for a screen without one (35 -> 36): a still copy of the shape, its labels and name plate fades out
+    // with the ice panel, so the panel never shows empty while it fades. Called before clear(), which leaves the copy alone
+    boardGhost() {
+      const stage = document.querySelector('.stage'), b = document.querySelector('.stage .board'), sw = document.querySelector('.stage .swiftee');
+      if (!stage || !b || reduced || !b.animate) return;
+      const wrap = document.createElement('div');
+      wrap.className = 'board-ghost';
+      wrap.setAttribute('aria-hidden', 'true');
+      wrap.setAttribute('style', 'position:absolute;left:0;top:0;width:1280px;height:720px;pointer-events:none');
+      [b.previousElementSibling, b, document.querySelector('.stage .chip-row')].forEach((el) => { if (el) wrap.appendChild(el.cloneNode(true)); });
+      if (sw && sw.parentNode === stage) stage.insertBefore(wrap, sw); else stage.appendChild(wrap); // under Swiftee and her bubble
+      wrap.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 450, easing: 'ease', fill: 'forwards' }).onfinish = () => wrap.remove();
+    },
     clear() {
       if (ctx) ctx.revert();
       sweeps.splice(0).forEach((s) => { if (!s.done && s.w.isConnected) s.w.setAttribute('d', s.d0); });
       document.querySelectorAll('[data-lencol]').forEach((e) => e.removeAttribute('data-lencol'));
+      document.querySelectorAll('.stage [vector-effect]').forEach((e) => e.removeAttribute('vector-effect')); // growFocus's thin-stroke trick, if its tidy-up was cut short
       document.querySelectorAll('.stage .spark').forEach((e) => e.remove()); // a spark cut short by a screen change never lingers
       if (G) G.set($(ANIMATED), { clearProps: 'opacity,transform,filter,textShadow,strokeWidth,translate,rotate,scale,backgroundColor,borderColor,color' });
       // GSAP writes transform-origin on any SVG element it touches (even when clearing), and some draws set
@@ -563,11 +577,11 @@
         .call(() => this.markPing(chev.filter((c) => !c.classList.contains('chev-halo'))), null, 0.7)
         .to(chev, { duration: 0.3, yoyo: true, repeat: 1 }, 0.75));
     },
-    // screen 35, on "right": both 90° marks draw into their corners with their labels, then glow gold
+    // screen 35, on "right": A's square and 90° come in, then D's, then both glow gold - one at a time
     rightBoth() {
       this.rightMark('A');
-      add(() => G.delayedCall(0.3, () => this.rightMark('D')));
-      add(() => G.delayedCall(0.9, () => this.rightGlow()));
+      add(() => G.delayedCall(0.6, () => this.rightMark('D')));
+      add(() => G.delayedCall(1.3, () => this.rightGlow()));
     },
     // screen 13, on "parallel": AB and DC glow together, then the parallel arrows (hidden by .chev-pre) pop on
     defParallel() {
@@ -899,16 +913,15 @@
       add(() => { const tl = G.timeline(); pulse(['A', 'D'], L, 0, tl); pulse(['B', 'C'], R, 0.8, tl); return tl; });
     },
 
-    // a right-angle marker draws itself into its corner and its 90° label pops in
+    // a right-angle square opens out of its corner, then its 90° label fades in where it stays (no slide)
     rightMark(k) {
-      const m = $('.rm' + k)[0], lab = $('.tag.r90' + k)[0];
+      const m = $('.rm' + k)[0], lab = $('.tag.r90' + k)[0], c = corner(k);
       if (!G) return;
       add(() => {
-        const tl = G.timeline(), L = (m && m.getTotalLength && m.getTotalLength()) || 30;
-        if (m) tl.fromTo(m, { opacity: 1, strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.5, ease: 'power2.out' }, 0)
-          .call(() => this.markPing(m), null, 0.45)
-          .to(m, { duration: 0.3, yoyo: true, repeat: 1 }, 0.45);
-        labelOut(tl, lab, corner(k), 0.35);
+        const tl = G.timeline();
+        if (m) tl.fromTo(m, Object.assign({ opacity: 0, scale: 0.2 }, c ? { svgOrigin: c.x + ' ' + c.y } : {}), { opacity: 1, scale: 1, duration: reduced ? 0 : 0.35, ease: 'power2.out' }, 0)
+          .call(() => this.markPing(m), null, 0.35);
+        if (lab) tl.fromTo(lab, { opacity: 0, xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: reduced ? 0 : 0.3, ease: 'power2.out' }, 0.3);
         return tl;
       });
     },
