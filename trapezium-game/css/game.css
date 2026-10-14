@@ -21,7 +21,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 /* Swiftee's still image never moves: no idle, talk or reaction motion */
 .bird{animation:none!important;transform:none!important;transition:none!important}
 .vp{animation:vp 1.3s ease-in-out infinite}
-@keyframes vp{0%,100%{fill:rgba(0,168,150,.05)}50%{fill:rgba(0,168,150,.3)}}
+@keyframes vp{0%,100%{fill:rgba(0,196,167,.05)}50%{fill:rgba(0,196,167,.3)}}
 .halo{animation:halo 1.2s ease-in-out infinite}
 @keyframes halo{0%,100%{stroke-opacity:.25;stroke-width:4}50%{stroke-opacity:.7;stroke-width:10}}
 .nudge{animation:nudge 1.1s ease-in-out infinite}
@@ -29,7 +29,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 .tag{position:absolute;transform:translate(-50%,-50%);font-weight:800;font-size:18px;padding:5px 14px;border-radius:10px;background:#fff;white-space:nowrap;box-shadow:0 2px 6px rgba(18,59,99,.12)}
 .vlab{background:transparent;box-shadow:none;padding:0;font-size:21px;font-weight:900;color:#123b63}
 .alab{background:rgba(255,255,255,.75);box-shadow:none;padding:1px 6px;font-size:17px;font-weight:900;color:#123b63}
-.mtag{border:3px solid #00a896;color:#00574d;animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
+.mtag{border:3px solid #00c4a7;color:#00574d;animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
 @keyframes pop{from{transform:translate(-50%,-50%) scale(.75);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
 .tag.off{display:none}
 .alab,.vlab{transition:none}
@@ -100,7 +100,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 .hand-nudge{position:absolute;width:0;height:0;pointer-events:none;z-index:20;animation:handLife 4.4s linear forwards}
 .hand-move{position:absolute;left:-25px;top:-22px;width:64px;height:90px;transform-origin:25px 22px;filter:drop-shadow(0 4px 6px rgba(18,59,99,.28))}
 .hand-move img{display:block;width:100%;height:100%}
-.hand-ring{position:absolute;left:-26px;top:-26px;width:52px;height:52px;border-radius:50%;border:3px solid #ff8a00;background:rgba(255,138,0,.16);box-sizing:border-box;opacity:0}
+.hand-ring{position:absolute;left:-26px;top:-26px;width:52px;height:52px;border-radius:50%;border:3px solid #ff7a00;background:rgba(255,122,0,.16);box-sizing:border-box;opacity:0}
 .hand-nudge.tap .hand-move{animation:handTap 1.4s cubic-bezier(.45,0,.3,1) infinite}
 .hand-nudge.tap .hand-ring{animation:handRing 1.4s ease-out infinite}
 .hand-nudge.drag .hand-move{animation:handDrag 2.1s cubic-bezier(.45,0,.3,1) infinite}
@@ -211,9 +211,10 @@ a{color:#123b63}a:hover{color:#0b2742}
 @media (prefers-reduced-motion: reduce){.opt.bad .sd{animation:none}}
 /* voice-over emphasis: the part being named (arc and its label, side, corner dot) grows, then eases back */
 .arc{transition:stroke-width .45s cubic-bezier(.3,0,.3,1),transform .45s cubic-bezier(.3,0,.3,1)}
-.arc.emph{stroke-width:10px;transform:scale(1.3)}
-.edge.emph{stroke-width:9px;animation:sidePulse 1.2s ease-in-out}
-@keyframes sidePulse{0%,100%{stroke-width:5px;filter:drop-shadow(0 0 0 transparent)}50%{stroke-width:8px;filter:drop-shadow(0 0 3px rgba(23,55,94,.22))}}
+.arc.emph{stroke-width:11px;transform:scale(1.3);filter:drop-shadow(0 0 6px rgba(255,190,0,.95))}
+/* a part Swiftee names: thicker, with a bright gold glow, so the eye goes straight to it */
+.edge.emph{stroke-width:11px;filter:drop-shadow(0 0 7px rgba(255,190,0,.95));animation:sidePulse 1.2s ease-in-out}
+@keyframes sidePulse{0%,100%{stroke-width:9px;filter:drop-shadow(0 0 4px rgba(255,190,0,.7))}50%{stroke-width:12px;filter:drop-shadow(0 0 10px rgba(255,190,0,1))}}
 .tag.alab{transition:transform .45s cubic-bezier(.3,0,.3,1)}
 .tag.alab.emph{transform:translate(-50%,-50%) scale(1.2)}
 .vdot{transition:r .45s cubic-bezier(.3,0,.3,1)}
@@ -228,11 +229,11 @@ a{color:#123b63}a:hover{color:#0b2742}
 .opts-in .opt.bad{animation:shake .4s ease}
 @media (prefers-reduced-motion: reduce){.qshape{transition:none}.opts-in .opt{animation:none}}
 /* a lit side is drawn a little bolder in its own colour */
-.edge.lit{stroke-width:8px}
-.edge.lit.emph{stroke-width:10px}
+.edge.lit{stroke-width:9px;filter:drop-shadow(0 0 5px rgba(255,190,0,.75))}
+.edge.lit.emph{stroke-width:11px}
 /* a glow that runs along a side (the pen on screen 1, the extensions on screens 7 and 8) */
 .trace{opacity:.95;filter:drop-shadow(0 0 4px rgba(31,107,255,.45));transition:opacity .35s ease}
-.trace.leg{stroke:#00a896;filter:drop-shadow(0 0 4px rgba(0,168,150,.5))} /* purple on a leg */
+.trace.leg{stroke:#00c4a7;filter:drop-shadow(0 0 4px rgba(0,196,167,.5))} /* purple on a leg */
 .trace.out{opacity:0}
 .xleg{animation:xlegIn .2s ease both}
 @keyframes xlegIn{from{opacity:0}to{opacity:1}}
@@ -257,8 +258,8 @@ a{color:#123b63}a:hover{color:#0b2742}
 .opts-in.quick .opt:nth-child(4){animation-delay:.48s}
 /* screen 29 sum boxes: outlined in their pair's colours (A + D orange / yellow, B + C purple / blue) */
 .tag.sum.sumL,.tag.sum.sumR{background:#fffaf0;color:#123b63;font-weight:900;border-radius:14px;box-shadow:0 3px 0 rgba(0,0,0,.06)}
-.tag.sum.sumL{border:2px solid #ff8a00;border-bottom-color:#ffc300;border-right-color:#ffc300}
-.tag.sum.sumR{border:2px solid #19c46b;border-bottom-color:#1fa3ff;border-right-color:#1fa3ff}
+.tag.sum.sumL{border:2px solid #ff7a00;border-bottom-color:#ffb800;border-right-color:#ffb800}
+.tag.sum.sumR{border:2px solid #1fcf66;border-bottom-color:#12a4ff;border-right-color:#12a4ff}
 /* screen 35: the 90° labels in the right-angled corners */
 .tag.r90{color:#1d6b35;background:rgba(239,251,241,.9);border:1.5px solid #8fd3a1}
 .r90pre .rmark,.r90pre .tag.r90{opacity:0;animation:none} /* hidden from the first frame until GSAP reveals them */
@@ -268,7 +269,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 .q3-hint{opacity:0;translate:-50% 0;display:flex;align-items:center;gap:8px;padding:6px 16px;border-radius:16px;background:#fbf8ee;border:3px solid #5cc6cf;
   font-family:'Nunito','Noto Sans Math',system-ui,sans-serif;font-weight:900;font-size:22px;color:#0b5b70;box-shadow:0 4px 12px rgba(11,91,112,.10);pointer-events:none}
 .q3-hint .q3h-a{color:#d9640a}.q3-hint .q3h-x{color:#b8860b}.q3-hint .q3h-op{color:#5b7f9c}
-.q3-hint .q3h-sa,.q3-hint .q3h-sd{opacity:0}
 .q3-fly{position:absolute;left:0;top:0;opacity:0;pointer-events:none;font-family:'Nunito','Noto Sans Math',system-ui,sans-serif;font-weight:900;font-size:22px;color:#1d6b35;
   background:#e3f7e7;border:2px solid #2e9e4f;border-radius:12px;padding:2px 10px;translate:-50% -50%}
 .soft-wrong .opt.bad{background:#fff3e2;border-color:#f0a020;box-shadow:0 5px 0 #e0a24a,0 10px 18px rgba(18,59,99,.10);color:#8a4b0a}
@@ -297,8 +297,8 @@ a{color:#123b63}a:hover{color:#0b2742}
 /* screens 14 and 15: both Base pills yellow, both Leg pills purple */
 .callout.cal-bases .cal-pill{fill:#fde49b;stroke:#f3c552}
 .callout.cal-bases .cal-stem{stroke:#f3c552}
-.callout.cal-legs .cal-pill{fill:#cdeee9;stroke:#00a896}
-.callout.cal-legs .cal-stem{stroke:#00a896}
+.callout.cal-legs .cal-pill{fill:#cdeee9;stroke:#00c4a7}
+.callout.cal-legs .cal-stem{stroke:#00c4a7}
 /* summary (screen 37, js/summary.js): no panel; Swiftee rises from behind the big card. She sits under the card
    layer (.sum-root), so the card's rim hides her body. No CSS translate or scale on her or the bubble: GSAP's
    clean-up on a screen change would carry it over as a transform */
@@ -338,8 +338,8 @@ a{color:#123b63}a:hover{color:#0b2742}
 
 /* screen 29: fixed-width sum boxes, so nothing shifts as the values change; the dragged leg's box and angles glow */
 .tag.sum.fixed{min-width:200px;text-align:center;transition:box-shadow .2s ease-out}
-.tag.sum.sumL.live{box-shadow:0 0 0 3px rgba(255,195,0,.55),0 0 14px 2px rgba(255,138,0,.35)}
-.tag.sum.sumR.live{box-shadow:0 0 0 3px rgba(25,196,107,.35),0 0 14px 2px rgba(31,163,255,.30)}
+.tag.sum.sumL.live{box-shadow:0 0 0 3px rgba(255,184,0,.55),0 0 14px 2px rgba(255,122,0,.35)}
+.tag.sum.sumR.live{box-shadow:0 0 0 3px rgba(31,207,102,.35),0 0 14px 2px rgba(18,164,255,.30)}
 .arc.live{filter:drop-shadow(0 0 5px rgba(255,184,40,.85));transition:filter .15s ease-out}
 .tag.alab.live{box-shadow:0 0 0 3px rgba(255,214,110,.55),0 0 14px 3px rgba(255,184,40,.45)}
 /* Done (screen 29): centred 16px under the ice panel; pops in after the first drag */
@@ -456,8 +456,8 @@ a{color:#123b63}a:hover{color:#0b2742}
 .tag.mtag[data-col]{transition:background-color .35s ease,border-color .35s ease,color .35s ease}
 .tag.mtag[data-col=AB]{background:#ffe680;border-color:#e0a800;color:#5c4300}
 .tag.mtag[data-col=BC]{background:#bfe3ff;border-color:#1f6bff;color:#0d3f99}
-.tag.mtag[data-col=CD]{background:#b8f0e6;border-color:#00a896;color:#00574d}
-.tag.mtag[data-col=DA]{background:#ffd2a8;border-color:#ff8a00;color:#8a3f00}
+.tag.mtag[data-col=CD]{background:#b8f0e6;border-color:#00c4a7;color:#00574d}
+.tag.mtag[data-col=DA]{background:#ffd2a8;border-color:#ff7a00;color:#8a3f00}
 /* screen 30: two equation boxes side by side, a little smaller so both fit */
 .chip.gold.eq-build.eq-pair{font-size:22px;padding:8px 20px 9px;gap:7px}
 .eq-pair .eq-r{min-width:5.6em}
@@ -476,7 +476,7 @@ a{color:#123b63}a:hover{color:#0b2742}
   transition:left .38s cubic-bezier(.22,.9,.3,1.12),top .38s cubic-bezier(.22,.9,.3,1.12),width .35s ease,transform .18s ease,box-shadow .2s ease,background-color .3s ease,border-color .3s ease,color .3s ease}
 .stage .lab::before{left:11px;width:7px;height:16px;margin-top:-8px;opacity:.7;background:radial-gradient(circle,#3aa9b3 1.3px,transparent 1.7px) 0 0/3.5px 5.3px}
 .stage .lab:hover{box-shadow:0 6px 0 #3aa9b3,0 12px 20px rgba(11,91,112,.2)}
-.stage .lab.sel{transform:translateY(-3px) scale(1.03);border-color:#d9640a;box-shadow:0 0 0 5px rgba(255,138,0,.28),0 5px 0 #c4570a}
+.stage .lab.sel{transform:translateY(-3px) scale(1.03);border-color:#d9640a;box-shadow:0 0 0 5px rgba(255,122,0,.28),0 5px 0 #c4570a}
 .stage .lab.drag{transform:scale(1.06) rotate(-2deg);box-shadow:0 18px 28px rgba(11,91,112,.3),0 4px 0 #3aa9b3}
 .stage .lab.lock{width:276px;border-color:transparent;background:transparent;box-shadow:none;color:#1d6b35;padding:0 10px;animation:labMerge .45s ease-out}
 .stage .lab.lock::before{display:none}
@@ -538,13 +538,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 .opts-in .opt.crys:not(.good):not(.bad){animation-name:crysFade}
 @keyframes crysFade{from{opacity:0}to{opacity:1}}
 
-/* pair equations (screens 25-27, 30, 31): a small straight-angle picture in the pair's colours after the
-   equation, like the hint on check 3 */
-.eqpair-AD::after,.eqpair-BC::after{content:'';display:inline-block;width:46px;height:26px;margin-left:12px;vertical-align:-3px;flex:none;
-  background:no-repeat center/contain}
-.eqpair-AD::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 26'%3E%3Cpath d='M23,24 L3,24 A20,20 0 0 1 33,6.68 Z' fill='%23f08a24'/%3E%3Cpath d='M23,24 L33,6.68 A20,20 0 0 1 43,24 Z' fill='%23ffc300'/%3E%3Cline x1='0' y1='24.6' x2='46' y2='24.6' stroke='%23123b63' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")}
-.eqpair-BC::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 26'%3E%3Cpath d='M23,24 L3,24 A20,20 0 0 1 28.18,4.68 Z' fill='%2319c46b'/%3E%3Cpath d='M23,24 L28.18,4.68 A20,20 0 0 1 43,24 Z' fill='%231fa3ff'/%3E%3Cline x1='0' y1='24.6' x2='46' y2='24.6' stroke='%23123b63' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")}
-.eq-pair.eqpair-AD::after,.eq-pair.eqpair-BC::after,.sumstep.eqpair-AD::after,.sumstep.eqpair-BC::after{width:38px;height:22px;margin-left:8px}
 
 
 /* ---------- fun and festive touches ---------- */
@@ -574,7 +567,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 .flake.now path{stroke:#5aa9e6}
 .flake.won{background:radial-gradient(circle at 38% 32%,#ffffff 0,#d9eeff 60%,#a9d4fb 100%);box-shadow:inset 0 0 0 3px #2b7bd6,0 0 10px rgba(43,123,214,.45)}
 .flake.won path{stroke:#1f63b8}
-.flake.won.gold{background:radial-gradient(circle at 38% 32%,#fffbe8 0,#ffe48a 60%,#ffc300 100%);box-shadow:inset 0 0 0 3px #d99a00,0 0 12px rgba(245,180,30,.6)}
+.flake.won.gold{background:radial-gradient(circle at 38% 32%,#fffbe8 0,#ffe48a 60%,#ffb800 100%);box-shadow:inset 0 0 0 3px #d99a00,0 0 12px rgba(245,180,30,.6)}
 .flake.won.gold path{stroke:#b36b00}
 @keyframes flakeNow{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 /* the end screen: the snowflakes the learner won, large, above Swiftee */
@@ -637,7 +630,7 @@ a{color:#123b63}a:hover{color:#0b2742}
   box-shadow:0 0 0 3px #db8c0c,0 2px 0 3px #b86a00,0 4px 8px rgba(90,45,0,.25),inset 0 3px 0 rgba(255,255,255,.6)}
 .stage .opt.crys:focus-visible{outline:4px solid #fff;outline-offset:6px}
 .stage .opt.crys.good{color:#fff;text-shadow:0 2px 0 rgba(6,90,74,.55);background:linear-gradient(180deg,#86f2d8 0%,#33cfad 50%,#16a98b 100%);
-  box-shadow:0 0 0 3px #00a896,0 7px 0 3px #0b6e66,0 0 24px 6px rgba(51,207,173,.5),inset 0 3px 0 rgba(255,255,255,.5);
+  box-shadow:0 0 0 3px #00c4a7,0 7px 0 3px #0b6e66,0 0 24px 6px rgba(51,207,173,.5),inset 0 3px 0 rgba(255,255,255,.5);
   animation:optGood .7s cubic-bezier(.2,1.6,.4,1) both;opacity:1;filter:none}
 .stage .opt.crys.bad,.stage .opts-in .opt.crys.bad,.stage .soft-wrong .opt.crys.bad{color:#7d8fa3;text-shadow:none;cursor:not-allowed;
   background:linear-gradient(180deg,#f5f8fc 0%,#dfe7f0 100%);box-shadow:0 0 0 3px #b7c6d6,0 4px 0 3px #9fb0c2,inset 0 2px 0 #fff;
@@ -654,13 +647,13 @@ a{color:#123b63}a:hover{color:#0b2742}
 .stage .opt:not(.crys).good{background:linear-gradient(180deg,#f2fffb 0%,#d4f6ec 100%);box-shadow:0 0 0 4px #16a98b,0 8px 0 4px #0b6e66,0 0 24px 6px rgba(51,207,173,.45)}
 .stage .opt:not(.crys).bad{background:linear-gradient(180deg,#f7f9fc 0%,#e6edf4 100%);box-shadow:0 0 0 3px #b7c6d6,0 5px 0 3px #9fb0c2}
 
-/* ---------- name plates (.chip): one look across the game and the summary - a white pill with a thick game-blue rim
-   on a raised base, sitting on the ice panel's bottom edge; 'gold' (the angle sums) is the warm version ---------- */
+/* ---------- name plates (.chip): one look across the game and the summary - flat labels, never button-like (no
+   raised base, no gloss, nothing to press): a white pill with a thick bright-blue border, sitting on the ice panel's
+   bottom edge; the angle sums are a cream pill with a gold border ---------- */
 .stage .chip,.stage .chip.name,.stage .chip.white,.stage .chip.measure{font-family:'Baloo 2','Noto Sans Math',system-ui,sans-serif;font-weight:800;
-  font-size:30px;line-height:1.1;letter-spacing:.2px;color:#123b63;padding:9px 38px 7px;border-radius:999px;
-  background:linear-gradient(180deg,#ffffff 0%,#eaf3ff 100%);border:4px solid #1f6bff;
-  box-shadow:0 5px 0 #1650c8,0 10px 18px rgba(20,60,130,.28),inset 0 2px 0 #fff;animation:chipIn .5s cubic-bezier(.2,1.35,.45,1) backwards}
-.stage .chip.long,.stage .chip.name.long{font-size:25px;padding:8px 30px 7px}
-.stage .chip.gold{font-family:'Baloo 2','Noto Sans Math',system-ui,sans-serif;font-weight:800;font-size:27px;color:#6b4300;padding:8px 32px 7px;border-radius:999px;
-  background:linear-gradient(180deg,#fff9e3 0%,#ffe7a3 100%);border:4px solid #e3a400;box-shadow:0 5px 0 #b57f00,0 10px 18px rgba(110,70,0,.25),inset 0 2px 0 #fff}
-@keyframes chipIn{0%{transform:translateY(14px) scale(.7);opacity:0}60%{transform:translateY(-3px) scale(1.06);opacity:1}100%{transform:none;opacity:1}}
+  font-size:30px;line-height:1.1;letter-spacing:.2px;color:#123b63;padding:8px 36px 6px;border-radius:999px;cursor:default;
+  background:#ffffff;border:4px solid #1f6bff;box-shadow:0 3px 10px rgba(20,60,130,.18);animation:chipIn .5s ease-out backwards}
+.stage .chip.long,.stage .chip.name.long{font-size:25px;padding:7px 28px 6px}
+.stage .chip.gold,.eq-layer .chip.gold{font-family:'Baloo 2','Noto Sans Math',system-ui,sans-serif;font-weight:800;font-size:27px;color:#6b4300;padding:7px 30px 6px;border-radius:999px;cursor:default;
+  background:#fff8e3;border:4px solid #f0b000;box-shadow:0 3px 10px rgba(110,70,0,.16)}
+@keyframes chipIn{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}

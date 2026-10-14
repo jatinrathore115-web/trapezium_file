@@ -36,8 +36,8 @@
     irregular: { deep: '#1f6bff', wash: '#e8f0fd', ink: '#1a4799' }
   };
   // the lesson's colours: pink bases, purple legs, lilac fill, orange parallel arrows; one colour per angle
-  const INK = { base: '#1f6bff', leg: '#00a896', fill: 'rgba(255,236,179,0.95)', chev: '#ff8a00', navy: '#123b63' };
-  const ANG = { A: '#ff8a00', B: '#19c46b', C: '#1fa3ff', D: '#ffc300' };
+  const INK = { base: '#1f6bff', leg: '#00c4a7', fill: 'rgba(255,246,214,0.95)', chev: '#ff7a00', navy: '#123b63' };
+  const ANG = { A: '#ff7a00', B: '#1fcf66', C: '#12a4ff', D: '#ffb800' };
   // Swiftee's two spots: 'peek' over the card's top edge, 'middle' standing on the snow between the albums. y = offset in stage px from her
   // CSS position, s = scale of her 259 px box, hide = how far she sinks to be out of sight
   const SPOT = { peek: { y: 0, s: 218 / 259, hide: 154 }, middle: { y: 186, s: 300 / 259, hide: 300 } };
@@ -82,11 +82,6 @@
 
   // ---------- small helpers ----------
   // make an SVG element: null attributes are skipped, attrs.text becomes its text
-  // a darker version of a colour (the plate's raised base)
-  function shade(hex) {
-    const n = parseInt(hex.slice(1), 16), d = (v) => Math.round(v * 0.72);
-    return '#' + ((1 << 24) | (d(n >> 16 & 255) << 16) | (d(n >> 8 & 255) << 8) | d(n & 255)).toString(16).slice(1);
-  }
   function mk(tag, attrs, parent) {
     const el = document.createElementNS(NS, tag);
     Object.keys(attrs || {}).forEach((k) => { if (attrs[k] == null) return; if (k === 'text') el.textContent = attrs[k]; else el.setAttribute(k, attrs[k]); });
@@ -237,8 +232,7 @@
       let w = 0; try { w = t.getComputedTextLength(); } catch (e) {}
       if (!w) w = text.length * fs * 0.54; // could not measure the text: estimate
       const bw = (o && o.w) ? Math.max(o.w, w + 16) : (w + 60);
-      // the plate (as in the lesson): a white pill with a thick rim, raised on a darker base
-      g.insertBefore(mk('rect', { x: x - bw / 2, y: y - H0 / 2 + rim + 1, width: bw, height: H0, rx: H0 / 2, fill: shade(deep) }), t);
+      // the plate (as in the lesson): a flat pill with a thick rim - a label, not a button
       g.insertBefore(mk('rect', { x: x - bw / 2, y: y - H0 / 2, width: bw, height: H0, rx: H0 / 2, fill: c ? c.wash : '#ffffff', stroke: deep, 'stroke-width': rim }), t);
       return g;
     },

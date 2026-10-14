@@ -104,7 +104,7 @@
       if (!G || !sides.length) return;
       add(() => {
         const tl = G.timeline();
-        tl.to(sides, { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(0,168,150,0.75))', duration: 0.28, ease: 'sine.out', yoyo: true, repeat: 3 }, 0);
+        tl.to(sides, { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(0,196,167,0.75))', duration: 0.28, ease: 'sine.out', yoyo: true, repeat: 3 }, 0);
         // the extensions and arrows join in only when they are showing
         if (ext.length) tl.to(ext, { strokeWidth: 5, opacity: 1, duration: 0.28, ease: 'sine.out', yoyo: true, repeat: 3 }, 0);
         if (chev.length) tl.fromTo(chev, { scale: 1 }, { scale: 1.35, transformOrigin: '50% 50%', duration: 0.28, ease: 'sine.out', yoyo: true, repeat: 3 }, 0);
@@ -168,11 +168,11 @@
           .to(o, { h: 0.5, duration: reduced ? 0 : 0.7, ease: 'power2.inOut', onUpdate: () => draw(o.h) }, 0.1)
           .call(() => legs.forEach((e) => e.style.removeProperty('stroke-dasharray')))
           // the matching pulse, the equal marks and the length labels all land together
-          .to(legs, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 4px rgba(0,168,150,0.45))', duration: 0.3, ease: 'sine.out' }, '>')
+          .to(legs, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 4px rgba(0,196,167,0.45))', duration: 0.3, ease: 'sine.out' }, '>')
           .to(ticks, { opacity: 1, duration: 0.3, ease: 'sine.out' }, '<')
           .call(() => labels.forEach((l) => l.setAttribute('data-in', '1')), null, '<') // data-in keeps them shown (they start hidden by .len-pre)
           .fromTo(labels, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, xPercent: -50, yPercent: -50, duration: 0.35, ease: 'back.out(1.4)' }, '<')
-          .to(legs, { strokeWidth: 6.5, filter: 'drop-shadow(0px 0px 2px rgba(0,168,150,0.3))', duration: 0.25, ease: 'sine.inOut' }, '>')
+          .to(legs, { strokeWidth: 6.5, filter: 'drop-shadow(0px 0px 2px rgba(0,196,167,0.3))', duration: 0.25, ease: 'sine.inOut' }, '>')
           // hold, then back to normal
           .to(legs, { strokeWidth: 5, filter: NOGLOW, duration: 0.45, ease: 'sine.inOut' }, '>+0.9')
           .to(bases, { opacity: 1, duration: 0.45, ease: 'sine.inOut' }, '<')
@@ -221,7 +221,7 @@
           // the filled angle grows out of its corner with a soft overshoot, then glows once (as in wedgeGrow)
           const wd = $('.wedge.w' + k)[0], dot = dots[i];
           if (wd && dot) tl.fromTo(wd, { opacity: 1, scale: 0, svgOrigin: dot.getAttribute('cx') + ' ' + dot.getAttribute('cy') }, { scale: 1, duration: reduced ? 0 : 0.5, ease: 'back.out(1.6)' }, at)
-            .to(wd, { filter: 'drop-shadow(0px 0px 5px ' + ({ A: 'rgba(255,138,0,0.8)', B: 'rgba(25,196,107,0.7)', C: 'rgba(31,163,255,0.7)', D: 'rgba(255,195,0,0.9)' })[k] + ')', duration: 0.3, yoyo: true, repeat: 1 }, at + 0.45);
+            .to(wd, { filter: 'drop-shadow(0px 0px 5px ' + ({ A: 'rgba(255,122,0,0.8)', B: 'rgba(31,207,102,0.7)', C: 'rgba(18,164,255,0.7)', D: 'rgba(255,184,0,0.9)' })[k] + ')', duration: 0.3, yoyo: true, repeat: 1 }, at + 0.45);
           if (lab) tl.fromTo(lab, { opacity: 0, x: dir[k][0], y: dir[k][1], xPercent: -50, yPercent: -50, scale: 0.9 },
             { opacity: 1, x: 0, y: 0, scale: 1, duration: reduced ? 0 : 0.5, ease: 'power3.out' }, at + 0.1);
         });
@@ -235,7 +235,7 @@
       if (!G) return;
       const i = ['A', 'B', 'C', 'D'].indexOf(k), dot = $('.vdot')[i];
       const arc = $('.arc.a' + k)[0], wd = $('.wedge.w' + k)[0], lab = $('.tag.alab.l' + k)[0];
-      const C = { A: 'rgba(255,138,0,0.8)', B: 'rgba(25,196,107,0.7)', C: 'rgba(31,163,255,0.7)', D: 'rgba(255,195,0,0.9)' };
+      const C = { A: 'rgba(255,122,0,0.8)', B: 'rgba(31,207,102,0.7)', C: 'rgba(18,164,255,0.7)', D: 'rgba(255,184,0,0.9)' };
       add(() => {
         const tl = G.timeline();
         if (arc) tl.fromTo(arc, { opacity: 1, strokeDasharray: 100, strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.45, ease: 'power2.out' }, 0);
@@ -285,7 +285,7 @@
       const row = $('.chip-row')[0], stage = this.eqLayer();
       if (!row || !stage) return;
       const box = document.createElement('div'), K = sp.keys || 'AD';
-      box.className = 'chip gold eq-build eqpair-' + K + (sp.pair ? ' eq-pair' : ''); box.dataset.i = sp.i || 0; box.dataset.keys = K;
+      box.className = 'chip gold eq-build' + (sp.pair ? ' eq-pair' : ''); box.dataset.i = sp.i || 0; box.dataset.keys = K;
       // the answer side goes "?" -> "120° + 60°" -> "180°" in one fixed-width cell, so the equation never shifts
       box.innerHTML = '<span>∠' + K[0] + '</span><span class="eq-op">+</span><span>∠' + K[1] + '</span><span class="eq-op">=</span>' +
         '<span class="eq-r"><span class="eq-q">?</span><span class="eq-sum"><span class="eq-v1"></span><span class="eq-op eq-plus">+</span><span class="eq-v2"></span></span><span class="eq-res">180°</span></span>';
@@ -406,7 +406,7 @@
           const lab = lenTag(k), e = $('.e' + k)[0], at = i * gap;
           // data-in keeps it shown: the runtime rewrites the label's style on every redraw but leaves attributes alone
           if (lab) tl.call(() => { lab.setAttribute('data-in', '1'); this.stampIn(lab); }, null, at);
-          if (e) tl.to(e, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 5px rgba(0,168,150,0.6))', duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
+          if (e) tl.to(e, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 5px rgba(0,196,167,0.6))', duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
             .set(e, { clearProps: 'strokeWidth,filter' }, at + 0.55);
         });
         return tl;
@@ -423,7 +423,7 @@
         ['AB', 'BC', 'CD', 'DA'].forEach((k, i) => {
           const lab = lenTag(k), e = $('.e' + k)[0], at = i * 0.45;
           if (lab) tl.call(() => { lab.setAttribute('data-col', k); this.stampIn(lab); }, null, at); // the colour comes from CSS (.tag.mtag[data-col]), so a redraw keeps it
-          if (e) tl.to(e, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 5px rgba(0,168,150,0.6))', duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
+          if (e) tl.to(e, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 5px rgba(0,196,167,0.6))', duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
             .set(e, { clearProps: 'strokeWidth,filter' }, at + 0.55);
         });
         return tl;
@@ -434,7 +434,7 @@
       const legs = [$('.eDA')[0], $('.eBC')[0]].filter(Boolean), labs = ['DA', 'BC'].map((k) => lenTag(k)).filter(Boolean);
       if (!G) return;
       add(() => G.timeline()
-        .to(legs, { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(0,168,150,0.7))', duration: 0.3, ease: 'sine.out' }, 0)
+        .to(legs, { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(0,196,167,0.7))', duration: 0.3, ease: 'sine.out' }, 0)
         .fromTo(labs, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.3, duration: 0.25, ease: 'back.out(2)', yoyo: true, repeat: 1 }, 0)
         .to(legs, { strokeWidth: 5, filter: NOGLOW, duration: 0.45, ease: 'sine.inOut' }, 1.8)
         .set(legs, { clearProps: 'strokeWidth,filter' }));
@@ -454,7 +454,7 @@
             .call(() => lab.setAttribute('data-gone', '1'), null, 0.55);
         });
         tl.call(() => { ticks.forEach((t) => t.setAttribute('data-in', '1')); this.drawOn(ticks, 0, 0.4); }, null, 0.45)
-          .to(ticks, { filter: 'drop-shadow(0px 0px 4px rgba(0,168,150,0.8))', duration: 0.25, yoyo: true, repeat: 1 }, 0.85);
+          .to(ticks, { filter: 'drop-shadow(0px 0px 4px rgba(0,196,167,0.8))', duration: 0.25, yoyo: true, repeat: 1 }, 0.85);
         return tl;
       });
     },
@@ -482,7 +482,7 @@
       const els = keys.map((k) => $('.e' + k)[0]).filter(Boolean);
       if (!G || !els.length) return;
       add(() => G.timeline()
-        .to(els, { strokeWidth: 7.5, filter: 'drop-shadow(0px 0px 5px rgba(0,168,150,0.55))', duration: 0.3, ease: 'sine.out' })
+        .to(els, { strokeWidth: 7.5, filter: 'drop-shadow(0px 0px 5px rgba(0,196,167,0.55))', duration: 0.3, ease: 'sine.out' })
         .to(els, { strokeWidth: 5, filter: NOGLOW, duration: 0.35, ease: 'sine.in' })
         .set(els, { clearProps: 'strokeWidth,filter' }));
     },
@@ -495,7 +495,7 @@
       if (!G || !chev.length) return;
       chev.forEach((c) => c.setAttribute('data-in', '1'));
       this.drawOn(chev, 0, 0.45);
-      add(() => G.to(chev, { filter: 'drop-shadow(0px 0px 5px rgba(255,138,0,0.9))', duration: 0.25, yoyo: true, repeat: 1, delay: 0.45 }));
+      add(() => G.to(chev, { filter: 'drop-shadow(0px 0px 5px rgba(255,122,0,0.9))', duration: 0.25, yoyo: true, repeat: 1, delay: 0.45 }));
     },
     // screen 35, on "right": both 90° marks draw into their corners with their labels, then glow gold
     rightBoth() {
@@ -508,9 +508,9 @@
       const sides = [$('.eAB')[0], $('.eCD')[0]].filter(Boolean), chev = $('.chev');
       if (!G || !sides.length) return;
       add(() => G.timeline()
-        .to(sides, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 6px rgba(0,168,150,0.6))', duration: 0.3, yoyo: true, repeat: 1 }, 0)
+        .to(sides, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 6px rgba(0,196,167,0.6))', duration: 0.3, yoyo: true, repeat: 1 }, 0)
         .call(() => { chev.forEach((c) => c.setAttribute('data-in', '1')); this.drawOn(chev, 0, 0.45); }, null, 0.6)
-        .to(chev, { filter: 'drop-shadow(0px 0px 5px rgba(255,138,0,0.9))', duration: 0.25, yoyo: true, repeat: 1 }, 1.05)
+        .to(chev, { filter: 'drop-shadow(0px 0px 5px rgba(255,122,0,0.9))', duration: 0.25, yoyo: true, repeat: 1 }, 1.05)
         .set(sides, { clearProps: 'strokeWidth,filter' }));
     },
 
@@ -518,7 +518,7 @@
     // keys: 'AD' or ['B'] ...; 0.3 s apart, after `delay` s
     wedgeGrow(keys, delay) {
       const P = window.__trapP && window.__trapP(), K = typeof keys === 'string' ? keys.split('') : keys;
-      const C = { A: 'rgba(255,138,0,0.8)', B: 'rgba(25,196,107,0.7)', C: 'rgba(31,163,255,0.7)', D: 'rgba(255,195,0,0.9)' };
+      const C = { A: 'rgba(255,122,0,0.8)', B: 'rgba(31,207,102,0.7)', C: 'rgba(18,164,255,0.7)', D: 'rgba(255,184,0,0.9)' };
       if (!G || !P) return;
       add(() => {
         const tl = G.timeline({ delay: delay || 0 });
@@ -613,7 +613,7 @@
     suppAt(T, S) {
       const P = window.__trapP && window.__trapP(), e = $('.eAB')[0];
       if (!G || !P || !e) return;
-      const ns = 'http://www.w3.org/2000/svg', R = 34, COL = { A: '#ff8a00', B: '#19c46b', C: '#1fa3ff', D: '#ffc300' };
+      const ns = 'http://www.w3.org/2000/svg', R = 34, COL = { A: '#ff7a00', B: '#1fcf66', C: '#12a4ff', D: '#ffb800' };
       const nb = { A: 'B', B: 'A', C: 'D', D: 'C' }, unit = (p, q) => { const L = Math.hypot(q.x - p.x, q.y - p.y) || 1; return { x: (q.x - p.x) / L, y: (q.y - p.y) / L }; };
       const t = P[T], s = P[S], dT = unit(t, P[nb[T]]), dS = unit(s, P[nb[S]]), up = unit(s, t);
       const wedge = (u, v, col) => { const c = u.x * v.y - u.y * v.x, g = document.createElementNS(ns, 'path');
@@ -782,8 +782,8 @@
     },
     // the questions: each part lights up as Swiftee reads it out
     q1Cards() { if (G) add(() => G.fromTo($('.opt'), { y: 0 }, { y: -14, duration: 0.18, ease: 'power2.out', yoyo: true, repeat: 1, stagger: 0.14 })); },
-    q1Look() { if (G) add(() => G.fromTo($('.opt svg'), { filter: 'drop-shadow(0px 0px 0px rgba(255,138,0,0))' }, { filter: 'drop-shadow(0px 0px 8px rgba(255,138,0,0.9))', duration: 0.35, yoyo: true, repeat: 1, stagger: 0.18 })); },
-    q2Shape() { if (G) add(() => G.fromTo($('.qshape'), { filter: 'drop-shadow(0px 0px 0px rgba(0,168,150,0))' }, { filter: 'drop-shadow(0px 0px 10px rgba(0,168,150,0.75))', duration: 0.4, yoyo: true, repeat: 1 })); },
+    q1Look() { if (G) add(() => G.fromTo($('.opt svg'), { filter: 'drop-shadow(0px 0px 0px rgba(255,122,0,0))' }, { filter: 'drop-shadow(0px 0px 8px rgba(255,122,0,0.9))', duration: 0.35, yoyo: true, repeat: 1, stagger: 0.18 })); },
+    q2Shape() { if (G) add(() => G.fromTo($('.qshape'), { filter: 'drop-shadow(0px 0px 0px rgba(0,196,167,0))' }, { filter: 'drop-shadow(0px 0px 10px rgba(0,196,167,0.75))', duration: 0.4, yoyo: true, repeat: 1 })); },
     q5Say(lab, line) {
       if (!G) return;
       add(() => G.timeline()
@@ -798,15 +798,15 @@
     q2Wrong() {
       if (!G) return;
       add(() => G.timeline()
-        .fromTo($('.q2-leg'), { strokeWidth: 5 }, { strokeWidth: 10, stroke: '#ff8a00', duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 0)
-        .fromTo($('.q2-tick'), { scale: 1, transformOrigin: '50% 50%' }, { scale: 1.6, stroke: '#ff8a00', duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 0));
+        .fromTo($('.q2-leg'), { strokeWidth: 5 }, { strokeWidth: 10, stroke: '#ff7a00', duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 0)
+        .fromTo($('.q2-tick'), { scale: 1, transformOrigin: '50% 50%' }, { scale: 1.6, stroke: '#ff7a00', duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 0));
     },
     // check 2 right: the legs glow and "AD = BC" stamps in
     q2Correct() {
       if (!G) return;
       const eq = $('.q2-eq')[0];
       add(() => G.timeline()
-        .to($('.q2-leg'), { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(0,168,150,0.8))', duration: 0.3, yoyo: true, repeat: 1 }, 0)
+        .to($('.q2-leg'), { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(0,196,167,0.8))', duration: 0.3, yoyo: true, repeat: 1 }, 0)
         .fromTo(eq, { opacity: 0, scale: 1.9, rotation: -10, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, rotation: 0, duration: reduced ? 0 : 0.45, ease: 'back.out(2.6)' }, 0.4)
         .call(() => this.burst(eq), null, 0.65));
     },
@@ -815,7 +815,7 @@
       if (!G) return;
       add(() => G.timeline()
         .to($('.q5-leg'), { opacity: 1, duration: 0.3 }, 0)
-        .fromTo($('.q5-tick'), { scale: 1, transformOrigin: '50% 50%' }, { scale: 1.6, stroke: '#ff8a00', duration: 0.3, yoyo: true, repeat: 3 }, 0.2)
+        .fromTo($('.q5-tick'), { scale: 1, transformOrigin: '50% 50%' }, { scale: 1.6, stroke: '#ff7a00', duration: 0.3, yoyo: true, repeat: 3 }, 0.2)
         .fromTo($('.q5-ad'), { scale: 1, transformOrigin: '50% 50%' }, { scale: 1.35, fill: '#d9640a', duration: 0.3, yoyo: true, repeat: 3 }, 0.2));
     },
     // check 5 right: the 5 cm on AD flies across to BC
@@ -964,7 +964,7 @@
       add(() => G.timeline()
         .fromTo($('.q3-wA'), { opacity: 1, scale: 0, transformOrigin: '0% 0%' }, { scale: 1, duration: 0.45, ease: 'back.out(1.6)' }, 0)
         .fromTo($('.q3-vA'), { opacity: 0, scale: 0.6, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(2)' }, 0.25)
-        .to($('.q3-wA'), { filter: 'drop-shadow(0px 0px 6px rgba(255,138,0,0.8))', duration: 0.3, yoyo: true, repeat: 1 }, 0.6));
+        .to($('.q3-wA'), { filter: 'drop-shadow(0px 0px 6px rgba(255,122,0,0.8))', duration: 0.3, yoyo: true, repeat: 1 }, 0.6));
     },
     // "value": a light runs down AD, D's yellow wedge opens, a big "?" pops and pulses, then A and D glow
     // together (60° stays hidden)
@@ -985,8 +985,7 @@
       const ad = $('.q3-ad')[0];
       add(() => G.timeline()
         .fromTo(ad, { opacity: 0, strokeDasharray: 'none' }, { opacity: 0.8, duration: 0.3, yoyo: true, repeat: 1 }, 0)
-        .fromTo($('.q3-hint'), { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.45, ease: 'back.out(1.6)' }, 0.2)
-        .fromTo($('.q3h-sa').concat($('.q3h-sd')), { opacity: 0, scale: 0.4, transformOrigin: '50% 100%' }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(2)', stagger: 0.15 }, 0.55));
+        .fromTo($('.q3-hint'), { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.45, ease: 'back.out(1.6)' }, 0.2));
     },
     // a wrong answer: once the spoken hint has played, the hint equation comes in (q3Hint); later misses pulse it again
     q3Wrong() {
@@ -1030,9 +1029,7 @@
           h.querySelector('.q3h-a').style.color = '#d9640a'; h.querySelector('.q3h-s').style.color = '';
         }, null, 0.9)
         .fromTo(h, { scale: 0.92 }, { scale: 1.06, boxShadow: '0 0 0 6px rgba(46,158,79,0.28), 0 4px 18px rgba(46,158,79,0.3)', duration: 0.3, ease: 'back.out(2)' }, 0.9)
-        .to(h, { scale: 1, duration: 0.4 }, 1.3)
-        .fromTo($('.q3h-sa'), { x: -8 }, { x: 0, duration: 0.4, ease: 'back.out(2)' }, 1.0)
-        .fromTo($('.q3h-sd'), { x: 8 }, { x: 0, duration: 0.4, ease: 'back.out(2)' }, 1.0));
+        .to(h, { scale: 1, duration: 0.4 }, 1.3));
     },
 
     // ---------- screen 41 (check 4: label the trapeziums) ----------
@@ -1166,11 +1163,11 @@
         const tl = G.timeline(), els = [], labs = [];
         list.forEach(([k, len], i) => {
           const e = $('.e' + k)[0], lab = tags.find((x) => x.textContent.trim() === len && getComputedStyle(x).display !== 'none'), at = i * gap;
-          if (e) { els.push(e); tl.to(e, { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(0,168,150,0.7))', duration: 0.3, ease: 'sine.out' }, at); }
-          if (lab) { labs.push(lab); tl.fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.15, boxShadow: '0 0 0 4px rgba(0,168,150,0.3)', duration: 0.3, ease: 'back.out(2)' }, at); }
+          if (e) { els.push(e); tl.to(e, { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(0,196,167,0.7))', duration: 0.3, ease: 'sine.out' }, at); }
+          if (lab) { labs.push(lab); tl.fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.15, boxShadow: '0 0 0 4px rgba(0,196,167,0.3)', duration: 0.3, ease: 'back.out(2)' }, at); }
         });
         tl.to(els, { strokeWidth: 5, filter: NOGLOW, duration: 0.45, ease: 'sine.inOut' }, hold)
-          .to(labs, { scale: 1, boxShadow: '0 0 0 0px rgba(0,168,150,0)', duration: 0.45, ease: 'sine.inOut' }, hold)
+          .to(labs, { scale: 1, boxShadow: '0 0 0 0px rgba(0,196,167,0)', duration: 0.45, ease: 'sine.inOut' }, hold)
           .set(els, { clearProps: 'strokeWidth,filter' })
           .set(labs, { clearProps: 'boxShadow' });
         return tl;
