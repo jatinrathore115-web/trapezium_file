@@ -334,7 +334,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 /* in focus: the arc thickens and the value takes its angle's colour (solid, no blur); the others step back */
 @keyframes arcGlow{from{stroke-width:7px}to{stroke-width:9px}}
 @keyframes labGlow{from{transform:translate(-50%,-50%) scale(1)}to{transform:translate(-50%,-50%) scale(1.08)}}
-@keyframes angDim{from{opacity:1}to{opacity:.4}}
+@keyframes angDim{from{opacity:1}to{opacity:.65}} /* stepped back, but still plainly filled */
 /* one design for every angle value: a white tag in its angle's colour; in focus it only grows a little and its border thickens */
 .tag.alab.glow{border-width:3.5px}
 @media (prefers-reduced-motion: reduce){.arc.glow,.tag.alab.glow,.arc.dim,.tag.alab.dim{animation-duration:.01s;animation-delay:0s}}
@@ -547,7 +547,7 @@ svg[data-lencol] .edge{transition:stroke .4s ease}
 /* Done: pops in, then glows twice along the crystal's outline */
 @keyframes crysGlow{0%,100%{filter:drop-shadow(0 3px 0 rgba(13,64,170,.32)) drop-shadow(0 6px 10px rgba(18,59,99,.18))}50%{filter:brightness(1.08) drop-shadow(0 0 10px rgba(120,210,255,.95)) drop-shadow(0 3px 0 rgba(13,64,170,.32))}}
 /* check 2 (screen 39): the word answers stay on one line */
-.stage .opts-in:not(.quick) .opt.crys{font-size:21px;white-space:nowrap;padding:0 16px}
+.stage .opts-in:not(.quick) .opt.crys{font-size:32px;white-space:nowrap;padding:0 16px}
 /* screen 36: no ice panel; Swiftee and her bubble stay where they usually are */
 .stage.nopanel .panel-img{opacity:0}
 
@@ -613,7 +613,7 @@ svg[data-lencol] .edge{transition:stroke .4s ease}
    answer turns green, a wrong one a soft grey (never red) ---------- */
 .stage .opt.crys{position:relative;border:3px solid #fff;border-radius:999px;padding:0 22px;cursor:pointer;min-height:68px;
   background:linear-gradient(180deg,#ffa53d 0%,#ff7f11 55%,#f26a00 100%);
-  color:#fff;font-family:'Baloo 2','Noto Sans Math',system-ui,sans-serif;font-weight:800;font-size:26px;line-height:1.1;letter-spacing:.4px;
+  color:#fff;font-family:'Baloo 2','Noto Sans Math',system-ui,sans-serif;font-weight:600;font-size:32px;line-height:1.05;letter-spacing:.4px;
   /* a dark-orange outline round the white letters keeps them crisp on the orange */
   text-shadow:-1.5px -1.5px 0 #a84400,1.5px -1.5px 0 #a84400,-1.5px 1.5px 0 #a84400,1.5px 1.5px 0 #a84400,0 3px 0 #a84400;display:flex;align-items:center;justify-content:center;text-align:center;
   box-shadow:0 6px 0 #c95c00,0 12px 18px rgba(120,50,0,.28);
@@ -656,7 +656,8 @@ svg[data-lencol] .edge{transition:stroke .4s ease}
 /* a named point: the dot grows gold (engine) with a soft gold glow */
 .vdot.on{filter:drop-shadow(0 0 5px rgba(255,184,0,.95))}
 .wedge,.arc,.shape-fill{transition:opacity .3s ease}
-.focusing .edge:not(.emph):not(.lit),.focusing .wedge:not(.emph),.focusing .arc:not(.emph){opacity:.35}
+.focusing .edge:not(.emph):not(.lit){opacity:.35}
+.focusing .wedge:not(.emph),.focusing .arc:not(.emph){opacity:.65}
 .wedge.emph{stroke:#ffd43b;stroke-width:5px;paint-order:stroke}
 @media (prefers-reduced-motion: reduce){.hl.on{animation:none;stroke-dasharray:none}}
 
@@ -684,8 +685,8 @@ svg[data-lencol] .edge{transition:stroke .4s ease}
 .stage .lab::before{display:none}
 .stage .lab{justify-content:center;padding:0 12px;border:3px solid #fff;border-radius:999px;cursor:grab;
   background:linear-gradient(180deg,#ffa53d 0%,#ff7f11 55%,#f26a00 100%);color:#fff;
-  font-family:'Baloo 2','Noto Sans Math',system-ui,sans-serif;font-weight:800;font-size:18px;letter-spacing:.3px;
-  text-shadow:-1px -1px 0 #a84400,1px -1px 0 #a84400,-1px 1px 0 #a84400,1px 1px 0 #a84400,0 2px 0 #a84400;
+  font-family:'Baloo 2','Noto Sans Math',system-ui,sans-serif;font-weight:600;font-size:26px;letter-spacing:.4px;
+  text-shadow:-1.5px -1.5px 0 #a84400,1.5px -1.5px 0 #a84400,-1.5px 1.5px 0 #a84400,1.5px 1.5px 0 #a84400,0 2px 0 #a84400;
   box-shadow:0 5px 0 #c95c00,0 10px 16px rgba(120,50,0,.25)}
 .stage .lab:hover{box-shadow:0 7px 0 #c95c00,0 14px 20px rgba(120,50,0,.28);filter:brightness(1.05)}
 .stage .lab.sel{transform:translateY(-3px) scale(1.04);border-color:#fff;box-shadow:0 0 0 5px rgba(255,184,0,.55),0 5px 0 #c95c00}

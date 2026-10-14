@@ -60,6 +60,7 @@
 //   noPanel      no ice panel
 //   summary      the Summary Kit's recall cards (js/summary.js)
 //   noIdle       no idle reminders
+//   skip         a silent screen that moves on by itself; Back passes over it
 //   cfu          check number (1-5)
 //   okFx / badFx Motion functions run on a right / wrong answer (they show why on the shape)
 //   qFocus       after the question the shape glides up and the answers come in under it (CONFIG.qFocus)
@@ -125,7 +126,7 @@ const LESSON = {
     { id: 'intro', build: 1, autoNext: 2200, lines: [{ m: 'waving', t: 'Remember we learnt about\nquadrilaterals earlier.' }] },
     { id: 'quadSides', sideNums: 1, autoNext: 2200, lines: [{ m: 'happy', t: 'Any polygon with 4 sides\nis called a quadrilateral.' }] },
     // spoken "A, B, C, D", shown "ABCD": each letter flies in as it is said
-    { id: 'quadName', letterIn: 1, autoNext: 2200, lines: [{ m: 'happy', t: 'We can call it\nquadrilateral ABCD.', s: 'We can call it quadrilateral, A, B, C, D.', letters: 1 }] },
+    { id: 'quadName', letterIn: 1, autoNext: 2200, lines: [{ m: 'happy', t: 'We can call it\nquadrilateral ABCD.', s: 'We can call it quadrilateral, A, B, C, D.', letters: 1, letterTimes: [2.28, 2.64, 2.88, 3.30] }] }, // letterTimes: A, B, C, D in the recording (vo003)
     // growFocus: the shape grows to 120% and back as she starts
     { id: 'special', lines: [{ m: 'happy', t: 'This is a special type\nof quadrilateral.', onStart: 'growFocus' },
       { m: 'curious', t: "Let's see what\nmakes it special.", cueAt: { special: 'shapePop' } }] },
@@ -163,7 +164,8 @@ const LESSON = {
       { m: 'curious', t: 'What if the legs were\nthe same length?', noEmph: 1, cueAt: { legs: 'legsTogether' } },
       { m: 'excited', t: "Let's find out.", cueAt: { find: 'findOut' } }],
       f: { par: 1, legLen: 1, sideLen: 1 } },
-    { id: 'equal', lines: [{ m: 'curious', t: "Let's change its\nshape a little.", cueAt: { change: 'pingA' } }], f: { par: 1, legLen: 1, sideLen: 1 } },
+    // a silent beat between "Let's find out." and the drag (no dialogue); it moves on by itself and Back skips it
+    { id: 'equal', skip: 1, autoNext: 900, lines: [], f: { par: 1, legLen: 1, sideLen: 1 } },
     // one demo hand after the line. Dragging A right (the wrong way) wiggles BC: A has only ~0.75 cm
     // before B stops it, so the limit is 0.5 cm. Equal legs snap into place and finish the task
     { id: 'equalDrag', lines: [{ m: 'curious', t: 'Drag vertex A so that both\nthe legs are of equal length.' }],
@@ -244,9 +246,9 @@ const LESSON = {
       lines: [{ m: 'curious', t: 'Which type of trapezium is this?', cueAt: { type: 'q2Shape' } }],
       ok: 'Right! The marks show its legs are equal, so it is an isosceles trapezium.',
       opts: [
-        { id: 's', t: 'Scalene trapezium', fb: 'Look at the little marks on the legs. They tell us the legs are equal.' },
-        { id: 'i', t: 'Isosceles trapezium', ok: true },
-        { id: 'r', t: 'Right trapezium', fb: 'There are no right angles in this shape. Look at the legs instead.' }
+        { id: 's', t: 'Scalene', fb: 'Look at the little marks on the legs. They tell us the legs are equal.' },
+        { id: 'i', t: 'Isosceles', ok: true },
+        { id: 'r', t: 'Right', fb: 'There are no right angles in this shape. Look at the legs instead.' }
       ] },
     // "120" opens ∠A; "value" runs a light down AD to a "?" at D. A wrong answer brings in
     // "120° + ? = 180°" above the shape; the right one flies 60° to D and the equation resolves
@@ -281,7 +283,7 @@ const LESSON = {
     { id: 'theEnd', end: 1, hero: 1, finale: 1, noIdle: 1, lines: [] }
   ],
   cfu4: {
-    labels: [{ id: 'iso', t: 'Isosceles trapezium' }, { id: 'right', t: 'Right trapezium' }, { id: 'scal', t: 'Scalene trapezium' }],
+    labels: [{ id: 'iso', t: 'Isosceles' }, { id: 'right', t: 'Right' }, { id: 'scal', t: 'Scalene' }],
     slots: [{ id: 's0', ans: 'scal', y: 170 }, { id: 's1', ans: 'iso', y: 274 }, { id: 's2', ans: 'right', y: 378 }]
   }
 };

@@ -33,7 +33,10 @@
   // arm-end Z") is rebuilt as the sweep grows, and put back as drawn at the end (or by clear(), if cut short).
   const sweeps = [];
   const sweepOf = (w) => {
-    const d0 = w && w.getAttribute('d'), n = ((d0 || '').match(/-?\d+(\.\d+)?/g) || []).map(Number);
+    // a wedge swept again while its last sweep is still running keeps its full shape (never the half-open one on screen)
+    const open = sweeps.find((s) => s.w === w && !s.done);
+    if (open) open.done = true;
+    const d0 = open ? open.d0 : w && w.getAttribute('d'), n = ((d0 || '').match(/-?\d+(\.\d+)?/g) || []).map(Number);
     if (n.length < 11) return null;
     const vx = n[0], vy = n[1], sx = n[2], sy = n[3], R = n[4], f = n[8], a1 = Math.atan2(sy - vy, sx - vx);
     let da = Math.atan2(n[10] - vy, n[9] - vx) - a1;
@@ -48,7 +51,7 @@
     if (!s) { tl.set(w, { opacity: 1 }, at); return; }
     const p = { t: 0 };
     tl.set(w, { opacity: 1 }, at).fromTo(p, { t: 0 }, { t: 1, duration: reduced ? 0 : (dur || 0.7), ease: 'power1.inOut',
-      onStart: () => s.set(0), onUpdate: () => s.set(p.t), onComplete: () => { w.setAttribute('d', s.rec.d0); s.rec.done = true; } }, at);
+      onStart: () => s.set(0), onUpdate: () => { if (!s.rec.done) s.set(p.t); }, onComplete: () => { if (!s.rec.done) { w.setAttribute('d', s.rec.d0); s.rec.done = true; } } }, at);
   };
   // a value label slides out from where it belongs - an angle's corner, a side's middle - to its place
   const labelOut = (tl, lab, from, at) => {
@@ -663,7 +666,7 @@
     suppAt(T, S) {
       const P = window.__trapP && window.__trapP(), e = $('.eAB')[0];
       if (!G || !P || !e) return;
-      const ns = 'http://www.w3.org/2000/svg', R = 28, COL = { A: '#ff7a00', B: '#1fcf66', C: '#12a4ff', D: '#ffb800' };
+      const ns = 'http://www.w3.org/2000/svg', R = 30 / ((window.__boardS && window.__boardS()) || 1), COL = { A: '#ff7a00', B: '#1fcf66', C: '#12a4ff', D: '#ffb800' };
       const nb = { A: 'B', B: 'A', C: 'D', D: 'C' }, unit = (p, q) => { const L = Math.hypot(q.x - p.x, q.y - p.y) || 1; return { x: (q.x - p.x) / L, y: (q.y - p.y) / L }; };
       const t = P[T], s = P[S], dT = unit(t, P[nb[T]]), dS = unit(s, P[nb[S]]), up = unit(s, t);
       const wedge = (u, v, col) => { const c = u.x * v.y - u.y * v.x, g = document.createElementNS(ns, 'path');
@@ -1179,11 +1182,13 @@
       const el = $('.tag.vlab.c' + k)[0];
       if (el) el.setAttribute('data-landed', '1'); // stays shown through the hand-over to the next screen (CSS .vlab.vin)
       if (!G || !el) { if (onLand) onLand(); return; }
-      const d = { A: [-44, -44], B: [44, -44], C: [44, 44], D: [-44, 44] }[k];
+      // it comes out of its own point and moves out to its place (never in from far away)
+      const P = window.__trapP && window.__trapP(), lx = parseFloat(el.style.left), ly = parseFloat(el.style.top);
+      const d = P && P[k] && isFinite(lx) ? [P[k].x - lx, P[k].y - ly] : [0, 0];
       add(() => {
         centred(el);
         const tl = G.timeline();
-        tl.fromTo(el, { opacity: 0, x: d[0], y: d[1], scale: 0.9 }, Object.assign({ opacity: 1, x: 0, y: 0, scale: 1, overwrite: 'auto' }, ENTER, { duration: reduced ? 0 : 0.55 }))
+        tl.fromTo(el, { opacity: 0, x: d[0], y: d[1] }, { opacity: 1, x: 0, y: 0, overwrite: 'auto', duration: reduced ? 0 : 0.45, ease: 'power2.out' })
           .call(() => onLand && onLand(), null, 0.48)
           .fromTo(el, { textShadow: '0px 0px 0px rgba(31,107,255,0)' }, { textShadow: '0px 0px 10px rgba(31,107,255,0.55)', duration: 0.4, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.45);
         return tl;

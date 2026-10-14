@@ -53,6 +53,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     window.__trapP = () => this.state.P;
     window.__popRoom = () => this.popRoom();
     window.__extBounds = () => this.extBounds();
+    window.__boardS = () => this.boardMap().s; // the board's zoom (figures drawn on it keep a constant size on screen)
     const C = CONFIG.swiftee;
     if (window.SwifteeMascot) {
       this.sw = new window.SwifteeMascot({ base: C.base, idle: C.idle, minHoldMs: C.minHoldMs, find: () => document.querySelector('.swiftee') });
@@ -559,6 +560,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     // corner letters by their place in the spoken text
     const clip = !this.state.muted && window.Voice ? Voice.find(keep ? L.s : text) : null;
     if (clip) {
+      const clipDur = clip.reduce((t, c) => t + c.dur, 0);
       const wt = words.map((w) => Voice.weight(this.speechOf(w)) + (/[.!?]$/.test(w) ? 6 : /[,:;]$/.test(w) ? 3 : 0));
       const all = wt.reduce((a, b) => a + b, 0) || 1, from = []; let acc = 0;
       wt.forEach((x) => { from.push(acc / all); acc += x; });
@@ -567,7 +569,9 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
         start: () => { if (!live()) return; spoke = true; bMode = true; begin(); },
         progress: (f) => {
           if (!live() || sDone) return;
-          letterCues.forEach((c) => { if (f >= c.at / Math.max(1, sp.length)) fireLetter(c); });
+          // letterTimes: when each corner letter is heard in the clip (s, measured from the recording); else its place in the text
+          if (L.letterTimes) { const t = f * Math.max(0.3, clipDur - 0.35) + 0.06; letterCues.forEach((c, j) => { if (t >= L.letterTimes[j] - 0.05) fireLetter(c); }); }
+          else letterCues.forEach((c) => { if (f >= c.at / Math.max(1, sp.length)) fireLetter(c); });
           let k = 0; while (k < from.length && from[k] <= f) k++;
           if (k > i) { i = k; setReveal(i); }
         },
@@ -843,7 +847,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     this.fit = st.room === 'measure' || st.noZoom ? null : this.fitFor(st, P); // the shape's size and place in the panel
     this.setState({
       step: i, P: P, done: !st.task && !st.cfu && !st.opts, ext: { DA: 0, BC: 0, AB: 0, CD: 0 }, tap: {}, chips: [],
-      moved: false, dragging: null, picks: {}, cfuFirst: true, hand: null, bubOff: false, centered: false, glow: null, callout: null, emph: {}, qc: false, trace: null, build: null, numsGone: false, bubLetters: null, explored: false, angFocus: null, symAng: false, linesDone: false, rFound: {}, rAll: false, labsIn: false, measuring: null, tape: null, swAway: false, line: '', reveal: 0,
+      moved: false, dragging: null, picks: {}, cfuFirst: true, hand: null, bubOff: false, centered: false, glow: null, callout: null, emph: {}, qc: false, trace: null, build: null, numsGone: false, bubLetters: null, explored: false, angFocus: null, symAng: false, linesDone: false, rFound: {}, rAll: false, labsIn: false, measuring: null, tape: null, swAway: false, line: '', reveal: 0, talking: false, // her speech was stopped above
       c4: { at: { iso: null, right: null, scal: null }, locked: {}, sel: null, drag: null, checking: false }
     });
     if (st.layout === 'focus' && !(st.lines || []).length && !this.state.done) {
@@ -871,7 +875,9 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     // voiceDelay (ms): Swiftee waits for the screen's opening animation before she speaks
     const glide = fwd && i > 0 && this.steps()[i - 1].room === 'measure' && st.room !== 'measure' ? 800 : 0; // back from the measuring slab
     this.glideMs = glide;
-    if (st.voiceDelay || glide) this.tm(lines, Math.max(st.voiceDelay || 0, glide)); else lines();
+    if (st.voiceDelay || glide) this.tm(lines, Math.max(st.voiceDelay || 0, glide));
+    else if (!(st.lines || []).length) this.tm(lines, 60); // a silent screen: let the screen change land before it can move on
+    else lines();
   }
   // a short lock after each screen change, so a double tap cannot skip a screen
   navLocked() { return Date.now() - (this.navAt || 0) < CONFIG.timing.navLockMs; }
@@ -883,7 +889,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (this.state.step <= 0 || this.navLocked()) return;
     // skip back over screens that move on by themselves, or Back would bounce straight forward again
     let i = this.state.step - 1;
-    while (CONFIG.flow.autoAdvance && i > 0 && this.steps()[i].locked) i--;
+    while (i > 0 && (this.steps()[i].skip || (CONFIG.flow.autoAdvance && this.steps()[i].locked))) i--;
     this.sfx('tap'); this.goTo(i, false);
   }
   // Top-right Next: moves on even if the screen is unfinished (unless it has lockNext). Skipping a drag task
@@ -1152,11 +1158,10 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   // Highlight cues share one focus language (emphasize): the named sides get the gold highlighter, corners ping,
   // angles glow, and the rest of the shape steps back while Swiftee talks about them
   glowLegs() { this.emphasize(['DA', 'BC']); }
-  growAD() { Motion.wedgeGrow('AD'); this.emphasize(['aA', 'aD']); }
+  growAD() { this.emphasize(['aA', 'aD']); } // the pair already swept open as the screen opened: now it is pointed out
   parPulse() { this.emphasize(['AB', 'CD']); Motion.parallelShow(); } // the arrows run along both bases the same way
   suppConfirmLater() { const tok = this.stepTok; this.tm(() => { if (tok !== this.stepTok) return; this.sfx('snap'); Motion.suppConfirm(); }, 2800); }
   vertexPulse() { ['A', 'B', 'C', 'D'].forEach((k, i) => this.tm(() => this.emphasize(['v' + k]), i * 420)); } // one corner after another
-  pingA() { this.emphasize(['vA']); } // screen 19: the corner the learner is about to drag
   legsPop() { this.emphasize(['DA', 'BC']); Motion.legsPop(); }
   defTrace() { ['AB', 'BC', 'CD', 'DA'].forEach((k, i) => this.tm(() => this.emphasize([k]), i * 450)); }
   // screen 18, on "legs": both legs glow together and their lengths pulse
@@ -1790,7 +1795,8 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const livePair = s.dragging ? (s.dragging === 'A' || s.dragging === 'D' ? 'AD' : 'BC') : ''; // a corner changes the two angles on its leg
     ['A', 'B', 'C', 'D'].forEach((k) => {
       const n = this.nb(k), Vk = P[k], u = unit(Vk, P[n[0]]), v = unit(Vk, P[n[1]]);
-      const R = 32; // the angle's arc: big enough to read the filled angle at a glance
+      // the angle's arc: the same size on screen whatever the board's zoom (30 stage px)
+      const zs = this.boardMap().s || 1, R = 30 / zs;
       const sx = Vk.x + u.x * R, sy = Vk.y + u.y * R, ex = Vk.x + v.x * R, ey = Vk.y + v.y * R;
       const cross = u.x * v.y - u.y * v.x;
       const show = arcSet.indexOf(k) >= 0;
@@ -1803,10 +1809,10 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       g['a' + k] = { p: 'M' + r1(sx) + ',' + r1(sy) + ' A' + R + ',' + R + ' 0 0 ' + (cross > 0 ? 1 : 0) + ' ' + r1(ex) + ',' + r1(ey), d: dsp(show && !isRight), cls: 'arc a' + k + stag + look + (em['a' + k] ? ' emph' : '') + (st.anglesIn ? ' pre' : ''), o: r1(Vk.x) + 'px ' + r1(Vk.y) + 'px' };
       // wedges (from screen 23 on): the angle filled in, out to the arc's outer edge so the arc is its rim. They follow
       // the arc's glow / dim and grow in from the corner when the angle comes into focus.
-      const RW = R + 3.5, wsx = Vk.x + u.x * RW, wsy = Vk.y + u.y * RW, wex = Vk.x + v.x * RW, wey = Vk.y + v.y * RW;
+      const RW = R + 3.5 / zs, wsx = Vk.x + u.x * RW, wsy = Vk.y + u.y * RW, wex = Vk.x + v.x * RW, wey = Vk.y + v.y * RW;
       g['w' + k] = { p: 'M' + r1(Vk.x) + ',' + r1(Vk.y) + ' L' + r1(wsx) + ',' + r1(wsy) + ' A' + RW + ',' + RW + ' 0 0 ' + (cross > 0 ? 1 : 0) + ' ' + r1(wex) + ',' + r1(wey) + ' Z', d: dsp((known || !!st.anglesIn) && show && !isRight), cls: 'wedge w' + k + look + (em['a' + k] ? ' emph' : '') + (st.anglesIn ? ' pre' : '') };
       // the square right-angle mark
-      const q = 20;
+      const q = 18 / zs; // the right-angle square, the same size on screen as the angles
       g['r' + k] = {
         // a closed square from the corner itself, so the whole square fills (its edges along the sides sit under them)
         p: 'M' + r1(Vk.x) + ',' + r1(Vk.y) + ' L' + r1(Vk.x + u.x * q) + ',' + r1(Vk.y + u.y * q) + ' L' + r1(Vk.x + u.x * q + v.x * q) + ',' + r1(Vk.y + u.y * q + v.y * q) + ' L' + r1(Vk.x + v.x * q) + ',' + r1(Vk.y + v.y * q) + ' Z',
