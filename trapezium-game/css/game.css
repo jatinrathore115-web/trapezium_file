@@ -307,9 +307,9 @@ a{color:#123b63}a:hover{color:#0b2742}
 /* screens 14 and 15: both Base pills yellow, both Leg pills purple */
 /* each callout wears its side's colour: Base tags blue like the bases, Leg tags teal like the legs */
 .callout.cal-bases .cal-pill{fill:#e3eeff;stroke:#1f6bff;stroke-width:3px}
-.callout.cal-bases .cal-stem,.callout.cal-bases .cal-dot{stroke:#1f6bff;stroke-width:3px}
+.callout.cal-bases .cal-stem{stroke:#1f6bff;stroke-width:3px}
 .callout.cal-legs .cal-pill{fill:#dcf8f2;stroke:#00c4a7;stroke-width:3px}
-.callout.cal-legs .cal-stem,.callout.cal-legs .cal-dot{stroke:#00c4a7;stroke-width:3px}
+.callout.cal-legs .cal-stem{stroke:#00c4a7;stroke-width:3px}
 /* summary (screen 37, js/summary.js): no panel; Swiftee rises from behind the big card. She sits under the card
    layer (.sum-root), so the card's rim hides her body. No CSS translate or scale on her or the bubble: GSAP's
    clean-up on a screen change would carry it over as a transform */

@@ -63,7 +63,7 @@
   // CSS centres labels on their point with translate(-50%, -50%); GSAP must keep that once it owns the transform
   const centred = (els) => G.set(els, { xPercent: -50, yPercent: -50, x: 0, y: 0 });
   // every element Motion animates; clear() wipes the animated properties from all of them
-  const ANIMATED = '.tag.snum, .tag.vlab, .edge, .vdot, .shape-fill, .outline-settle, .pop-g, .chev, .calp > *, .ticks, .tag.mtag, .okcheck *, .tag.alab, .arc, .wedge, .chip, .chip-res, .xleg, .swiftee, .swiftee canvas, .swiftee img, .bubble, .rmark, .tag.r90, .q3, .q3 *, .q3-hint, .q3-hint *, .q3-fly, .q4s, .q4s *, .slot, .lab, .q4-strip, .q4-card, .q4-link, .opt svg, .qshape, .hl, .spark, .cal-dot, .q1-par, .q1-chev, .q2-leg, .q2-tick, .q2-eq, .q5-leg, .q5-tick, .q5-ad, .q5-q, .q5-bc, .q5-ab, .q5-cd, .q5-hab, .q5-hcd, .q5-hl';
+  const ANIMATED = '.tag.snum, .tag.vlab, .edge, .vdot, .shape-fill, .outline-settle, .pop-g, .chev, .calp > *, .ticks, .tag.mtag, .okcheck *, .tag.alab, .arc, .wedge, .chip, .chip-res, .xleg, .swiftee, .swiftee canvas, .swiftee img, .bubble, .rmark, .tag.r90, .q3, .q3 *, .q3-hint, .q3-hint *, .q3-fly, .q4s, .q4s *, .slot, .lab, .q4-strip, .q4-card, .q4-link, .opt svg, .qshape, .hl, .spark, .q1-par, .q1-chev, .q2-leg, .q2-tick, .q2-eq, .q5-leg, .q5-tick, .q5-ad, .q5-q, .q5-bc, .q5-ab, .q5-cd, .q5-hab, .q5-hcd, .q5-hl';
   // the SVG ones among them (clear() removes transform-origin and stroke-dasharray from these by hand)
   const ANIMATED_SVG = '.wedge, .edge, .vdot, .shape-fill, .outline-settle, svg g.pop-g, .chev, .calp > *, .ticks, .okcheck *, .arc, .rmark, .q1-par, .q1-chev, .q2-leg, .q2-tick, .q2-eq, .q5-leg, .q5-tick, .q5-ad, .q5-q, .q5-bc, .q5-ab, .q5-cd, .q5-hab, .q5-hcd, .q5-hl';
 
@@ -159,11 +159,10 @@
       add(() => {
         const tl = G.timeline();
         pills.forEach((p, i) => {
-          const stem = p.querySelector('.cal-stem'), dot = p.querySelector('.cal-dot'), body = Array.from(p.children).filter((c) => c !== stem && c !== dot);
+          const stem = p.querySelector('.cal-stem'), body = Array.from(p.children).filter((c) => c !== stem);
           const L = (stem && stem.getTotalLength && stem.getTotalLength()) || 1, at = i * 0.5;
           tl.set(body, { opacity: 0 }, 0);
-          if (dot) tl.fromTo(dot, { opacity: 0, scale: 0.3, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: reduced ? 0 : 0.25, ease: 'back.out(2)' }, at);
-          if (stem) tl.fromTo(stem, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.3, ease: 'sine.out' }, at + 0.15);
+          if (stem) tl.fromTo(stem, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.3, ease: 'sine.out' }, at);
           tl.fromTo(body, { opacity: 0, scale: 0.9, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: reduced ? 0 : 0.4, ease: 'power2.out', immediateRender: false }, at + 0.4);
         });
         tl.to(others, { opacity: 1, duration: 0.45, ease: 'sine.inOut' }, '>+0.6').set(others, { clearProps: 'opacity' });
