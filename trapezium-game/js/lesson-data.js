@@ -1,6 +1,6 @@
 // =====================================================================
 // LESSON - every screen as data, in play order (LESSON.steps).
-// Screen numbers in comments count from 1 in this order (intro = 1, end = 43).
+// Screen numbers in comments count from 1 in this order (intro = 1, end = 43, The End = 44).
 //
 // Step options
 //   id           screen name
@@ -26,7 +26,9 @@
 //   chevPre      parallel arrows hidden until a cue brings them in
 //   room         'measure' = the Measuring Kit layout: wide slab, big shape, small Swiftee (CONFIG.measureRoom)
 //   lenPre       side lengths hidden until a cue brings them in
-//   boardShiftY  px to move the shape up (-) or down (+)
+//   boardShiftY  px to move the shape up (-) or down (+), on a noZoom screen
+//   noZoom       keep the shape at its plain size (lesson screens are fitted to fill the panel, CONFIG.fit)
+//   fitBox       the area the shape is fitted to, when a screen has a question above and answers below it
 //   handOnce     one demo hand gesture after the line, never repeated
 //   wrongRight   { cm, side }: dragging the corner right by more than cm wiggles side, with the wrong sound
 //   tickPre      equal-leg marks hidden until a cue brings them in
@@ -58,7 +60,8 @@
 //   noPanel      no ice panel
 //   summary      the Summary Kit's recall cards (js/summary.js)
 //   noIdle       no idle reminders
-//   cfu          check number (1-5); only a right first answer scores
+//   cfu          check number (1-5)
+//   okFx / badFx Motion functions run on a right / wrong answer (they show why on the shape)
 //   qFocus       after the question the shape glides up and the answers come in under it (CONFIG.qFocus)
 //   qStatic      the question text kept in the bubble; it returns after each feedback line
 //   enterFx      Motion function run as the screen opens
@@ -125,19 +128,19 @@ const LESSON = {
     { id: 'quadName', letterIn: 1, autoNext: 2200, lines: [{ m: 'happy', t: 'We can call it\nquadrilateral ABCD.', s: 'We can call it quadrilateral, A, B, C, D.', letters: 1 }] },
     // growFocus: the shape grows to 120% and back as she starts
     { id: 'special', lines: [{ m: 'happy', t: 'This is a special type\nof quadrilateral.', onStart: 'growFocus' },
-      { m: 'curious', t: "Let's see what\nmakes it special." }] },
-    { id: 'meet', lines: [{ m: 'curious', t: 'These two sides look like they will meet.' }], f: { legGlow: 1 } },
+      { m: 'curious', t: "Let's see what\nmakes it special.", cueAt: { special: 'shapePop' } }] },
+    { id: 'meet', lines: [{ m: 'curious', t: 'These two sides look like they will meet.', noEmph: 1, cueAt: { sides: 'glowLegs' } }], f: { legGlow: 1 } },
     // instruction only, nothing to do
-    { id: 'extendSay', autoAdvance: 1, locked: 1, lines: [{ m: 'curious', t: "Let's extend them." }], f: { legGlow: 1 } },
+    { id: 'extendSay', autoAdvance: 1, locked: 1, lines: [{ m: 'curious', t: "Let's extend them.", cueAt: { extend: 'glowLegs' } }], f: { legGlow: 1 } },
     // opens with the shape at centre stage, no line; D->A then C->B glow and extend dotted until they meet
     { id: 'extend', layout: 'focus', lines: [], task: 'extLegs', auto: 1,
       after: [{ m: 'surprised', t: 'Woah! The sides meet.', s: 'Whoa! The sides meet.' }] },
     // 1 s after the line AB and DC glow once, then A->B and D->C each extend both ways
-    { id: 'other', extendDelay: 1000, swapCol: 1, lines: [{ m: 'curious', t: "Let's check the other\npair of sides." }], task: 'extBases', auto: 1 },
+    { id: 'other', extendDelay: 1000, lines: [{ m: 'curious', t: "Let's check the other\npair of sides." }], task: 'extBases', auto: 1 },
     // the parallel sides and their extensions pulse on "pair" and again on "meet"
-    { id: 'parallel', swapCol: 1, parStrong: 1, lines: [{ m: 'surprised', t: 'This pair of sides\ndoes not meet.', noEmph: 1, cueAt: { pair: 'parPulse', meet: 'parPulse' } }], f: { baseExt: 1 } },
+    { id: 'parallel', parStrong: 1, lines: [{ m: 'surprised', t: 'This pair of sides\ndoes not meet.', noEmph: 1, cueAt: { pair: 'parPulse', meet: 'parPulse' } }], f: { baseExt: 1 } },
     // second line is voice only; its label appears once "A B" and "C D" have both been said
-    { id: 'abcd', lines: [{ t: 'This means the sides are parallel to each other.' },
+    { id: 'abcd', lines: [{ t: 'This means the sides are parallel to each other.', cueAt: { parallel: 'parPulse' } },
       { keep: 1, s: 'A B is parallel to C D.', chipsAfterParts: ['AB', 'CD'], chips: [{ t: 'AB ∥ CD', k: 'white' }] }], f: { par: 1 } },
     { id: 'onePair', lines: [{ t: "So this quadrilateral has\none pair of parallel sides.", noEmph: 1, cueAt: { parallel: 'parPulse' }, chips: [{ t: 'AB ∥ CD', k: 'white' }] }], f: { par: 1 } },
     { id: 'def', lines: [{ t: 'We call this a trapezium.', pulse: 1, pulseAt: 'trapezium', chipsAt: 'trapezium', chipsAfterPulse: 1, holdChips: 1, chips: [{ t: 'Trapezium', k: 'name' }] }], f: { par: 1 } },
@@ -151,8 +154,7 @@ const LESSON = {
     { id: 'measure', room: 'measure', lines: [{ m: 'curious', t: "Let's measure the sides\nof this trapezium." }], task: 'measure', auto: 1,
       after: [{ m: 'surprised', t: 'Woah! All the sides of\nthis trapezium are of\ndifferent lengths.', s: 'Whoa! All the sides of this trapezium are of different lengths.', noEmph: 1, cueAt: { sides: 'lenColors' } }], hint: 'Tap the glowing side to measure it', idle: 'Tap the glowing side and I will measure it.', f: { par: 1 } },
     // "trapezium": the shape pops; "sides": the lengths pop in one by one; "scalene": the name label.
-    // boardShiftY lifts the shape so the bottom length clears the label
-    { id: 'scalene', lenPre: 1, boardShiftY: -22, lines: [{ t: 'This type of trapezium which\nhas sides of different lengths\nis called a scalene trapezium.', holdChips: 1, noEmph: 1,
+    { id: 'scalene', lenPre: 1, lines: [{ t: 'This type of trapezium which\nhas sides of different lengths\nis called a scalene trapezium.', holdChips: 1, noEmph: 1,
       cueAt: { trapezium: 'shapePop', sides: 'lensSeq', scalene: 'showTitle' }, chips: [{ t: 'Scalene trapezium', k: 'name' }] }],
       f: { par: 1, legLen: 1, sideLen: 1 } },
     // a longer autoNext so the last line can be read
@@ -161,7 +163,7 @@ const LESSON = {
       { m: 'curious', t: 'What if the legs were\nthe same length?', noEmph: 1, cueAt: { legs: 'legsTogether' } },
       { m: 'excited', t: "Let's find out.", cueAt: { find: 'findOut' } }],
       f: { par: 1, legLen: 1, sideLen: 1 } },
-    { id: 'equal', lines: [{ m: 'curious', t: "Let's change its\nshape a little." }], f: { par: 1, legLen: 1, sideLen: 1 } },
+    { id: 'equal', lines: [{ m: 'curious', t: "Let's change its\nshape a little.", cueAt: { change: 'pingA' } }], f: { par: 1, legLen: 1, sideLen: 1 } },
     // one demo hand after the line. Dragging A right (the wrong way) wiggles BC: A has only ~0.75 cm
     // before B stops it, so the limit is 0.5 cm. Equal legs snap into place and finish the task
     { id: 'equalDrag', lines: [{ m: 'curious', t: 'Drag vertex A so that both\nthe legs are of equal length.' }],
@@ -179,17 +181,17 @@ const LESSON = {
     // after the line Swiftee carries a protractor round A, B, C, D; each angle appears as she holds it there
     { id: 'angles', room: 'measure', anglesIn: 1, task: 'measureAngles', auto: 1, lines: [{ m: 'curious', t: "Let's measure its angles." }], f: { par: 1, arcs: 'ABCD' } },
     // 120° (A) and 60° (D) in focus: the pair the next screen adds up
-    { id: 'notice', lines: [{ m: 'thinking', t: 'Did you notice something?' }], f: { par: 1, arcs: 'ABCD', focusAng: 'AD' } },
+    { id: 'notice', lines: [{ m: 'thinking', t: 'Did you notice something?', cueAt: { notice: 'growAD' } }], f: { par: 1, arcs: 'ABCD', focusAng: 'AD' } },
     // "∠A + ∠D = ?" rises in; on "add" the two values fly from the shape into it; on "180" it resolves
     { id: 'sumAD', dimIn: 'BC', lines: [{ m: 'surprised', t: '∠A and ∠D add up to 180°.', noEmph: 1, onStart: 'eqStart',
       cueAt: { add: 'eqFly', 180: { fn: 'eqResult', sfx: 'snap' } } }], f: { par: 1, arcs: 'ABCD', focusAng: 'AD' } },
     // "supplementary": DC extends past D and a copy of 120° turns onto it beside 60°, a straight angle;
     // "angles": the equation glows
     { id: 'supp', dimIn: 'BC', lines: [{ m: 'happy', t: 'That means they are\nsupplementary angles.', onStart: 'suppStart',
-      cueAt: { supplementary: 'suppAtAD', angles: { fn: 'suppConfirm', sfx: 'snap' } }, chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
+      cueAt: { supplementary: 'suppAtAD', angles: 'suppConfirmLater' }, chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
     // ∠B then ∠C get the focus as they are named, then the answers slide in. A correct answer shows
     // the real sum, and 105° turns onto the extended base beside 75° (okFx)
-    { id: 'askBC', practice: 1, optTop: 476, chipTop: 105, boardShiftY: -11, idle: 'What about ∠B and ∠C?',
+    { id: 'askBC', practice: 1, fitBox: { cy: 312, h: 300 }, optTop: 486, chipTop: 100, idle: 'What about ∠B and ∠C?',
       optsAfter: 1, okSum: ['B', 'C'], okFx: 'suppAtBC',
       lines: [{ m: 'curious', t: 'What about ∠B and ∠C?', angleCues: 1, pairEnd: ['B', 'C'], onStart: 'askIn', chips: [{ t: '∠B + ∠C = ?', k: 'white' }] }],
       ok: 'Correct! ∠B and ∠C are\nsupplementary angles too.', okChips: [{ t: '∠B + ∠C = 180°', k: 'gold' }],
@@ -215,27 +217,31 @@ const LESSON = {
       after: [{ m: 'happy', t: 'Great job!' }], f: { par: 1, arcs: 'ABCD' } },
     // the learner's right angle glows; on "another" its partner on the same leg (also 90°) joins it
     { id: 'another90', lines: [{ m: 'surprised', t: 'Woah! We got another\nright angle.', noEmph: 1, cueAt: { woah: 'anotherStart', another: 'anotherReveal' } }], f: { par: 1, arcs: 'ABCD' } },
-    // "trapezium": the outline traces in; "adjacent": the arrows pop on; "right": both 90° marks appear;
-    // "called": the name label. Then the learner taps the two 90° corners
+    // "adjacent": the arrows glide on; "right": both 90° marks draw in;
+    // "called": the name label. Then Swiftee asks the learner to tap the two 90° corners: every corner gets a ring
+    // (so the learner has to find them), a found one stops pulsing, and finding both is cheered
     { id: 'right', shape: 'right', right90: 1, r90Pre: 1, chevPre: 1, rightTap: 1, okCheck: 1,
+      hint: 'Tap the two 90° corners', idle: 'Tap the two corners with the square marks.',
       lines: [{ t: 'A trapezium with two adjacent\nright angles is called a\nright angled trapezium.', noEmph: 1,
-        holdChips: 1, cueAt: { trapezium: 'defTrace', adjacent: 'chevIn', right: 'rightBoth', called: 'showTitle', angled: 'titlePulse' }, chips: [{ t: 'Right trapezium', k: 'name' }] }],
+        holdChips: 1, cueAt: { adjacent: 'chevIn', right: 'rightBoth', called: 'showTitle' }, chips: [{ t: 'Right trapezium', k: 'name' }] },
+        { m: 'curious', t: 'Can you tap the two\nright angles?', holdChips: 1 }],
       f: { par: 1, right: 1 } },
     { id: 'wellDone', noBoard: 1, noPanel: 1, lines: [{ m: 'celebrating', t: 'Great job! Now you know\nall about trapeziums.' }] },
     // after this line eight idea cards are shown and explained one by one
     { id: 'recap', noBoard: 1, layout: 'recap', summary: 1, noIdle: 1,
       lines: [{ m: 'happy', t: "Let's recall what\nwe learnt today." }] },
     { id: 'cfu1', cfu: 1, idle: 'Look for the shape with exactly one pair of parallel sides.', hint: 'Check 1 of 5 · Which one is a trapezium?',
-      lines: [{ m: 'curious', t: 'Which of these quadrilaterals is a trapezium? Look for one pair of parallel sides.' }],
-      ok: 'Correct! It is a trapezium.',
+      okFx: 'q1Correct',
+      lines: [{ m: 'curious', t: 'Which of these quadrilaterals is a trapezium? Look for one pair of parallel sides.', cueAt: { quadrilaterals: 'q1Cards', parallel: 'q1Look' } }],
+      ok: 'Correct! It has one pair of parallel sides, so it is a trapezium.',
       opts: [
         { id: 'A', ok: true },
         { id: 'B', fb: 'Look at each side of this shape. No two sides are parallel, so it is not a trapezium.' },
         { id: 'C', fb: 'This shape has no parallel sides at all.' },
         { id: 'D', fb: 'Look at each side of this shape. No two sides are parallel, so it is not a trapezium.' }
       ] },
-    { id: 'cfu2', cfu: 2, qFocus: 1, qStatic: 'Which type of trapezium is this?', idle: 'Which type of trapezium is this?', hint: 'Check 2 of 5 · Which type of trapezium?', optTop: 376,
-      lines: [{ m: 'curious', t: 'Which type of trapezium is this?' }],
+    { id: 'cfu2', cfu: 2, qFocus: 1, qStatic: 'Which type of trapezium is this?', idle: 'Which type of trapezium is this?', hint: 'Check 2 of 5 · Which type of trapezium?', optTop: 376, okFx: 'q2Correct', badFx: 'q2Wrong',
+      lines: [{ m: 'curious', t: 'Which type of trapezium is this?', cueAt: { type: 'q2Shape' } }],
       ok: 'Right! The marks show its legs are equal, so it is an isosceles trapezium.',
       opts: [
         { id: 's', t: 'Scalene trapezium', fb: 'Look at the little marks on the legs. They tell us the legs are equal.' },
@@ -244,7 +250,7 @@ const LESSON = {
       ] },
     // "120" opens ∠A; "value" runs a light down AD to a "?" at D. A wrong answer brings in
     // "120° + ? = 180°" above the shape; the right one flies 60° to D and the equation resolves
-    { id: 'cfu3', cfu: 3, idle: 'In this trapezium, ∠A = 120°. What is the value of ∠D?', hint: 'Check 3 of 5 · Find the missing angle', optTop: 433,
+    { id: 'cfu3', cfu: 3, idle: 'In this trapezium, ∠A = 120°. What is the value of ∠D?', hint: 'Check 3 of 5 · Find the missing angle', optTop: 482,
       enterFx: 'q3In', okFx: 'q3Correct', badFx: 'q3Wrong', idleFx: 'q3Idle', optsAfter: 1, softWrong: 1, handMs: 3000, voiceDelay: 1300,
       lines: [{ m: 'curious', t: 'In this trapezium, ∠A = 120°. What is the value of ∠D?', cueAt: { trapezium: 'q3Shape', 120: 'q3A', value: 'q3D' } }],
       ok: 'Correct! 120° + 60° = 180°.',
@@ -259,8 +265,8 @@ const LESSON = {
       enterFx: 'q4In', labelsAt: 1, instant: 1, handMs: 3000,
       lines: [{ m: 'curious', t: 'Drag the labels to their\ncorrect place.', cueAt: { drag: 'q4Shapes', labels: 'q4LabelsIn', place: 'q4HiShapes' } }],
       ok: 'Brilliant! You labelled all three trapeziums.' },
-    { id: 'cfu5', cfu: 5, idle: 'BC is a leg. What do you know about the legs of an isosceles trapezium?', hint: 'Check 5 of 5 · Find the missing side', optTop: 427,
-      lines: [{ m: 'curious', t: 'In an isosceles trapezium, AB = 6 cm, CD = 10 cm and AD = 5 cm. What is the length of BC?' }],
+    { id: 'cfu5', cfu: 5, idle: 'BC is a leg. What do you know about the legs of an isosceles trapezium?', hint: 'Check 5 of 5 · Find the missing side', optTop: 458, okFx: 'q5Correct', badFx: 'q5Wrong', optsAfter: 1,
+      lines: [{ m: 'curious', t: 'In an isosceles trapezium, AB = 6 cm, CD = 10 cm and AD = 5 cm. What is the length of BC?', cueAt: { ab: 'q5AB', cd: 'q5CD', ad: 'q5AD', bc: 'q5BC' } }],
       ok: 'Yes! In an isosceles trapezium the legs are equal, so BC = 5 cm.',
       opts: [
         { id: 'a', t: '4 cm', fb: 'BC is a leg. In an isosceles trapezium, both legs are equal.' },
@@ -268,8 +274,11 @@ const LESSON = {
         { id: 'c', t: '6 cm', fb: '6 cm is the top base AB. BC is a leg, like AD.' },
         { id: 'd', t: '10 cm', fb: '10 cm is the bottom base CD. BC is a leg, like AD.' }
       ] },
-    // Swiftee flies to centre stage and speaks once she has landed; the result is laid out around her
-    { id: 'end', end: 1, hero: 1, voiceDelay: 1100, lines: [{ m: 'celebrating', t: 'Amazing work! You know all about trapeziums now.' }] }
+    // Swiftee flies to centre stage and speaks once she has landed, she says goodbye, and screen 44 follows by itself
+    { id: 'end', end: 1, hero: 1, voiceDelay: 1100, autoNext: 700,
+      lines: [{ m: 'celebrating', t: 'Amazing work! You know all about trapeziums now.' }, { m: 'waving', t: 'Bye for now! See you on\nour next snowy adventure!' }] },
+    // the cartoon closer (js/finale.js): an iris closes on Swiftee, the sunburst, "The End", Play again
+    { id: 'theEnd', end: 1, hero: 1, finale: 1, noIdle: 1, lines: [] }
   ],
   cfu4: {
     labels: [{ id: 'iso', t: 'Isosceles trapezium' }, { id: 'right', t: 'Right trapezium' }, { id: 'scal', t: 'Scalene trapezium' }],

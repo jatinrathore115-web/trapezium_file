@@ -4,6 +4,7 @@
 // =====================================================================
 const CONFIG = {
   pxPerCm: 40,                       // board scale: 1 cm = 40 board px
+  board: { x: 640, y: 104 },         // where index.html puts the board (its svg's left / top, stage px)
   start: { D: 45, C: 405, baseY: 340, height: 195.96, legAD: 7, legBC: 5 }, // opening shape: AB 3, BC 5, CD 9, AD 7 cm (height = √24 cm)
   limits: { minTop: 90, minBottom: 160, maxLegRun: 243, minX: 16, maxX: 478 }, // drag limits: shortest top / bottom base, longest sideways leg run, corner x range
   // screen 35: the right trapezium (A and D at 90°, so DA is vertical)
@@ -18,7 +19,7 @@ const CONFIG = {
   soundVolume: 0.9,
   drag: { wrongGapMs: 1200 },        // wrong-way drag feedback (wiggle + sound) at most once per this long
   // a part named in the voice-over grows briefly and holds this long before easing back
-  emph: { holdMs: 650 },
+  emph: { holdMs: 1300 },
   // screens 7-8: side trace and dotted extension speed (board px per ms); pause between the two sides
   trace: { pxPerMs: 0.4, gapMs: 250 },
   // screen 1: pen speed round the outline (board px per ms), delay after the screen opens, outline glow time
@@ -27,29 +28,42 @@ const CONFIG = {
   letters: { minGapMs: 260 },
   // qFocus question (screen 39): bubble hold and fade after the question; the shape's centre x and its top
   // before and after it glides up; the answer row's top and width (stage px)
-  qFocus: { holdMs: 700, fadeMs: 350, cx: 876, shapeTop0: 220, shapeTop: 171, optTop: 417, optW: 680 },
+  // check 4 (screen 41): the whole task drawn larger to fill the ice card, as one group (scale k about ox, oy, then
+  // moved down ty); its drag maths converts the pointer back into the group's own px
+  q4: { k: 1.12, ox: 876, oy: 345, ty: 10 },
+  qFocus: { holdMs: 700, fadeMs: 350, cx: 876, shapeTop0: 205, shapeTop: 150, optTop: 450, optW: 680 },
   // idleMs: no-touch wait before a spoken reminder (at most idleMaxHints per screen); navLockMs: minimum gap between
   // Next / Back taps; speechRate: voice speed (1 = normal); lineGapMs: pause after each line
-  timing: { idleMs: 9000, idleMaxHints: 3, navLockMs: 450, speechRate: 0.86, lineGapMs: 850 },
+  timing: { idleMs: 9000, idleMaxHints: 3, navLockMs: 450, speechRate: 0.86, lineGapMs: 1100 },
   // autoAdvance false = manual navigation (a finished screen waits for Next); advanceMs = the wait when it is on;
-  // showNext / showBack: the extra Next and Back buttons (off = top-right ones only); cover: open on the front page
+  // showNext / showBack: the extra Next and Back buttons (off = top-right ones only); cover: open on the front page;
   flow: { autoAdvance: false, advanceMs: 2500, showNext: false, showBack: false, cover: true },
-  // every screen: shape nudged right to centre it in the panel (boardX); position of the label row
-  scene: { boardX: 11, chipTop: 476, chipLeft: 616 },
+  // every screen: shape nudged right to centre it in the panel (boardX, on noZoom screens); the label row sits on the
+  // panel's bottom edge (chipTop: the row's top, so a name plate's middle lands on the edge)
+  scene: { boardX: 11, chipTop: 571, chipLeft: 616 },
+  // lesson screens: the shape is fitted to fill the ice panel, screen by screen (engine fitFor): the panel's inner
+  // area (centre cx / cy, size w x h, stage px), room kept round the shape for its letters and labels (board px), and
+  // the most it may grow. A screen with noZoom keeps the plain layout (answers round the shape); lessonZoom is the
+  // fallback before the first screen is fitted
+  fit: { cx: 876, cy: 346, w: 714, h: 474, padX: 62, padTop: 58, padBottom: 52, maxScale: 1.5 },
+  lessonZoom: { scale: 1.3, tx: -56.5, ty: -88.6 },
   // Measuring Kit layout (screens 16 and 23): board scale and offset that put the shape in the slab
   measureRoom: { scale: 1.25, tx: -171.25, ty: -26.5 },
   // layout 'focus' (screen 7): bubble hold and fade after the line, the shape's move to centre, wait before the hand
   focus: { holdMs: 3000, fadeMs: 350, moveMs: 700, handMs: 5000 },
   // screen 16 measuring walk: her size on the shape, fallback home spot and size, walk time per cm measured,
   // pause between sides, stroll speed to and from the shape (px per ms)
-  walker: { size: 110, homeX: 199, homeY: 639, homeSize: 259, msPerCm: 380, pauseMs: 550, strollPxPerMs: 0.42,
+  walker: { size: 135, homeX: 199, homeY: 639, homeSize: 259, msPerCm: 380, pauseMs: 550, strollPxPerMs: 0.42,
     tips: [[488, 272], [484, 281], [494, 273], [489, 270], [486, 278], [483, 279], [491, 281], [489, 281]] }, // tape exit per walk frame (@2x cell px)
-  // screen 23 protractor walk (js/angle-walker.js): scale = stage px per kit board unit; homeK = her home size
+  // screen 23 protractor walk (js/angle-walker.js): scale = stage px per kit board unit (sized so the protractor
+  // covers the drawn angle); traceK = radius of the angle traced on it while she holds it, as a share of the protractor's radius; homeK = her home size
   // against her size on the board; carryPx = protractor offset from the vertex between corners; hop = how far her
   // path bows out round a side; bob = px of bob every stepPx; tiltMax = most a drawing may turn (deg);
   // leadMs = wait after her line; firstMs = shortest walk to or from her spot; the rest are move timings
-  angleWalk: { scale: 1.28, homeK: 1.9, carryPx: 20, hop: 50, stepPx: 45, bob: 5, tiltMax: 33, leadMs: 900,
+  angleWalk: { scale: 1.6, homeK: 1.52, carryPx: 28, hop: 60, traceK: 0.78, stepPx: 45, bob: 5, tiltMax: 33, leadMs: 900,
     firstMs: 950, moveMs: 600, placeMs: 400, alignMs: 420, measureMs: 300, holdMs: 900, liftMs: 350, fadeMs: 250 },
+  // idle antics: after idleMs with nothing happening Swiftee amuses herself, cycling through these expressions
+  antics: { idleMs: 15000, list: ['sleeping', 'daydreaming', 'playful', 'reading'] },
   hand: { idleMs: 8000, showMs: 4400, maxShows: 4, // hand nudge: wait with no touch, time on screen, showings per step
     onceDelayMs: 500, onceMs: 2300 },                 // handOnce screens: delay after the line, time on screen
   // Swiftee's expressions (state names from swiftee-assets/atlas/swiftee.manifest.json).

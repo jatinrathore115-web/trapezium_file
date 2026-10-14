@@ -8,13 +8,25 @@ moments, then answers five scored checks.
   from a soft zoom and drifts very slowly; the title pops in, breathes and catches a sweep of light (the banner shown
   through the title's own shape, `banner-title-mask.png`); the stars round it and the ice trapezium twinkle, the ice
   glows, and snow falls. One big round **Play** button (glossy orange with a snow cap, `assets/images/play-button.webp`) sits on
-  the snow between Swiftee and the ice: it spins in and floats on a warm glow that breathes with it, a soft aura
+  the face of the ice trapezium: it spins in and floats on a warm glow that breathes with it, a soft aura
   swells out from it, glints twinkle on its rim and a shine crosses its face. Hover lifts and brightens it, a press squashes it; on Play it pops with a
   chime and the scene zooms softly away into Screen 1. The tap also unlocks the voice-over and sounds.
   Jumps from the screen list skip it. `CONFIG.flow.cover: false` turns it off.
-- **43 screens** in one fixed sequence: 36 learning screens, 5 checks, 1 lesson-complete screen.
+- The cabin intro (Swiftee opens her door and says hello) is kept as a draft in `drafts/intro/` at the repository
+  root, with the steps to bring it back; for launch, Play goes straight to Screen 1.
+- **Look.** Every colour comes from the game's art: the shape's bases in the winter-sky blue, its legs in Swiftee's
+  teal, a warm cream fill; angles A and D (one leg) warm orange and gold, B and C (the other) green and sky blue;
+  highlights gold. Name plates are white pills with a thick blue rim on a raised base, sitting on the ice panel's
+  bottom edge (the angle sums are the gold version). Answers are solid gold game buttons; a right answer turns teal,
+  a wrong one a soft frosted grey (never red).
+- **Pace.** What a spoken word starts (a side lighting up, a mark drawing on) plays at a slower teaching pace, and a
+  named part stays highlighted for 1.3 s. Voices that report each word as they say it are chosen first, so the words
+  and animations land on the voice.
+- **44 screens** in one fixed sequence: 36 learning screens, 5 checks, the lesson-complete
+  screen and "The End".
 - **Navigation is manual**: the learner moves on with **Next** / **Back** (top right). Only the opening intro
-  (Screens 1→2→3→4, each holding 2.2 s after its line so it can be read) and Screen 18 (after "Let's find out.") move on by themselves.
+  (Screens 1→2→3→4, each holding 2.2 s after its line so it can be read), Screen 18 (after "Let's find out.") and Screen 43 (after
+  Swiftee's goodbye, into The End) move on by themselves.
 - Runs in the browser from local files (no server, no build step). Open `index.html`.
 
 ---
@@ -40,11 +52,11 @@ Every screen uses one 16:9 composition (1280 × 720 stage, scaled to the window)
 |---|---|
 | Left, on the snow | **Swiftee** and her **speech bubble** (text appears word by word with the voice) |
 | Right | The **ice panel** — the shape, labels, answer options |
-| Top left | **"Screen N of 43"** — opens a list of every screen (number and opening line) to jump to any screen |
+| Top left | **"Screen N of 44"** — opens a list of every screen (number and opening line) to jump to any screen |
 | Top right | **Back** / **Next** |
 
-Exceptions: **Screens 16 and 23** use the measuring slab instead (§4a); **36, 37 and 43** hide the ice panel (37 shows the
-summary cards; on 43 Swiftee flies to the centre).
+Exceptions: **Screens 16 and 23** use the measuring slab instead (§4a); **36, 37, 43 and 44** hide the ice panel (37 shows the
+summary cards; on 43 Swiftee flies to the centre; 44 is the cartoon closer).
 
 **Colour language (kept on every screen)**
 
@@ -118,16 +130,19 @@ summary cards; on 43 Swiftee flies to the centre).
 | 36 | "Great job! Now you know all about trapeziums." | The ice panel fades away; Swiftee stays in her usual bottom-left spot with her bubble above her, as on the lesson screens. No stars, no fly-in. |
 | 37 | "Let's recall what we learnt today." then the summary lines | **Summary** (§5, the Summary Kit): eight idea cards one at a time, each shown, explained by Swiftee rising from behind it, and collected into albums at the sides; then the finale, Next glows, and a tap on any card replays it. |
 
-### Part 5 — Checks (Screens 38–42, scored) and end (43)
+### Part 5 — Checks (Screens 38–42) and end (43–44)
+
+Each question lights up its parts as Swiftee reads them, and a right answer shows why on the shape.
 
 | # | Question | Answers (✓ = correct) | Interaction |
 |---|---|---|---|
-| 38 | "Which of these quadrilaterals is a trapezium? Look for one pair of parallel sides." | 4 shape cards; the yellow one ✓ | Tap a card. A wrong card traces its sides one by one to show no pair is parallel. The question stays in the bubble at all times: it returns after any feedback line, and the idle reminder repeats it word for word. |
-| 39 | "Which type of trapezium is this?" | Scalene · **Isosceles ✓** · Right | Bubble fades, shape glides up, answers come in one by one. The question stays in the bubble at all times: it returns after any feedback line, and the idle reminder repeats it word for word. |
+| 38 | "Which of these quadrilaterals is a trapezium? Look for one pair of parallel sides." | 4 shape cards; the yellow one ✓ | Tap a card. The cards hop on "quadrilaterals" and glow on "parallel". A wrong card traces its sides one by one to show no pair is parallel; the right one lights its two parallel sides and draws their arrows (hidden until then). The question stays in the bubble at all times: it returns after any feedback line, and the idle reminder repeats it word for word. |
+| 39 | "Which type of trapezium is this?" | Scalene · **Isosceles ✓** · Right | Bubble fades, shape glides up, answers come in one by one. A wrong type flashes the legs and their equal marks; the right one stamps **AD = BC** on the shape. The question stays in the bubble at all times: it returns after any feedback line, and the idle reminder repeats it word for word. |
 | 40 | "In this trapezium, ∠A = 120°. What is the value of ∠D?" | 120° · **60° ✓** · 50° · 180° | The question stays static: no equation up front, and the idle reminder repeats the question word for word. Any wrong answer: the card flashes orange then turns disabled, Swiftee gives the one hint *"Angles on the same leg add up to 180°."*, then the equation **120° + ? = 180°** comes in at the top (once; it never changes form, later misses just pulse it). Right: 60° flies to D and the equation resolves to **120° + 60° = 180°** (it appears then if the learner was right first time). |
 | 41 | "Drag the labels to their correct place." | Purple → **Scalene**, green → **Isosceles**, pink → **Right** | Drag labels to boxes, each drop checked instantly; see §4.6. The question stays in the bubble at all times: it returns after any feedback line, and the idle reminder repeats it word for word. Labels: cream name cards with a teal border and grip; a correct drop widens the label to fill its slot and melts into it (slot turns soft green); a wrong drop flashes orange, shakes and glides back. |
-| 42 | "In an isosceles trapezium, AB = 6 cm, CD = 10 cm and AD = 5 cm. What is the length of BC?" | 4 cm · **5 cm ✓** · 6 cm · 10 cm | Tap an answer. The question stays in the bubble at all times: it returns after any feedback line, and the idle reminder repeats it word for word. |
-| 43 | "Amazing work! You know all about trapeziums now." | — | Hero stage: no panel, Swiftee flies to centre with the warm glow and hovers. Only Swiftee and her bubble - no title, stars, score line or Play again. |
+| 42 | "In an isosceles trapezium, AB = 6 cm, CD = 10 cm and AD = 5 cm. What is the length of BC?" | 4 cm · **5 cm ✓** · 6 cm · 10 cm | Each side flashes as it is named; the answers come in after the question. Tap an answer. A wrong one lights both legs and pulses AD's 5 cm; the right one flies 5 cm across to BC. The question stays in the bubble at all times: it returns after any feedback line, and the idle reminder repeats it word for word. |
+| 43 | "Amazing work! You know all about trapeziums now." | — | Hero stage: no panel, Swiftee flies to centre with the warm glow. Then Swiftee says "Bye for now! See you on our next snowy adventure!" and the screen moves on by itself. |
+| 44 | — (Swiftee says "The End!") | — | **The End**, an old-cartoon closer: an iris closes on Swiftee, the dark turns into a turning sunburst, the circle slides left and "The End" bounces in letter by letter with sparkles; a round **Play again** button returns to the front page. |
 
 ---
 
@@ -146,7 +161,7 @@ summary cards; on 43 Swiftee flies to the centre).
 
 ### 4.2 Navigation
 
-- **Next / Back** always available (except Back on Screen 1, Next on Screen 43).
+- **Next / Back** always available (except Back on Screen 1, Next on Screen 44).
 - Next on an unfinished drag screen applies that drag's result first, so later screens still match the shape.
 - **Screen list** (top left) jumps to any screen; the shape is rebuilt as if every earlier screen had been completed.
 - Every screen change stops speech, sounds and animations and resets the screen's state; returning replays the screen.
