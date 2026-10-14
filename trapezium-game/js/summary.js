@@ -38,6 +38,7 @@
   // the lesson's colours: pink bases, purple legs, lilac fill, orange parallel arrows; one colour per angle
   const INK = { base: '#1f6bff', leg: '#00c4a7', fill: 'rgba(255,246,214,0.95)', chev: '#ff7a00', navy: '#123b63' };
   const ANG = { A: '#ff7a00', B: '#1fcf66', C: '#12a4ff', D: '#ffb800' };
+  const TXT = { A: '#e0560a', B: '#128a44', C: '#0a72c4', D: '#a87200' }; // angle values, as on the lesson's board
   // Swiftee's two spots: 'peek' over the card's top edge, 'middle' standing on the snow between the albums. y = offset in stage px from her
   // CSS position, s = scale of her 259 px box, hide = how far she sinks to be out of sight
   const SPOT = { peek: { y: 0, s: 218 / 259, hide: 154 }, middle: { y: 186, s: 300 / 259, hide: 300 } };
@@ -72,9 +73,11 @@
     { id: 'isosceles', label: 'Isosceles', tone: 'convex', t: 'An isosceles trapezium has legs of the same length.',
       visual: { shape: 'iso', ticks: 'legs' }, cue: { isosceles: 'tag', legs: 'legs', same: 'ticks' } },
     { id: 'angleSum', label: 'Angle sum', tone: 'concave', t: 'Angles on the same leg add up to 180°.',
-      visual: { shape: 'ang', lit: ['DA'], wedges: ['A', 'D'] }, cue: { angles: 'wedges', leg: 'lit', 180: 'sum' } },
+      visual: { shape: 'ang', lit: ['DA'], wedges: ['A', 'D'] }, cue: { angles: 'wedges', leg: 'lit', add: 'add', 180: 'sum' },
+      times: { add: 1.84, '180°': 2.36 } }, // measured in the recording (vo182): "add" 1.84 s, "one hundred eighty" 2.36 s
     { id: 'supplementary', label: 'Supplementary', tone: 'concave', t: 'Two angles that add up to 180° are supplementary.',
-      visual: { shape: 'ang', lit: ['BC'], wedges: ['B', 'C'] }, cue: { angles: 'wedges', 180: 'sum', supplementary: 'tag' } },
+      visual: { shape: 'ang', lit: ['BC'], wedges: ['B', 'C'] }, cue: { angles: 'wedges', add: 'add', 180: 'sum', supplementary: 'tag' },
+      times: { add: 1.16, '180°': 1.76, supplementary: 3.44 } }, // (vo183): "add" 1.16 s, "one hundred eighty" 1.76 s, "supplementary" 3.44 s
     { id: 'right', label: 'Right', tone: 'regular', t: 'A right trapezium has two adjacent right angles.',
       visual: { shape: 'right', right: ['A', 'D'] }, cue: { right: 'tag', adjacent: 'side', angles: 'right' } }
   ];
@@ -194,7 +197,7 @@
         if (!live()) { res(false); return; }
         const cueAt = {};
         Object.keys(c.cue || {}).forEach((w) => { cueAt[w] = () => this.cue(c.cue[w]); });
-        this.eng.say({ m: c.m || 'happy', t: c.t, noEmph: 1, cueAt: cueAt }, () => res(live()));
+        this.eng.say({ m: c.m || 'happy', t: c.t, noEmph: 1, cueAt: cueAt, cueTimes: c.times }, () => res(live()));
       });
     },
     // hide the speech bubble
@@ -239,25 +242,30 @@
       g.insertBefore(mk('rect', { x: x - bw / 2, y: y - H0 / 2, width: bw, height: H0, rx: H0 / 2, fill: c ? c.wash : '#ffffff', stroke: deep, 'stroke-width': rim }), t);
       return g;
     },
-    // pop an element in (overshoot, then settle); fill 'backwards' keeps it hidden during the delay
-    // bring an element in: it fades in and settles from slightly smaller, never growing past its size (so nothing
-    // pokes out of its card); fill 'backwards' keeps it hidden during the delay
+    // bring an element in: a plain fade (marks are drawn, never popped); fill 'backwards' keeps it hidden during the delay
     pop(el, delay) {
       el.setAttribute('opacity', 1);
       if (reduced() || !el.animate) return;
-      el.style.transformBox = 'fill-box'; el.style.transformOrigin = 'center';
-      try { el.animate([{ opacity: 0, scale: '.8' }, { opacity: 1, scale: '1' }],
-        { duration: 450, delay: delay || 0, easing: 'cubic-bezier(.25,.8,.35,1)', fill: 'backwards' }); } catch (e) {}
+      try { el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 380, delay: delay || 0, easing: 'ease-out', fill: 'backwards' }); } catch (e) {}
     },
-    // a short warm grow-and-glow on each element, slightly staggered
+    // a named part swells once and settles, slightly staggered: one smooth beat, no blur
     warmPulse(els, peak) {
-      peak = String(Math.min(1.15, parseFloat(peak) || 1.15)); // marks swell a little, never out of their card
+      const p = String(Math.min(1.1, parseFloat(peak) || 1.1)); // marks swell a little, never out of their card
       (els || []).filter(Boolean).forEach((e, i) => {
         if (reduced() || !e.animate) return;
         e.style.transformBox = 'fill-box'; e.style.transformOrigin = 'center';
-        const glow = 'brightness(1.15) drop-shadow(0 0 8px ' + WARM + ')', p = peak || '1.4';
-        try { e.animate([{ scale: '1', filter: 'brightness(1)' }, { scale: p, filter: glow, offset: 0.22 }, { scale: '1', filter: glow, offset: 0.45 }, { scale: p, filter: glow, offset: 0.67 }, { scale: '1', filter: 'brightness(1)' }],
-          { duration: 1100, delay: i * 90, easing: 'ease-in-out' }); } catch (x) {}
+        try { e.animate([{ scale: '1', filter: 'brightness(1)' }, { scale: p, filter: 'brightness(1.12)', offset: 0.45 }, { scale: '1', filter: 'brightness(1)' }],
+          { duration: 700, delay: i * 120, easing: 'ease-in-out' }); } catch (x) {}
+      });
+    },
+    // a frame-by-frame tween (SVG attributes): fn(t) with t 0..1 over ms, after delay; stops when the screen changes
+    tween(ms, delay, fn) {
+      if (reduced()) { this.later(delay || 0, () => fn(1)); return; }
+      const run = this.run;
+      this.later(delay || 0, () => {
+        let t0 = null;
+        const step = (now) => { if (run !== this.run) return; if (t0 == null) t0 = now; const t = Math.min(1, (now - t0) / ms); fn(t); if (t < 1) requestAnimationFrame(step); };
+        requestAnimationFrame(step);
       });
     },
     // a warm stroke runs along each line and fades. It is a copy in the fx layer, mapped through the card's transform,
@@ -269,7 +277,8 @@
         const m = src.getCTM && this.svg.getCTM ? this.svg.getCTM().inverse().multiply(src.getCTM()) : null;
         const P = (p) => (m ? { x: m.a * p.x + m.c * p.y + m.e, y: m.b * p.x + m.d * p.y + m.f } : p);
         const A2 = P(a), B2 = P(b), len = Math.hypot(B2.x - A2.x, B2.y - A2.y) || 1;
-        const ln = mk('line', { x1: A2.x, y1: A2.y, x2: B2.x, y2: B2.y, stroke: WARM, 'stroke-width': 10, 'stroke-linecap': 'round', style: 'filter: drop-shadow(0 0 5px rgba(255,170,40,.9))' }, this.fx);
+        // a clean gold marker running along the side (no blur; orange is angle A's colour)
+        const ln = mk('line', { x1: A2.x, y1: A2.y, x2: B2.x, y2: B2.y, stroke: 'rgba(255, 184, 0, 0.9)', 'stroke-width': 9, 'stroke-linecap': 'round' }, this.fx);
         ln.style.strokeDasharray = len + ' ' + len;
         try {
           const an = ln.animate([{ strokeDashoffset: len + 'px', opacity: 1 }, { strokeDashoffset: '0px', opacity: 1, offset: 0.35 }, { strokeDashoffset: '0px', opacity: 0.55, offset: 0.55 }, { strokeDashoffset: '0px', opacity: 1, offset: 0.75 }, { strokeDashoffset: '0px', opacity: 0 }],
@@ -325,7 +334,7 @@
         });
         this.later(t, () => this.sfx('draw')); t += 340;
       }
-      if (V.wedges) { // each angle pops in as a coloured wedge at its corner, then its value
+      if (V.wedges) { // each angle sweeps open at its corner, as in the lesson, then its value fades in
         g._wedges = []; g._values = [];
         V.wedges.forEach((k, i) => {
           const nb = { A: ['D', 'B'], B: ['A', 'C'], C: ['B', 'D'], D: ['C', 'A'] }[k], p = P[k], q = P[nb[0]], r = P[nb[1]];
@@ -335,14 +344,17 @@
           const R = 22 * CONFIG.angleR(sweep * 180 / Math.PI) / 38; // the same amount of colour for every angle, as in the lesson
           const large = 0;
           const s = { x: p.x + Math.cos(a1) * R, y: p.y + Math.sin(a1) * R }, e = { x: p.x + Math.cos(a2) * R, y: p.y + Math.sin(a2) * R };
-          const wg = mk('g', { opacity: 0 }, g._wedgeG);
-          mk('path', { d: 'M' + p.x + ' ' + p.y + ' L' + f1(s.x) + ' ' + f1(s.y) + ' A' + R + ' ' + R + ' 0 ' + large + ' 1 ' + f1(e.x) + ' ' + f1(e.y) + ' Z', fill: ANG[k], 'fill-opacity': 0.92 }, wg);
+          const wg = mk('g', { opacity: 0 }, g._wedgeG); wg._p = p;
+          const wd = (u) => { const b = a1 + sweep * u; return 'M' + p.x + ' ' + p.y + ' L' + f1(s.x) + ' ' + f1(s.y) + ' A' + R + ' ' + R + ' 0 ' + large + ' 1 ' + f1(p.x + Math.cos(b) * R) + ' ' + f1(p.y + Math.sin(b) * R) + ' Z'; };
+          const path = mk('path', { d: wd(0.001), fill: ANG[k], 'fill-opacity': 0.92 }, wg);
           g._wedges.push(wg);
           const deg = Math.round(sweep * 180 / Math.PI), mid = a1 + sweep / 2, dl = deg < 70 ? 44 : 36;
           const v = mk('text', { x: f1(p.x + Math.cos(mid) * dl), y: f1(p.y + Math.sin(mid) * dl + 4.5), 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 900,
-            'font-family': 'Nunito, system-ui, sans-serif', fill: INK.navy, stroke: '#fff', 'stroke-width': 3.2, 'paint-order': 'stroke', 'stroke-linejoin': 'round', opacity: 0, text: deg + '°' }, g._marks);
-          g._values.push(v);
-          this.pop(wg, t + i * 260, true); this.pop(v, t + i * 260 + 160);
+            'font-family': 'Nunito, system-ui, sans-serif', fill: TXT[k], stroke: '#fff', 'stroke-width': 3.2, 'paint-order': 'stroke', 'stroke-linejoin': 'round', opacity: 0, text: deg + '°' }, g._marks);
+          g._values.push(v); v._k = k;
+          this.later(t + i * 260, () => wg.setAttribute('opacity', 1));
+          this.tween(420, t + i * 260, (u) => path.setAttribute('d', wd(Math.max(0.001, 1 - Math.pow(1 - u, 3)))));
+          this.pop(v, t + i * 260 + 380);
           this.later(t + i * 260, () => this.sfx('tick'));
         });
         t += V.wedges.length * 260 + 260;
@@ -396,28 +408,70 @@
       else if (kind === 'side') this.trace([sd.DA]); // the side the two right angles share (they are adjacent)
       else if (kind === 'ticks') { this.warmPulse(c._ticks, '1.6'); if (c._c.visual.ticks === 'all') this.trace([sd.AB, sd.BC, sd.DC, sd.DA]); }
       else if (kind === 'right') this.warmPulse(c._right, '1.6');
-      else if (kind === 'wedges') this.warmPulse(c._wedges, '1.15');
+      else if (kind === 'wedges') this.anglePulse(c);
+      else if (kind === 'add') this.add(c);
       else if (kind === 'values') this.warmPulse(c._values, '1.5');
-      else if (kind === 'sum') this.sum(c);
+      else if (kind === 'sum') this.total(c);
       else if (kind === 'tag') this.warmPulse([c._tag], '1.05');
     },
-    // "180°": the two angle values pulse, then their sum fades up into place under the shape: 120° + 60° = 180°
-    sum(c) {
-      this.warmPulse(c._values, '1.5');
-      if (!c._sum) {
-        const v = (c._values || []).map((e) => parseInt(e.textContent, 10)).filter((n) => !isNaN(n));
-        if (v.length < 2) return;
-        v[1] = 180 - v[0]; // same-leg angles of a trapezium: shown exactly
-        const ink = (k) => (k === 'D' ? '#b88300' : ANG[k]); // each value in its angle's colour (D's yellow, darkened to read on white)
-        const tx = mk('text', { x: SUM.card.cx, y: BOT + 40, 'text-anchor': 'middle', 'font-size': 19, 'font-weight': 900, 'font-family': 'Nunito, system-ui, sans-serif',
-          fill: INK.navy, stroke: '#fff', 'stroke-width': 4, 'paint-order': 'stroke', 'stroke-linejoin': 'round', opacity: 0 }, c._marks);
-        [[v[0] + '°', ink(c._c.visual.wedges[0])], [' + ', INK.navy], [v[1] + '°', ink(c._c.visual.wedges[1])], [' = ', INK.navy], ['180°', '#e06600']].forEach(([s, col]) => mk('tspan', { fill: col, text: s }, tx));
-        c._sum = tx;
-      }
-      this.later(350, () => {
-        const e = c._sum; e.setAttribute('opacity', 1); this.sfx('chime');
-        if (!reduced() && e.animate) try { e.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 450, easing: 'cubic-bezier(.25,.8,.35,1)', fill: 'backwards' }); } catch (x) {}
+    // "angles": each angle swells once from its own corner, one after the other
+    anglePulse(c) {
+      (c._wedges || []).forEach((wg, i) => {
+        const p = wg._p; if (!p) return;
+        this.tween(560, i * 300, (u) => {
+          const k = 1 + 0.16 * Math.sin(Math.PI * u);
+          if (u >= 1) wg.removeAttribute('transform'); else wg.setAttribute('transform', 'translate(' + p.x + ' ' + p.y + ') scale(' + k.toFixed(3) + ') translate(' + -p.x + ' ' + -p.y + ')');
+        });
       });
+    },
+    // "add": the two angle values fly from their corners down into a sum under the shape, one after the other, each
+    // growing to the sum's size on the way; "+" joins after the first lands. total() completes it on "180".
+    add(c) {
+      if (!c._values || c._values.length < 2 || c._eq) return;
+      const y = BOT + 40, fs = 19, gap = 7, font = 'Nunito, system-ui, sans-serif';
+      const grp = mk('g', {}, c._marks);
+      const part = (text, fill) => mk('text', { x: 0, y: y, 'font-size': fs, 'font-weight': 900, 'font-family': font, fill: fill, stroke: '#fff', 'stroke-width': 4,
+        'paint-order': 'stroke', 'stroke-linejoin': 'round', opacity: 0, text: text }, grp);
+      const v = c._values, val = (j) => v[j].textContent;
+      const P = [part(val(0), TXT[v[0]._k] || INK.navy), part('+', INK.navy), part(val(1), TXT[v[1]._k] || INK.navy), part('=', INK.navy), part(180 + '°', '#e06600')];
+      // one centred line: 120° + 60° = 180°
+      const w = P.map((e) => { let n = 0; try { n = e.getComputedTextLength(); } catch (x) {} return n || e.textContent.length * fs * 0.55; });
+      let x = SUM.card.cx - (w.reduce((a, b) => a + b, 0) + gap * (P.length - 1)) / 2;
+      P.forEach((e, i) => { e.setAttribute('x', f1(x)); x += w[i] + gap; });
+      const eq = c._eq = { parts: P, landed: 0, want: false };
+      [0, 1].forEach((j) => {
+        const src = v[j], slot = P[j * 2], sx = +src.getAttribute('x'), sy = +src.getAttribute('y'), tx = +slot.getAttribute('x') + w[j * 2] / 2;
+        // a straight path that would pass the other value bends away from it
+        const o = v[1 - j], ox = +o.getAttribute('x'), oy = +o.getAttribute('y'), dx = tx - sx, dy = y - sy, L = Math.hypot(dx, dy) || 1;
+        const along = Math.max(0, Math.min(1, ((ox - sx) * dx + (oy - sy) * dy) / (L * L))), cx = sx + dx * along, cy = sy + dy * along;
+        const miss = Math.hypot(ox - cx, oy - cy), bx = miss < 34 ? (cx - ox) / (miss || 1) * (34 - miss + 20) : 0, by = miss < 34 ? (cy - oy) / (miss || 1) * (34 - miss + 20) : 0;
+        const fly = mk('text', { x: sx, y: sy, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 900, 'font-family': font, fill: slot.getAttribute('fill'),
+          stroke: '#fff', 'stroke-width': 3.2, 'paint-order': 'stroke', 'stroke-linejoin': 'round', opacity: 0, text: val(j) }, c._marks);
+        this.later(j * 420, () => { fly.setAttribute('opacity', 1); src.setAttribute('opacity', 0); this.sfx('tick'); }); // the number itself sets off
+        this.tween(620, j * 420, (u) => {
+          const e = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2; // ease in and out, along a small arc
+          const arc = Math.sin(Math.PI * u);
+          fly.setAttribute('x', f1(sx + (tx - sx) * e + bx * arc)); fly.setAttribute('y', f1(sy + (y - sy) * e - 18 * arc + by * arc));
+          fly.setAttribute('font-size', f1(13 + (fs - 13) * e));
+          if (u < 1) return;
+          fly.remove(); slot.setAttribute('opacity', 1); eq.landed++;
+          this.tween(300, 120, (q) => src.setAttribute('opacity', q)); // and its corner shows it again
+          if (j === 0) this.tween(250, 0, (q) => P[1].setAttribute('opacity', q));
+          if (eq.landed === 2 && eq.want) this.total(c);
+        });
+      });
+    },
+    // "180": once both values are in, "= 180°" joins the sum and the total gives one gentle beat
+    total(c) {
+      if (!c._eq) this.add(c);
+      const eq = c._eq;
+      if (!eq) return;
+      if (eq.landed < 2) { eq.want = true; return; }
+      if (eq.done) return;
+      eq.done = true; this.sfx('chime');
+      const [, , , eqs, tot] = eq.parts, y = +tot.getAttribute('y');
+      this.tween(320, 0, (u) => { eqs.setAttribute('opacity', u); tot.setAttribute('opacity', u); tot.setAttribute('y', f1(y + 6 * (1 - u))); });
+      this.tween(420, 360, (u) => tot.setAttribute('font-size', f1(19 * (1 + 0.1 * Math.sin(Math.PI * u)))));
     },
 
     // ---------- a card coming in, and going to the albums ----------
@@ -427,7 +481,7 @@
       S.active = c.id; this.setState('CARD_ENTER', c.id); this.sfx('whoosh');
       if (!reduced() && g._pop.animate) {
         g._pop.style.transformBox = 'fill-box'; g._pop.style.transformOrigin = 'center';
-        try { g._pop.animate([{ opacity: 0, scale: '.82', translate: '0 14px' }, { opacity: 1, scale: '1.03', translate: '0 0', offset: 0.62 }, { opacity: 1, scale: '1', translate: '0 0' }], { duration: SUM.enterMs, easing: 'cubic-bezier(.22,1,.36,1)' }); } catch (e) {}
+        try { g._pop.animate([{ opacity: 0, scale: '.96', translate: '0 16px' }, { opacity: 1, scale: '1', translate: '0 0' }], { duration: SUM.enterMs, easing: 'cubic-bezier(.22,1,.36,1)' }); } catch (e) {}
       }
       return this.hold(SUM.enterMs).then((ok) => {
         if (!ok) return false;
@@ -522,11 +576,11 @@
       this.eng.sfx('tap');
       this.setState('CARD_SELECTED', id);
       S.collected.forEach((k) => { const o = k === id ? '' : '.42'; [S.cards[k], S.cards[k]._mini].forEach((el) => { el.style.transition = 'opacity 240ms ease'; el.style.opacity = o; }); });
-      if (!reduced() && c._pop.animate) { try { c._pop.animate([{ scale: '1' }, { scale: '1.06', offset: 0.45 }, { scale: '1' }], { duration: 360, easing: 'cubic-bezier(.3,1.4,.5,1)' }); } catch (e) {} }
+      if (!reduced() && c._pop.animate) { try { c._pop.animate([{ scale: '1' }, { scale: '1.04', offset: 0.45 }, { scale: '1' }], { duration: 360, easing: 'ease-in-out' }); } catch (e) {} }
       this.setState('REPLAY_EXPLANATION', id);
       // reset the card to its starting state so reveal() can draw it again
       [c._bands, c._wedgeG, c._marks].forEach((el) => { while (el.firstChild) el.removeChild(el.firstChild); });
-      c._chev = c._lit = c._wedges = c._values = c._right = c._ticks = null;
+      c._chev = c._lit = c._wedges = c._values = c._right = c._ticks = c._eq = null;
       [c._fill].concat(Object.keys(c._sides).map((s) => c._sides[s]), c._dots).forEach((el) => el.setAttribute('opacity', 0));
       S.active = id;
       const ms = this.reveal(c);
