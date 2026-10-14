@@ -12,14 +12,16 @@ moments, then answers five scored checks.
   swells out from it, glints twinkle on its rim and a shine crosses its face. Hover lifts and brightens it, a press squashes it; on Play it pops with a
   chime and the scene zooms softly away into Screen 1. The tap also unlocks the voice-over and sounds.
   Jumps from the screen list skip it. `CONFIG.flow.cover: false` turns it off.
-- **Intro** next (`js/intro.js`, art `assets/images/cabin-door-closed.webp` / `cabin-door-open.webp`, door masks
-  `cabin-door-leaf.png` / `cabin-door-frame.png`). Nothing to tap - it plays by itself. The front page zooms into a
-  soft snowy white that clears onto Swiftee's cabin as the camera pushes in. The doorbell rings (a two-tone chime; the
-  lantern flares, golden ripples spread from the door, snow shakes off the porch roof). The door swings open inward on
-  its hinge (latch, creak, warm light) and Swiftee hops out to sleigh bells: "Oh, hello there! I'm Swiftee." ·
-  "Welcome to my cosy winter cabin!" · "Today I have a special shape to show you." · "It's called a trapezium. Let's
-  go and explore it!". Then she flies off, flapping, as the camera pulls back through the white onto the lesson's
-  landscape, and lands on her usual spot as screen 1 begins. Skip (top right) goes straight to screen 1.
+- The cabin intro (Swiftee opens her door and says hello) is kept as a draft in `drafts/intro/` at the repository
+  root, with the steps to bring it back; for launch, Play goes straight to Screen 1.
+- **Look.** Every colour comes from the game's art: the shape's bases in the winter-sky blue, its legs in Swiftee's
+  teal, a warm cream fill; angles A and D (one leg) warm orange and gold, B and C (the other) green and sky blue;
+  highlights gold. Name plates are white pills with a thick blue rim on a raised base, sitting on the ice panel's
+  bottom edge (the angle sums are the gold version). Answers are solid gold game buttons; a right answer turns teal,
+  a wrong one a soft frosted grey (never red).
+- **Pace.** What a spoken word starts (a side lighting up, a mark drawing on) plays at a slower teaching pace, and a
+  named part stays highlighted for 1.3 s. Voices that report each word as they say it are chosen first, so the words
+  and animations land on the voice.
 - **44 screens** in one fixed sequence: 36 learning screens, 5 checks (the Snowflake Challenge), the lesson-complete
   screen and "The End".
 - **Navigation is manual**: the learner moves on with **Next** / **Back** (top right). Only the opening intro

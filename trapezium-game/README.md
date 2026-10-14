@@ -48,7 +48,6 @@ trapezium-game/
 │   ├── angle-walker.js   screen 23: Swiftee measures the angles with one protractor
 │   ├── angle-frames.js   the protractor poses
 │   ├── summary.js        screen 37: the summary cards
-│   ├── intro.js          the cabin intro between the front page and screen 1
 │   ├── finale.js         screen 44: the cartoon closer, "The End"
 │   ├── stage-fit.js, snowfall.js, confetti.js
 ├── assets/
@@ -78,12 +77,10 @@ trapezium-game/
 - **Screens.** Navigation is manual: Back and Next sit top right, and "Screen N of 44" (top left) jumps to any screen.
   Skipping an unfinished drag applies its result, so later screens still match the shape.
 - **Shapes.** The bases always stay parallel: corners only slide sideways, within limits that keep the shape readable.
-- **Front page.** The banner fills the stage; the Play button unlocks sound and starts the intro.
-- **Intro** (`js/intro.js`). It plays by itself: out of a snowy white the camera pushes in on Swiftee's cabin, the
-  doorbell rings, the door swings open and Swiftee hops out to say hello; then she flies off as the camera pulls back
-  through the white onto the lesson's landscape, landing on her spot as screen 1 begins. Skip jumps straight to
-  screen 1. `CONFIG.flow.intro: false` turns it off. Sounds: `assets/audio/doorbell.m4a`, `door-open.m4a`,
-  `sleigh-bells.m4a`.
+- **Front page.** The banner fills the stage; the Play button unlocks sound and starts screen 1. (The cabin intro is
+  kept as a draft in `../drafts/intro/`, with the steps to bring it back.)
+- **Board size.** On lesson screens the shape is drawn 1.3x (`CONFIG.lessonZoom`) so it fills the ice panel; a screen
+  with `noZoom` keeps the plain size. Name plates sit on the panel's bottom edge (`CONFIG.scene.chipTop`).
 
 ## Tests
 

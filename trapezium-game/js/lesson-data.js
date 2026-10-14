@@ -26,7 +26,9 @@
 //   chevPre      parallel arrows hidden until a cue brings them in
 //   room         'measure' = the Measuring Kit layout: wide slab, big shape, small Swiftee (CONFIG.measureRoom)
 //   lenPre       side lengths hidden until a cue brings them in
-//   boardShiftY  px to move the shape up (-) or down (+)
+//   boardShiftY  px to move the shape up (-) or down (+), on a noZoom screen
+//   noZoom       keep the shape at its plain size (lesson screens are drawn larger, CONFIG.lessonZoom)
+//   apexZoom     the smaller zoom that keeps the point where the extended legs meet inside the panel
 //   handOnce     one demo hand gesture after the line, never repeated
 //   wrongRight   { cm, side }: dragging the corner right by more than cm wiggles side, with the wrong sound
 //   tickPre      equal-leg marks hidden until a cue brings them in
@@ -131,7 +133,7 @@ const LESSON = {
     // instruction only, nothing to do
     { id: 'extendSay', autoAdvance: 1, locked: 1, lines: [{ m: 'curious', t: "Let's extend them.", cueAt: { extend: 'glowLegs' } }], f: { legGlow: 1 } },
     // opens with the shape at centre stage, no line; D->A then C->B glow and extend dotted until they meet
-    { id: 'extend', layout: 'focus', lines: [], task: 'extLegs', auto: 1,
+    { id: 'extend', layout: 'focus', apexZoom: 1, lines: [], task: 'extLegs', auto: 1,
       after: [{ m: 'surprised', t: 'Woah! The sides meet.', s: 'Whoa! The sides meet.' }] },
     // 1 s after the line AB and DC glow once, then A->B and D->C each extend both ways
     { id: 'other', extendDelay: 1000, swapCol: 1, lines: [{ m: 'curious', t: "Let's check the other\npair of sides." }], task: 'extBases', auto: 1 },
@@ -152,8 +154,7 @@ const LESSON = {
     { id: 'measure', room: 'measure', lines: [{ m: 'curious', t: "Let's measure the sides\nof this trapezium." }], task: 'measure', auto: 1,
       after: [{ m: 'surprised', t: 'Woah! All the sides of\nthis trapezium are of\ndifferent lengths.', s: 'Whoa! All the sides of this trapezium are of different lengths.', noEmph: 1, cueAt: { sides: 'lenColors' } }], hint: 'Tap the glowing side to measure it', idle: 'Tap the glowing side and I will measure it.', f: { par: 1 } },
     // "trapezium": the shape pops; "sides": the lengths pop in one by one; "scalene": the name label.
-    // boardShiftY lifts the shape so the bottom length clears the label
-    { id: 'scalene', lenPre: 1, boardShiftY: -22, lines: [{ t: 'This type of trapezium which\nhas sides of different lengths\nis called a scalene trapezium.', holdChips: 1, noEmph: 1,
+    { id: 'scalene', lenPre: 1, lines: [{ t: 'This type of trapezium which\nhas sides of different lengths\nis called a scalene trapezium.', holdChips: 1, noEmph: 1,
       cueAt: { trapezium: 'shapePop', sides: 'lensSeq', scalene: 'showTitle' }, chips: [{ t: 'Scalene trapezium', k: 'name' }] }],
       f: { par: 1, legLen: 1, sideLen: 1 } },
     // a longer autoNext so the last line can be read
@@ -190,7 +191,7 @@ const LESSON = {
       cueAt: { supplementary: 'suppAtAD', angles: { fn: 'suppConfirm', sfx: 'snap' } }, chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
     // ∠B then ∠C get the focus as they are named, then the answers slide in. A correct answer shows
     // the real sum, and 105° turns onto the extended base beside 75° (okFx)
-    { id: 'askBC', practice: 1, optTop: 476, chipTop: 105, boardShiftY: -11, idle: 'What about ∠B and ∠C?',
+    { id: 'askBC', practice: 1, noZoom: 1, optTop: 476, chipTop: 105, boardShiftY: -11, idle: 'What about ∠B and ∠C?',
       optsAfter: 1, okSum: ['B', 'C'], okFx: 'suppAtBC',
       lines: [{ m: 'curious', t: 'What about ∠B and ∠C?', angleCues: 1, pairEnd: ['B', 'C'], onStart: 'askIn', chips: [{ t: '∠B + ∠C = ?', k: 'white' }] }],
       ok: 'Correct! ∠B and ∠C are\nsupplementary angles too.', okChips: [{ t: '∠B + ∠C = 180°', k: 'gold' }],
@@ -247,7 +248,7 @@ const LESSON = {
       ] },
     // "120" opens ∠A; "value" runs a light down AD to a "?" at D. A wrong answer brings in
     // "120° + ? = 180°" above the shape; the right one flies 60° to D and the equation resolves
-    { id: 'cfu3', cfu: 3, idle: 'In this trapezium, ∠A = 120°. What is the value of ∠D?', hint: 'Check 3 of 5 · Find the missing angle', optTop: 433,
+    { id: 'cfu3', cfu: 3, idle: 'In this trapezium, ∠A = 120°. What is the value of ∠D?', hint: 'Check 3 of 5 · Find the missing angle', optTop: 482,
       enterFx: 'q3In', okFx: 'q3Correct', badFx: 'q3Wrong', idleFx: 'q3Idle', optsAfter: 1, softWrong: 1, handMs: 3000, voiceDelay: 1300,
       lines: [{ m: 'curious', t: 'In this trapezium, ∠A = 120°. What is the value of ∠D?', cueAt: { trapezium: 'q3Shape', 120: 'q3A', value: 'q3D' } }],
       ok: 'Correct! 120° + 60° = 180°.',
@@ -262,7 +263,7 @@ const LESSON = {
       enterFx: 'q4In', labelsAt: 1, instant: 1, handMs: 3000,
       lines: [{ m: 'curious', t: 'Drag the labels to their\ncorrect place.', cueAt: { drag: 'q4Shapes', labels: 'q4LabelsIn', place: 'q4HiShapes' } }],
       ok: 'Brilliant! You labelled all three trapeziums.' },
-    { id: 'cfu5', cfu: 5, idle: 'BC is a leg. What do you know about the legs of an isosceles trapezium?', hint: 'Check 5 of 5 · Find the missing side', optTop: 427, okFx: 'q5Correct', badFx: 'q5Wrong', optsAfter: 1,
+    { id: 'cfu5', cfu: 5, idle: 'BC is a leg. What do you know about the legs of an isosceles trapezium?', hint: 'Check 5 of 5 · Find the missing side', optTop: 458, okFx: 'q5Correct', badFx: 'q5Wrong', optsAfter: 1,
       lines: [{ m: 'curious', t: 'In an isosceles trapezium, AB = 6 cm, CD = 10 cm and AD = 5 cm. What is the length of BC?', cueAt: { ab: 'q5AB', cd: 'q5CD', ad: 'q5AD', bc: 'q5BC' } }],
       ok: 'Yes! In an isosceles trapezium the legs are equal, so BC = 5 cm.',
       opts: [

@@ -15,13 +15,11 @@ const CONFIG = {
   // rightAngleDeg: screen 33 snaps a corner to 90° within this many degrees
   snap: { exactCm: 0.05, rightAngleDeg: 5 },
   // recorded effects (the rest are synthesised): good = every correct action, bad = every wrong one
-  sounds: { good: 'assets/audio/correct.mp3', bad: 'assets/audio/incorrect.mp3',
-    // the intro: the cabin doorbell, the door opening (latch, creak, air), sleigh bells as Swiftee steps out
-    dingdong: 'assets/audio/doorbell.m4a', door: 'assets/audio/door-open.m4a', jingle: 'assets/audio/sleigh-bells.m4a' },
+  sounds: { good: 'assets/audio/correct.mp3', bad: 'assets/audio/incorrect.mp3' },
   soundVolume: 0.9,
   drag: { wrongGapMs: 1200 },        // wrong-way drag feedback (wiggle + sound) at most once per this long
   // a part named in the voice-over grows briefly and holds this long before easing back
-  emph: { holdMs: 650 },
+  emph: { holdMs: 1300 },
   // screens 7-8: side trace and dotted extension speed (board px per ms); pause between the two sides
   trace: { pxPerMs: 0.4, gapMs: 250 },
   // screen 1: pen speed round the outline (board px per ms), delay after the screen opens, outline glow time
@@ -30,16 +28,21 @@ const CONFIG = {
   letters: { minGapMs: 420 },
   // qFocus question (screen 39): bubble hold and fade after the question; the shape's centre x and its top
   // before and after it glides up; the answer row's top and width (stage px)
-  qFocus: { holdMs: 700, fadeMs: 350, cx: 876, shapeTop0: 220, shapeTop: 171, optTop: 417, optW: 680 },
+  qFocus: { holdMs: 700, fadeMs: 350, cx: 876, shapeTop0: 205, shapeTop: 150, optTop: 450, optW: 680 },
   // idleMs: no-touch wait before a spoken reminder (at most idleMaxHints per screen); navLockMs: minimum gap between
   // Next / Back taps; speechRate: voice speed (1 = normal); lineGapMs: pause after each line
-  timing: { idleMs: 9000, idleMaxHints: 3, navLockMs: 450, speechRate: 0.86, lineGapMs: 850 },
+  timing: { idleMs: 9000, idleMaxHints: 3, navLockMs: 450, speechRate: 0.86, lineGapMs: 1100 },
   // autoAdvance false = manual navigation (a finished screen waits for Next); advanceMs = the wait when it is on;
   // showNext / showBack: the extra Next and Back buttons (off = top-right ones only); cover: open on the front page;
-  // intro: after Play, the cabin intro (js/intro.js) before screen 1
-  flow: { autoAdvance: false, advanceMs: 2500, showNext: false, showBack: false, cover: true, intro: true },
-  // every screen: shape nudged right to centre it in the panel (boardX); position of the label row
-  scene: { boardX: 11, chipTop: 476, chipLeft: 616 },
+  flow: { autoAdvance: false, advanceMs: 2500, showNext: false, showBack: false, cover: true },
+  // every screen: shape nudged right to centre it in the panel (boardX); the label row sits on the panel's bottom
+  // edge (chipTop: the row's top, so a name plate's middle lands on the edge)
+  scene: { boardX: 11, chipTop: 526, chipLeft: 616 },
+  // lesson screens: the shape drawn larger so it fills the ice panel (board scale and offset, like measureRoom);
+  // a screen with noZoom keeps the plain layout (answers or labels around the shape)
+  lessonZoom: { scale: 1.3, tx: -56.5, ty: -88.6 },
+  // screen 7 (apexZoom): a little smaller and lower, so the point where the extended legs meet stays in the panel
+  apexZoom: { scale: 1.15, tx: -22.75, ty: 0.25 },
   // Measuring Kit layout (screens 16 and 23): board scale and offset that put the shape in the slab
   measureRoom: { scale: 1.25, tx: -171.25, ty: -26.5 },
   // layout 'focus' (screen 7): bubble hold and fade after the line, the shape's move to centre, wait before the hand

@@ -33,11 +33,11 @@
     convex: { deep: '#0f6f86', wash: '#e4f8fc', ink: '#0b5566' },
     concave: { deep: '#95590a', wash: '#fff3dd', ink: '#6d4100' },
     regular: { deep: '#a04e0a', wash: '#fff0e0', ink: '#7a3300' },
-    irregular: { deep: '#54399e', wash: '#f1ebfe', ink: '#3d2775' }
+    irregular: { deep: '#1f6bff', wash: '#e8f0fd', ink: '#1a4799' }
   };
   // the lesson's colours: pink bases, purple legs, lilac fill, orange parallel arrows; one colour per angle
-  const INK = { base: '#e8287a', leg: '#8e44d6', fill: 'rgba(229,205,234,0.95)', chev: '#f08a24', navy: '#123b63' };
-  const ANG = { A: '#f08a24', B: '#8e44d6', C: '#2b7bd6', D: '#f5c542' };
+  const INK = { base: '#1f6bff', leg: '#00a896', fill: 'rgba(255,236,179,0.95)', chev: '#ff8a00', navy: '#123b63' };
+  const ANG = { A: '#ff8a00', B: '#19c46b', C: '#1fa3ff', D: '#ffc300' };
   // Swiftee's two spots: 'peek' over the card's top edge, 'middle' standing on the snow between the albums. y = offset in stage px from her
   // CSS position, s = scale of her 259 px box, hide = how far she sinks to be out of sight
   const SPOT = { peek: { y: 0, s: 218 / 259, hide: 154 }, middle: { y: 186, s: 300 / 259, hide: 300 } };
@@ -82,6 +82,11 @@
 
   // ---------- small helpers ----------
   // make an SVG element: null attributes are skipped, attrs.text becomes its text
+  // a darker version of a colour (the plate's raised base)
+  function shade(hex) {
+    const n = parseInt(hex.slice(1), 16), d = (v) => Math.round(v * 0.72);
+    return '#' + ((1 << 24) | (d(n >> 16 & 255) << 16) | (d(n >> 8 & 255) << 8) | d(n & 255)).toString(16).slice(1);
+  }
   function mk(tag, attrs, parent) {
     const el = document.createElementNS(NS, tag);
     Object.keys(attrs || {}).forEach((k) => { if (attrs[k] == null) return; if (k === 'text') el.textContent = attrs[k]; else el.setAttribute(k, attrs[k]); });
@@ -226,14 +231,15 @@
     // a rounded name plate sized to its text; o sets height, font size, minimum width and rim (the album plates)
     nameTag(parent, x, y, text, tone, o) {
       const c = TONE[tone] || null, g = mk('g', { 'class': 'badge' }, parent);
-      const H0 = (o && o.h) || 50, fs = (o && o.size) || 26;
-      const t = mk('text', { x: x, y: y + fs * 0.35, 'text-anchor': 'middle', 'font-size': fs, 'font-weight': 900,
-        'font-family': 'Nunito, system-ui, sans-serif', fill: c ? c.ink : '#0b3f7a', text: text }, g);
+      const H0 = (o && o.h) || 50, fs = (o && o.size) || 26, rim = (o && o.rim) || 4, deep = c ? c.deep : '#1f6bff';
+      const t = mk('text', { x: x, y: y + fs * 0.36, 'text-anchor': 'middle', 'font-size': fs, 'font-weight': 800,
+        'font-family': "'Baloo 2', Nunito, system-ui, sans-serif", fill: c ? c.ink : '#123b63', text: text }, g);
       let w = 0; try { w = t.getComputedTextLength(); } catch (e) {}
       if (!w) w = text.length * fs * 0.54; // could not measure the text: estimate
-      const bw = (o && o.w) ? Math.max(o.w, w + 14) : (w + 52);
-      g.insertBefore(mk('rect', { x: x - bw / 2, y: y - H0 / 2, width: bw, height: H0, rx: H0 * 0.44,
-        fill: c ? c.wash : '#f3fcff', stroke: c ? c.deep : '#0b4f9e', 'stroke-width': (o && o.rim) || 3 }), t);
+      const bw = (o && o.w) ? Math.max(o.w, w + 16) : (w + 60);
+      // the plate (as in the lesson): a white pill with a thick rim, raised on a darker base
+      g.insertBefore(mk('rect', { x: x - bw / 2, y: y - H0 / 2 + rim + 1, width: bw, height: H0, rx: H0 / 2, fill: shade(deep) }), t);
+      g.insertBefore(mk('rect', { x: x - bw / 2, y: y - H0 / 2, width: bw, height: H0, rx: H0 / 2, fill: c ? c.wash : '#ffffff', stroke: deep, 'stroke-width': rim }), t);
       return g;
     },
     // pop an element in (overshoot, then settle); fill 'backwards' keeps it hidden during the delay
