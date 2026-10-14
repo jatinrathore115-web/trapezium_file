@@ -124,7 +124,8 @@ const LESSON = {
   steps: [
     // screens 1-3 run on by themselves (autoNext) as one intro
     { id: 'intro', build: 1, autoNext: 2200, lines: [{ m: 'waving', t: 'Remember we learnt about\nquadrilaterals earlier.' }] },
-    { id: 'quadSides', sideNums: 1, autoNext: 2200, lines: [{ m: 'happy', t: 'Any polygon with 4 sides\nis called a quadrilateral.' }] },
+    // on "4" the sides are numbered 1 to 4, one after another
+    { id: 'quadSides', sideNums: 1, autoNext: 2200, lines: [{ m: 'happy', t: 'Any polygon with 4 sides\nis called a quadrilateral.', noEmph: 1, cueAt: { 4: 'sideNumsGo' } }] },
     // spoken "A, B, C, D", shown "ABCD": each letter flies in as it is said
     { id: 'quadName', letterIn: 1, autoNext: 2200, lines: [{ m: 'happy', t: 'We can call it\nquadrilateral ABCD.', s: 'We can call it quadrilateral, A, B, C, D.', letters: 1, letterTimes: [2.28, 2.64, 2.88, 3.30] }] }, // letterTimes: A, B, C, D in the recording (vo003)
     // growFocus: the shape grows to 120% and back as she starts

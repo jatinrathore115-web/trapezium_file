@@ -126,17 +126,18 @@
 
     // screen 2: the side numbers 1-4 (top, right, bottom, left) glide in from their own sides, one after another;
     // onLand(i) fires as number i settles
+    sideNumsHide() { const els = $('.tag.snum'); if (G && els.length) add(() => { centred(els); G.set(els, { opacity: 0 }); }); },
     sideNums(onLand) {
       const els = ['.tag.snum.n1', '.tag.snum.n2', '.tag.snum.n3', '.tag.snum.n4'].map((s) => $(s)[0]).filter(Boolean);
       if (!G || !els.length) { els.forEach((e, i) => onLand && onLand(i)); return; }
       const from = [{ y: -46 }, { x: 46 }, { y: 46 }, { x: -46 }];
       add(() => {
         centred(els);
-        const tl = G.timeline({ delay: 0.45 });
+        const tl = G.timeline();
         els.forEach((el, i) => {
-          tl.fromTo(el, Object.assign({ opacity: 0, scale: 0.9, x: 0, y: 0 }, from[i]),
-            Object.assign({ opacity: 1, scale: 1, x: 0, y: 0 }, ENTER, reduced ? { duration: 0 } : {}), i * 0.65)
-            .call(() => onLand && onLand(i), null, i * 0.65 + 0.5);
+          tl.fromTo(el, Object.assign({ opacity: 0, x: 0, y: 0 }, from[i]),
+            { opacity: 1, x: 0, y: 0, duration: reduced ? 0 : 0.45, ease: 'power2.out' }, i * 0.6)
+            .call(() => onLand && onLand(i), null, i * 0.6 + 0.3);
         });
         return tl;
       });
@@ -455,7 +456,10 @@
     spark(k) {
       const e = $('.e' + k)[0];
       if (!G || reduced || !e || getComputedStyle(e).display === 'none') return;
-      const a = { x: +e.getAttribute('x1'), y: +e.getAttribute('y1') }, b = { x: +e.getAttribute('x2'), y: +e.getAttribute('y2') };
+      let a = { x: +e.getAttribute('x1'), y: +e.getAttribute('y1') }, b = { x: +e.getAttribute('x2'), y: +e.getAttribute('y2') };
+      // one direction for everything: up a leg (towards where the legs would meet), left to right along a base
+      const steep = Math.abs(b.y - a.y) > Math.abs(b.x - a.x);
+      if (steep ? a.y < b.y : a.x > b.x) { const t = a; a = b; b = t; }
       // the spark's place is its circle's own cx / cy (never a transform the screen-change cleanup could strip)
       const ns = 'http://www.w3.org/2000/svg', g = document.createElementNS(ns, 'circle');
       g.setAttribute('class', 'spark'); g.setAttribute('pointer-events', 'none');

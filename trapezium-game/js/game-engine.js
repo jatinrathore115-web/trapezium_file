@@ -271,7 +271,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   keyCue(w, L, words, i) {
     const st = this.cur(), f = st.f || {}, P = this.state.P;
     if (st.cfu || st.noBoard || st.hero || st.summary || st.room === 'measure' || !P) return;
-    if (st.sumSteps || st.morph) return; // screens running their own animated sequence keep it uncluttered
+    if (st.sumSteps || st.morph || st.sideNums) return; // screens running their own animated sequence keep it uncluttered
     if (Date.now() - (this.cueT || 0) < 1800) return; // the last animation finishes before a new one starts
     const has = (re) => words.some((x) => re.test(x.toLowerCase().replace(/[^a-z]/g, '')));
     const ALL = ['AB', 'BC', 'CD', 'DA'], BASES = ['AB', 'CD'], LEGS = ['DA', 'BC'];
@@ -314,11 +314,11 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   }
   // One focus at a time, in the order things are named: a newly named part takes over from the last one (it never
   // piles up on top of it), and is let go after holdMs unless something newer has already taken over.
-  emphasize(parts, onDone) {
+  emphasize(parts, onDone, quiet) { // quiet: light the parts without a spark running along them
     const tok = this.stepTok, id = (this.emphId = (this.emphId || 0) + 1);
     this.cueT = Date.now();
     this.setState({ emph: parts.reduce((o, k) => { o[k] = 1; return o; }, {}) },
-      () => { const sides = parts.filter((k) => /^(AB|BC|CD|DA)$/.test(k)); if (sides.length <= 2) sides.forEach((k) => Motion.paced(() => Motion.spark(k))); });
+      () => { const sides = parts.filter((k) => /^(AB|BC|CD|DA)$/.test(k)); if (!quiet && sides.length <= 2) sides.forEach((k) => Motion.paced(() => Motion.spark(k))); });
     this.tm(() => {
       if (tok !== this.stepTok) return;
       if (id === this.emphId) this.setState({ emph: {} }, () => { if (onDone) onDone(); });
@@ -1161,6 +1161,8 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   growAD() { this.emphasize(['aA', 'aD']); } // the pair already swept open as the screen opened: now it is pointed out
   parPulse() { this.emphasize(['AB', 'CD']); Motion.parallelShow(); } // the arrows run along both bases the same way
   suppConfirmLater() { const tok = this.stepTok; this.tm(() => { if (tok !== this.stepTok) return; this.sfx('snap'); Motion.suppConfirm(); }, 2800); }
+  // screen 2, on "4 sides": the sides are numbered one after another, each side lighting up as its number lands
+  sideNumsGo() { Motion.sideNums((i) => this.emphasize([['AB', 'BC', 'CD', 'DA'][i]], null, true)); }
   vertexPulse() { ['A', 'B', 'C', 'D'].forEach((k, i) => this.tm(() => this.emphasize(['v' + k]), i * 420)); } // one corner after another
   legsPop() { this.emphasize(['DA', 'BC']); Motion.legsPop(); }
   defTrace() { ['AB', 'BC', 'CD', 'DA'].forEach((k, i) => this.tm(() => this.emphasize([k]), i * 450)); }
@@ -1207,7 +1209,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     // focusAng: the pair's wedges grow in from the start (a line with angleCues grows them one by one instead)
     if (st.f && st.f.focusAng && !((st.lines || [])[0] || {}).angleCues) Motion.wedgeGrow(st.f.focusAng, 0.35 + (this.glideMs || 0) / 1000);
     if (st.build) { Motion.hideFill(); this.tm(() => this.runBuild(), CONFIG.build.delayMs); }
-    if (st.sideNums) Motion.sideNums((i) => this.emphasize([['AB', 'BC', 'CD', 'DA'][i]]));
+    if (st.sideNums) Motion.sideNumsHide(); // the side numbers wait for "4 sides" (sideNumsGo)
     // screen 3: the side numbers fade out, then are dropped so no later redraw can flash them back; the corner
     // letters start hidden and fly in on their voice cues
     if (st.letterIn) { Motion.lettersReset(); Motion.fadeOut('.tag.snum'); const tok = this.stepTok; this.tm(() => { if (tok === this.stepTok) this.setState({ numsGone: true }); }, 450); }
@@ -1735,6 +1737,11 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     g.eCD = seg(C, D, edgeOn('CD'), { c: baseCol('CD'), cls: eCls('CD'), hl: hlCls('CD') });
     g.eBC = seg(B, C, edgeOn('BC'), { c: legCol('BC'), cls: eCls('BC'), hl: hlCls('BC') });
     g.eDA = seg(D, A, edgeOn('DA'), { c: legCol('DA'), cls: eCls('DA'), hl: hlCls('DA') });
+    // the marker band under a named side draws one way for every side: up a leg, left to right along a base
+    ['AB', 'BC', 'CD', 'DA'].forEach((k) => {
+      const e = g['e' + k], steep = Math.abs(e.y2 - e.y1) > Math.abs(e.x2 - e.x1), flip = steep ? e.y1 < e.y2 : e.x1 > e.x2;
+      Object.assign(e, flip ? { h1x: e.x2, h1y: e.y2, h2x: e.x1, h2y: e.y1 } : { h1x: e.x1, h1y: e.y1, h2x: e.x2, h2y: e.y2 });
+    });
     // the "Base" / "Leg" callout (screens 14-15): a pill just outside each side's midpoint, joined to it by a
     // short tail. Bases: above AB and below CD. Legs: level, left of AD and right of BC.
     {
