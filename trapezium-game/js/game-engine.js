@@ -1744,7 +1744,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
         const m = { x: (p.x + q.x) / 2 + sh, y: (p.y + q.y) / 2 };
         let nx = vert ? 0 : horiz ? (m.x < cx0 ? -1 : 1) : -(q.y - p.y) / L, ny = vert ? (m.y < cy0 ? -1 : 1) : horiz ? 0 : (q.x - p.x) / L;
         if (!vert && !horiz && nx * (m.x - cx0) + ny * (m.y - cy0) < 0) { nx = -nx; ny = -ny; }
-        // the tail runs from a pin on the side itself out to the pill, so the name is plainly joined to its side
+        // the tail runs from the side itself out to the pill, so the name is plainly joined to its side
         const ext = (W / 2) * Math.abs(nx) + (H / 2) * Math.abs(ny), reach = 30;
         const c = { x: m.x + nx * (reach + ext), y: m.y + ny * (reach + ext) };
         const d0 = { x: m.x, y: m.y }, e = { x: c.x - nx * ext, y: c.y - ny * ext };

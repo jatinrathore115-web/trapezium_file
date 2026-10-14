@@ -63,7 +63,7 @@
   // CSS centres labels on their point with translate(-50%, -50%); GSAP must keep that once it owns the transform
   const centred = (els) => G.set(els, { xPercent: -50, yPercent: -50, x: 0, y: 0 });
   // every element Motion animates; clear() wipes the animated properties from all of them
-  const ANIMATED = '.tag.snum, .tag.vlab, .edge, .vdot, .shape-fill, .outline-settle, .pop-g, .chev, .calp > *, .ticks, .tag.mtag, .okcheck *, .tag.alab, .arc, .wedge, .chip, .chip-res, .xleg, .swiftee, .swiftee canvas, .swiftee img, .bubble, .rmark, .tag.r90, .q3, .q3 *, .q3-hint, .q3-hint *, .q3-fly, .q4s, .q4s *, .slot, .lab, .q4-strip, .q4-card, .q4-link, .opt svg, .qshape, .hl, .spark, .cal-dot, .q1-par, .q1-chev, .q2-leg, .q2-tick, .q2-eq, .q5-leg, .q5-tick, .q5-ad, .q5-q, .q5-bc, .q5-ab, .q5-cd, .q5-hab, .q5-hcd, .q5-hl';
+  const ANIMATED = '.tag.snum, .tag.vlab, .edge, .vdot, .shape-fill, .outline-settle, .pop-g, .chev, .calp > *, .ticks, .tag.mtag, .okcheck *, .tag.alab, .arc, .wedge, .chip, .chip-res, .xleg, .swiftee, .swiftee canvas, .swiftee img, .bubble, .rmark, .tag.r90, .q3, .q3 *, .q3-hint, .q3-hint *, .q3-fly, .q4s, .q4s *, .slot, .lab, .q4-strip, .q4-card, .q4-link, .opt svg, .qshape, .hl, .spark, .q1-par, .q1-chev, .q2-leg, .q2-tick, .q2-eq, .q5-leg, .q5-tick, .q5-ad, .q5-q, .q5-bc, .q5-ab, .q5-cd, .q5-hab, .q5-hcd, .q5-hl';
   // the SVG ones among them (clear() removes transform-origin and stroke-dasharray from these by hand)
   const ANIMATED_SVG = '.wedge, .edge, .vdot, .shape-fill, .outline-settle, svg g.pop-g, .chev, .calp > *, .ticks, .okcheck *, .arc, .rmark, .q1-par, .q1-chev, .q2-leg, .q2-tick, .q2-eq, .q5-leg, .q5-tick, .q5-ad, .q5-q, .q5-bc, .q5-ab, .q5-cd, .q5-hab, .q5-hcd, .q5-hl';
 
@@ -89,6 +89,7 @@
       if (ctx) ctx.revert();
       sweeps.splice(0).forEach((s) => { if (!s.done && s.w.isConnected) s.w.setAttribute('d', s.d0); });
       document.querySelectorAll('[data-lencol]').forEach((e) => e.removeAttribute('data-lencol'));
+      document.querySelectorAll('.stage .spark').forEach((e) => e.remove()); // a spark cut short by a screen change never lingers
       if (G) G.set($(ANIMATED), { clearProps: 'opacity,transform,filter,textShadow,strokeWidth,translate,rotate,scale,backgroundColor,borderColor,color' });
       // GSAP writes transform-origin on any SVG element it touches (even when clearing), and some draws set
       // stroke-dasharray directly: remove both by hand
@@ -159,11 +160,10 @@
       add(() => {
         const tl = G.timeline();
         pills.forEach((p, i) => {
-          const stem = p.querySelector('.cal-stem'), dot = p.querySelector('.cal-dot'), body = Array.from(p.children).filter((c) => c !== stem && c !== dot);
+          const stem = p.querySelector('.cal-stem'), body = Array.from(p.children).filter((c) => c !== stem);
           const L = (stem && stem.getTotalLength && stem.getTotalLength()) || 1, at = i * 0.5;
           tl.set(body, { opacity: 0 }, 0);
-          if (dot) tl.fromTo(dot, { opacity: 0, scale: 0.3, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: reduced ? 0 : 0.25, ease: 'back.out(2)' }, at);
-          if (stem) tl.fromTo(stem, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.3, ease: 'sine.out' }, at + 0.15);
+          if (stem) tl.fromTo(stem, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.3, ease: 'sine.out' }, at);
           tl.fromTo(body, { opacity: 0, scale: 0.9, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: reduced ? 0 : 0.4, ease: 'power2.out', immediateRender: false }, at + 0.4);
         });
         tl.to(others, { opacity: 1, duration: 0.45, ease: 'sine.inOut' }, '>+0.6').set(others, { clearProps: 'opacity' });
@@ -453,11 +453,12 @@
       const e = $('.e' + k)[0];
       if (!G || reduced || !e || getComputedStyle(e).display === 'none') return;
       const a = { x: +e.getAttribute('x1'), y: +e.getAttribute('y1') }, b = { x: +e.getAttribute('x2'), y: +e.getAttribute('y2') };
-      const ns = 'http://www.w3.org/2000/svg', g = document.createElementNS(ns, 'g');
+      // the spark's place is its circle's own cx / cy (never a transform the screen-change cleanup could strip)
+      const ns = 'http://www.w3.org/2000/svg', g = document.createElementNS(ns, 'circle');
       g.setAttribute('class', 'spark'); g.setAttribute('pointer-events', 'none');
-      g.innerHTML = '<circle r="9" fill="#ffffff" stroke="#ffb800" stroke-width="4"></circle>';
+      g.setAttribute('r', 9); g.setAttribute('fill', '#ffffff'); g.setAttribute('stroke', '#ffb800'); g.setAttribute('stroke-width', 4);
       e.parentNode.appendChild(g);
-      const p = { t: 0 }, put = () => g.setAttribute('transform', 'translate(' + (a.x + (b.x - a.x) * p.t).toFixed(1) + ',' + (a.y + (b.y - a.y) * p.t).toFixed(1) + ')');
+      const p = { t: 0 }, put = () => { g.setAttribute('cx', (a.x + (b.x - a.x) * p.t).toFixed(1)); g.setAttribute('cy', (a.y + (b.y - a.y) * p.t).toFixed(1)); };
       put();
       add(() => G.timeline({ onComplete: () => g.remove() })
         .fromTo(g, { opacity: 0 }, { opacity: 1, duration: 0.12 }, 0)
