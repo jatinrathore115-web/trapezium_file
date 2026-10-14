@@ -188,14 +188,11 @@ window.AngleWalker = class AngleWalker {
       c.globalAlpha = 1;
     }
     const tr = this.trace;
-    if (tr && tr.t > 0) { // the angle being read, in its own colour, over the protractor's face
-      const r = (this.F.poses[this.frame].faceR || 60) * this.S * CONFIG.angleWalk.traceK, end = tr.a + tr.sweep * tr.t;
+    if (tr && tr.t > 0) { // the angle being read sweeps open in its own colour, exactly as the angle that stays on the shape
+      const r = CONFIG.angleWalk.angleR, end = tr.a + tr.sweep * tr.t; // stage px, the size of every angle in the lesson
       c.setTransform(k, 0, 0, k, 0, 0);
       c.beginPath(); c.moveTo(tr.p.x, tr.p.y); c.arc(tr.p.x, tr.p.y, r, tr.a, end, tr.sweep < 0); c.closePath();
-      c.globalAlpha = 0.16; c.fillStyle = tr.col; c.fill();
-      c.globalAlpha = 0.95; c.lineWidth = 3; c.lineCap = 'round'; c.strokeStyle = tr.col;
-      c.beginPath(); c.arc(tr.p.x, tr.p.y, r, tr.a, end, tr.sweep < 0); c.stroke();
-      c.globalAlpha = 1;
+      c.fillStyle = tr.col; c.fill();
       if (tr.lab) { // the degrees count up as the angle is traced, where the value will land
         c.font = '900 24px Nunito, system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
         c.lineWidth = 6; c.strokeStyle = '#ffffff'; c.lineJoin = 'round'; c.fillStyle = '#123b63';
