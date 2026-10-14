@@ -1789,6 +1789,8 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
         // the tail runs from the side itself out to the pill, so the name is plainly joined to its side
         const ext = (W / 2) * Math.abs(nx) + (H / 2) * Math.abs(ny), reach = 30;
         const c = { x: m.x + nx * (reach + ext), y: m.y + ny * (reach + ext) };
+        // a Leg pill stays inside the ice card's inner area, however close its leg runs to the edge (its tail shortens)
+        if (horiz) { const Bd = this.extBounds(); c.x = Math.max(Bd.l + W / 2, Math.min(Bd.r - W / 2, c.x)); }
         const d0 = { x: m.x, y: m.y }, e = { x: c.x - nx * ext, y: c.y - ny * ext };
         return { x: r1(c.x - W / 2), y: r1(c.y - H / 2), tx: r1(c.x), ty: r1(c.y + 6), dx: r1(d0.x), dy: r1(d0.y),
           stem: 'M' + r1(d0.x) + ',' + r1(d0.y) + ' L' + r1(e.x) + ',' + r1(e.y) };
