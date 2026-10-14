@@ -318,7 +318,8 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const tok = this.stepTok, id = (this.emphId = (this.emphId || 0) + 1);
     this.cueT = Date.now();
     this.setState({ emph: parts.reduce((o, k) => { o[k] = 1; return o; }, {}) },
-      () => { const sides = parts.filter((k) => /^(AB|BC|CD|DA)$/.test(k)); if (!quiet && sides.length <= 2) sides.forEach((k) => Motion.paced(() => Motion.spark(k))); });
+      () => { const sides = parts.filter((k) => /^(AB|BC|CD|DA)$/.test(k)); if (!quiet && sides.length === 1) Motion.paced(() => Motion.spark(sides[0]));
+        parts.filter((k) => /^a[A-D]$/.test(k)).forEach((k) => Motion.angleJump(k[1])); }); // a dot only for one named side; a pair lights up together
     this.tm(() => {
       if (tok !== this.stepTok) return;
       if (id === this.emphId) this.setState({ emph: {} }, () => { if (onDone) onDone(); });
@@ -397,7 +398,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       if (lgAt >= 0 && n >= lgAt + 1) fireLegs();
       emphCues.forEach((c) => { if (!c.done && n >= c.i + 1) { c.done = true; if (tok === this.narrTok) {
         const ang = L.angleCues ? c.parts.filter((k) => /^a[A-D]$/.test(k)) : [];
-        if (ang.length) { this.sfx('pop'); ang.forEach((k) => Motion.angleFocus(k[1])); } else this.whenFree(() => this.emphasize(c.parts, () => c.parts.forEach(showDelayedChips)), 1500, false); } } });
+        if (ang.length) { this.sfx('pop'); ang.forEach((k) => Motion.angleFocus(k[1])); } else this.emphasize(c.parts, () => c.parts.forEach(showDelayedChips)); } } }); // a named part reacts as it is said
       wordCues.forEach((c) => { if (n >= c.i + 1) fireCue(c); });
       keyCues.forEach((c) => { if (n >= c.i + 1) fireKey(c); });
     });
@@ -1813,7 +1814,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       const look = (known && (f.arcs || '').indexOf(k) >= 0 ? ' still' : '') + (fa ? (fa.indexOf(k) >= 0 ? ' glow' : ' dim') : '') +
         (st.explore && s.dragging && livePair.indexOf(k) >= 0 ? ' live' : ''); // explore: the dragged leg's two angles glow while they change
       // at exactly 90° the arc gives way to the square right-angle mark
-      g['a' + k] = { p: 'M' + r1(sx) + ',' + r1(sy) + ' A' + R + ',' + R + ' 0 0 ' + (cross > 0 ? 1 : 0) + ' ' + r1(ex) + ',' + r1(ey), d: dsp(show && !isRight), cls: 'arc a' + k + stag + look + (em['a' + k] ? ' emph' : '') + (st.anglesIn ? ' pre' : ''), o: r1(Vk.x) + 'px ' + r1(Vk.y) + 'px' };
+      g['a' + k] = { p: 'M' + r1(sx) + ',' + r1(sy) + ' A' + R + ',' + R + ' 0 0 ' + (cross > 0 ? 1 : 0) + ' ' + r1(ex) + ',' + r1(ey), d: dsp(show && !isRight && !(known || st.anglesIn)), cls: 'arc a' + k + stag + look + (em['a' + k] ? ' emph' : '') + (st.anglesIn ? ' pre' : ''), o: r1(Vk.x) + 'px ' + r1(Vk.y) + 'px' };
       // wedges (from screen 23 on): the angle filled in, out to the arc's outer edge so the arc is its rim. They follow
       // the arc's glow / dim and grow in from the corner when the angle comes into focus.
       const RW = R + 3.5 / zs, wsx = Vk.x + u.x * RW, wsy = Vk.y + u.y * RW, wex = Vk.x + v.x * RW, wey = Vk.y + v.y * RW;

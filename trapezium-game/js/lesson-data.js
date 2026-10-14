@@ -186,7 +186,7 @@ const LESSON = {
     // 120° (A) and 60° (D) in focus: the pair the next screen adds up
     { id: 'notice', lines: [{ m: 'thinking', t: 'Did you notice something?', cueAt: { notice: 'growAD' } }], f: { par: 1, arcs: 'ABCD', focusAng: 'AD' } },
     // "∠A + ∠D = ?" rises in; on "add" the two values fly from the shape into it; on "180" it resolves
-    { id: 'sumAD', dimIn: 'BC', lines: [{ m: 'surprised', t: '∠A and ∠D add up to 180°.', noEmph: 1, onStart: 'eqStart',
+    { id: 'sumAD', dimIn: 'BC', lines: [{ m: 'surprised', t: '∠A and ∠D add up to 180°.', onStart: 'eqStart',
       cueAt: { add: 'eqFly', 180: { fn: 'eqResult', sfx: 'snap' } } }], f: { par: 1, arcs: 'ABCD', focusAng: 'AD' } },
     // "supplementary": DC extends past D and a copy of 120° turns onto it beside 60°, a straight angle;
     // "angles": the equation glows

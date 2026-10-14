@@ -151,8 +151,7 @@
       const pair = keys.map((k) => $('.e' + k)[0]).filter(Boolean);
       const others = ['AB', 'BC', 'CD', 'DA'].filter((k) => keys.indexOf(k) < 0).map((k) => $('.e' + k)[0]).filter(Boolean);
       if (!G || !pair.length) return;
-      // the pair stays drawn: a spark runs along each in turn (the engine's focus lights them and dims the rest)
-      keys.forEach((k, i) => { if (i === 0) this.spark(k); else add(() => G.delayedCall(0.4 * i, () => this.spark(k))); });
+      // the pair is lit by the engine's focus (its sides thicken, bands draw along both): no dots
     },
     // screens 14 and 15: the "Base" / "Leg" pills come in one after another (each connector draws out from its
     // side, then its pill pops in), then the other two sides ease back to full strength. The pills stay.
@@ -186,7 +185,6 @@
       add(() => {
         const tl = G.timeline();
         tl.to(legs, { strokeWidth: 7, duration: 0.3, ease: 'sine.out' }, 0)
-          .call(() => { this.spark('DA'); this.spark('BC'); }, null, 0)
           .call(() => labels.forEach((l) => l.setAttribute('data-in', '1')), null, 0.25); // data-in keeps them shown (they start hidden by .len-pre)
         labels.forEach((l) => labelOut(tl, l, sideMid(l.classList.contains('mDA') ? 'DA' : 'BC'), 0.25));
         if (ticks.length) tl.fromTo(ticks, { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.5);
@@ -256,6 +254,16 @@
         labelOut(tl, lab, corner(k), 0.3);
         return tl;
       });
+    },
+    // an angle named in the line: its filled angle and its value jump once about the corner (quick up, soft settle)
+    angleJump(k) {
+      const P = window.__trapP && window.__trapP(), w = $('.wedge.w' + k)[0], lab = $('.tag.alab.l' + k)[0];
+      if (!G || reduced || !P || !w) return;
+      add(() => G.timeline()
+        .fromTo(w, { scale: 1, svgOrigin: P[k].x + ' ' + P[k].y }, { scale: 1.3, duration: 0.18, ease: 'power2.out' }, 0)
+        .to(w, { scale: 1, duration: 0.35, ease: 'power2.inOut' }, 0.18)
+        .set(w, { clearProps: 'transform' })
+        .add(lab ? G.fromTo(lab, { xPercent: -50, yPercent: -50, y: 0 }, { y: -8, duration: 0.18, ease: 'power2.out', yoyo: true, repeat: 1 }) : G.timeline(), 0));
     },
     // screen 27, as each angle is named: the other angles dim, this arc redraws round its corner and pulses once,
     // and its filled angle grows in and its value pulses with it
@@ -1150,7 +1158,7 @@
         const tl = G.timeline(), els = [], labs = [];
         list.forEach(([k, len], i) => {
           const e = $('.e' + k)[0], lab = tags.find((x) => x.textContent.trim() === len && getComputedStyle(x).display !== 'none'), at = i * gap;
-          if (e) { els.push(e); tl.to(e, { strokeWidth: 7, duration: 0.3, ease: 'sine.out' }, at).call(() => this.spark(k), null, at); }
+          if (e) { els.push(e); tl.to(e, { strokeWidth: 7, duration: 0.3, ease: 'sine.out' }, at); }
           if (lab) { labs.push(lab); tl.fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.18, duration: 0.3, ease: 'sine.out' }, at); }
         });
         tl.to(els, { strokeWidth: 5, duration: 0.45, ease: 'sine.inOut' }, hold)
