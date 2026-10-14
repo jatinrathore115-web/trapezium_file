@@ -926,10 +926,6 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       this.goTo(i + 1, true);
     }, Math.max(0, wait - (afterLine ? CONFIG.timing.lineGapMs : 0))); // a finished line has already paused lineGapMs
   }
-  oops(text) {
-    this.sfx('bad');
-    this.interject({ m: CONFIG.swiftee.wrong, t: text });
-  }
 
   // ---------- screen animations and measuring ----------
   // measuring goes one side at a time, clockwise from the top

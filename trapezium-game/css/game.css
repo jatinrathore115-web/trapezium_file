@@ -45,15 +45,8 @@ a{color:#123b63}a:hover{color:#0b2742}
 .chip.name.long,.chip.gold.long{font-size:24px;padding:8px 28px 9px}
 @keyframes chipIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
 .edge{transition:stroke .5s ease,stroke-width .3s cubic-bezier(.3,0,.3,1)}
-/* angle arcs draw in; .d1-.d3 stagger them */
+/* angle arcs draw in */
 .arc{stroke-dasharray:100 100;animation:arcIn .5s ease-out backwards}
-.d1{animation-delay:.15s}
-.d2{animation-delay:.3s}
-.d3{animation-delay:.45s}
-.alab.d0,.alab.d1,.alab.d2,.alab.d3{animation:fade .3s ease-out backwards}
-.alab.d1{animation-delay:.25s}
-.alab.d2{animation-delay:.4s}
-.alab.d3{animation-delay:.55s}
 @keyframes arcIn{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
 .fadein{animation:fade .35s ease-out}
 @keyframes fade{from{opacity:0}to{opacity:1}}
