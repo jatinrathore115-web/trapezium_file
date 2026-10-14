@@ -86,7 +86,8 @@ window.Voice = (function () {
       el.src = DIR + LINES[Object.keys(LINES)[0]][0] + '.ogg';
       const p = el.play();
       const off = () => { try { if (!cur) el.pause(); } catch (e) {} el.muted = false; };
-      if (p && p.then) p.then(off, () => { unlock.done = false; el.muted = false; }); else off();
+      // only a refusal means "try again on the next tap"; an abort (a line started meanwhile) means audio is allowed
+      if (p && p.then) p.then(off, (e) => { if (e && e.name === 'NotAllowedError') unlock.done = false; el.muted = false; }); else off();
     } catch (e) { unlock.done = false; }
   }
   function prefetch() {

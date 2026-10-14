@@ -55,7 +55,7 @@ trapezium-game/
 ├── assets/
 │   ├── images/           backgrounds, panels, the front-page banner, buttons, Swiftee extras
 │   ├── audio/            the correct / incorrect sounds
-│   └── vo/               Swiftee's voice-over, one Ogg Opus clip per line (see docs/VOICEOVER.md)
+│   └── vo/               Swiftee's voice-over: 208 Ogg Opus clips, one per line, 4.5 MB (see docs/VOICEOVER.md)
 ├── swiftee-assets/       Swiftee's sprite sheets (spritesheets/1x, 2x and extra/) and their manifest
 ├── docs/VOICEOVER.md     how the voice-over is made, and every clip
 ├── tools/                Node scripts that rebuild Swiftee's measuring sheet and manifest, and the voice-over (vo_build.js)

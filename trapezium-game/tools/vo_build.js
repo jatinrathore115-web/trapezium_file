@@ -82,6 +82,8 @@ function gather() {
     const needs = st.task || st.cfu || st.opts;
     if (needs && !st.auto && !st.noIdle) add(qText(st) || st.idle || (st.hint + '.'));
     if (st.summary) { ideas.forEach((t) => add(t)); add(done); }
+    // screen 44's closer says its own line (js/finale.js, Voice.find)
+    if (st.finale) { const f = fs.readFileSync(path.join(ROOT, 'js', 'finale.js'), 'utf8'), m = /Voice\.find\('([^']+)'\)/.exec(f); if (m) add(m[1]); }
   });
   return out;
 }
