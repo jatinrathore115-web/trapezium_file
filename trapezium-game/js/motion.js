@@ -615,11 +615,8 @@
     titlePop() {
       const els = $('.chip'), el = els[els.length - 1];
       if (!G || !el) return;
-      add(() => G.timeline()
-        .fromTo(el, { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1.05, duration: reduced ? 0 : 0.3, ease: 'power2.out' })
-        .to(el, { scale: 1, duration: reduced ? 0 : 0.2, ease: 'sine.inOut' })
-        .to(el, { scale: 1.04, boxShadow: '0 0 0 6px rgba(92,198,207,0.3), 0 4px 14px rgba(11,91,112,0.12)', duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, '>+0.15')
-        .set(el, { clearProps: 'boxShadow' }));
+      // the name glides up into place and stays still (no pulse)
+      add(() => G.fromTo(el, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: reduced ? 0 : 0.45, ease: 'power2.out' }));
     },
     // a new label arriving: a soft pop with a slight lift
     chipPop() {
@@ -915,14 +912,6 @@
       add(() => G.timeline()
         .fromTo(labs, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.15, duration: 0.3, ease: 'sine.inOut', yoyo: true, repeat: 1, stagger: 0.12 }, 0)
         .call(() => ms.forEach((m) => this.markPing(m)), null, 0));
-    },
-    // screen 35, on "angled": the name label below the shape pulses twice, gently
-    titlePulse() {
-      const els = $('.chip'), el = els[els.length - 1];
-      if (!G || !el) return;
-      add(() => G.timeline()
-        .to(el, { scale: 1.06, boxShadow: '0 0 0 6px rgba(92,198,207,0.32), 0 4px 14px rgba(11,91,112,0.12)', duration: 0.35, ease: 'sine.inOut', yoyo: true, repeat: 3 })
-        .set(el, { clearProps: 'boxShadow' }));
     },
     // screen 35, a right angle tapped: its marker and 90° label give a soft green pulse
     rightFound(k) {
