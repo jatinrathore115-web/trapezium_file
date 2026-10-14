@@ -1165,7 +1165,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   sideNumsGo() { Motion.sideNums((i) => this.emphasize([['AB', 'BC', 'CD', 'DA'][i]], null, true)); }
   vertexPulse() { ['A', 'B', 'C', 'D'].forEach((k, i) => this.tm(() => this.emphasize(['v' + k]), i * 420)); } // one corner after another
   legsPop() { this.emphasize(['DA', 'BC']); Motion.legsPop(); }
-  defTrace() { ['AB', 'BC', 'CD', 'DA'].forEach((k, i) => this.tm(() => this.emphasize([k]), i * 450)); }
+  defTrace() { ['AB', 'BC', 'CD', 'DA'].forEach((k, i) => this.tm(() => this.emphasize([k], null, true), i * 450)); } // the sides light in turn (no racing sparks)
   // screen 18, on "legs": both legs glow together and their lengths pulse
   legsTogether() {
     const P = this.state.P, d = (a, b) => this.cm(this.dist(P[a], P[b]));

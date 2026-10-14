@@ -456,13 +456,14 @@
     spark(k) {
       const e = $('.e' + k)[0];
       if (!G || reduced || !e || getComputedStyle(e).display === 'none') return;
+      if (e.parentNode.querySelector('.spark[data-k="' + k + '"]')) return; // one spark on a side at a time (never a second dot)
       let a = { x: +e.getAttribute('x1'), y: +e.getAttribute('y1') }, b = { x: +e.getAttribute('x2'), y: +e.getAttribute('y2') };
       // one direction for everything: up a leg (towards where the legs would meet), left to right along a base
       const steep = Math.abs(b.y - a.y) > Math.abs(b.x - a.x);
       if (steep ? a.y < b.y : a.x > b.x) { const t = a; a = b; b = t; }
       // the spark's place is its circle's own cx / cy (never a transform the screen-change cleanup could strip)
       const ns = 'http://www.w3.org/2000/svg', g = document.createElementNS(ns, 'circle');
-      g.setAttribute('class', 'spark'); g.setAttribute('pointer-events', 'none');
+      g.setAttribute('class', 'spark'); g.setAttribute('data-k', k); g.setAttribute('pointer-events', 'none');
       g.setAttribute('r', 9); g.setAttribute('fill', '#ffffff'); g.setAttribute('stroke', '#ffb800'); g.setAttribute('stroke-width', 4);
       e.parentNode.appendChild(g);
       const p = { t: 0 }, put = () => { g.setAttribute('cx', (a.x + (b.x - a.x) * p.t).toFixed(1)); g.setAttribute('cy', (a.y + (b.y - a.y) * p.t).toFixed(1)); };

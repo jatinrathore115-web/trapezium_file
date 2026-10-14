@@ -201,9 +201,10 @@ a{color:#123b63}a:hover{color:#0b2742}
 .stage.scene .panel-img{transition:opacity .45s ease}
 .stage.scene.measure-room .panel-img{opacity:0}
 .stage.scene.measure-room .slab-img{opacity:1}
-.stage.scene.measure-room .swiftee{left:200px!important;top:466px!important;transform-origin:0 0;transform:scale(.55);animation:none!important;
+/* measuring screens: Swiftee stands large on the left of the slab (the walkers start and end at this size) */
+.stage.scene.measure-room .swiftee{left:138px!important;top:396px!important;transform-origin:0 0;transform:scale(.86);animation:none!important;
   transition:opacity .2s ease,left .6s cubic-bezier(.22,.8,.3,1),top .6s cubic-bezier(.22,.8,.3,1),transform .6s cubic-bezier(.22,.8,.3,1)}
-.stage.scene.measure-room .bubble{left:205px!important;top:auto!important;bottom:259px!important;max-width:420px;transform-origin:60px 100%}
+.stage.scene.measure-room .bubble{left:146px!important;top:auto!important;bottom:300px!important;max-width:340px;transform-origin:60px 100%}
 .stage.scene.measure-room .bubble .bubble-tail{left:52px;top:100%;margin-top:-1px;transform:none}
 @media (prefers-reduced-motion: reduce){.slab-img,.stage.scene .panel-img,.stage.scene.measure-room .swiftee{transition:none}}
 .stage.scene .opt{transition:transform .12s ease}
