@@ -279,7 +279,7 @@
         .set(w, { clearProps: 'transform' })
         // its value hops with it: up and a little bigger, then lands with a small bounce
         .add(lab ? G.timeline()
-          .fromTo(lab, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1 }, { y: -16, scale: 1.3, duration: 0.22, ease: 'power2.out' })
+          .fromTo(lab, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1 }, { y: -11, scale: 1.28, duration: 0.22, ease: 'power2.out' })
           .to(lab, { y: 0, scale: 1, duration: 0.42, ease: 'bounce.out' }) : G.timeline(), 0));
     },
     // screen 27, as each angle is named: this arc redraws round its corner and pulses once, and its filled angle grows
@@ -297,7 +297,7 @@
       });
     },
     // ---------- the equation build (screen 25; two boxes on screen 30) ----------
-    // eqStart as the line starts: "∠A + ∠D = ?" rises in; eqFly on "add": the two values fly in and replace the "?";
+    // eqStart as the line starts: "∠A + ∠D = ?" rises in; eqFlyA / eqFlyD as each angle is named: its value flies in;
     // eqResult on "180": they add up to 180°. A cue that arrives early first completes the steps before it.
     // The build has its own layer outside the runtime's markup (the runtime must not meet nodes it did not make),
     // laid over the stage and scaled with it, so its children use stage coordinates. clear() removes it.
@@ -334,10 +334,11 @@
     // the first replaces the "?", then the "+" appears and the second lands beside it
     // screen 25: each value jumps into the sum as the voice names its angle (eqFlyA on "angle A", eqFlyD on "angle D");
     // on "180" they merge (eqResult)
-    eqFlyA() { this.eqFlyAt(0, { only: 0, lift: 0.2, travel: 0.6 }); },
-    eqFlyD() { this.eqFlyAt(0, { only: 1, lift: 0.2, travel: 0.6 }); },
+    // (delay: the value hops first - angleJump - and its copy lifts off for the sum just as it lands)
+    eqFlyA() { this.eqFlyAt(0, { only: 0, delay: 0.4, lift: 0.2, travel: 0.6 }); },
+    eqFlyD() { this.eqFlyAt(0, { only: 1, delay: 0.4, lift: 0.2, travel: 0.6 }); },
     eqFly() { this.eqFlyAt(0); },
-    // o: { only (0 or 1: just that value), gap (s between the two values), lift, travel } - by default both values,
+    // o: { only (0 or 1: just that value), delay, gap (s between the two values), lift, travel } - by default both values,
     // one after the other (screen 30)
     eqFlyAt(i, o) {
       o = o || {};
@@ -364,9 +365,10 @@
           // the answer side is already laid out (just invisible), so the landing spot can be measured
           const from = local(src.getBoundingClientRect()), to = local(dst.getBoundingClientRect());
           const c = document.createElement('div');
-          c.className = 'tag alab eq-fly' + (box.classList.contains('eq-pair') ? ' small' : ''); c.textContent = src.textContent.trim(); c.style.left = from.x + 'px'; c.style.top = from.y + 'px';
+          // in its angle's colour: the value itself lifting off
+          c.className = 'tag alab eq-fly l' + v + (box.classList.contains('eq-pair') ? ' small' : ''); c.textContent = src.textContent.trim(); c.style.left = from.x + 'px'; c.style.top = from.y + 'px';
           stage.appendChild(c);
-          const at = i * gap, grow = 28 / 21; // the text grows from label size to formula size in flight
+          const at = (o.delay || 0) + i * gap, grow = 28 / 21; // the text grows from label size to formula size in flight
           tl.fromTo(c, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1, opacity: 0 }, { opacity: 1, y: -8, scale: 1.12, duration: lift, ease: 'power2.out' }, at);
           if (o.only == null) tl.fromTo(src, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1 }, { scale: 1.2, duration: 0.2, yoyo: true, repeat: 1 }, at); // (a single value's label is already hopping: angleJump)
           tl.to(c, { x: to.x - from.x, y: to.y - from.y, scale: grow, duration: travel, ease: 'power2.inOut' }, at + lift)

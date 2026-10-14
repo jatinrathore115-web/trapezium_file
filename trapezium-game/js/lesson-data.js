@@ -184,8 +184,7 @@ const LESSON = {
     { id: 'angles', room: 'measure', anglesIn: 1, task: 'measureAngles', auto: 1, lines: [{ m: 'curious', t: "Let's measure its angles." }], f: { par: 1, arcs: 'ABCD' } },
     // 120° (A) and 60° (D) in focus: the pair the next screen adds up
     { id: 'notice', lines: [{ m: 'thinking', t: 'Did you notice something?', cueAt: { notice: 'growAD' } }], f: { par: 1, arcs: 'ABCD', focusAng: 'AD' } },
-    // "∠A + ∠D = ?" rises in; on "add" the two values fly from the shape into it; on "180" it resolves
-    // each value jumps into the sum as its angle is named, and they add up on "180". cueTimes: measured in the recording
+    // "∠A + ∠D = ?" rises in; each value jumps into the sum as its angle is named, and they add up on "180". cueTimes: measured in the recording
     // (vo058): "angle A" 0.06-0.86 s, "angle D" 1.22-1.92, "one hundred eighty" 2.78
     { id: 'sumAD', lines: [{ m: 'surprised', t: '∠A and ∠D add up to 180°.', onStart: 'eqStart',
       cueAt: { '∠A': 'eqFlyA', '∠D': 'eqFlyD', 180: { fn: 'eqResult', sfx: 'snap' } }, cueTimes: { '∠A': 0.56, '∠D': 1.7, '180°': 2.8 } }], f: { par: 1, arcs: 'ABCD', focusAng: 'AD' } },
@@ -195,7 +194,8 @@ const LESSON = {
       cueAt: { supplementary: 'suppAtAD', angles: 'suppConfirmLater' }, chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
     // ∠B then ∠C get the focus as they are named, then the answers slide in. A correct answer shows
     // the real sum, and 105° turns onto the extended base beside 75° (okFx)
-    { id: 'askBC', practice: 1, fitBox: { cy: 312, h: 300 }, optTop: 486, chipTop: 100, idle: 'What about ∠B and ∠C?',
+    // voiceDelay: the board glides into this smaller frame first, so the question chip never meets corner A on the way
+    { id: 'askBC', practice: 1, fitBox: { cy: 326, h: 282 }, optTop: 486, chipTop: 100, voiceDelay: 750, idle: 'What about ∠B and ∠C?',
       optsAfter: 1, okSum: ['B', 'C'], okFx: 'suppAtBC',
       // cueTimes from the recording (vo060): "angle B" 0.90-1.66 s (B at 1.40), "angle C" 2.08-2.70 (C at 2.44)
       lines: [{ m: 'curious', t: 'What about ∠B and ∠C?', angleCues: 1, pairEnd: ['B', 'C'], onStart: 'askIn', cueTimes: { '∠B': 1.4, '∠C': 2.44 }, chips: [{ t: '∠B + ∠C = ?', k: 'white' }] }],
