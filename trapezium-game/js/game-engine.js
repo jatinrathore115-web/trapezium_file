@@ -282,16 +282,6 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const ctx = this.actx;
     try {
       const now = ctx.currentTime;
-      if (kind === 'rustle') { // three soft crunches of snow (Chilly is coming): short bursts of filtered noise
-        const len = Math.floor(ctx.sampleRate * 0.12), buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
-        for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
-        [0, 0.12, 0.26].forEach((t0, i) => {
-          const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
-          s.buffer = buf; f.type = 'bandpass'; f.frequency.value = [2200, 1600, 2600][i]; f.Q.value = 0.9; g.gain.value = 0.35;
-          s.connect(f); f.connect(g); g.connect(ctx.destination); s.start(now + t0);
-        });
-        return;
-      }
       // synthesized fallback; each note is [freq, start, length, optional glide-to freq]
       const N = {
         tap: [[700, 0, 0.07]], pop: [[520, 0, 0.07], [780, 0.06, 0.09]],
@@ -303,10 +293,9 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
         draw: [[520, 0, 0.18, 760]], shimmer: [[1320, 0, 0.08], [1760, 0.05, 0.08], [2093, 0.1, 0.14]],
         whoosh: [[300, 0, 0.24, 900]], morph: [[440, 0, 0.3, 640]], chime: [[784, 0, 0.12], [1047, 0.08, 0.22]],
         tick: [[1600, 0, 0.035]], warm: [[523, 0, 0.14], [659, 0.08, 0.14], [784, 0.16, 0.28]],
-        boing: [[220, 0, 0.32, 620]], giggle: [[900, 0, 0.09, 1180], [840, 0.15, 0.09, 1110], [780, 0.3, 0.09, 1040], [720, 0.46, 0.1, 970]], // Chilly
         flourish: [[659, 0, 0.1], [784, 0.07, 0.1], [988, 0.14, 0.1], [1319, 0.21, 0.3]]
       }[kind] || [];
-      const soft = ['draw', 'shimmer', 'whoosh', 'morph', 'chime', 'tick', 'warm', 'flourish', 'boing', 'giggle'].indexOf(kind) >= 0;
+      const soft = ['draw', 'shimmer', 'whoosh', 'morph', 'chime', 'tick', 'warm', 'flourish'].indexOf(kind) >= 0;
       N.forEach((n) => {
         const o = ctx.createOscillator(), g = ctx.createGain();
         o.type = kind === 'bad' ? 'square' : 'triangle';
@@ -620,7 +609,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       this.idleId = null;
       if (tok !== this.stepTok || !this.needsInput()) return;
       if (this.state.swAway) return; // no reminder while Swiftee is out measuring
-      if (this.drag || this.ld || this.rulerBusy || this.state.talking || this.gagOn) { this.armIdle(); return; }
+      if (this.drag || this.ld || this.rulerBusy || this.state.talking) { this.armIdle(); return; }
       if ((this.idleCount || 0) >= CONFIG.timing.idleMaxHints) return;
       this.idleCount = (this.idleCount || 0) + 1;
       const st = this.cur();
@@ -642,7 +631,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       const st = this.cur();
       if (tok !== this.stepTok || this.antic) return;
       if (st.summary || st.hero || this.state.swAway || this.state.navOpen) return;
-      if (this.state.talking || this.drag || this.ld || this.rulerBusy || this.gagOn || this.q) { this.armAntic(); return; }
+      if (this.state.talking || this.drag || this.ld || this.rulerBusy || this.q) { this.armAntic(); return; }
       const A = CONFIG.antics.list;
       this.antic = A[(this.anticN = ((this.anticN || 0) + 1)) % A.length];
       this.pose(this.antic);
@@ -760,7 +749,6 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (this.aw) this.aw.cancel(); // stop screen 23's protractor walk so no late reading comes in
     this.stepTok++; this.narrTok++;
     if (window.Summary) Summary.stop(); // stop screen 37's summary
-    if (window.Chilly) Chilly.stop(); this.gagOn = false;
     if (window.Finale) Finale.stop(); // the end screen's closer
     this.endAntic(true);
     Motion.cueReset(); // clear cue marks left by the last screen
@@ -797,11 +785,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
         else this.autoExtend(['AB', 'CD']);
       }
       else if (st.summary && window.Summary) Summary.start(this); // screen 37: the summary cards, one by one
-      else if (st.finale && window.Finale) { if (window.Chilly) Chilly.place(this, 'end', 'happy'); this.tm(() => Finale.play(this), 500); } // screen 44: The End
-      else if (st.gag && window.Chilly) { // Chilly the snowman drops by (then any lines after him, then the end screen's closer)
-        const next = () => this.maybeAdvance(true);
-        Chilly.visit(this, st.gag, () => (st.gag.after ? this.playLines(st.gag.after, next) : next()), st.gag.spot);
-      }
+      else if (st.finale && window.Finale) this.tm(() => Finale.play(this), 500); // screen 44: The End
       else this.maybeAdvance(true);
     });
     // voiceDelay (ms): Swiftee waits for the screen's opening animation before she speaks
@@ -1386,7 +1370,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (won === ids.length && first === won) t = 'You won all five snowflakes,\nevery one on the first try!';
     else if (won === ids.length) t = 'You won all five snowflakes!\n' + (first ? N[first].charAt(0).toUpperCase() + N[first].slice(1) + ' on the first try.' : 'Well done!');
     else if (won) t = 'You won ' + N[won] + ' snowflake' + (won > 1 ? 's' : '') + '!';
-    return t ? st.lines.concat([{ m: 'proud', t: t, cueAt: { snowflake: 'flakesEnd' } }]) : st.lines;
+    return t ? [st.lines[0], { m: 'proud', t: t, cueAt: { snowflake: 'flakesEnd' } }].concat(st.lines.slice(1)) : st.lines;
   }
   // an answer tapped on a check or practice screen; results keep whether each check was right first time
   pick(o) {

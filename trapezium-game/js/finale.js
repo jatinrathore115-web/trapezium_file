@@ -1,5 +1,5 @@
 // =====================================================================
-// FINALE - the old-cartoon closer on the end screen. After Swiftee's goodbye an iris closes in on her and Chilly,
+// FINALE - the old-cartoon closer on the end screen. After Swiftee's goodbye an iris closes in on her,
 // the dark round the circle turns into a turning sunburst, the circle (with the two of them inside) slides to the left
 // and "The End" bounces in beside it letter by letter, with twinkling sparkles. It is screen 44, the last one.
 // A round button plays the game again from the front page; the screen list (top left) still jumps to any screen.
@@ -9,9 +9,9 @@
   const G = window.gsap;
   const reduced = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   // stage px: the iris centre and radius as it closes round the two of them (centre stage), and where it ends up
-  const CLOSE = { x: 775, y: 445, r: 255 }, END = { x: 405, y: 385 };
-  // inside the circle they grow a little and huddle together: Swiftee's and Chilly's moves (stage px) and their scale
-  const SW_TO = { x: -340, y: -37 }, CH_TO = { x: -398, y: -37 }, ZOOM = 1.25;
+  const CLOSE = { x: 640, y: 445, r: 255 }, END = { x: 405, y: 385 };
+  // inside the circle she grows a little: her move (stage px) and scale
+  const SW_TO = { x: -235, y: -42 }, ZOOM = 1.4;
   const TITLE = 'The End';
   const SPARKS = [[1090, 200, 1], [1015, 530, 0.7], [740, 160, 0.6], [1215, 420, 0.8], [880, 245, 0.5]];
 
@@ -46,8 +46,7 @@
       const againLab = el('div', 'fin-again-lab', root, 'Play again');
       again.addEventListener('click', () => { eng.sfx('tap'); setTimeout(() => location.reload(), 150); });
 
-      const sw = document.querySelector('.stage .swiftee'), ch = document.querySelector('.stage .chilly-root');
-      const chBody = ch && ch.querySelector('.chilly');
+      const sw = document.querySelector('.stage .swiftee');
       // "The End!" in Swiftee's voice as the title lands
       const sayEnd = () => {
         const s = eng.synth && eng.synth();
@@ -70,23 +69,21 @@
           .to(sun, { opacity: 1, duration: D(0.6), ease: 'sine.out' }, D(1.9))
           .to(dark, { opacity: 0, duration: D(0.6), ease: 'sine.out' }, D(1.9))
           .fromTo(ring, { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1, duration: D(0.45), ease: 'back.out(2.4)' }, D(2.0))
-        // 3. the circle slides left, taking them with it
+        // 3. the circle slides left, taking her with it
           .to(root, { '--x': END.x + 'px', '--y': END.y + 'px', duration: D(1), ease: 'power2.inOut' }, D(2.6));
         if (sw) tl.to(sw, { x: SW_TO.x, y: SW_TO.y, scale: ZOOM, transformOrigin: '50% 88%', duration: D(1), ease: 'power2.inOut' }, D(2.6));
-        if (ch) tl.to(ch, { x: CH_TO.x, y: CH_TO.y, scale: ZOOM, transformOrigin: '918px 557px', duration: D(1), ease: 'power2.inOut' }, D(2.6));
         // 4. "The End" drops in letter by letter, each landing with a bounce
         tl.call(() => eng.sfx('flourish'), null, D(3.6))
           .fromTo(letters, { opacity: 0, y: -150, scale: 0.3, rotation: (i) => (i % 2 ? 24 : -24) },
             { opacity: 1, y: 0, scale: 1, rotation: 0, duration: D(0.55), ease: 'back.out(2.8)', stagger: D(0.09) }, D(3.6))
-          .call(() => { eng.sfx('good'); sayEnd(); if (window.Confetti) window.Confetti.burst(); eng.pose('celebrating'); if (window.Chilly) Chilly.pose('laugh'); }, null, D(4.4))
+          .call(() => { eng.sfx('good'); sayEnd(); if (window.Confetti) window.Confetti.burst(); eng.pose('celebrating'); }, null, D(4.4))
           .fromTo(again, { opacity: 0, scale: 0 }, { opacity: 1, scale: 1, duration: D(0.45), ease: 'back.out(2.4)' }, D(4.9))
           .to(againLab, { opacity: 1, duration: D(0.3) }, D(5.2));
-        // and then it keeps playing: the sunburst turns, the sparkles twinkle, the title wobbles, Chilly bounces
+        // and then it keeps playing: the sunburst turns, the sparkles twinkle, the title wobbles
         if (!R) {
           G.to(root, { '--a': '360deg', duration: 40, ease: 'none', repeat: -1 });
           sparks.forEach((s, i) => G.fromTo(s, { opacity: 0, scale: 0.2, rotation: 0 }, { opacity: 1, scale: +s.dataset.k, rotation: 90, duration: 0.8, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 4.5 + i * 0.37, repeatDelay: 0.6 }));
           G.to(title, { rotation: 2, duration: 1.1, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 5, transformOrigin: '50% 60%' });
-          if (chBody) G.to(chBody, { y: -12, duration: 0.35, ease: 'sine.out', yoyo: true, repeat: -1, repeatDelay: 0.5, delay: 4.6 });
           G.to(again, { scale: 1.08, duration: 0.7, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 5.5 });
         } else G.set(sparks, { opacity: 1 });
         return tl;

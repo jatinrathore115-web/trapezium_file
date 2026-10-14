@@ -25,7 +25,7 @@ The stage is 1920 × 1080 and scales to fit any window. Mouse, touch and pen all
 | 23–35 | Angles: Swiftee measures the angles with a protractor, same-leg angles add to 180°, supplementary angles, right trapezium |
 | 36–37 | Well done, and the summary (eight idea cards) |
 | 38–42 | Five checks, the Snowflake Challenge (a snowflake for each right answer) |
-| 43 | Lesson complete: the snowflakes won, Chilly, goodbye |
+| 43 | Lesson complete: the snowflakes won, goodbye |
 | 44 | The End: the cartoon closer and Play again |
 
 ## Folder
@@ -49,7 +49,6 @@ trapezium-game/
 │   ├── angle-frames.js   the protractor poses
 │   ├── summary.js        screen 37: the summary cards
 │   ├── intro.js          the cabin intro between the front page and screen 1
-│   ├── chilly.js         Chilly the snowman's visits (the running gag)
 │   ├── finale.js         screen 44: the cartoon closer, "The End"
 │   ├── stage-fit.js, snowfall.js, confetti.js
 ├── assets/

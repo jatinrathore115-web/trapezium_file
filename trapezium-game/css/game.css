@@ -608,23 +608,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 .eq-layer .zzz i:nth-child(2){font-size:28px;animation-delay:.8s}
 .eq-layer .zzz i:nth-child(3){font-size:34px;animation-delay:1.6s}
 @keyframes zzzUp{0%{opacity:0;transform:translate(0,0) rotate(-10deg) scale(.6)}20%{opacity:1}100%{opacity:0;transform:translate(26px,-70px) rotate(12deg) scale(1.1)}}
-/* Chilly the snowman (js/chilly.js): pops up from the snow between Swiftee and the ice panel */
-.chilly-root{position:absolute;left:0;top:0;width:1280px;height:720px;pointer-events:none;z-index:7;overflow:hidden}
-.chilly{position:absolute;left:277px;top:441px;width:236px;height:236px;background:url(../assets/images/snowman.webp) 0 0/400% 100% no-repeat}
-/* the snow drift in front of him: his base sinks into it, on the same ground as Swiftee */
-.chilly-drift{position:absolute;left:255px;top:622px;width:280px;height:96px;background:url(../assets/images/snow-drift.webp) 0 0/100% 100% no-repeat}
-.chilly-bubble{position:absolute;left:250px;bottom:276px;max-width:300px;width:max-content;box-sizing:border-box;padding:12px 18px 13px;opacity:0;
-  background:#f4fbff;border:3px solid #5aa9e6;border-radius:20px;box-shadow:0 6px 16px rgba(18,59,99,.16);transform-origin:40% 100%;
-  font:800 21px/1.25 'Nunito','Noto Sans Math',system-ui,sans-serif;color:#123b63;text-align:center}
-.chilly-bubble::after{content:'';position:absolute;left:96px;bottom:-14px;width:22px;height:22px;background:#f4fbff;border:3px solid #5aa9e6;
-  border-top:0;border-left:0;transform:rotate(45deg);border-bottom-right-radius:5px}
-.chilly-bubble .key{color:#e06600}
-.chilly-puff{position:absolute;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff 0 45%,#e3f0fc 75%,#bcd6ef 100%);box-shadow:0 2px 5px rgba(40,90,150,.35),0 0 8px rgba(255,255,255,.9);pointer-events:none}
-/* in the intro he says hello beside Swiftee's cabin steps, in front of the cabin */
-.stage.intro .chilly-root{z-index:10}
-.chilly-root.cabin .chilly{left:900px;top:462px}
-.chilly-root.cabin .chilly-drift{left:878px;top:643px}
-.chilly-root.cabin .chilly-bubble{left:873px;bottom:261px}
 @media (prefers-reduced-motion: reduce){.eq-layer .zzz i{animation:none;opacity:.8}}
 /* ---------- the Snowflake Challenge (screens 38-43): one snowflake per check ---------- */
 .flake-bar{position:absolute;left:640px;top:12px;transform:translateX(-50%);display:flex;gap:10px;padding:6px 14px;border-radius:32px;z-index:6;pointer-events:none;
@@ -649,10 +632,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 .q1-par,.q1-chev,.q2-eq,.q5-leg,.q5-bc,.q5-hab,.q5-hcd,.q5-hl{opacity:0}
 .eq-layer .fx-fly{position:absolute;padding:2px 12px;border-radius:14px;background:#fff;border:3px solid #2e9e4f;color:#1d6b35;white-space:nowrap;pointer-events:none;
   font:900 22px 'Nunito','Noto Sans Math',system-ui,sans-serif;box-shadow:0 4px 12px rgba(18,59,99,.25)}
-/* on the end screen he pops up beside Swiftee, centre stage */
-.chilly-root.end .chilly{left:800px;top:330px}
-.chilly-root.end .chilly-drift{left:778px;top:511px}
-.chilly-root.end .chilly-bubble{left:773px;bottom:393px}
 /* ---------- the end screen's cartoon closer (js/finale.js) ----------
    --x / --y / --r: the iris (stage px); --a: the sunburst's turn */
 .finale-root{position:absolute;left:0;top:0;width:1280px;height:720px;z-index:40;pointer-events:none}

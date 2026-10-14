@@ -58,9 +58,6 @@
 //   noPanel      no ice panel
 //   summary      the Summary Kit's recall cards (js/summary.js)
 //   noIdle       no idle reminders
-//   gag          { chilly, swiftee }: after the lines, Chilly the snowman drops by with a mix-up question and Swiftee
-//                answers (js/chilly.js); optional call (his first words, default "Psst, Swiftee!"), m (Swiftee's
-//                expression), spot ('end': beside her on the end screen)
 //   cfu          check number (1-5); each wins a snowflake in the Snowflake Challenge bar (gold if right first time)
 //   okFx / badFx Motion functions run on a right / wrong answer (they show why on the shape)
 //   qFocus       after the question the shape glides up and the answers come in under it (CONFIG.qFocus)
@@ -144,13 +141,13 @@ const LESSON = {
     { id: 'abcd', lines: [{ t: 'This means the sides are parallel to each other.', cueAt: { parallel: 'parPulse' } },
       { keep: 1, s: 'A B is parallel to C D.', chipsAfterParts: ['AB', 'CD'], chips: [{ t: 'AB ∥ CD', k: 'white' }] }], f: { par: 1 } },
     { id: 'onePair', lines: [{ t: "So this quadrilateral has\none pair of parallel sides.", noEmph: 1, cueAt: { parallel: 'parPulse' }, chips: [{ t: 'AB ∥ CD', k: 'white' }] }], f: { par: 1 } },
-    { id: 'def', gag: { chilly: 'Tra-pee-zee-um? Is that a new kind of snowflake?', swiftee: "Ha ha! No, Chilly!\nIt's a shape with one pair\nof parallel sides." }, lines: [{ t: 'We call this a trapezium.', pulse: 1, pulseAt: 'trapezium', chipsAt: 'trapezium', chipsAfterPulse: 1, holdChips: 1, chips: [{ t: 'Trapezium', k: 'name' }] }], f: { par: 1 } },
+    { id: 'def', lines: [{ t: 'We call this a trapezium.', pulse: 1, pulseAt: 'trapezium', chipsAt: 'trapezium', chipsAfterPulse: 1, holdChips: 1, chips: [{ t: 'Trapezium', k: 'name' }] }], f: { par: 1 } },
     // "quadrilateral": the sides trace in; "parallel": AB and DC glow and the arrows pop on;
     // "trapezium": the name label pops in
     { id: 'defFull', legsSet: 1, chevPre: 1, lines: [{ t: 'A quadrilateral with at least\none pair of parallel sides\nis called a trapezium.', noEmph: 1, holdChips: 1,
       cueAt: { quadrilateral: 'defTrace', parallel: 'defParallel', trapezium: 'showTitle' }, chips: [{ t: 'Trapezium', k: 'name' }] }], f: { par: 1 } },
     { id: 'bases', lines: [{ t: 'The parallel sides\nare called bases.', glow: ['AB', 'CD'], focusAt: 'parallel', glowAt: 'bases', callout: 'bases' }], f: { par: 1 } },
-    { id: 'legs', gag: { chilly: "Legs? But I don't have any legs!", swiftee: 'Hee hee! In a trapezium,\nthe legs are the two sides\nthat are not parallel.' }, lines: [{ t: 'The other two sides\nare called legs.', glow: ['DA', 'BC'], focusAt: 'other', glowAt: 'legs', callout: 'legs' }], f: { par: 1 } },
+    { id: 'legs', lines: [{ t: 'The other two sides\nare called legs.', glow: ['DA', 'BC'], focusAt: 'other', glowAt: 'legs', callout: 'legs' }], f: { par: 1 } },
     // after the line Swiftee walks out and measures each side; on "sides" each length pops in its own colour
     { id: 'measure', room: 'measure', lines: [{ m: 'curious', t: "Let's measure the sides\nof this trapezium." }], task: 'measure', auto: 1,
       after: [{ m: 'surprised', t: 'Woah! All the sides of\nthis trapezium are of\ndifferent lengths.', s: 'Whoa! All the sides of this trapezium are of different lengths.', noEmph: 1, cueAt: { sides: 'lenColors' } }], hint: 'Tap the glowing side to measure it', idle: 'Tap the glowing side and I will measure it.', f: { par: 1 } },
@@ -173,7 +170,7 @@ const LESSON = {
       f: { par: 1, legLen: 1, sideLen: 1 } },
     // "trapezium": the shape pops; "same": both legs light up with their lengths;
     // "isosceles": the lengths shrink into the equal marks, then the name label pops in
-    { id: 'iso', gag: { chilly: 'Isos... isosceles... ah... ah... ah-CHOO!', swiftee: 'Bless you, Chilly!\nIsosceles means both legs\nare the same length.' }, lenPre: 1, tickPre: 1, lines: [{ t: 'A trapezium where legs are\nof same length is called\nan isosceles trapezium.', legsAt: 'same', holdChips: 1, noEmph: 1,
+    { id: 'iso', lenPre: 1, tickPre: 1, lines: [{ t: 'A trapezium where legs are\nof same length is called\nan isosceles trapezium.', legsAt: 'same', holdChips: 1, noEmph: 1,
       cueAt: { trapezium: 'shapePop', isosceles: 'isoName' }, chips: [{ t: 'Isosceles trapezium', k: 'name' }] }],
       f: { par: 1, legLen: 1, ticks: 1 } },
     // from here on the angle shape (A 120°, B 105°, C 75°, D 60°); it fades in as she starts,
@@ -218,7 +215,7 @@ const LESSON = {
       task: 'drag90', hint: 'Drag a corner until an angle is 90°', idle: 'Drag a corner slowly and stop when an angle shows 90°.',
       after: [{ m: 'happy', t: 'Great job!' }], f: { par: 1, arcs: 'ABCD' } },
     // the learner's right angle glows; on "another" its partner on the same leg (also 90°) joins it
-    { id: 'another90', gag: { chilly: 'Another right angle? Is there a left angle too?', swiftee: 'Ha ha! A right angle is\njust a square corner of 90°.' }, lines: [{ m: 'surprised', t: 'Woah! We got another\nright angle.', noEmph: 1, cueAt: { woah: 'anotherStart', another: 'anotherReveal' } }], f: { par: 1, arcs: 'ABCD' } },
+    { id: 'another90', lines: [{ m: 'surprised', t: 'Woah! We got another\nright angle.', noEmph: 1, cueAt: { woah: 'anotherStart', another: 'anotherReveal' } }], f: { par: 1, arcs: 'ABCD' } },
     // "trapezium": the outline traces in; "adjacent": the arrows pop on; "right": both 90° marks appear;
     // "called": the name label. Then the learner taps the two 90° corners
     { id: 'right', shape: 'right', right90: 1, r90Pre: 1, chevPre: 1, rightTap: 1, okCheck: 1,
@@ -274,12 +271,11 @@ const LESSON = {
         { id: 'c', t: '6 cm', fb: '6 cm is the top base AB. BC is a leg, like AD.' },
         { id: 'd', t: '10 cm', fb: '10 cm is the bottom base CD. BC is a leg, like AD.' }
       ] },
-    // Swiftee flies to centre stage and speaks once she has landed; the result is laid out around her
-    // then Chilly pops up beside her to join the party and she says goodbye; screen 44 follows by itself
+    // Swiftee flies to centre stage and speaks once she has landed; the snowflakes won land as she counts them (the
+    // engine adds that line after the first), she says goodbye, and screen 44 follows by itself
     { id: 'end', end: 1, hero: 1, voiceDelay: 1100, autoNext: 700,
-      gag: { spot: 'end', stay: 1, call: 'Hooray! Hooray!', chilly: 'Can I have a snowflake too?', swiftee: 'Ha ha! Chilly, you are made\nof snowflakes!',
-        after: [{ m: 'waving', t: 'Bye for now! See you on\nour next snowy adventure!' }] }, lines: [{ m: 'celebrating', t: 'Amazing work! You know all about trapeziums now.' }] },
-    // the cartoon closer (js/finale.js): an iris closes on Swiftee and Chilly, the sunburst, "The End", Play again
+      lines: [{ m: 'celebrating', t: 'Amazing work! You know all about trapeziums now.' }, { m: 'waving', t: 'Bye for now! See you on\nour next snowy adventure!' }] },
+    // the cartoon closer (js/finale.js): an iris closes on Swiftee, the sunburst, "The End", Play again
     { id: 'theEnd', end: 1, hero: 1, finale: 1, noIdle: 1, lines: [] }
   ],
   cfu4: {

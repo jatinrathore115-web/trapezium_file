@@ -2,8 +2,7 @@
 // INTRO - the little story between the front page and screen 1. After Play a gust of blowing snow clears onto
 // Swiftee's cabin as the camera pushes in; the doorbell rings (a two-tone chime, the lantern flares,
 // golden ripples spread from the door, snow shakes off the porch roof); the door swings open inward with warm
-// light; Swiftee hops out onto the steps and says hello; her friend Chilly the snowman pops up out of the snow
-// beside the steps and asks to come along; then she flies off and the camera pulls back through
+// light; Swiftee hops out onto the steps and says hello; then she flies off and the camera pulls back through
 // another gust of snow onto the lesson's landscape while she hops down to her usual spot, so the last frame is the lesson's first one.
 // Nothing to tap: it plays by itself, and Skip ends it at once.
 // The door: the two cabin pictures are the same except round the doorway, so the open picture is shown as soon as
@@ -34,9 +33,6 @@
     { m: 'curious', t: 'Today I have a special\nshape to show you.' },
     { m: 'excited', t: "It's called a trapezium.\nLet's go and explore it!" }
   ];
-  // once she says "let's go", her friend Chilly the snowman pops up by the steps (js/chilly.js) and asks to come
-  // along; he dives back into the snow to travel (that is how he pops up in the lesson), and she flies off
-  const MEET_CHILLY = { call: 'Wait! Wait for me!', chilly: "I'm Chilly the snowman.\nCan I come too?", m: 'excited', swiftee: 'Ha ha! Of course, Chilly!\nLet\'s all go together!' };
 
   const el = (tag, cls, parent, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (parent) parent.appendChild(e); return e; };
   const at = (e, p) => { e.style.left = p.x + 'px'; e.style.top = p.y + 'px'; };
@@ -151,9 +147,7 @@
         })
         // ---------- 5. hello! ----------
         .then(() => LINES.reduce((p, L) => p.then(() => say(L)), Promise.resolve()))
-        // ---------- 6. "Wait for me!" Chilly asks to come too ----------
-        .then(() => (live() && window.Chilly ? new Promise((res) => Chilly.visit(eng, MEET_CHILLY, res, 'cabin')) : null))
-        // ---------- 7. Swiftee flies off; the camera pulls back through a snowy white-out onto the landscape ----------
+        // ---------- 6. Swiftee flies off; the camera pulls back through a snowy white-out onto the landscape ----------
         .then(() => {
           if (!live()) return;
           eng.setState({ bubOff: true }); eng.pose('flapping'); eng.sfx('whoosh');
@@ -184,7 +178,6 @@
     stop() {
       this.run++;
       if (this.ctx) { this.ctx.revert(); this.ctx = null; }
-      if (window.Chilly) Chilly.stop();
       const sw = document.querySelector('.stage .swiftee');
       if (sw && G) G.set(sw, { clearProps: 'transform,opacity' });
       if (this.root) this.root.innerHTML = '';
