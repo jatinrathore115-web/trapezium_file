@@ -1761,7 +1761,8 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       // the square right-angle mark
       const q = 20;
       g['r' + k] = {
-        p: 'M' + r1(Vk.x + u.x * q) + ',' + r1(Vk.y + u.y * q) + ' L' + r1(Vk.x + u.x * q + v.x * q) + ',' + r1(Vk.y + u.y * q + v.y * q) + ' L' + r1(Vk.x + v.x * q) + ',' + r1(Vk.y + v.y * q),
+        // a closed square from the corner itself, so the whole square fills (its edges along the sides sit under them)
+        p: 'M' + r1(Vk.x) + ',' + r1(Vk.y) + ' L' + r1(Vk.x + u.x * q) + ',' + r1(Vk.y + u.y * q) + ' L' + r1(Vk.x + u.x * q + v.x * q) + ',' + r1(Vk.y + u.y * q + v.y * q) + ' L' + r1(Vk.x + v.x * q) + ',' + r1(Vk.y + v.y * q) + ' Z',
         d: dsp(isRight && (f.right || show))
       };
 
@@ -1788,7 +1789,12 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       g['v' + k] = { x: r1(Vk.x), y: r1(Vk.y), r: vOn(k) ? (drag ? 11 : 7) + (em['v' + k] ? 4 : 0) : 0, c: drag ? PU : NAVY, w: drag ? 4 : 3, ping: 'ping' + (em['v' + k] && vOn(k) ? ' on' : '') };
       const tapV = !!st.rightTap && (s.linesDone || !s.talking); // listen first; after that taps work even while she answers a wrong one
       const pulse = tapV && (k === 'A' || k === 'D');
+      // any-corner drags (screens 29, 33): ‹ › arrows on the side line either side of each corner say "slide me this
+      // way", until the learner has dragged one
+      const hx = Vk.x, hy = Vk.y;
       g['k' + k] = {
+        dh: 'M' + r1(hx - 21) + ',' + r1(hy - 8) + ' L' + r1(hx - 30) + ',' + r1(hy) + ' L' + r1(hx - 21) + ',' + r1(hy + 8) + ' M' + r1(hx + 21) + ',' + r1(hy - 8) + ' L' + r1(hx + 30) + ',' + r1(hy) + ' L' + r1(hx + 21) + ',' + r1(hy + 8),
+        dd: dsp(anyV && !s.moved && !s.explored && !s.dragging),
         x: r1(Vk.x), y: r1(Vk.y), d: dsp(tapV || drag), cls: pulse || (anyV && !s.dragging) ? 'vp' : '',
         cur: drag ? (s.dragging ? 'grabbing' : 'grab') : 'pointer',
         click: tapV ? () => this.rightTap(k) : noop,

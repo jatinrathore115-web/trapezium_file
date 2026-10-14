@@ -103,6 +103,14 @@
 <circle class="{{g.vB.ping}}" sc-camel-cx="{{g.vB.x}}" sc-camel-cy="{{g.vB.y}}" r="15" fill="none" stroke="#ffb800" stroke-width="5" pointer-events="none"></circle>
 <circle class="{{g.vC.ping}}" sc-camel-cx="{{g.vC.x}}" sc-camel-cy="{{g.vC.y}}" r="15" fill="none" stroke="#ffb800" stroke-width="5" pointer-events="none"></circle>
 <circle class="{{g.vD.ping}}" sc-camel-cx="{{g.vD.x}}" sc-camel-cy="{{g.vD.y}}" r="15" fill="none" stroke="#ffb800" stroke-width="5" pointer-events="none"></circle>
+<path class="drag-hint-h" sc-camel-d="{{g.kA.dh}}" sc-camel-display="{{g.kA.dd}}" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"></path>
+<path class="drag-hint" sc-camel-d="{{g.kA.dh}}" sc-camel-display="{{g.kA.dd}}" fill="none" stroke="#ff7a00" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"></path>
+<path class="drag-hint-h" sc-camel-d="{{g.kB.dh}}" sc-camel-display="{{g.kB.dd}}" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"></path>
+<path class="drag-hint" sc-camel-d="{{g.kB.dh}}" sc-camel-display="{{g.kB.dd}}" fill="none" stroke="#ff7a00" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"></path>
+<path class="drag-hint-h" sc-camel-d="{{g.kC.dh}}" sc-camel-display="{{g.kC.dd}}" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"></path>
+<path class="drag-hint" sc-camel-d="{{g.kC.dh}}" sc-camel-display="{{g.kC.dd}}" fill="none" stroke="#ff7a00" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"></path>
+<path class="drag-hint-h" sc-camel-d="{{g.kD.dh}}" sc-camel-display="{{g.kD.dd}}" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"></path>
+<path class="drag-hint" sc-camel-d="{{g.kD.dh}}" sc-camel-display="{{g.kD.dd}}" fill="none" stroke="#ff7a00" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"></path>
 <circle class="vdot" sc-camel-cx="{{g.vA.x}}" sc-camel-cy="{{g.vA.y}}" sc-camel-r="{{g.vA.r}}" fill="#fff" stroke="{{g.vA.c}}" sc-camel-stroke-width="{{g.vA.w}}"></circle>
 <circle class="vdot" sc-camel-cx="{{g.vB.x}}" sc-camel-cy="{{g.vB.y}}" sc-camel-r="{{g.vB.r}}" fill="#fff" stroke="{{g.vB.c}}" sc-camel-stroke-width="{{g.vB.w}}"></circle>
 <circle class="vdot" sc-camel-cx="{{g.vC.x}}" sc-camel-cy="{{g.vC.y}}" sc-camel-r="{{g.vC.r}}" fill="#fff" stroke="{{g.vC.c}}" sc-camel-stroke-width="{{g.vC.w}}"></circle>
@@ -306,7 +314,7 @@
 </sc-if>
 
 <sc-if value="{{showDone}}" hint-placeholder-val="{{ false }}">
-<button class="navbtn done-btn" data-qa="done" aria-label="Done" onClick="{{doneExplore}}">Done</button>
+<button class="done-btn" data-qa="done" aria-label="Done" onClick="{{doneExplore}}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Done</button>
 </sc-if>
 <div class="topnav" style="position: absolute; right: 24px; top: 16px; display: flex; gap: 10px">
 <button class="navbtn" data-qa="nav-back" aria-label="Back" disabled="{{navBackDis}}" onClick="{{navBack}}">Back</button>
