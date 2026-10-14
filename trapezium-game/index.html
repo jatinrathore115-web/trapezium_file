@@ -99,10 +99,6 @@
 </g>
 </g>
 <circle sc-camel-cx="{{g.halo.x}}" sc-camel-cy="{{g.halo.y}}" r="19" sc-camel-display="{{g.halo.d}}" class="halo" fill="none" stroke="#00c4a7"></circle>
-<circle class="{{g.vA.ping}}" sc-camel-cx="{{g.vA.x}}" sc-camel-cy="{{g.vA.y}}" r="15" fill="none" stroke="#ffb800" stroke-width="5" pointer-events="none"></circle>
-<circle class="{{g.vB.ping}}" sc-camel-cx="{{g.vB.x}}" sc-camel-cy="{{g.vB.y}}" r="15" fill="none" stroke="#ffb800" stroke-width="5" pointer-events="none"></circle>
-<circle class="{{g.vC.ping}}" sc-camel-cx="{{g.vC.x}}" sc-camel-cy="{{g.vC.y}}" r="15" fill="none" stroke="#ffb800" stroke-width="5" pointer-events="none"></circle>
-<circle class="{{g.vD.ping}}" sc-camel-cx="{{g.vD.x}}" sc-camel-cy="{{g.vD.y}}" r="15" fill="none" stroke="#ffb800" stroke-width="5" pointer-events="none"></circle>
 <path class="drag-hint-h" sc-camel-d="{{g.kA.dh}}" sc-camel-display="{{g.kA.dd}}" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"></path>
 <path class="drag-hint" sc-camel-d="{{g.kA.dh}}" sc-camel-display="{{g.kA.dd}}" fill="none" stroke="#ff7a00" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"></path>
 <path class="drag-hint-h" sc-camel-d="{{g.kB.dh}}" sc-camel-display="{{g.kB.dd}}" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"></path>
@@ -111,10 +107,10 @@
 <path class="drag-hint" sc-camel-d="{{g.kC.dh}}" sc-camel-display="{{g.kC.dd}}" fill="none" stroke="#ff7a00" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"></path>
 <path class="drag-hint-h" sc-camel-d="{{g.kD.dh}}" sc-camel-display="{{g.kD.dd}}" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"></path>
 <path class="drag-hint" sc-camel-d="{{g.kD.dh}}" sc-camel-display="{{g.kD.dd}}" fill="none" stroke="#ff7a00" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"></path>
-<circle class="vdot" sc-camel-cx="{{g.vA.x}}" sc-camel-cy="{{g.vA.y}}" sc-camel-r="{{g.vA.r}}" fill="#fff" stroke="{{g.vA.c}}" sc-camel-stroke-width="{{g.vA.w}}"></circle>
-<circle class="vdot" sc-camel-cx="{{g.vB.x}}" sc-camel-cy="{{g.vB.y}}" sc-camel-r="{{g.vB.r}}" fill="#fff" stroke="{{g.vB.c}}" sc-camel-stroke-width="{{g.vB.w}}"></circle>
-<circle class="vdot" sc-camel-cx="{{g.vC.x}}" sc-camel-cy="{{g.vC.y}}" sc-camel-r="{{g.vC.r}}" fill="#fff" stroke="{{g.vC.c}}" sc-camel-stroke-width="{{g.vC.w}}"></circle>
-<circle class="vdot" sc-camel-cx="{{g.vD.x}}" sc-camel-cy="{{g.vD.y}}" sc-camel-r="{{g.vD.r}}" fill="#fff" stroke="{{g.vD.c}}" sc-camel-stroke-width="{{g.vD.w}}"></circle>
+<circle class="vdot {{g.vA.cls}}" sc-camel-cx="{{g.vA.x}}" sc-camel-cy="{{g.vA.y}}" sc-camel-r="{{g.vA.r}}" fill="#fff" stroke="{{g.vA.c}}" sc-camel-stroke-width="{{g.vA.w}}"></circle>
+<circle class="vdot {{g.vB.cls}}" sc-camel-cx="{{g.vB.x}}" sc-camel-cy="{{g.vB.y}}" sc-camel-r="{{g.vB.r}}" fill="#fff" stroke="{{g.vB.c}}" sc-camel-stroke-width="{{g.vB.w}}"></circle>
+<circle class="vdot {{g.vC.cls}}" sc-camel-cx="{{g.vC.x}}" sc-camel-cy="{{g.vC.y}}" sc-camel-r="{{g.vC.r}}" fill="#fff" stroke="{{g.vC.c}}" sc-camel-stroke-width="{{g.vC.w}}"></circle>
+<circle class="vdot {{g.vD.cls}}" sc-camel-cx="{{g.vD.x}}" sc-camel-cy="{{g.vD.y}}" sc-camel-r="{{g.vD.r}}" fill="#fff" stroke="{{g.vD.c}}" sc-camel-stroke-width="{{g.vD.w}}"></circle>
 <circle sc-camel-cx="{{g.kA.x}}" sc-camel-cy="{{g.kA.y}}" r="28" data-qa="vtx-A" sc-camel-display="{{g.kA.d}}" class="{{g.kA.cls}}" onClick="{{g.kA.click}}" onPointerDown="{{g.kA.down}}" fill="rgba(0,0,0,0.001)" style="cursor: {{g.kA.cur}}"></circle>
 <circle sc-camel-cx="{{g.kB.x}}" sc-camel-cy="{{g.kB.y}}" r="28" data-qa="vtx-B" sc-camel-display="{{g.kB.d}}" class="{{g.kB.cls}}" onClick="{{g.kB.click}}" onPointerDown="{{g.kB.down}}" fill="rgba(0,0,0,0.001)" style="cursor: {{g.kB.cur}}"></circle>
 <circle sc-camel-cx="{{g.kC.x}}" sc-camel-cy="{{g.kC.y}}" r="28" data-qa="vtx-C" sc-camel-display="{{g.kC.d}}" class="{{g.kC.cls}}" onClick="{{g.kC.click}}" onPointerDown="{{g.kC.down}}" fill="rgba(0,0,0,0.001)" style="cursor: {{g.kC.cur}}"></circle>

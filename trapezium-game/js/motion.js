@@ -63,7 +63,7 @@
   // CSS centres labels on their point with translate(-50%, -50%); GSAP must keep that once it owns the transform
   const centred = (els) => G.set(els, { xPercent: -50, yPercent: -50, x: 0, y: 0 });
   // every element Motion animates; clear() wipes the animated properties from all of them
-  const ANIMATED = '.tag.snum, .tag.vlab, .edge, .vdot, .shape-fill, .outline-settle, .pop-g, .chev, .calp > *, .ticks, .tag.mtag, .okcheck *, .tag.alab, .arc, .wedge, .chip, .chip-res, .xleg, .swiftee, .swiftee canvas, .swiftee img, .bubble, .rmark, .tag.r90, .q3, .q3 *, .q3-hint, .q3-hint *, .q3-fly, .q4s, .q4s *, .slot, .lab, .q4-strip, .q4-card, .q4-link, .opt svg, .qshape, .hl, .ping, .spark, .cal-dot, .q1-par, .q1-chev, .q2-leg, .q2-tick, .q2-eq, .q5-leg, .q5-tick, .q5-ad, .q5-q, .q5-bc, .q5-ab, .q5-cd, .q5-hab, .q5-hcd, .q5-hl';
+  const ANIMATED = '.tag.snum, .tag.vlab, .edge, .vdot, .shape-fill, .outline-settle, .pop-g, .chev, .calp > *, .ticks, .tag.mtag, .okcheck *, .tag.alab, .arc, .wedge, .chip, .chip-res, .xleg, .swiftee, .swiftee canvas, .swiftee img, .bubble, .rmark, .tag.r90, .q3, .q3 *, .q3-hint, .q3-hint *, .q3-fly, .q4s, .q4s *, .slot, .lab, .q4-strip, .q4-card, .q4-link, .opt svg, .qshape, .hl, .spark, .cal-dot, .q1-par, .q1-chev, .q2-leg, .q2-tick, .q2-eq, .q5-leg, .q5-tick, .q5-ad, .q5-q, .q5-bc, .q5-ab, .q5-cd, .q5-hab, .q5-hcd, .q5-hl';
   // the SVG ones among them (clear() removes transform-origin and stroke-dasharray from these by hand)
   const ANIMATED_SVG = '.wedge, .edge, .vdot, .shape-fill, .outline-settle, svg g.pop-g, .chev, .calp > *, .ticks, .okcheck *, .arc, .rmark, .q1-par, .q1-chev, .q2-leg, .q2-tick, .q2-eq, .q5-leg, .q5-tick, .q5-ad, .q5-q, .q5-bc, .q5-ab, .q5-cd, .q5-hab, .q5-hcd, .q5-hl';
 
@@ -442,22 +442,11 @@
         return tl;
       });
     },
-    // a mark arriving: a small yellow ring pings out once at each place it lands (board px). sides: the sides whose
-    // middles carry the mark (arrows sit on the bases, equal marks on the legs); or an element (a right-angle square)
+    // a mark arriving (arrows, equal marks, right-angle squares, the point where legs meet): it glows gold once
     markPing(what) {
       if (!G || reduced) return;
-      const P = window.__trapP && window.__trapP(), host = $('.edge')[0];
-      if (!host) return;
-      let pts = [];
-      if (typeof what === 'string') pts = what.split(',').map((k) => (P ? { x: (P[k[0]].x + P[k[1]].x) / 2, y: (P[k[0]].y + P[k[1]].y) / 2 } : null)).filter(Boolean);
-      else if (what) { let bb = null; try { bb = what.getBBox(); } catch (e) {} if (bb && (bb.width || bb.height)) pts = [{ x: bb.x + bb.width / 2, y: bb.y + bb.height / 2 }]; }
-      pts.forEach((p, i) => {
-        const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        c.setAttribute('class', 'spark'); c.setAttribute('cx', p.x); c.setAttribute('cy', p.y); c.setAttribute('r', 16);
-        c.setAttribute('fill', 'none'); c.setAttribute('stroke', '#ffc400'); c.setAttribute('stroke-width', '5'); c.setAttribute('pointer-events', 'none');
-        host.parentNode.appendChild(c);
-        add(() => G.fromTo(c, { opacity: 1, scale: 0.5, transformOrigin: '50% 50%' }, { opacity: 0, scale: 1.9, duration: 0.75, ease: 'power2.out', delay: i * 0.15, onComplete: () => c.remove() }));
-      });
+      const els = (Array.isArray(what) ? what : [what]).filter((e) => e && e.nodeType === 1);
+      if (els.length) add(() => G.fromTo(els, { filter: 'drop-shadow(0px 0px 0px rgba(255,184,0,0))' }, { filter: 'drop-shadow(0px 0px 6px rgba(255,184,0,0.95))', duration: 0.4, ease: 'sine.inOut', yoyo: true, repeat: 1 }));
     },
     // a bright spark runs along a side from end to end, so the eye follows the side being named
     spark(k) {
@@ -510,7 +499,7 @@
           tl.to(lab, { x: mid[k].x - parseFloat(lab.style.left), y: mid[k].y - parseFloat(lab.style.top), scale: 0.3, opacity: 0, duration: 0.55, ease: 'power2.in' }, 0)
             .call(() => lab.setAttribute('data-gone', '1'), null, 0.55);
         });
-        tl.call(() => { ticks.forEach((t) => t.setAttribute('data-in', '1')); this.drawOn(ticks, 0, 0.4); this.markPing('DA,BC'); }, null, 0.45)
+        tl.call(() => { ticks.forEach((t) => t.setAttribute('data-in', '1')); this.drawOn(ticks, 0, 0.4); this.markPing(ticks); }, null, 0.45)
           .to(ticks, { duration: 0.3, yoyo: true, repeat: 1 }, 0.85);
         return tl;
       });
@@ -554,7 +543,7 @@
       // the arrows glide along their sides the way they point: both bases run the same way
       add(() => G.timeline()
         .fromTo(chev, { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: reduced ? 0 : 0.8, ease: 'power2.out' }, 0)
-        .call(() => this.markPing('AB,DC'), null, 0.7)
+        .call(() => this.markPing(chev.filter((c) => !c.classList.contains('chev-halo'))), null, 0.7)
         .to(chev, { duration: 0.3, yoyo: true, repeat: 1 }, 0.75));
     },
     // screen 35, on "right": both 90° marks draw into their corners with their labels, then glow gold
@@ -571,7 +560,7 @@
         .to(sides, { strokeWidth: 7, duration: 0.35, yoyo: true, repeat: 1 }, 0)
         .call(() => chev.forEach((c) => c.setAttribute('data-in', '1')), null, 0.6)
         .fromTo(chev, { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: reduced ? 0 : 0.8, ease: 'power2.out' }, 0.6)
-        .call(() => this.markPing('AB,DC'), null, 1.3)
+        .call(() => this.markPing(chev.filter((c) => !c.classList.contains('chev-halo'))), null, 1.3)
         .to(chev, { duration: 0.3, yoyo: true, repeat: 1 }, 1.35)
         .set(sides, { clearProps: 'strokeWidth,filter' }));
     },
@@ -622,7 +611,8 @@
     chipPop() {
       const els = $('.chip');
       const el = els[els.length - 1];
-      if (G && el) add(() => G.fromTo(el, { opacity: 0, scale: 0.85, y: 8 }, { opacity: 1, scale: 1, y: 0, duration: reduced ? 0 : 0.5, ease: 'back.out(1.6)' }));
+      // a name plate (title) glides up into place - no pop
+      if (G && el) add(() => G.fromTo(el, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: reduced ? 0 : 0.45, ease: 'power2.out' }));
     },
 
     // screen 43 (end): Swiftee flies in a gentle arc from her usual spot to centre stage, then hovers softly

@@ -227,7 +227,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 @keyframes sidePulse{0%,100%{stroke-width:7px}50%{stroke-width:9px}}
 .tag.alab{transition:transform .45s cubic-bezier(.3,0,.3,1)}
 .tag.alab.emph{transform:translate(-50%,-50%) scale(1.2)}
-.vdot{transition:r .45s cubic-bezier(.3,0,.3,1)}
+.vdot{transition:r .45s cubic-bezier(.3,0,.3,1),stroke .3s ease,filter .3s ease}
 @media (prefers-reduced-motion: reduce){.arc,.edge,.tag.alab,.vdot{transition:none}.edge.emph{animation:none}}
 /* check 2 (screen 39): the shape glides to the centre once the bubble has gone, then the answers come in one by one */
 .qshape{transition:left .7s cubic-bezier(.22,.8,.3,1),top .7s cubic-bezier(.22,.8,.3,1)}
@@ -650,13 +650,12 @@ svg[data-lencol] .edge{transition:stroke .4s ease}
 .hl{opacity:0;pointer-events:none;stroke:#ffd43b}
 .hl.on{opacity:.85;stroke-width:16px;stroke-dasharray:100 100;animation:hlSweep .6s ease-out both}
 @keyframes hlSweep{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
-.ping{opacity:0;pointer-events:none;transform-box:fill-box;transform-origin:center;stroke:#ffc400}
-.ping.on{animation:ping 1.1s ease-out infinite}
-@keyframes ping{0%{opacity:1;transform:scale(.55)}100%{opacity:0;transform:scale(2.1)}}
+/* a named point: the dot grows gold (engine) with a soft gold glow */
+.vdot.on{filter:drop-shadow(0 0 5px rgba(255,184,0,.95))}
 .wedge,.arc,.shape-fill{transition:opacity .3s ease}
 .focusing .edge:not(.emph):not(.lit),.focusing .wedge:not(.emph),.focusing .arc:not(.emph){opacity:.35}
 .wedge.emph{stroke:#ffd43b;stroke-width:5px;paint-order:stroke}
-@media (prefers-reduced-motion: reduce){.hl.on{animation:none;stroke-dasharray:none}.ping.on{animation:none;opacity:1}}
+@media (prefers-reduced-motion: reduce){.hl.on{animation:none;stroke-dasharray:none}}
 
 /* Done (screen 29, free exploration): the same orange pill as the answer buttons, with a check mark, so it plainly
    reads as the thing to tap once the learner has explored; it pops in and bobs gently to call for the tap */

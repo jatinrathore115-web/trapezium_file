@@ -1807,7 +1807,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const dk = this.dragKey();
     ['A', 'B', 'C', 'D'].forEach((k) => {
       const anyV = this.anyCorner(), Vk = P[k], drag = dk === k || anyV;
-      g['v' + k] = { x: r1(Vk.x), y: r1(Vk.y), r: vOn(k) ? (drag ? 11 : 7) + (em['v' + k] ? 4 : 0) : 0, c: drag ? PU : NAVY, w: drag ? 4 : 3, ping: 'ping' + (em['v' + k] && vOn(k) ? ' on' : '') };
+      g['v' + k] = { x: r1(Vk.x), y: r1(Vk.y), r: vOn(k) ? (drag ? 11 : 7) + (em['v' + k] ? 6 : 0) : 0, c: em['v' + k] ? '#ffb800' : drag ? PU : NAVY, w: drag || em['v' + k] ? 4 : 3, cls: em['v' + k] && vOn(k) ? 'on' : '' }; // a named point pops gold, with a glow
       // listen first (she asks for the taps); after that taps work even while she answers a wrong one. Every corner
       // gets a ring, so the learner has to find the right angles; a found one stops pulsing
       const tapV = !!st.rightTap && s.linesDone && !s.rAll;
