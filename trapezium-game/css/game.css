@@ -392,7 +392,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 .cover-title{position:absolute;left:311.58px;top:55.89px;width:708.13px;height:290.14px;pointer-events:none;transform-origin:50% 55%;
   background:url(../assets/images/banner.webp) -311.58px -55.89px/1280px 720.38px no-repeat;
   -webkit-mask:url(../assets/images/banner-title-mask.png) 0 0/100% 100% no-repeat;mask:url(../assets/images/banner-title-mask.png) 0 0/100% 100% no-repeat;
-  animation:titleIn .9s cubic-bezier(.2,.8,.2,1) .3s both} /* it settles and stays still; only the light sweeps across it */
+  animation:titleIn 1s ease-out .3s both} /* it settles and stays still; only the light sweeps across it */
 .cover-title::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,rgba(255,255,255,0) 42%,rgba(255,255,255,.85) 50%,rgba(255,255,255,0) 58%) no-repeat;
   background-size:300% 100%;background-position:150% 0;animation:titleShine 4.2s ease-in-out 1.4s infinite}
 .cover-ice{position:absolute;left:587px;top:403px;width:540px;height:250px;border-radius:50%;pointer-events:none;mix-blend-mode:screen;
@@ -430,7 +430,8 @@ a{color:#123b63}a:hover{color:#0b2742}
 .cover.leaving .play-aura,.cover.leaving .play-glints,.cover.leaving .play-btn::before{animation:none;opacity:0}
 @keyframes coverSettle{from{opacity:0;transform:scale(1.08);filter:brightness(1.18) saturate(.85)}to{opacity:1;transform:none;filter:none}}
 @keyframes coverDrift{from{transform:scale(1)}to{transform:scale(1.06) translateY(-6px)}}
-@keyframes titleIn{from{opacity:0;transform:scale(1.22);filter:brightness(1.7)}to{opacity:1;transform:none;filter:none}}
+/* the title fades in and settles down a few px - no zoom, no flash */
+@keyframes titleIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
 @keyframes titleShine{0%{background-position:150% 0}45%,100%{background-position:-50% 0}}
 @keyframes iceGlow{0%,100%{opacity:.25}50%{opacity:.85}}
 @keyframes twinkle{0%,100%{opacity:0;transform:scale(.3) rotate(0deg)}50%{opacity:1;transform:scale(1) rotate(45deg)}}
