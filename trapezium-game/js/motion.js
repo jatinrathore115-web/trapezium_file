@@ -28,12 +28,42 @@
     ctx.data.slice(n0).forEach((a) => { if (a && a.timeScale && a.parent === G.globalTimeline) a.timeScale(1 / pace); });
     return r;
   };
+  // ---------- marks drawn the way a teacher draws them ----------
+  // An angle sweeps open from its first arm to its second: its wedge path ("M vertex L arm-start A r r 0 0 sweep
+  // arm-end Z") is rebuilt as the sweep grows, and put back as drawn at the end (or by clear(), if cut short).
+  const sweeps = [];
+  const sweepOf = (w) => {
+    const d0 = w && w.getAttribute('d'), n = ((d0 || '').match(/-?\d+(\.\d+)?/g) || []).map(Number);
+    if (n.length < 11) return null;
+    const vx = n[0], vy = n[1], sx = n[2], sy = n[3], R = n[4], f = n[8], a1 = Math.atan2(sy - vy, sx - vx);
+    let da = Math.atan2(n[10] - vy, n[9] - vx) - a1;
+    if (f === 1) { while (da < 0) da += Math.PI * 2; } else { while (da > 0) da -= Math.PI * 2; }
+    const rec = { w: w, d0: d0 }; sweeps.push(rec);
+    return { rec: rec, set: (t) => { const a = a1 + da * t, f1 = (v) => Math.round(v * 10) / 10;
+      w.setAttribute('d', 'M' + vx + ',' + vy + ' L' + sx + ',' + sy + ' A' + R + ',' + R + ' 0 0 ' + f + ' ' + f1(vx + R * Math.cos(a)) + ',' + f1(vy + R * Math.sin(a)) + ' Z'); } };
+  };
+  // add the sweep of wedge w to timeline tl at time `at`
+  const sweepIn = (tl, w, at, dur) => {
+    const s = sweepOf(w);
+    if (!s) { tl.set(w, { opacity: 1 }, at); return; }
+    const p = { t: 0 };
+    tl.set(w, { opacity: 1 }, at).fromTo(p, { t: 0 }, { t: 1, duration: reduced ? 0 : (dur || 0.7), ease: 'power1.inOut',
+      onStart: () => s.set(0), onUpdate: () => s.set(p.t), onComplete: () => { w.setAttribute('d', s.rec.d0); s.rec.done = true; } }, at);
+  };
+  // a value label slides out from where it belongs - an angle's corner, a side's middle - to its place
+  const labelOut = (tl, lab, from, at) => {
+    if (!lab) return;
+    const x = parseFloat(lab.style.left), y = parseFloat(lab.style.top), dx = from && isFinite(x) ? (from.x - x) * 0.75 : 0, dy = from && isFinite(y) ? (from.y - y) * 0.75 : 0;
+    tl.fromTo(lab, { opacity: 0, xPercent: -50, yPercent: -50, x: dx, y: dy, scale: 0.85 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: reduced ? 0 : 0.6, ease: 'power3.out' }, at);
+  };
+  const sideMid = (k) => { const P = window.__trapP && window.__trapP(), ab = { AB: 'AB', BC: 'BC', CD: 'CD', DA: 'DA' }[k]; return P && ab ? { x: (P[ab[0]].x + P[ab[1]].x) / 2, y: (P[ab[0]].y + P[ab[1]].y) / 2 } : null; };
+  const corner = (k) => { const P = window.__trapP && window.__trapP(); return P && P[k] ? { x: P[k].x, y: P[k].y } : null; };
   // the visible length label of a side (each side has two: one for the measuring screen, one for the lesson)
   const lenTag = (k) => $('.board .tag.m' + k).filter((x) => getComputedStyle(x).display !== 'none')[0];
   // CSS centres labels on their point with translate(-50%, -50%); GSAP must keep that once it owns the transform
   const centred = (els) => G.set(els, { xPercent: -50, yPercent: -50, x: 0, y: 0 });
   // every element Motion animates; clear() wipes the animated properties from all of them
-  const ANIMATED = '.tag.snum, .tag.vlab, .edge, .vdot, .shape-fill, .outline-settle, .pop-g, .chev, .calp > *, .ticks, .tag.mtag, .okcheck *, .tag.alab, .arc, .wedge, .chip, .chip-res, .xleg, .swiftee, .swiftee canvas, .swiftee img, .bubble, .rmark, .tag.r90, .q3, .q3 *, .q3-hint, .q3-hint *, .q3-fly, .q4s, .q4s *, .slot, .lab, .q4-strip, .q4-card, .q4-link, .flake, .flake-bar, .opt svg, .qshape, .q1-par, .q1-chev, .q2-leg, .q2-tick, .q2-eq, .q5-leg, .q5-tick, .q5-ad, .q5-q, .q5-bc, .q5-ab, .q5-cd, .q5-hab, .q5-hcd, .q5-hl';
+  const ANIMATED = '.tag.snum, .tag.vlab, .edge, .vdot, .shape-fill, .outline-settle, .pop-g, .chev, .calp > *, .ticks, .tag.mtag, .okcheck *, .tag.alab, .arc, .wedge, .chip, .chip-res, .xleg, .swiftee, .swiftee canvas, .swiftee img, .bubble, .rmark, .tag.r90, .q3, .q3 *, .q3-hint, .q3-hint *, .q3-fly, .q4s, .q4s *, .slot, .lab, .q4-strip, .q4-card, .q4-link, .opt svg, .qshape, .hl, .ping, .spark, .cal-dot, .q1-par, .q1-chev, .q2-leg, .q2-tick, .q2-eq, .q5-leg, .q5-tick, .q5-ad, .q5-q, .q5-bc, .q5-ab, .q5-cd, .q5-hab, .q5-hcd, .q5-hl';
   // the SVG ones among them (clear() removes transform-origin and stroke-dasharray from these by hand)
   const ANIMATED_SVG = '.wedge, .edge, .vdot, .shape-fill, .outline-settle, svg g.pop-g, .chev, .calp > *, .ticks, .okcheck *, .arc, .rmark, .q1-par, .q1-chev, .q2-leg, .q2-tick, .q2-eq, .q5-leg, .q5-tick, .q5-ad, .q5-q, .q5-bc, .q5-ab, .q5-cd, .q5-hab, .q5-hcd, .q5-hl';
 
@@ -47,6 +77,8 @@
     // flown back in) can "revert" to a hidden state, so every animated property is also cleared by hand.
     clear() {
       if (ctx) ctx.revert();
+      sweeps.splice(0).forEach((s) => { if (!s.done && s.w.isConnected) s.w.setAttribute('d', s.d0); });
+      document.querySelectorAll('[data-lencol]').forEach((e) => e.removeAttribute('data-lencol'));
       if (G) G.set($(ANIMATED), { clearProps: 'opacity,transform,filter,textShadow,strokeWidth,translate,rotate,scale,backgroundColor,borderColor,color' });
       // GSAP writes transform-origin on any SVG element it touches (even when clearing), and some draws set
       // stroke-dasharray directly: remove both by hand
@@ -98,36 +130,14 @@
 
     // screens 9 and 11: the parallel pair AB, DC pulses together with a soft purple glow (with its dashed
     // extensions on screen 9, its arrows on screen 11), showing which pair runs side by side without meeting
-    parPulse() {
-      const sides = [$('.eAB')[0], $('.eCD')[0]].filter(Boolean), ext = $('.xleg').filter((e) => getComputedStyle(e).display !== 'none');
-      const chev = $('.chev').filter((e) => getComputedStyle(e).display !== 'none');
-      if (!G || !sides.length) return;
-      add(() => {
-        const tl = G.timeline();
-        tl.to(sides, { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(0,196,167,0.75))', duration: 0.28, ease: 'sine.out', yoyo: true, repeat: 3 }, 0);
-        // the extensions and arrows join in only when they are showing
-        if (ext.length) tl.to(ext, { strokeWidth: 5, opacity: 1, duration: 0.28, ease: 'sine.out', yoyo: true, repeat: 3 }, 0);
-        if (chev.length) tl.fromTo(chev, { scale: 1 }, { scale: 1.35, transformOrigin: '50% 50%', duration: 0.28, ease: 'sine.out', yoyo: true, repeat: 3 }, 0);
-        tl.call(() => { if (chev.length) G.set(chev, { clearProps: 'transform' }); if (ext.length) G.set(ext, { clearProps: 'strokeWidth,opacity' }); G.set(sides, { clearProps: 'strokeWidth,filter' }); });
-        return tl;
-      });
-    },
 
     // screens 14 ("parallel") and 15 ("other"): the named pair redraws itself one side after the other, like a pen stroke
     focusPair(keys) {
       const pair = keys.map((k) => $('.e' + k)[0]).filter(Boolean);
       const others = ['AB', 'BC', 'CD', 'DA'].filter((k) => keys.indexOf(k) < 0).map((k) => $('.e' + k)[0]).filter(Boolean);
       if (!G || !pair.length) return;
-      const len = (e) => Math.hypot(+e.getAttribute('x2') - +e.getAttribute('x1'), +e.getAttribute('y2') - +e.getAttribute('y1')) || 1;
-      add(() => {
-        const tl = G.timeline();
-        pair.forEach((e, i) => {
-          const L = len(e);
-          tl.fromTo(e, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.45, ease: 'power2.inOut' }, 0.05 + i * 0.4)
-            .set(e, { clearProps: 'strokeDasharray,strokeDashoffset' });
-        });
-        return tl;
-      });
+      // the pair stays drawn: a spark runs along each in turn (the engine's focus lights them and dims the rest)
+      keys.forEach((k, i) => { if (i === 0) this.spark(k); else add(() => G.delayedCall(0.4 * i, () => this.spark(k))); });
     },
     // screens 14 and 15: the "Base" / "Leg" pills come in one after another (each connector draws out from its
     // side, then its pill pops in), then the other two sides ease back to full strength. The pills stay.
@@ -139,11 +149,12 @@
       add(() => {
         const tl = G.timeline();
         pills.forEach((p, i) => {
-          const stem = p.querySelector('.cal-stem'), body = Array.from(p.children).filter((c) => c !== stem);
-          const L = (stem && stem.getTotalLength && stem.getTotalLength()) || 1, at = i * 0.45;
+          const stem = p.querySelector('.cal-stem'), dot = p.querySelector('.cal-dot'), body = Array.from(p.children).filter((c) => c !== stem && c !== dot);
+          const L = (stem && stem.getTotalLength && stem.getTotalLength()) || 1, at = i * 0.5;
           tl.set(body, { opacity: 0 }, 0);
-          if (stem) tl.fromTo(stem, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.25, ease: 'sine.out' }, at);
-          tl.fromTo(body, { opacity: 0, scale: 0.9, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: reduced ? 0 : 0.4, ease: 'back.out(1.4)', immediateRender: false }, at + 0.2);
+          if (dot) tl.fromTo(dot, { opacity: 0, scale: 0.3, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: reduced ? 0 : 0.25, ease: 'back.out(2)' }, at);
+          if (stem) tl.fromTo(stem, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.3, ease: 'sine.out' }, at + 0.15);
+          tl.fromTo(body, { opacity: 0, scale: 0.9, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: reduced ? 0 : 0.4, ease: 'power2.out', immediateRender: false }, at + 0.4);
         });
         tl.to(others, { opacity: 1, duration: 0.45, ease: 'sine.inOut' }, '>+0.6').set(others, { clearProps: 'opacity' });
         return tl;
@@ -156,28 +167,17 @@
       const legs = [$('.eDA')[0], $('.eBC')[0]].filter(Boolean);
       if (!G || legs.length < 2) return;
       // with .tick-pre (screen 21) the equal marks come later, from lensToTicks, so leave them alone here
-      const bases = $('.eAB').concat($('.eCD')), ticks = document.querySelector('.board.tick-pre, .tick-pre') ? [] : $('.ticks'), labels = $('.board .tag.mtag.mleg');
-      const L = legs.map((e) => Math.hypot(+e.getAttribute('x2') - +e.getAttribute('x1'), +e.getAttribute('y2') - +e.getAttribute('y1')) || 1);
-      // dash h at each end, gap between: h 0 -> L/2 closes the line from both ends into the middle
-      const draw = (h) => legs.forEach((e, i) => { const hh = Math.min(h * L[i], L[i] / 2); e.style.strokeDasharray = hh + ' ' + Math.max(0, L[i] - 2 * hh) + ' ' + hh + ' 0'; });
+      const ticks = document.querySelector('.board.tick-pre, .tick-pre') ? [] : $('.ticks'), labels = $('.board .tag.mleg');
+      // both legs light up together (a spark runs along each), and their equal lengths slide out of them side by side
       add(() => {
-        const o = { h: 0 }, tl = G.timeline();
-        tl.to(bases, { opacity: 0.4, duration: 0.3, ease: 'sine.out' }, 0)
-          .set(ticks.concat(labels), { opacity: 0 }, 0)
-          .call(() => draw(0), null, 0)
-          .to(o, { h: 0.5, duration: reduced ? 0 : 0.7, ease: 'power2.inOut', onUpdate: () => draw(o.h) }, 0.1)
-          .call(() => legs.forEach((e) => e.style.removeProperty('stroke-dasharray')))
-          // the matching pulse, the equal marks and the length labels all land together
-          .to(legs, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 4px rgba(0,196,167,0.45))', duration: 0.3, ease: 'sine.out' }, '>')
-          .to(ticks, { opacity: 1, duration: 0.3, ease: 'sine.out' }, '<')
-          .call(() => labels.forEach((l) => l.setAttribute('data-in', '1')), null, '<') // data-in keeps them shown (they start hidden by .len-pre)
-          .fromTo(labels, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, xPercent: -50, yPercent: -50, duration: 0.35, ease: 'back.out(1.4)' }, '<')
-          .to(legs, { strokeWidth: 6.5, filter: 'drop-shadow(0px 0px 2px rgba(0,196,167,0.3))', duration: 0.25, ease: 'sine.inOut' }, '>')
-          // hold, then back to normal
-          .to(legs, { strokeWidth: 5, filter: NOGLOW, duration: 0.45, ease: 'sine.inOut' }, '>+0.9')
-          .to(bases, { opacity: 1, duration: 0.45, ease: 'sine.inOut' }, '<')
-          .set(legs, { clearProps: 'strokeWidth,filter' })
-          .set(bases, { clearProps: 'opacity' });
+        const tl = G.timeline();
+        tl.to(legs, { strokeWidth: 7, duration: 0.3, ease: 'sine.out' }, 0)
+          .call(() => { this.spark('DA'); this.spark('BC'); }, null, 0)
+          .call(() => labels.forEach((l) => l.setAttribute('data-in', '1')), null, 0.25); // data-in keeps them shown (they start hidden by .len-pre)
+        labels.forEach((l) => labelOut(tl, l, sideMid(l.classList.contains('mDA') ? 'DA' : 'BC'), 0.25));
+        if (ticks.length) tl.fromTo(ticks, { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.5);
+        tl.to(legs, { strokeWidth: 5, duration: 0.45, ease: 'sine.inOut' }, 1.9)
+          .set(legs, { clearProps: 'strokeWidth' });
         return tl;
       });
     },
@@ -218,10 +218,9 @@
         order.forEach((k, i) => {
           const arc = $('.arc.a' + k)[0], lab = $('.tag.alab.l' + k)[0], at = i * 0.55;
           if (arc) tl.fromTo(arc, { opacity: 1, strokeDasharray: 100, strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.45, ease: 'power2.out' }, at);
-          // the filled angle grows out of its corner with a soft overshoot, then glows once (as in wedgeGrow)
-          const wd = $('.wedge.w' + k)[0], dot = dots[i];
-          if (wd && dot) tl.fromTo(wd, { opacity: 1, scale: 0, svgOrigin: dot.getAttribute('cx') + ' ' + dot.getAttribute('cy') }, { scale: 1, duration: reduced ? 0 : 0.5, ease: 'back.out(1.6)' }, at)
-            .to(wd, { filter: 'drop-shadow(0px 0px 5px ' + ({ A: 'rgba(255,122,0,0.8)', B: 'rgba(31,207,102,0.7)', C: 'rgba(18,164,255,0.7)', D: 'rgba(255,184,0,0.9)' })[k] + ')', duration: 0.3, yoyo: true, repeat: 1 }, at + 0.45);
+          // the filled angle sweeps open from one arm to the other, as the arc draws round
+          const wd = $('.wedge.w' + k)[0];
+          if (wd) sweepIn(tl, wd, at, 0.45);
           if (lab) tl.fromTo(lab, { opacity: 0, x: dir[k][0], y: dir[k][1], xPercent: -50, yPercent: -50, scale: 0.9 },
             { opacity: 1, x: 0, y: 0, scale: 1, duration: reduced ? 0 : 0.5, ease: 'power3.out' }, at + 0.1);
         });
@@ -239,9 +238,8 @@
       add(() => {
         const tl = G.timeline();
         if (arc) tl.fromTo(arc, { opacity: 1, strokeDasharray: 100, strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.45, ease: 'power2.out' }, 0);
-        if (wd && dot) tl.fromTo(wd, { opacity: 1, scale: 0, svgOrigin: dot.getAttribute('cx') + ' ' + dot.getAttribute('cy') }, { scale: 1, duration: reduced ? 0 : 0.5, ease: 'back.out(1.6)' }, 0)
-          .to(wd, { filter: 'drop-shadow(0px 0px 5px ' + C[k] + ')', duration: 0.3, yoyo: true, repeat: 1 }, 0.45);
-        if (lab) tl.call(() => this.stampIn(lab), null, 0.12);
+        if (wd) sweepIn(tl, wd, 0, 0.5);
+        labelOut(tl, lab, corner(k), 0.3);
         return tl;
       });
     },
@@ -257,7 +255,7 @@
         const tl = G.timeline();
         tl.to(dim, { opacity: 0.35, duration: 0.3, ease: 'sine.out' }, 0).to([arc, lab].filter(Boolean), { opacity: 1, duration: 0.2 }, 0);
         if (arc) tl.fromTo(arc, { strokeDasharray: 100, strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.5, ease: 'power2.out' }, 0)
-          .to(arc, { strokeWidth: 10, duration: 0.2, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.5);
+          .to(arc, { strokeWidth: 7, duration: 0.2, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.5);
         if (lab) tl.fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.15, duration: 0.2, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.5);
         return tl;
       });
@@ -369,7 +367,7 @@
       add(() => {
         const tl = G.timeline();
         if (lab) tl.fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.3, duration: 0.25, ease: 'back.out(2)', yoyo: true, repeat: 1 }, 0);
-        if (arc) tl.fromTo(arc, { strokeWidth: 5 }, { strokeWidth: 10, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, 0);
+        if (arc) tl.fromTo(arc, { strokeWidth: 5 }, { strokeWidth: 7, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, 0);
         return tl;
       });
     },
@@ -405,15 +403,20 @@
         keys.forEach((k, i) => {
           const lab = lenTag(k), e = $('.e' + k)[0], at = i * gap;
           // data-in keeps it shown: the runtime rewrites the label's style on every redraw but leaves attributes alone
-          if (lab) tl.call(() => { lab.setAttribute('data-in', '1'); this.stampIn(lab); }, null, at);
-          if (e) tl.to(e, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 5px rgba(0,196,167,0.6))', duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
-            .set(e, { clearProps: 'strokeWidth,filter' }, at + 0.55);
+          if (lab) { tl.call(() => lab.setAttribute('data-in', '1'), null, at + 0.15); labelOut(tl, lab, sideMid(k), at + 0.15); }
+          if (e) tl.to(e, { strokeWidth: 7, duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
+            .set(e, { clearProps: 'strokeWidth,filter' }, at + 0.65);
         });
         return tl;
       });
     },
-    // screen 17, on "sides": AB, BC, CD, DA in turn
-    lensSeq() { this.lensIn(['AB', 'BC', 'CD', 'DA'], 0.45); },
+    // screen 17, on "sides": AB, BC, CD, DA in turn, each side and its length in its own colour (all different)
+    lensSeq() {
+      this.lensIn(['AB', 'BC', 'CD', 'DA'], 0.45);
+      ['AB', 'BC', 'CD', 'DA'].forEach((k, i) => add(() => G && G.delayedCall(i * 0.45 + 0.15, () => { const l = lenTag(k); if (l) l.setAttribute('data-col', k); this.sideColours(); })));
+    },
+    // the sides take their own colours (CSS svg[data-lencol]); an attribute, so a redraw keeps it, and clear() removes it
+    sideColours() { $('svg[aria-label="Trapezium ABCD"]').forEach((s) => s.setAttribute('data-lencol', '1')); },
     // screen 16, on "sides": the same rhythm as lensSeq - each side glows in turn while its length pops and
     // takes the side's own colour
     lenColors() {
@@ -422,22 +425,66 @@
         const tl = G.timeline();
         ['AB', 'BC', 'CD', 'DA'].forEach((k, i) => {
           const lab = lenTag(k), e = $('.e' + k)[0], at = i * 0.45;
-          if (lab) tl.call(() => { lab.setAttribute('data-col', k); this.stampIn(lab); }, null, at); // the colour comes from CSS (.tag.mtag[data-col]), so a redraw keeps it
-          if (e) tl.to(e, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 5px rgba(0,196,167,0.6))', duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
-            .set(e, { clearProps: 'strokeWidth,filter' }, at + 0.55);
+          if (lab) { tl.call(() => { lab.setAttribute('data-col', k); this.sideColours(); }, null, at + 0.15); labelOut(tl, lab, sideMid(k), at + 0.15); } // the colour comes from CSS (.tag.mtag[data-col]), so a redraw keeps it
+          if (e) tl.to(e, { strokeWidth: 7, duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
+            .set(e, { clearProps: 'strokeWidth,filter' }, at + 0.65);
         });
         return tl;
       });
     },
-    // screen 18, on "different": both legs light up for a moment and their two lengths pop once
+    // a mark arriving: a small yellow ring pings out once at each place it lands (board px). sides: the sides whose
+    // middles carry the mark (arrows sit on the bases, equal marks on the legs); or an element (a right-angle square)
+    markPing(what) {
+      if (!G || reduced) return;
+      const P = window.__trapP && window.__trapP(), host = $('.edge')[0];
+      if (!host) return;
+      let pts = [];
+      if (typeof what === 'string') pts = what.split(',').map((k) => (P ? { x: (P[k[0]].x + P[k[1]].x) / 2, y: (P[k[0]].y + P[k[1]].y) / 2 } : null)).filter(Boolean);
+      else if (what) { let bb = null; try { bb = what.getBBox(); } catch (e) {} if (bb && (bb.width || bb.height)) pts = [{ x: bb.x + bb.width / 2, y: bb.y + bb.height / 2 }]; }
+      pts.forEach((p, i) => {
+        const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        c.setAttribute('class', 'spark'); c.setAttribute('cx', p.x); c.setAttribute('cy', p.y); c.setAttribute('r', 16);
+        c.setAttribute('fill', 'none'); c.setAttribute('stroke', '#ffc400'); c.setAttribute('stroke-width', '5'); c.setAttribute('pointer-events', 'none');
+        host.parentNode.appendChild(c);
+        add(() => G.fromTo(c, { opacity: 1, scale: 0.5, transformOrigin: '50% 50%' }, { opacity: 0, scale: 1.9, duration: 0.75, ease: 'power2.out', delay: i * 0.15, onComplete: () => c.remove() }));
+      });
+    },
+    // a bright spark runs along a side from end to end, so the eye follows the side being named
+    spark(k) {
+      const e = $('.e' + k)[0];
+      if (!G || reduced || !e || getComputedStyle(e).display === 'none') return;
+      const a = { x: +e.getAttribute('x1'), y: +e.getAttribute('y1') }, b = { x: +e.getAttribute('x2'), y: +e.getAttribute('y2') };
+      const ns = 'http://www.w3.org/2000/svg', g = document.createElementNS(ns, 'g');
+      g.setAttribute('class', 'spark'); g.setAttribute('pointer-events', 'none');
+      g.innerHTML = '<circle r="9" fill="#ffffff" stroke="#ffb800" stroke-width="4"></circle>';
+      e.parentNode.appendChild(g);
+      const p = { t: 0 }, put = () => g.setAttribute('transform', 'translate(' + (a.x + (b.x - a.x) * p.t).toFixed(1) + ',' + (a.y + (b.y - a.y) * p.t).toFixed(1) + ')');
+      put();
+      add(() => G.timeline({ onComplete: () => g.remove() })
+        .fromTo(g, { opacity: 0 }, { opacity: 1, duration: 0.12 }, 0)
+        .to(p, { t: 1, duration: 0.75, ease: 'power1.inOut', onUpdate: put }, 0)
+        .to(g, { opacity: 0, duration: 0.2 }, 0.72));
+    },
+    // screen 18, on "different": the legs are highlighted (engine) and their two lengths glow gold together
     legsPop() {
-      const legs = [$('.eDA')[0], $('.eBC')[0]].filter(Boolean), labs = ['DA', 'BC'].map((k) => lenTag(k)).filter(Boolean);
-      if (!G) return;
+      const labs = ['DA', 'BC'].map((k) => lenTag(k)).filter(Boolean);
+      if (!G || !labs.length) return;
       add(() => G.timeline()
-        .to(legs, { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(0,196,167,0.7))', duration: 0.3, ease: 'sine.out' }, 0)
-        .fromTo(labs, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.3, duration: 0.25, ease: 'back.out(2)', yoyo: true, repeat: 1 }, 0)
-        .to(legs, { strokeWidth: 5, filter: NOGLOW, duration: 0.45, ease: 'sine.inOut' }, 1.8)
-        .set(legs, { clearProps: 'strokeWidth,filter' }));
+        .fromTo(labs, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.18, duration: 0.35, ease: 'sine.inOut', yoyo: true, repeat: 3 }, 0)
+        .set(labs, { clearProps: 'transform' }));
+    },
+    // "parallel": the arrows glide along both bases the same way, and any extension lines brighten with them
+    parallelShow() {
+      const chev = $('.chev').filter((e) => getComputedStyle(e).display !== 'none'), ext = $('.xleg').filter((e) => getComputedStyle(e).display !== 'none');
+      if (!G) return;
+      add(() => {
+        const tl = G.timeline();
+        if (chev.length) tl.fromTo(chev, { x: -34, opacity: 0.2 }, { x: 0, opacity: 1, duration: reduced ? 0 : 0.9, ease: 'power2.out' }, 0)
+          .to(chev, { duration: 0.35, yoyo: true, repeat: 1 }, 0.6);
+        if (ext.length) tl.to(ext, { strokeWidth: 5, opacity: 1, duration: 0.4, ease: 'sine.out', yoyo: true, repeat: 1 }, 0);
+        tl.call(() => { if (chev.length) G.set(chev, { clearProps: 'transform,opacity,filter' }); if (ext.length) G.set(ext, { clearProps: 'strokeWidth,opacity' }); });
+        return tl;
+      });
     },
     // screen 21, on "isosceles": the two equal lengths shrink into their legs and turn into the equal marks
     // (hidden by .tick-pre until now)
@@ -453,8 +500,8 @@
           tl.to(lab, { x: mid[k].x - parseFloat(lab.style.left), y: mid[k].y - parseFloat(lab.style.top), scale: 0.3, opacity: 0, duration: 0.55, ease: 'power2.in' }, 0)
             .call(() => lab.setAttribute('data-gone', '1'), null, 0.55);
         });
-        tl.call(() => { ticks.forEach((t) => t.setAttribute('data-in', '1')); this.drawOn(ticks, 0, 0.4); }, null, 0.45)
-          .to(ticks, { filter: 'drop-shadow(0px 0px 4px rgba(0,196,167,0.8))', duration: 0.25, yoyo: true, repeat: 1 }, 0.85);
+        tl.call(() => { ticks.forEach((t) => t.setAttribute('data-in', '1')); this.drawOn(ticks, 0, 0.4); this.markPing('DA,BC'); }, null, 0.45)
+          .to(ticks, { duration: 0.3, yoyo: true, repeat: 1 }, 0.85);
         return tl;
       });
     },
@@ -470,7 +517,7 @@
           const L = len(e), at = i * 0.42;
           tl.set(e, { strokeDasharray: L, strokeDashoffset: L }, 0)
             .to(e, { strokeDashoffset: 0, duration: 0.4, ease: 'power1.inOut' }, at)
-            .to(e, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 5px rgba(31,107,255,0.55))', duration: 0.2, yoyo: true, repeat: 1 }, at + 0.3);
+            .to(e, { strokeWidth: 7, duration: 0.2, yoyo: true, repeat: 1 }, at + 0.3);
         });
         tl.call(() => $('.edge').forEach((e) => { e.style.removeProperty('stroke-dasharray'); e.style.removeProperty('stroke-dashoffset'); }))
           .set($('.edge'), { clearProps: 'strokeWidth,filter' });
@@ -482,7 +529,7 @@
       const els = keys.map((k) => $('.e' + k)[0]).filter(Boolean);
       if (!G || !els.length) return;
       add(() => G.timeline()
-        .to(els, { strokeWidth: 7.5, filter: 'drop-shadow(0px 0px 5px rgba(0,196,167,0.55))', duration: 0.3, ease: 'sine.out' })
+        .to(els, { strokeWidth: 7, duration: 0.3, ease: 'sine.out' })
         .to(els, { strokeWidth: 5, filter: NOGLOW, duration: 0.35, ease: 'sine.in' })
         .set(els, { clearProps: 'strokeWidth,filter' }));
     },
@@ -494,8 +541,11 @@
       const chev = $('.chev');
       if (!G || !chev.length) return;
       chev.forEach((c) => c.setAttribute('data-in', '1'));
-      this.drawOn(chev, 0, 0.45);
-      add(() => G.to(chev, { filter: 'drop-shadow(0px 0px 5px rgba(255,122,0,0.9))', duration: 0.25, yoyo: true, repeat: 1, delay: 0.45 }));
+      // the arrows glide along their sides the way they point: both bases run the same way
+      add(() => G.timeline()
+        .fromTo(chev, { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: reduced ? 0 : 0.8, ease: 'power2.out' }, 0)
+        .call(() => this.markPing('AB,DC'), null, 0.7)
+        .to(chev, { duration: 0.3, yoyo: true, repeat: 1 }, 0.75));
     },
     // screen 35, on "right": both 90° marks draw into their corners with their labels, then glow gold
     rightBoth() {
@@ -508,9 +558,11 @@
       const sides = [$('.eAB')[0], $('.eCD')[0]].filter(Boolean), chev = $('.chev');
       if (!G || !sides.length) return;
       add(() => G.timeline()
-        .to(sides, { strokeWidth: 8, filter: 'drop-shadow(0px 0px 6px rgba(0,196,167,0.6))', duration: 0.3, yoyo: true, repeat: 1 }, 0)
-        .call(() => { chev.forEach((c) => c.setAttribute('data-in', '1')); this.drawOn(chev, 0, 0.45); }, null, 0.6)
-        .to(chev, { filter: 'drop-shadow(0px 0px 5px rgba(255,122,0,0.9))', duration: 0.25, yoyo: true, repeat: 1 }, 1.05)
+        .to(sides, { strokeWidth: 7, duration: 0.35, yoyo: true, repeat: 1 }, 0)
+        .call(() => chev.forEach((c) => c.setAttribute('data-in', '1')), null, 0.6)
+        .fromTo(chev, { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: reduced ? 0 : 0.8, ease: 'power2.out' }, 0.6)
+        .call(() => this.markPing('AB,DC'), null, 1.3)
+        .to(chev, { duration: 0.3, yoyo: true, repeat: 1 }, 1.35)
         .set(sides, { clearProps: 'strokeWidth,filter' }));
     },
 
@@ -525,9 +577,9 @@
         K.forEach((k, i) => {
           const w = $('.wedge.w' + k)[0];
           if (!w || getComputedStyle(w).display === 'none') return;
-          tl.fromTo(w, { scale: 0, svgOrigin: P[k].x + ' ' + P[k].y }, { scale: 1, duration: reduced ? 0 : 0.5, ease: 'back.out(1.6)' }, i * 0.3)
-            .to(w, { filter: 'drop-shadow(0px 0px 5px ' + C[k] + ')', duration: 0.3, yoyo: true, repeat: 1 }, i * 0.3 + 0.45)
-            .set(w, { clearProps: 'transform,filter' }, i * 0.3 + 1.1);
+          sweepIn(tl, w, i * 0.45, 0.6);
+          tl.to(w, { duration: 0.3, yoyo: true, repeat: 1 }, i * 0.45 + 0.6)
+            .set(w, { clearProps: 'filter' }, i * 0.45 + 1.25);
         });
         return tl;
       });
@@ -544,7 +596,7 @@
       const all = $('.arc').concat($('.board .tag.alab'), $('.wedge'));
       add(() => G.timeline()
         .to(arcs.concat(labs), { opacity: 1, duration: 0.2 }, 0)
-        .to(arcs, { strokeWidth: 10, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, 0)
+        .to(arcs, { strokeWidth: 7, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, 0)
         .fromTo(labs, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.15, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, 0)
         .to(all, { opacity: 1, duration: 0.45, ease: 'sine.inOut' }, '>+0.8')
         .set(all, { clearProps: 'opacity,strokeWidth,strokeDasharray,strokeDashoffset' }));
@@ -589,7 +641,7 @@
       this.wedgeGrow('AD', 0.1);
       add(() => G.timeline()
         .to(dim, { opacity: 0.35, duration: 0.4, ease: 'sine.inOut' }, 0)
-        .to(focus, { strokeWidth: 10, duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.1)
+        .to(focus, { strokeWidth: 7, duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.1)
         .fromTo(flab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.12, duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.1));
     },
     // on "angles": the equation glows softly; a little later every angle returns to full strength
@@ -613,43 +665,46 @@
     suppAt(T, S) {
       const P = window.__trapP && window.__trapP(), e = $('.eAB')[0];
       if (!G || !P || !e) return;
-      const ns = 'http://www.w3.org/2000/svg', R = 34, COL = { A: '#ff7a00', B: '#1fcf66', C: '#12a4ff', D: '#ffb800' };
+      const ns = 'http://www.w3.org/2000/svg', R = 28, COL = { A: '#ff7a00', B: '#1fcf66', C: '#12a4ff', D: '#ffb800' };
       const nb = { A: 'B', B: 'A', C: 'D', D: 'C' }, unit = (p, q) => { const L = Math.hypot(q.x - p.x, q.y - p.y) || 1; return { x: (q.x - p.x) / L, y: (q.y - p.y) / L }; };
       const t = P[T], s = P[S], dT = unit(t, P[nb[T]]), dS = unit(s, P[nb[S]]), up = unit(s, t);
       const wedge = (u, v, col) => { const c = u.x * v.y - u.y * v.x, g = document.createElementNS(ns, 'path');
         g.setAttribute('d', 'M0,0 L' + (u.x * R).toFixed(1) + ',' + (u.y * R).toFixed(1) + ' A' + R + ',' + R + ' 0 0 ' + (c > 0 ? 1 : 0) + ' ' + (v.x * R).toFixed(1) + ',' + (v.y * R).toFixed(1) + ' Z');
         g.setAttribute('fill', col); g.setAttribute('fill-opacity', '1'); g.setAttribute('stroke', '#fff'); g.setAttribute('stroke-width', '1.5'); return g; };
-      const root = document.createElementNS(ns, 'g'); root.setAttribute('class', 'supp-at');
-      const ex = { x: -dS.x, y: -dS.y }, L = 92; // the extension: past S, away from the shape
-      const line = document.createElementNS(ns, 'line');
-      line.setAttribute('x1', s.x); line.setAttribute('y1', s.y); line.setAttribute('x2', s.x); line.setAttribute('y2', s.y);
-      line.setAttribute('stroke', '#5b7f9c'); line.setAttribute('stroke-width', '3'); line.setAttribute('stroke-dasharray', '8 6'); line.setAttribute('stroke-linecap', 'round');
+      const el = (tag, at) => { const n = document.createElementNS(ns, tag); Object.keys(at).forEach((k) => n.setAttribute(k, at[k])); return n; };
+      const root = el('g', { class: 'supp-at' });
+      // the base carried on past S (dashed, in the bases' blue), so the two angles can sit side by side on one line
+      // ...as far as the card allows: never past its inner edge
+      const ex = { x: -dS.x, y: -dS.y }, B = window.__extBounds ? window.__extBounds() : null;
+      const L = Math.max(R + 6, Math.min(80, B ? (ex.x < 0 ? s.x - B.l - 12 : B.r - 12 - s.x) / Math.max(0.2, Math.abs(ex.x)) : 80));
+      const line = el('line', { x1: s.x, y1: s.y, x2: s.x, y2: s.y, stroke: '#1f6bff', 'stroke-width': 4, 'stroke-dasharray': '10 8', 'stroke-linecap': 'round' });
       const own = wedge(dS, up, COL[S]); own.setAttribute('transform', 'translate(' + s.x + ' ' + s.y + ')');
       const copy = wedge(dT, unit(t, s), COL[T]); copy.setAttribute('transform', 'translate(' + t.x + ' ' + t.y + ')');
-      // the straight-angle marker: a half-circle over S from the extension round to the base, and its label
-      const r2 = R + 9, a0 = { x: s.x + ex.x * r2, y: s.y + ex.y * r2 }, a1 = { x: s.x + dS.x * r2, y: s.y + dS.y * r2 };
-      const half = document.createElementNS(ns, 'path'), side = ex.x * up.y - ex.y * up.x;
-      half.setAttribute('d', 'M' + a0.x.toFixed(1) + ',' + a0.y.toFixed(1) + ' A' + r2 + ',' + r2 + ' 0 0 ' + (side > 0 ? 1 : 0) + ' ' + a1.x.toFixed(1) + ',' + a1.y.toFixed(1));
-      half.setAttribute('fill', 'none'); half.setAttribute('stroke', '#0b5b70'); half.setAttribute('stroke-width', '2.5'); half.setAttribute('stroke-linecap', 'round');
-      const lbl = document.createElementNS(ns, 'text');
-      // above the half-circle, nudged outward, clear of the corner letter and the angle value
-      lbl.setAttribute('x', (s.x + ex.x * 16).toFixed(1)); lbl.setAttribute('y', (s.y - r2 - 10).toFixed(1)); lbl.setAttribute('text-anchor', 'middle');
-      lbl.setAttribute('font-family', 'Nunito, sans-serif'); lbl.setAttribute('font-weight', '900'); lbl.setAttribute('font-size', '20'); lbl.setAttribute('fill', '#0b5b70'); lbl.textContent = '180°';
-      [line, own, copy, half, lbl].forEach((n) => root.appendChild(n));
+      // once the copy has turned onto the line, the two make a half-disc: a gold rim draws round it - a straight angle
+      const a0 = { x: s.x + ex.x * R, y: s.y + ex.y * R }, a1 = { x: s.x + dS.x * R, y: s.y + dS.y * R }, side = ex.x * up.y - ex.y * up.x;
+      const rim = el('path', { d: 'M' + a0.x.toFixed(1) + ',' + a0.y.toFixed(1) + ' A' + R + ',' + R + ' 0 0 ' + (side > 0 ? 1 : 0) + ' ' + a1.x.toFixed(1) + ',' + a1.y.toFixed(1),
+        fill: 'none', stroke: '#ffc400', 'stroke-width': 4, 'stroke-linecap': 'round', pathLength: 100, opacity: 0 });
+      // its "180°" label: a gold pill beyond the half-disc on the outside of the shape, between the line and the leg
+      let bx = ex.x + up.x, by = ex.y + up.y; const bl = Math.hypot(bx, by) || 1; bx /= bl; by /= bl;
+      let lx = s.x + bx * (R + 30); const ly = s.y + by * (R + 30), lbl = el('g', {});
+      if (B) lx = Math.max(B.l + 46, Math.min(B.r - 46, lx)); // the pill stays inside the card too
+      lbl.appendChild(el('rect', { x: (lx - 34).toFixed(1), y: (ly - 15).toFixed(1), width: 68, height: 30, rx: 15, fill: '#fff8e3', stroke: '#f0b000', 'stroke-width': 3 }));
+      const tx = el('text', { x: lx.toFixed(1), y: (ly + 6.5).toFixed(1), 'text-anchor': 'middle', 'font-family': 'Nunito, sans-serif', 'font-weight': 900, 'font-size': 18, fill: '#6b4300' });
+      tx.textContent = '180°'; lbl.appendChild(tx);
+      [line, own, copy, rim, lbl].forEach((n) => root.appendChild(n));
       const dot = $('.vdot')[0];
       if (dot && dot.parentNode === e.parentNode) e.parentNode.insertBefore(root, dot); else e.parentNode.appendChild(root);
       const o = { x: t.x, y: t.y, r: 0 }, place = () => copy.setAttribute('transform', 'translate(' + o.x.toFixed(1) + ' ' + o.y.toFixed(1) + ') rotate(' + o.r.toFixed(1) + ')');
       add(() => G.timeline({ onComplete: () => root.remove() })
-        .to(line, { attr: { x2: s.x + ex.x * L, y2: s.y + ex.y * L }, duration: reduced ? 0 : 0.45, ease: 'power2.out' }, 0)
-        .fromTo(own, { opacity: 0, scale: 0, svgOrigin: s.x + ' ' + s.y }, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.6)' }, 0.25)
-        .fromTo(copy, { opacity: 0 }, { opacity: 1, duration: 0.25 }, 0.55)
-        // down the leg, then the half-turn onto the extension
-        .to(o, { x: s.x, y: s.y, duration: reduced ? 0 : 0.85, ease: 'power2.inOut', onUpdate: place }, 0.7)
-        .to(o, { r: 180, duration: reduced ? 0 : 0.6, ease: 'power2.inOut', onUpdate: place }, 1.6)
-        .fromTo(half, { opacity: 0, strokeDasharray: 200, strokeDashoffset: 200 }, { opacity: 1, strokeDashoffset: 0, duration: 0.45, ease: 'sine.out' }, 2.25)
-        .fromTo(lbl, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.35, ease: 'back.out(2)' }, 2.5)
-        .to([own, copy], { filter: 'drop-shadow(0px 0px 6px rgba(255,184,40,0.85))', duration: 0.3, yoyo: true, repeat: 1 }, 2.6)
-        .to(root, { opacity: 0, duration: 0.5, ease: 'sine.inOut' }, 6.2));
+        .to(line, { attr: { x2: s.x + ex.x * L, y2: s.y + ex.y * L }, duration: reduced ? 0 : 0.5, ease: 'power2.out' }, 0)
+        .fromTo(own, { opacity: 0 }, { opacity: 1, duration: 0.35 }, 0.25)
+        .fromTo(copy, { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0.55)
+        // down the leg, then the half-turn onto the line beside its partner
+        .to(o, { x: s.x, y: s.y, duration: reduced ? 0 : 0.9, ease: 'power2.inOut', onUpdate: place }, 0.8)
+        .to(o, { r: 180, duration: reduced ? 0 : 0.7, ease: 'power2.inOut', onUpdate: place }, 1.75)
+        .fromTo(rim, { opacity: 1, strokeDasharray: 100, strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.5, ease: 'sine.out' }, 2.5)
+        .fromTo(lbl, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.out' }, 2.85)
+        .to(root, { opacity: 0, duration: 0.5, ease: 'sine.inOut' }, 6.4));
     },
     suppAtAD() { this.suppAt('A', 'D'); },
     suppAtBC() { this.suppAt('B', 'C'); },
@@ -678,38 +733,8 @@
         .to([g, d].filter(Boolean), { scaleY: 0.97, scaleX: 1.02, transformOrigin: '50% 80%', duration: 0.25, ease: 'sine.out' })
         .to([g, d].filter(Boolean), { scaleY: 1, scaleX: 1, duration: 0.45, ease: 'elastic.out(1, 0.5)' }));
     },
-    // the corner dots pulse once, one after another (screen 32 on "90", and as screen 28's morph starts)
-    // ---------- game-style reveals ----------
-    // a reading or label lands like a stamp: it drops in big and tilted, settles with a bounce, a gold ring spreads
-    // from it and a few stars burst out (labels are centred on their point, so xPercent / yPercent stay -50)
-    stampIn(els, delay) {
-      const list = (Array.isArray(els) ? els : [els]).filter(Boolean);
-      if (!G || !list.length) return;
-      add(() => {
-        const tl = G.timeline({ delay: delay || 0 });
-        list.forEach((el, i) => {
-          tl.fromTo(el, { opacity: 0, xPercent: -50, yPercent: -50, scale: 1.9, rotation: -10 },
-            { opacity: 1, scale: 1, rotation: 0, duration: reduced ? 0 : 0.42, ease: 'back.out(2.6)' }, i * 0.12)
-            .call(() => this.burst(el), null, i * 0.12 + 0.22);
-        });
-        return tl;
-      });
-    },
-    // the gold ring and star burst round an element (in the eq-layer, over the stage)
-    burst(el) {
-      if (!G || reduced || !el) return;
-      const L = this.eqLayer(), st = document.querySelector('.stage');
-      if (!L || !st) return;
-      const r = el.getBoundingClientRect(), s = st.getBoundingClientRect(), k = s.width / 1280;
-      const x = (r.left + r.width / 2 - s.left) / k, y = (r.top + r.height / 2 - s.top) / k;
-      const ring = document.createElement('div'); ring.className = 'fx-ring'; ring.style.left = x + 'px'; ring.style.top = y + 'px'; L.appendChild(ring);
-      add(() => G.fromTo(ring, { scale: 0.4, opacity: 0.95 }, { scale: 2.3, opacity: 0, duration: 0.6, ease: 'power2.out', onComplete: () => ring.remove() }));
-      for (let j = 0; j < 7; j++) {
-        const a = (j / 7) * Math.PI * 2 + 0.3, d = 34 + (j % 2) * 14, star = document.createElement('i');
-        star.className = 'fx-star' + (j % 2 ? ' w' : ''); star.style.left = x + 'px'; star.style.top = y + 'px'; L.appendChild(star);
-        add(() => G.fromTo(star, { x: 0, y: 0, scale: 0.3, opacity: 1, rotation: 0 }, { x: Math.cos(a) * d, y: Math.sin(a) * d, scale: 1, rotation: 90, opacity: 0, duration: 0.7, ease: 'power2.out', onComplete: () => star.remove() }));
-      }
-    },
+    // screen 16: as Swiftee reaches the end of a side, its length slides out of the side's middle
+    lenOut(lab, k) { if (G && lab) add(() => { const tl = G.timeline(); labelOut(tl, lab, sideMid(k), 0); return tl; }); },
     // marks are drawn like pen strokes rather than popping: each path's stroke runs on from its start
     drawOn(paths, delay, dur) {
       const list = paths.filter(Boolean);
@@ -725,51 +750,12 @@
         return tl;
       });
     },
-    // ---------- the Snowflake Challenge (screens 38-43) ----------
     // stage px of an element's centre
     centreOf(el) {
       const st = document.querySelector('.stage'); if (!st || !el) return null;
       const s = st.getBoundingClientRect(), r = el.getBoundingClientRect(), k = s.width / 1280;
       return { x: (r.left + r.width / 2 - s.left) / k, y: (r.top + r.height / 2 - s.top) / k };
     },
-    // a badge lands: it drops in big and tilted, settles, and bursts
-    flakeLand(el) {
-      if (!G || !el) return;
-      add(() => G.fromTo(el, { scale: 1.8, rotation: -30 }, { scale: 1, rotation: 0, duration: reduced ? 0 : 0.5, ease: 'back.out(2.6)' }));
-      this.burst(el);
-    },
-    // "Snowflake Challenge": the five badges pop in one by one
-    flakesIn() {
-      if (!G) return;
-      add(() => G.fromTo($('.flake'), { scale: 0, rotation: -90 }, { scale: 1, rotation: 0, duration: reduced ? 0 : 0.45, ease: 'back.out(2.2)', stagger: reduced ? 0 : 0.12 }));
-    },
-    flakesHide(sel) { if (G) add(() => G.set($(sel || '.flake'), sel === '.flake-bar' ? { opacity: 0 } : { scale: 0 })); },
-    // a right answer: a snowflake spins up from the answer to its badge in the bar; onLand fills the badge
-    flakeWin(i, gold, from, onLand) {
-      const badge = $('.flake')[i], L = this.eqLayer();
-      const a = this.centreOf(from) || { x: 870, y: 360 }, b = this.centreOf(badge);
-      if (!G || reduced || !L || !b) { if (onLand) onLand(); return; }
-      const f = document.createElement('div'); f.className = 'fx-flake' + (gold ? ' gold' : '');
-      f.innerHTML = badge.innerHTML; f.style.left = a.x + 'px'; f.style.top = a.y + 'px'; L.appendChild(f);
-      add(() => G.timeline({ delay: 0.35, onComplete: () => { f.remove(); if (onLand) onLand(); } })
-        .fromTo(f, { scale: 0.3, opacity: 0 }, { scale: 1.6, opacity: 1, duration: 0.3, ease: 'back.out(2)' }, 0)
-        .to(f, { left: b.x, duration: 0.8, ease: 'power1.in' }, 0.3)
-        .to(f, { top: b.y, duration: 0.8, ease: 'back.in(1.6)' }, 0.3)
-        .to(f, { rotation: 360, scale: 1, duration: 0.8, ease: 'sine.inOut' }, 0.3));
-    },
-    // the end screen: the won snowflakes land one after another
-    flakesEnd() {
-      if (!G) return;
-      const won = $('.flake.won');
-      add(() => {
-        const tl = G.timeline();
-        G.set(won, { scale: 0 });
-        tl.to($('.flake-bar'), { opacity: 1, duration: reduced ? 0 : 0.35 }, 0);
-        won.forEach((el, i) => tl.call(() => this.flakeLand(el), null, 0.3 + i * 0.28));
-        return tl;
-      });
-    },
-
     // ---------- the checks: show why ----------
     // check 1 found: the two parallel sides light up and their arrows draw on
     q1Correct() {
@@ -782,8 +768,8 @@
     },
     // the questions: each part lights up as Swiftee reads it out
     q1Cards() { if (G) add(() => G.fromTo($('.opt'), { y: 0 }, { y: -14, duration: 0.18, ease: 'power2.out', yoyo: true, repeat: 1, stagger: 0.14 })); },
-    q1Look() { if (G) add(() => G.fromTo($('.opt svg'), { filter: 'drop-shadow(0px 0px 0px rgba(255,122,0,0))' }, { filter: 'drop-shadow(0px 0px 8px rgba(255,122,0,0.9))', duration: 0.35, yoyo: true, repeat: 1, stagger: 0.18 })); },
-    q2Shape() { if (G) add(() => G.fromTo($('.qshape'), { filter: 'drop-shadow(0px 0px 0px rgba(0,196,167,0))' }, { filter: 'drop-shadow(0px 0px 10px rgba(0,196,167,0.75))', duration: 0.4, yoyo: true, repeat: 1 })); },
+    q1Look() { if (G) add(() => G.fromTo($('.opt svg'), { scale: 1 }, { scale: 1.12, transformOrigin: '50% 50%', duration: 0.35, ease: 'sine.inOut', yoyo: true, repeat: 1, stagger: 0.18 })); },
+    q2Shape() { if (G) add(() => G.fromTo($('.qshape'), { scale: 1 }, { scale: 1.05, transformOrigin: '50% 50%', duration: 0.4, ease: 'sine.inOut', yoyo: true, repeat: 1 })); },
     q5Say(lab, line) {
       if (!G) return;
       add(() => G.timeline()
@@ -798,7 +784,7 @@
     q2Wrong() {
       if (!G) return;
       add(() => G.timeline()
-        .fromTo($('.q2-leg'), { strokeWidth: 5 }, { strokeWidth: 10, stroke: '#ff7a00', duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 0)
+        .fromTo($('.q2-leg'), { strokeWidth: 5 }, { strokeWidth: 7, stroke: '#ff7a00', duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 0)
         .fromTo($('.q2-tick'), { scale: 1, transformOrigin: '50% 50%' }, { scale: 1.6, stroke: '#ff7a00', duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 0));
     },
     // check 2 right: the legs glow and "AD = BC" stamps in
@@ -806,9 +792,9 @@
       if (!G) return;
       const eq = $('.q2-eq')[0];
       add(() => G.timeline()
-        .to($('.q2-leg'), { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(0,196,167,0.8))', duration: 0.3, yoyo: true, repeat: 1 }, 0)
+        .to($('.q2-leg'), { strokeWidth: 7, duration: 0.3, yoyo: true, repeat: 1 }, 0)
         .fromTo(eq, { opacity: 0, scale: 1.9, rotation: -10, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, rotation: 0, duration: reduced ? 0 : 0.45, ease: 'back.out(2.6)' }, 0.4)
-        .call(() => this.burst(eq), null, 0.65));
+        );
     },
     // check 5: a wrong length - both legs light up with their equal marks, and AD's 5 cm pulses: "BC is a leg, like AD"
     q5Wrong() {
@@ -834,7 +820,7 @@
         .to(q, { opacity: 0, duration: 0.15 }, 1.15)
         .to(f, { opacity: 0, duration: 0.12 }, 1.25)
         .fromTo(bc, { opacity: 0, scale: 1.9, rotation: -10, transformOrigin: '0% 50%' }, { opacity: 1, scale: 1, rotation: 0, duration: 0.42, ease: 'back.out(2.6)' }, 1.25)
-        .call(() => this.burst(bc), null, 1.45));
+        );
     },
     // Swiftee dozing (an idle antic): three soft "z"s float up from her head, over and over, until zzz(false)
     zzz(on) {
@@ -879,8 +865,9 @@
       const g = $('svg g.pop-g')[0], d = $('div.pop-g')[0];
       add(() => {
         const tl = G.timeline();
-        if (g) tl.fromTo(g, { scale: 1 }, { scale: 1.04, svgOrigin: cx + ' ' + cy, duration: 0.18, ease: 'sine.out', yoyo: true, repeat: 1 }, 0);
-        if (d) tl.fromTo(d, { scale: 1 }, { scale: 1.04, transformOrigin: cx + 'px ' + cy + 'px', duration: 0.18, ease: 'sine.out', yoyo: true, repeat: 1 }, 0);
+        const S = Math.min(1.04, window.__popRoom ? window.__popRoom() : 1.04);
+        if (g) tl.fromTo(g, { scale: 1 }, { scale: S, svgOrigin: cx + ' ' + cy, duration: 0.18, ease: 'sine.out', yoyo: true, repeat: 1 }, 0);
+        if (d) tl.fromTo(d, { scale: 1 }, { scale: S, transformOrigin: cx + 'px ' + cy + 'px', duration: 0.18, ease: 'sine.out', yoyo: true, repeat: 1 }, 0);
         return tl;
       });
     },
@@ -891,7 +878,7 @@
       const L = $('.tag.sumL')[0], R = $('.tag.sumR')[0];
       const pulse = (keys, panel, at, tl) => {
         const arcs = keys.map((k) => $('.arc.a' + k)[0]).filter(Boolean), labs = keys.map((k) => $('.tag.alab.l' + k)[0]).filter(Boolean);
-        tl.to(arcs, { strokeWidth: 10, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
+        tl.to(arcs, { strokeWidth: 7, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at)
           .fromTo(labs, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.15, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1 }, at);
         if (panel) tl.fromTo(panel, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.08, duration: 0.3, ease: 'back.out(2)', yoyo: true, repeat: 1 }, at + 0.2);
       };
@@ -905,8 +892,9 @@
       add(() => {
         const tl = G.timeline(), L = (m && m.getTotalLength && m.getTotalLength()) || 30;
         if (m) tl.fromTo(m, { opacity: 1, strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.5, ease: 'power2.out' }, 0)
-          .to(m, { filter: 'drop-shadow(0px 0px 4px rgba(46,158,79,0.7))', duration: 0.25, yoyo: true, repeat: 1 }, 0.45);
-        if (lab) tl.fromTo(lab, { opacity: 0, scale: 0.6, xPercent: -50, yPercent: -50 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)' }, 0.3);
+          .call(() => this.markPing(m), null, 0.45)
+          .to(m, { duration: 0.3, yoyo: true, repeat: 1 }, 0.45);
+        labelOut(tl, lab, corner(k), 0.35);
         return tl;
       });
     },
@@ -915,9 +903,8 @@
       const ms = $('.rmark'), labs = $('.tag.r90');
       if (!G) return;
       add(() => G.timeline()
-        .fromTo(labs, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.2, duration: 0.25, ease: 'back.out(2)', yoyo: true, repeat: 1, stagger: 0.12 }, 0)
-        .to(labs, { boxShadow: '0 0 0 3px rgba(255,214,110,.55), 0 0 14px 3px rgba(255,184,40,.45)', duration: 0.4, ease: 'sine.out', stagger: 0.12 }, 0)
-        .to(ms, { filter: 'drop-shadow(0px 0px 5px rgba(255,184,40,0.85))', duration: 0.4, ease: 'sine.out', stagger: 0.12 }, 0));
+        .fromTo(labs, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.15, duration: 0.3, ease: 'sine.inOut', yoyo: true, repeat: 1, stagger: 0.12 }, 0)
+        .call(() => ms.forEach((m) => this.markPing(m)), null, 0));
     },
     // screen 35, on "angled": the name label below the shape pulses twice, gently
     titlePulse() {
@@ -932,14 +919,14 @@
       const m = $('.rm' + k)[0], lab = $('.tag.r90' + k)[0];
       if (!G) return;
       add(() => G.timeline()
-        .to(m, { strokeWidth: 5, filter: 'drop-shadow(0px 0px 5px rgba(46,158,79,0.8))', duration: 0.2, yoyo: true, repeat: 1 }, 0)
+        .to(m, { strokeWidth: 5, duration: 0.2, yoyo: true, repeat: 1 }, 0)
         .fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.3, duration: 0.2, ease: 'sine.out', yoyo: true, repeat: 1 }, 0));
     },
     // screen 35, both right angles found: the vertical side glows once
     rightAll() {
       const s = $('.eDA')[0];
       if (G && s) add(() => G.timeline()
-        .to(s, { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(46,158,79,0.7))', duration: 0.35, ease: 'sine.out' })
+        .to(s, { strokeWidth: 7, duration: 0.35, ease: 'sine.out' })
         .to(s, { strokeWidth: 5, filter: NOGLOW, duration: 0.6, ease: 'sine.inOut' }, '>+0.4')
         .set(s, { clearProps: 'strokeWidth,filter' }));
     },
@@ -964,7 +951,7 @@
       add(() => G.timeline()
         .fromTo($('.q3-wA'), { opacity: 1, scale: 0, transformOrigin: '0% 0%' }, { scale: 1, duration: 0.45, ease: 'back.out(1.6)' }, 0)
         .fromTo($('.q3-vA'), { opacity: 0, scale: 0.6, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(2)' }, 0.25)
-        .to($('.q3-wA'), { filter: 'drop-shadow(0px 0px 6px rgba(255,122,0,0.8))', duration: 0.3, yoyo: true, repeat: 1 }, 0.6));
+        .to($('.q3-wA'), { duration: 0.3, yoyo: true, repeat: 1 }, 0.6));
     },
     // "value": a light runs down AD, D's yellow wedge opens, a big "?" pops and pulses, then A and D glow
     // together (60° stays hidden)
@@ -977,7 +964,7 @@
         .fromTo($('.q3-wD'), { opacity: 1, scale: 0, transformOrigin: '0% 100%' }, { scale: 1, duration: 0.45, ease: 'back.out(1.6)' }, 0.6)
         .fromTo($('.q3-q'), { opacity: 0, scale: 0.4, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2.2)' }, 0.85)
         .to($('.q3-q'), { scale: 1.15, duration: 0.35, ease: 'sine.inOut', yoyo: true, repeat: 3 }, 1.3)
-        .to($('.q3-wA').concat($('.q3-wD')), { filter: 'drop-shadow(0px 0px 6px rgba(240,170,36,0.8))', duration: 0.3, yoyo: true, repeat: 1 }, 1.4));
+        .to($('.q3-wA').concat($('.q3-wD')), { duration: 0.3, yoyo: true, repeat: 1 }, 1.4));
     },
     // AD glows once and the hint equation "120° + ? = 180°" appears above the shape (after a miss, or with the right answer)
     q3Hint() {
@@ -1021,7 +1008,7 @@
         .to(q, { opacity: 0, scale: 0.4, duration: 0.2 }, 0.55)
         .to(fly, { opacity: 0, duration: 0.15 }, 0.7)
         .fromTo($('.q3-vD'), { opacity: 0, scale: 0.6, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(2)' }, 0.7)
-        .to($('.q3-wA').concat($('.q3-wD')), { filter: 'drop-shadow(0px 0px 7px rgba(240,170,36,0.9))', duration: 0.35, yoyo: true, repeat: 1 }, 0.8)
+        .to($('.q3-wA').concat($('.q3-wD')), { duration: 0.35, yoyo: true, repeat: 1 }, 0.8)
         .call(() => {
           const ops = h.querySelectorAll('.q3h-op');
           h.querySelector('.q3h-a').textContent = '120°'; ops[0].textContent = '+'; ops[1].textContent = '=';
@@ -1113,7 +1100,7 @@
         const strip = $('.q4-strip' + i)[0], card = $('.q4-card' + i)[0];
         if (strip) tl.fromTo(strip, { boxShadow: 'inset 0 0 0 1.5px rgba(255,255,255,0.65)' }, { boxShadow: 'inset 0 0 0 2.5px rgba(46,158,79,0.6), 0 0 18px rgba(46,158,79,0.25)', duration: 0.35 }, 0.05);
         if (card) tl.fromTo(card, { y: 0 }, { y: -4, duration: 0.18, yoyo: true, repeat: 1 }, 0.05);
-        if (s) tl.fromTo(s, { filter: 'drop-shadow(0px 0px 0px rgba(46,158,79,0))' }, { filter: 'drop-shadow(0px 0px 8px rgba(46,158,79,0.75))', duration: 0.3, yoyo: true, repeat: 1 }, 0.05);
+        if (s) tl.fromTo(s, { filter: 'drop-shadow(0px 0px 0px rgba(46,158,79,0))' }, { duration: 0.3, yoyo: true, repeat: 1 }, 0.05);
         this.q4Clue(i, tl, 0.15);
         return tl;
       });
@@ -1141,7 +1128,9 @@
     growFocus() {
       const g = $('svg g.pop-g')[0], d = $('div.pop-g')[0], P = window.__trapP && window.__trapP();
       if (!G || !P) return;
-      const cx = (P.A.x + P.B.x + P.C.x + P.D.x) / 4, cy = (P.A.y + P.B.y + P.C.y + P.D.y) / 4, S = 1.2, f = reduced ? 0 : 1;
+      // it grows as much as the card allows (at most 20%), so no corner or letter ever touches the card's edge
+      const room = window.__popRoom ? window.__popRoom() : 1.1;
+      const cx = (P.A.x + P.B.x + P.C.x + P.D.x) / 4, cy = (P.A.y + P.B.y + P.C.y + P.D.y) / 4, S = Math.min(1.2, room), f = reduced ? 0 : 1;
       const lines = g ? Array.from(g.querySelectorAll('.edge, circle')) : [];
       add(() => {
         const tl = G.timeline();
@@ -1163,13 +1152,13 @@
         const tl = G.timeline(), els = [], labs = [];
         list.forEach(([k, len], i) => {
           const e = $('.e' + k)[0], lab = tags.find((x) => x.textContent.trim() === len && getComputedStyle(x).display !== 'none'), at = i * gap;
-          if (e) { els.push(e); tl.to(e, { strokeWidth: 9, filter: 'drop-shadow(0px 0px 6px rgba(0,196,167,0.7))', duration: 0.3, ease: 'sine.out' }, at); }
-          if (lab) { labs.push(lab); tl.fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.15, boxShadow: '0 0 0 4px rgba(0,196,167,0.3)', duration: 0.3, ease: 'back.out(2)' }, at); }
+          if (e) { els.push(e); tl.to(e, { strokeWidth: 7, duration: 0.3, ease: 'sine.out' }, at).call(() => this.spark(k), null, at); }
+          if (lab) { labs.push(lab); tl.fromTo(lab, { xPercent: -50, yPercent: -50, scale: 1 }, { scale: 1.18, duration: 0.3, ease: 'sine.out' }, at); }
         });
-        tl.to(els, { strokeWidth: 5, filter: NOGLOW, duration: 0.45, ease: 'sine.inOut' }, hold)
-          .to(labs, { scale: 1, boxShadow: '0 0 0 0px rgba(0,196,167,0)', duration: 0.45, ease: 'sine.inOut' }, hold)
-          .set(els, { clearProps: 'strokeWidth,filter' })
-          .set(labs, { clearProps: 'boxShadow' });
+        tl.to(els, { strokeWidth: 5, duration: 0.45, ease: 'sine.inOut' }, hold)
+          .to(labs, { scale: 1, duration: 0.45, ease: 'sine.inOut' }, hold)
+          .set(els, { clearProps: 'strokeWidth' })
+          .set(labs, { clearProps: 'transform' });
         return tl;
       });
     },

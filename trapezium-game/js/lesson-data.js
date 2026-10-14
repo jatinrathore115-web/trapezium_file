@@ -27,8 +27,7 @@
 //   room         'measure' = the Measuring Kit layout: wide slab, big shape, small Swiftee (CONFIG.measureRoom)
 //   lenPre       side lengths hidden until a cue brings them in
 //   boardShiftY  px to move the shape up (-) or down (+), on a noZoom screen
-//   noZoom       keep the shape at its plain size (lesson screens are drawn larger, CONFIG.lessonZoom)
-//   apexZoom     the smaller zoom that keeps the point where the extended legs meet inside the panel
+//   noZoom       keep the shape at its plain size (lesson screens are fitted to fill the panel, CONFIG.fit)
 //   handOnce     one demo hand gesture after the line, never repeated
 //   wrongRight   { cm, side }: dragging the corner right by more than cm wiggles side, with the wrong sound
 //   tickPre      equal-leg marks hidden until a cue brings them in
@@ -60,7 +59,7 @@
 //   noPanel      no ice panel
 //   summary      the Summary Kit's recall cards (js/summary.js)
 //   noIdle       no idle reminders
-//   cfu          check number (1-5); each wins a snowflake in the Snowflake Challenge bar (gold if right first time)
+//   cfu          check number (1-5)
 //   okFx / badFx Motion functions run on a right / wrong answer (they show why on the shape)
 //   qFocus       after the question the shape glides up and the answers come in under it (CONFIG.qFocus)
 //   qStatic      the question text kept in the bubble; it returns after each feedback line
@@ -133,12 +132,12 @@ const LESSON = {
     // instruction only, nothing to do
     { id: 'extendSay', autoAdvance: 1, locked: 1, lines: [{ m: 'curious', t: "Let's extend them.", cueAt: { extend: 'glowLegs' } }], f: { legGlow: 1 } },
     // opens with the shape at centre stage, no line; D->A then C->B glow and extend dotted until they meet
-    { id: 'extend', layout: 'focus', apexZoom: 1, lines: [], task: 'extLegs', auto: 1,
+    { id: 'extend', layout: 'focus', lines: [], task: 'extLegs', auto: 1,
       after: [{ m: 'surprised', t: 'Woah! The sides meet.', s: 'Whoa! The sides meet.' }] },
     // 1 s after the line AB and DC glow once, then A->B and D->C each extend both ways
-    { id: 'other', extendDelay: 1000, swapCol: 1, lines: [{ m: 'curious', t: "Let's check the other\npair of sides." }], task: 'extBases', auto: 1 },
+    { id: 'other', extendDelay: 1000, lines: [{ m: 'curious', t: "Let's check the other\npair of sides." }], task: 'extBases', auto: 1 },
     // the parallel sides and their extensions pulse on "pair" and again on "meet"
-    { id: 'parallel', swapCol: 1, parStrong: 1, lines: [{ m: 'surprised', t: 'This pair of sides\ndoes not meet.', noEmph: 1, cueAt: { pair: 'parPulse', meet: 'parPulse' } }], f: { baseExt: 1 } },
+    { id: 'parallel', parStrong: 1, lines: [{ m: 'surprised', t: 'This pair of sides\ndoes not meet.', noEmph: 1, cueAt: { pair: 'parPulse', meet: 'parPulse' } }], f: { baseExt: 1 } },
     // second line is voice only; its label appears once "A B" and "C D" have both been said
     { id: 'abcd', lines: [{ t: 'This means the sides are parallel to each other.', cueAt: { parallel: 'parPulse' } },
       { keep: 1, s: 'A B is parallel to C D.', chipsAfterParts: ['AB', 'CD'], chips: [{ t: 'AB ∥ CD', k: 'white' }] }], f: { par: 1 } },
@@ -163,7 +162,7 @@ const LESSON = {
       { m: 'curious', t: 'What if the legs were\nthe same length?', noEmph: 1, cueAt: { legs: 'legsTogether' } },
       { m: 'excited', t: "Let's find out.", cueAt: { find: 'findOut' } }],
       f: { par: 1, legLen: 1, sideLen: 1 } },
-    { id: 'equal', lines: [{ m: 'curious', t: "Let's change its\nshape a little.", cueAt: { change: 'vertexPulse' } }], f: { par: 1, legLen: 1, sideLen: 1 } },
+    { id: 'equal', lines: [{ m: 'curious', t: "Let's change its\nshape a little.", cueAt: { change: 'pingA' } }], f: { par: 1, legLen: 1, sideLen: 1 } },
     // one demo hand after the line. Dragging A right (the wrong way) wiggles BC: A has only ~0.75 cm
     // before B stops it, so the limit is 0.5 cm. Equal legs snap into place and finish the task
     { id: 'equalDrag', lines: [{ m: 'curious', t: 'Drag vertex A so that both\nthe legs are of equal length.' }],
@@ -229,8 +228,7 @@ const LESSON = {
       lines: [{ m: 'happy', t: "Let's recall what\nwe learnt today." }] },
     { id: 'cfu1', cfu: 1, idle: 'Look for the shape with exactly one pair of parallel sides.', hint: 'Check 1 of 5 · Which one is a trapezium?',
       okFx: 'q1Correct',
-      lines: [{ m: 'excited', t: "It's Snowflake Challenge time!\nGet each one right\nto win a snowflake.", cueAt: { snowflake: 'flakesIn' } },
-        { m: 'curious', t: 'Which of these quadrilaterals is a trapezium? Look for one pair of parallel sides.', cueAt: { quadrilaterals: 'q1Cards', parallel: 'q1Look' } }],
+      lines: [{ m: 'curious', t: 'Which of these quadrilaterals is a trapezium? Look for one pair of parallel sides.', cueAt: { quadrilaterals: 'q1Cards', parallel: 'q1Look' } }],
       ok: 'Correct! It has one pair of parallel sides, so it is a trapezium.',
       opts: [
         { id: 'A', ok: true },
@@ -272,8 +270,7 @@ const LESSON = {
         { id: 'c', t: '6 cm', fb: '6 cm is the top base AB. BC is a leg, like AD.' },
         { id: 'd', t: '10 cm', fb: '10 cm is the bottom base CD. BC is a leg, like AD.' }
       ] },
-    // Swiftee flies to centre stage and speaks once she has landed; the snowflakes won land as she counts them (the
-    // engine adds that line after the first), she says goodbye, and screen 44 follows by itself
+    // Swiftee flies to centre stage and speaks once she has landed, she says goodbye, and screen 44 follows by itself
     { id: 'end', end: 1, hero: 1, voiceDelay: 1100, autoNext: 700,
       lines: [{ m: 'celebrating', t: 'Amazing work! You know all about trapeziums now.' }, { m: 'waving', t: 'Bye for now! See you on\nour next snowy adventure!' }] },
     // the cartoon closer (js/finale.js): an iris closes on Swiftee, the sunburst, "The End", Play again

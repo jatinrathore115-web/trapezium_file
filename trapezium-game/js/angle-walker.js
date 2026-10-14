@@ -183,7 +183,8 @@ window.AngleWalker = class AngleWalker {
       c.rotate((P.rotation - F.poses[f].angle) * Math.PI / 180); // turn only by the difference from how the frame was drawn
       c.globalAlpha = this.alpha;
       const pc = this.centreOf(f); // the protractor's own centre goes on the point
-      c.drawImage(im, (f % F.cols) * cell, Math.floor(f / F.cols) * cell, cell, cell, -pc.x * s, -pc.y * s, cell * s, cell * s);
+      if (window.WinterScarf) WinterScarf.frame(c, im, (f % F.cols) * cell, Math.floor(f / F.cols) * cell, cell, 'protractor', f, -pc.x * s, -pc.y * s, cell * s, cell * s);
+      else c.drawImage(im, (f % F.cols) * cell, Math.floor(f / F.cols) * cell, cell, cell, -pc.x * s, -pc.y * s, cell * s, cell * s);
       c.globalAlpha = 1;
     }
     const tr = this.trace;

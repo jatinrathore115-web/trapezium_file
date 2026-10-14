@@ -97,6 +97,7 @@ window.SwifteeWalker = class SwifteeWalker {
     const cell = sh.info.cell, cols = sh.info.cols, f = this.frame % sh.info.frames;
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, 512, 512);
     ctx.setTransform(this.flip ? -1 : 1, 0, 0, 1, this.flip ? 512 : 0, 0);
-    ctx.drawImage(sh.img, (f % cols) * cell, Math.floor(f / cols) * cell, cell, cell, 0, 0, 512, 512);
+    if (window.WinterScarf) WinterScarf.frame(ctx, sh.img, (f % cols) * cell, Math.floor(f / cols) * cell, cell, this.anim, f, 0, 0, 512, 512);
+    else ctx.drawImage(sh.img, (f % cols) * cell, Math.floor(f / cols) * cell, cell, cell, 0, 0, 512, 512);
   }
 };

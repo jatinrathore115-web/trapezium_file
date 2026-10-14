@@ -237,15 +237,18 @@
       return g;
     },
     // pop an element in (overshoot, then settle); fill 'backwards' keeps it hidden during the delay
-    pop(el, delay, big) {
+    // bring an element in: it fades in and settles from slightly smaller, never growing past its size (so nothing
+    // pokes out of its card); fill 'backwards' keeps it hidden during the delay
+    pop(el, delay) {
       el.setAttribute('opacity', 1);
       if (reduced() || !el.animate) return;
       el.style.transformBox = 'fill-box'; el.style.transformOrigin = 'center';
-      try { el.animate([{ opacity: 0, scale: '.3' }, { opacity: 1, scale: big ? '1.35' : '1.2', offset: 0.6 }, { opacity: 1, scale: '1' }],
-        { duration: 320, delay: delay || 0, easing: 'cubic-bezier(.3,1.3,.5,1)', fill: 'backwards' }); } catch (e) {}
+      try { el.animate([{ opacity: 0, scale: '.8' }, { opacity: 1, scale: '1' }],
+        { duration: 450, delay: delay || 0, easing: 'cubic-bezier(.25,.8,.35,1)', fill: 'backwards' }); } catch (e) {}
     },
     // a short warm grow-and-glow on each element, slightly staggered
     warmPulse(els, peak) {
+      peak = String(Math.min(1.15, parseFloat(peak) || 1.15)); // marks swell a little, never out of their card
       (els || []).filter(Boolean).forEach((e, i) => {
         if (reduced() || !e.animate) return;
         e.style.transformBox = 'fill-box'; e.style.transformOrigin = 'center';
@@ -389,7 +392,7 @@
       else if (kind === 'side') this.trace([sd.DA]); // the side the two right angles share (they are adjacent)
       else if (kind === 'ticks') { this.warmPulse(c._ticks, '1.6'); if (c._c.visual.ticks === 'all') this.trace([sd.AB, sd.BC, sd.DC, sd.DA]); }
       else if (kind === 'right') this.warmPulse(c._right, '1.6');
-      else if (kind === 'wedges') this.warmPulse(c._wedges, '1.45');
+      else if (kind === 'wedges') this.warmPulse(c._wedges, '1.15');
       else if (kind === 'values') this.warmPulse(c._values, '1.5');
       else if (kind === 'sum') this.sum(c);
       else if (kind === 'tag') this.warmPulse([c._tag], '1.12');

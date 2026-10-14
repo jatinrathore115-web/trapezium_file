@@ -202,6 +202,7 @@ window.SwifteeMascot = class SwifteeMascot {
     this.root = root || null;
     this.cv = root ? root.querySelector('canvas') : null;
     this.ctx = null;
+    this.drawn = false; // a replacement canvas needs its own data-live reveal
     return this.cv;
   }
   // draw sheet frame f (from whichever page holds it) over the whole canvas
@@ -212,7 +213,8 @@ window.SwifteeMascot = class SwifteeMascot {
     const sx = (i % pg.cols) * cell, sy = Math.floor(i / pg.cols) * cell;
     ctx.globalAlpha = alpha;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.drawImage(pg.img, sx, sy, cell, cell, 0, 0, ctx.canvas.width, ctx.canvas.height);
+    if (window.WinterScarf) WinterScarf.frame(ctx, pg.img, sx, sy, cell, anim, f, 0, 0, ctx.canvas.width, ctx.canvas.height);
+    else ctx.drawImage(pg.img, sx, sy, cell, cell, 0, 0, ctx.canvas.width, ctx.canvas.height);
     return true;
   }
   draw(now) {

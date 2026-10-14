@@ -16,6 +16,9 @@
 <script src="js/config.js"></script>
 <script src="js/lesson-data.js"></script>
 <script src="js/swiftee-manifest.js"></script>
+<script src="js/scarf-anchors.js"></script>
+<script src="js/scarf-occlusion.js"></script>
+<script src="js/winter-scarf.js"></script>
 <script src="js/swiftee.js"></script>
 <script src="js/walker.js"></script>
 <script src="js/angle-frames.js"></script>
@@ -39,13 +42,13 @@
 <svg class="{{boardCls}}" viewBox="0 0 520 420" width="520" height="420" style="position: absolute; left: 640px; top: 104px; overflow: visible; touch-action: none; transform-origin: 0px 0px; transition: transform 0.7s cubic-bezier(0.22, 0.8, 0.3, 1); transform: {{boardTf}}" aria-label="Trapezium ABCD">
 <g class="pop-g" style="transform-origin: {{popO}}">
 <polygon class="shape-fill" sc-camel-points="{{g.poly}}" fill="rgba(255,246,214,0.92)" stroke="none"></polygon>
-<line class="xleg" sc-camel-x1="{{g.xA.x1}}" sc-camel-y1="{{g.xA.y1}}" sc-camel-x2="{{g.xA.x2}}" sc-camel-y2="{{g.xA.y2}}" sc-camel-display="{{g.xA.d}}" stroke="#e8643c" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round"></line>
-<line class="xleg" sc-camel-x1="{{g.xB.x1}}" sc-camel-y1="{{g.xB.y1}}" sc-camel-x2="{{g.xB.x2}}" sc-camel-y2="{{g.xB.y2}}" sc-camel-display="{{g.xB.d}}" stroke="#e8643c" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round"></line>
-<line class="xleg" sc-camel-x1="{{g.xAB.x1}}" sc-camel-y1="{{g.xAB.y1}}" sc-camel-x2="{{g.xAB.x2}}" sc-camel-y2="{{g.xAB.y2}}" sc-camel-display="{{g.xAB.d}}" stroke="#e8643c" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round"></line>
-<line class="xleg" sc-camel-x1="{{g.xCD.x1}}" sc-camel-y1="{{g.xCD.y1}}" sc-camel-x2="{{g.xCD.x2}}" sc-camel-y2="{{g.xCD.y2}}" sc-camel-display="{{g.xCD.d}}" stroke="#e8643c" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round"></line>
-<circle class="apex-ring" sc-camel-cx="{{g.apex.cx}}" sc-camel-cy="{{g.apex.cy}}" r="7.5" fill="none" stroke="#e8643c" stroke-width="2.5" sc-camel-display="{{g.apex.d}}"></circle>
-<circle class="apex-ring r2" sc-camel-cx="{{g.apex.cx}}" sc-camel-cy="{{g.apex.cy}}" r="7.5" fill="none" stroke="#e8643c" stroke-width="2.5" sc-camel-display="{{g.apex.d}}"></circle>
-<circle class="fadein apex-dot" sc-camel-cx="{{g.apex.cx}}" sc-camel-cy="{{g.apex.cy}}" r="7.5" fill="#e8643c" sc-camel-display="{{g.apex.d}}"></circle>
+<line class="xleg" sc-camel-x1="{{g.xA.x1}}" sc-camel-y1="{{g.xA.y1}}" sc-camel-x2="{{g.xA.x2}}" sc-camel-y2="{{g.xA.y2}}" sc-camel-display="{{g.xA.d}}" stroke="#00c4a7" stroke-width="4" stroke-dasharray="10 8" stroke-linecap="round"></line>
+<line class="xleg" sc-camel-x1="{{g.xB.x1}}" sc-camel-y1="{{g.xB.y1}}" sc-camel-x2="{{g.xB.x2}}" sc-camel-y2="{{g.xB.y2}}" sc-camel-display="{{g.xB.d}}" stroke="#00c4a7" stroke-width="4" stroke-dasharray="10 8" stroke-linecap="round"></line>
+<line class="xleg" sc-camel-x1="{{g.xAB.x1}}" sc-camel-y1="{{g.xAB.y1}}" sc-camel-x2="{{g.xAB.x2}}" sc-camel-y2="{{g.xAB.y2}}" sc-camel-display="{{g.xAB.d}}" stroke="#1f6bff" stroke-width="4" stroke-dasharray="10 8" stroke-linecap="round"></line>
+<line class="xleg" sc-camel-x1="{{g.xCD.x1}}" sc-camel-y1="{{g.xCD.y1}}" sc-camel-x2="{{g.xCD.x2}}" sc-camel-y2="{{g.xCD.y2}}" sc-camel-display="{{g.xCD.d}}" stroke="#1f6bff" stroke-width="4" stroke-dasharray="10 8" stroke-linecap="round"></line>
+<circle class="apex-ring" sc-camel-cx="{{g.apex.cx}}" sc-camel-cy="{{g.apex.cy}}" r="7.5" fill="none" stroke="#ff7a00" stroke-width="2.5" sc-camel-display="{{g.apex.d}}"></circle>
+<circle class="apex-ring r2" sc-camel-cx="{{g.apex.cx}}" sc-camel-cy="{{g.apex.cy}}" r="7.5" fill="none" stroke="#ff7a00" stroke-width="2.5" sc-camel-display="{{g.apex.d}}"></circle>
+<circle class="fadein apex-dot" sc-camel-cx="{{g.apex.cx}}" sc-camel-cy="{{g.apex.cy}}" r="7.5" fill="#ff7a00" sc-camel-display="{{g.apex.d}}"></circle>
 <clipPath id="shapeClip"><polygon sc-camel-points="{{g.poly}}"></polygon></clipPath>
 <g class="angle-marks" clip-path="url(#shapeClip)">
 <path sc-camel-d="{{g.wA.p}}" class="{{g.wA.cls}}" sc-camel-display="{{g.wA.d}}" fill="#ff7a00" fill-opacity="1" stroke="none"></path>
@@ -56,20 +59,24 @@
 <path sc-camel-d="{{g.aB.p}}" pathLength="100" class="{{g.aB.cls}}" style="transform-origin: {{g.aB.o}}" sc-camel-display="{{g.aB.d}}" fill="none" stroke="#1fcf66" stroke-width="7" stroke-linecap="round"></path>
 <path sc-camel-d="{{g.aC.p}}" pathLength="100" class="{{g.aC.cls}}" style="transform-origin: {{g.aC.o}}" sc-camel-display="{{g.aC.d}}" fill="none" stroke="#12a4ff" stroke-width="7" stroke-linecap="round"></path>
 <path sc-camel-d="{{g.aD.p}}" pathLength="100" class="{{g.aD.cls}}" style="transform-origin: {{g.aD.o}}" sc-camel-display="{{g.aD.d}}" fill="none" stroke="#ffb800" stroke-width="7" stroke-linecap="round"></path>
-<path sc-camel-d="{{g.rA.p}}" class="fadein rmark rmA" sc-camel-display="{{g.rA.d}}" fill="none" stroke="#2e9e4f" stroke-width="3"></path>
-<path sc-camel-d="{{g.rB.p}}" class="fadein rmark rmB" sc-camel-display="{{g.rB.d}}" fill="none" stroke="#2e9e4f" stroke-width="3"></path>
-<path sc-camel-d="{{g.rC.p}}" class="fadein rmark rmC" sc-camel-display="{{g.rC.d}}" fill="none" stroke="#2e9e4f" stroke-width="3"></path>
-<path sc-camel-d="{{g.rD.p}}" class="fadein rmark rmD" sc-camel-display="{{g.rD.d}}" fill="none" stroke="#2e9e4f" stroke-width="3"></path>
+<path sc-camel-d="{{g.rA.p}}" class="fadein rmark rmA" sc-camel-display="{{g.rA.d}}" fill="rgba(255,196,0,0.5)" stroke="#123b63" stroke-width="2.5" stroke-linejoin="round"></path>
+<path sc-camel-d="{{g.rB.p}}" class="fadein rmark rmB" sc-camel-display="{{g.rB.d}}" fill="rgba(255,196,0,0.5)" stroke="#123b63" stroke-width="2.5" stroke-linejoin="round"></path>
+<path sc-camel-d="{{g.rC.p}}" class="fadein rmark rmC" sc-camel-display="{{g.rC.d}}" fill="rgba(255,196,0,0.5)" stroke="#123b63" stroke-width="2.5" stroke-linejoin="round"></path>
+<path sc-camel-d="{{g.rD.p}}" class="fadein rmark rmD" sc-camel-display="{{g.rD.d}}" fill="rgba(255,196,0,0.5)" stroke="#123b63" stroke-width="2.5" stroke-linejoin="round"></path>
 </g>
-<line sc-camel-x1="{{g.eAB.x1}}" sc-camel-y1="{{g.eAB.y1}}" sc-camel-x2="{{g.eAB.x2}}" sc-camel-y2="{{g.eAB.y2}}" sc-camel-display="{{g.eAB.d}}" class="edge {{g.eAB.cls}}" style="stroke: {{g.eAB.c}}" stroke-width="7" stroke-linecap="round"></line>
-<line sc-camel-x1="{{g.eBC.x1}}" sc-camel-y1="{{g.eBC.y1}}" sc-camel-x2="{{g.eBC.x2}}" sc-camel-y2="{{g.eBC.y2}}" sc-camel-display="{{g.eBC.d}}" class="edge {{g.eBC.cls}}" style="stroke: {{g.eBC.c}}" stroke-width="7" stroke-linecap="round"></line>
-<line sc-camel-x1="{{g.eCD.x1}}" sc-camel-y1="{{g.eCD.y1}}" sc-camel-x2="{{g.eCD.x2}}" sc-camel-y2="{{g.eCD.y2}}" sc-camel-display="{{g.eCD.d}}" class="edge {{g.eCD.cls}}" style="stroke: {{g.eCD.c}}" stroke-width="7" stroke-linecap="round"></line>
-<line sc-camel-x1="{{g.eDA.x1}}" sc-camel-y1="{{g.eDA.y1}}" sc-camel-x2="{{g.eDA.x2}}" sc-camel-y2="{{g.eDA.y2}}" sc-camel-display="{{g.eDA.d}}" class="edge {{g.eDA.cls}}" style="stroke: {{g.eDA.c}}" stroke-width="7" stroke-linecap="round"></line>
+<line class="{{g.eAB.hl}}" sc-camel-x1="{{g.eAB.x1}}" sc-camel-y1="{{g.eAB.y1}}" sc-camel-x2="{{g.eAB.x2}}" sc-camel-y2="{{g.eAB.y2}}" pathLength="100" fill="none" stroke="#ffd23f" stroke-width="16" stroke-linecap="round" pointer-events="none"></line>
+<line class="{{g.eBC.hl}}" sc-camel-x1="{{g.eBC.x1}}" sc-camel-y1="{{g.eBC.y1}}" sc-camel-x2="{{g.eBC.x2}}" sc-camel-y2="{{g.eBC.y2}}" pathLength="100" fill="none" stroke="#ffd23f" stroke-width="16" stroke-linecap="round" pointer-events="none"></line>
+<line class="{{g.eCD.hl}}" sc-camel-x1="{{g.eCD.x1}}" sc-camel-y1="{{g.eCD.y1}}" sc-camel-x2="{{g.eCD.x2}}" sc-camel-y2="{{g.eCD.y2}}" pathLength="100" fill="none" stroke="#ffd23f" stroke-width="16" stroke-linecap="round" pointer-events="none"></line>
+<line class="{{g.eDA.hl}}" sc-camel-x1="{{g.eDA.x1}}" sc-camel-y1="{{g.eDA.y1}}" sc-camel-x2="{{g.eDA.x2}}" sc-camel-y2="{{g.eDA.y2}}" pathLength="100" fill="none" stroke="#ffd23f" stroke-width="16" stroke-linecap="round" pointer-events="none"></line>
+<line sc-camel-x1="{{g.eAB.x1}}" sc-camel-y1="{{g.eAB.y1}}" sc-camel-x2="{{g.eAB.x2}}" sc-camel-y2="{{g.eAB.y2}}" sc-camel-display="{{g.eAB.d}}" class="edge {{g.eAB.cls}}" style="stroke: {{g.eAB.c}}" stroke-width="5" stroke-linecap="round"></line>
+<line sc-camel-x1="{{g.eBC.x1}}" sc-camel-y1="{{g.eBC.y1}}" sc-camel-x2="{{g.eBC.x2}}" sc-camel-y2="{{g.eBC.y2}}" sc-camel-display="{{g.eBC.d}}" class="edge {{g.eBC.cls}}" style="stroke: {{g.eBC.c}}" stroke-width="5" stroke-linecap="round"></line>
+<line sc-camel-x1="{{g.eCD.x1}}" sc-camel-y1="{{g.eCD.y1}}" sc-camel-x2="{{g.eCD.x2}}" sc-camel-y2="{{g.eCD.y2}}" sc-camel-display="{{g.eCD.d}}" class="edge {{g.eCD.cls}}" style="stroke: {{g.eCD.c}}" stroke-width="5" stroke-linecap="round"></line>
+<line sc-camel-x1="{{g.eDA.x1}}" sc-camel-y1="{{g.eDA.y1}}" sc-camel-x2="{{g.eDA.x2}}" sc-camel-y2="{{g.eDA.y2}}" sc-camel-display="{{g.eDA.d}}" class="edge {{g.eDA.cls}}" style="stroke: {{g.eDA.c}}" stroke-width="5" stroke-linecap="round"></line>
 <line sc-camel-x1="{{g.trace.x1}}" sc-camel-y1="{{g.trace.y1}}" sc-camel-x2="{{g.trace.x2}}" sc-camel-y2="{{g.trace.y2}}" sc-camel-display="{{g.trace.d}}" class="{{g.trace.cls}}" stroke="#1f6bff" stroke-width="6" stroke-linecap="round" pointer-events="none"></line>
 <polygon class="outline-settle" sc-camel-points="{{g.poly}}" sc-camel-display="{{g.ol.d}}" fill="none" stroke="#1f6bff" stroke-width="6" stroke-linejoin="round" pointer-events="none"></polygon>
 <path sc-camel-d="{{g.tape.p}}" sc-camel-display="{{g.tape.d}}" class="tape" fill="none" stroke="#f7c531" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"></path>
 <path sc-camel-d="{{g.tapeTk.p}}" sc-camel-display="{{g.tapeTk.d}}" fill="none" stroke="#6b4c0c" stroke-width="1.6" stroke-linecap="round"></path>
-<path sc-camel-d="{{g.tk.p}}" class="fadein ticks" sc-camel-display="{{g.tk.d}}" fill="none" stroke="#00c4a7" stroke-width="3" stroke-linecap="round"></path>
+<path sc-camel-d="{{g.tk.p}}" class="fadein ticks" sc-camel-display="{{g.tk.d}}" fill="none" stroke="#123b63" stroke-width="3.5" stroke-linecap="round"></path>
 <path sc-camel-d="{{g.ch.p}}" class="fadein chev chev-halo" sc-camel-display="{{g.ch.d}}" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"></path>
 <path sc-camel-d="{{g.ch.p}}" class="fadein chev" sc-camel-display="{{g.ch.d}}" fill="none" stroke="#ff7a00" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
 <path sc-camel-d="{{g.arw.p}}" sc-camel-display="{{g.arw.d}}" class="nudge" fill="none" stroke="#ff7a00" stroke-width="3" stroke-dasharray="6 5" stroke-linecap="round"></path>
@@ -77,19 +84,25 @@
 <g class="okcheck" sc-camel-transform="{{g.okc.tf}}" sc-camel-display="{{g.okc.d}}" pointer-events="none"><path class="spk" d="M0,-30 L2,-24 L8,-22 L2,-20 L0,-14 L-2,-20 L-8,-22 L-2,-24 Z" fill="#f2b51c"></path><path class="spk" d="M27,-6 L28.5,-2 L32,-0.5 L28.5,1 L27,5 L25.5,1 L22,-0.5 L25.5,-2 Z" fill="#2e9e4f"></path><path class="spk" d="M-26,8 L-24.5,12 L-21,13.5 L-24.5,15 L-26,19 L-27.5,15 L-31,13.5 L-27.5,12 Z" fill="#56bdf4"></path></g>
 <g class="callout {{g.cal.cls}}" sc-camel-display="{{g.cal.d}}" pointer-events="none">
 <g class="calp calp1">
-<path class="cal-stem" sc-camel-d="{{g.cal.p1.stem}}" fill="none" stroke="#f3c552" stroke-width="2.5" stroke-linecap="round"></path>
+<path class="cal-stem" sc-camel-d="{{g.cal.p1.stem}}" fill="none" stroke="#f3c552" stroke-width="3" stroke-linecap="round"></path>
+<circle class="cal-dot" sc-camel-cx="{{g.cal.p1.dx}}" sc-camel-cy="{{g.cal.p1.dy}}" r="6" fill="#fff" stroke="#f3c552" stroke-width="3"></circle>
 <rect class="cal-pill" sc-camel-x="{{g.cal.p1.x}}" sc-camel-y="{{g.cal.p1.y}}" sc-camel-width="{{g.cal.w}}" height="32" rx="16" fill="#fde49b" stroke="#f3c552" stroke-width="2"></rect>
 <text sc-camel-display="{{g.cal.tb}}" sc-camel-x="{{g.cal.p1.tx}}" sc-camel-y="{{g.cal.p1.ty}}" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="18" fill="#123b63">Base</text>
 <text sc-camel-display="{{g.cal.tl}}" sc-camel-x="{{g.cal.p1.tx}}" sc-camel-y="{{g.cal.p1.ty}}" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="18" fill="#123b63">Leg</text>
 </g>
 <g class="calp calp2">
-<path class="cal-stem" sc-camel-d="{{g.cal.p2.stem}}" fill="none" stroke="#5fc4b8" stroke-width="2.5" stroke-linecap="round"></path>
+<path class="cal-stem" sc-camel-d="{{g.cal.p2.stem}}" fill="none" stroke="#5fc4b8" stroke-width="3" stroke-linecap="round"></path>
+<circle class="cal-dot" sc-camel-cx="{{g.cal.p2.dx}}" sc-camel-cy="{{g.cal.p2.dy}}" r="6" fill="#fff" stroke="#5fc4b8" stroke-width="3"></circle>
 <rect class="cal-pill" sc-camel-x="{{g.cal.p2.x}}" sc-camel-y="{{g.cal.p2.y}}" sc-camel-width="{{g.cal.w}}" height="32" rx="16" fill="#cdeee9" stroke="#5fc4b8" stroke-width="2"></rect>
 <text sc-camel-display="{{g.cal.tb}}" sc-camel-x="{{g.cal.p2.tx}}" sc-camel-y="{{g.cal.p2.ty}}" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="18" fill="#123b63">Base</text>
 <text sc-camel-display="{{g.cal.tl}}" sc-camel-x="{{g.cal.p2.tx}}" sc-camel-y="{{g.cal.p2.ty}}" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="18" fill="#123b63">Leg</text>
 </g>
 </g>
 <circle sc-camel-cx="{{g.halo.x}}" sc-camel-cy="{{g.halo.y}}" r="19" sc-camel-display="{{g.halo.d}}" class="halo" fill="none" stroke="#00c4a7"></circle>
+<circle class="{{g.vA.ping}}" sc-camel-cx="{{g.vA.x}}" sc-camel-cy="{{g.vA.y}}" r="15" fill="none" stroke="#ffb800" stroke-width="5" pointer-events="none"></circle>
+<circle class="{{g.vB.ping}}" sc-camel-cx="{{g.vB.x}}" sc-camel-cy="{{g.vB.y}}" r="15" fill="none" stroke="#ffb800" stroke-width="5" pointer-events="none"></circle>
+<circle class="{{g.vC.ping}}" sc-camel-cx="{{g.vC.x}}" sc-camel-cy="{{g.vC.y}}" r="15" fill="none" stroke="#ffb800" stroke-width="5" pointer-events="none"></circle>
+<circle class="{{g.vD.ping}}" sc-camel-cx="{{g.vD.x}}" sc-camel-cy="{{g.vD.y}}" r="15" fill="none" stroke="#ffb800" stroke-width="5" pointer-events="none"></circle>
 <circle class="vdot" sc-camel-cx="{{g.vA.x}}" sc-camel-cy="{{g.vA.y}}" sc-camel-r="{{g.vA.r}}" fill="#fff" stroke="{{g.vA.c}}" sc-camel-stroke-width="{{g.vA.w}}"></circle>
 <circle class="vdot" sc-camel-cx="{{g.vB.x}}" sc-camel-cy="{{g.vB.y}}" sc-camel-r="{{g.vB.r}}" fill="#fff" stroke="{{g.vB.c}}" sc-camel-stroke-width="{{g.vB.w}}"></circle>
 <circle class="vdot" sc-camel-cx="{{g.vC.x}}" sc-camel-cy="{{g.vC.y}}" sc-camel-r="{{g.vC.r}}" fill="#fff" stroke="{{g.vC.c}}" sc-camel-stroke-width="{{g.vC.w}}"></circle>
@@ -212,25 +225,25 @@
 <div class="celebrate" aria-hidden="true">
 <span class="cf" style="left: 120px; background: #f2b51c; animation-delay: 0.00s; transform: rotate(0deg)"></span>
 <span class="cf" style="left: 517px; background: #2b7bd6; animation-delay: 0.12s; transform: rotate(53deg)"></span>
-<span class="cf" style="left: 914px; background: #e8643c; animation-delay: 0.24s; transform: rotate(106deg)"></span>
+<span class="cf" style="left: 914px; background: #ff7a00; animation-delay: 0.24s; transform: rotate(106deg)"></span>
 <span class="cf" style="left: 271px; background: #2e9e4f; animation-delay: 0.36s; transform: rotate(159deg)"></span>
 <span class="cf" style="left: 668px; background: #00c4a7; animation-delay: 0.48s; transform: rotate(212deg)"></span>
 <span class="cf" style="left: 1065px; background: #56bdf4; animation-delay: 0.60s; transform: rotate(265deg)"></span>
 <span class="cf" style="left: 422px; background: #f2b51c; animation-delay: 0.72s; transform: rotate(318deg)"></span>
 <span class="cf" style="left: 819px; background: #2b7bd6; animation-delay: 0.00s; transform: rotate(11deg)"></span>
-<span class="cf" style="left: 176px; background: #e8643c; animation-delay: 0.12s; transform: rotate(64deg)"></span>
+<span class="cf" style="left: 176px; background: #ff7a00; animation-delay: 0.12s; transform: rotate(64deg)"></span>
 <span class="cf" style="left: 573px; background: #2e9e4f; animation-delay: 0.24s; transform: rotate(117deg)"></span>
 <span class="cf" style="left: 970px; background: #00c4a7; animation-delay: 0.36s; transform: rotate(170deg)"></span>
 <span class="cf" style="left: 327px; background: #56bdf4; animation-delay: 0.48s; transform: rotate(223deg)"></span>
 <span class="cf" style="left: 724px; background: #f2b51c; animation-delay: 0.60s; transform: rotate(276deg)"></span>
 <span class="cf" style="left: 1121px; background: #2b7bd6; animation-delay: 0.72s; transform: rotate(329deg)"></span>
-<span class="cf" style="left: 478px; background: #e8643c; animation-delay: 0.00s; transform: rotate(22deg)"></span>
+<span class="cf" style="left: 478px; background: #ff7a00; animation-delay: 0.00s; transform: rotate(22deg)"></span>
 <span class="cf" style="left: 875px; background: #2e9e4f; animation-delay: 0.12s; transform: rotate(75deg)"></span>
 <span class="cf" style="left: 232px; background: #00c4a7; animation-delay: 0.24s; transform: rotate(128deg)"></span>
 <span class="cf" style="left: 629px; background: #56bdf4; animation-delay: 0.36s; transform: rotate(181deg)"></span>
 <span class="cf" style="left: 1026px; background: #f2b51c; animation-delay: 0.48s; transform: rotate(234deg)"></span>
 <span class="cf" style="left: 383px; background: #2b7bd6; animation-delay: 0.60s; transform: rotate(287deg)"></span>
-<span class="cf" style="left: 780px; background: #e8643c; animation-delay: 0.72s; transform: rotate(340deg)"></span>
+<span class="cf" style="left: 780px; background: #ff7a00; animation-delay: 0.72s; transform: rotate(340deg)"></span>
 <span class="cf" style="left: 137px; background: #2e9e4f; animation-delay: 0.00s; transform: rotate(33deg)"></span>
 <span class="cf" style="left: 534px; background: #00c4a7; animation-delay: 0.12s; transform: rotate(86deg)"></span>
 <span class="cf" style="left: 931px; background: #56bdf4; animation-delay: 0.24s; transform: rotate(139deg)"></span>
@@ -260,6 +273,7 @@
 
 <div class="{{swCls}}" style="position: absolute; top: 401px; width: 259px; height: 259px; pointer-events: none">
 <img class="{{birdCls}} swiftee-still" src="assets/images/swiftee.webp" alt="Swiftee the bird" style="position: absolute; left: 42px; top: 29px; width: 180px; height: 198px">
+<img class="swiftee-still" src="assets/images/winter-scarf-flat.png" alt="" aria-hidden="true" style="position: absolute; left: 40.3px; top: 82.6px; width: 168.8px; height: 118.2px; transform: rotate(6.61deg); transform-origin: 57.1% 54%; filter: drop-shadow(0 .4px .4px rgba(14,91,82,.2))">
 <canvas class="swiftee-sprite" width="256" height="256" aria-hidden="true" style="position: absolute; left: 0px; top: 0px; width: 259px; height: 259px"></canvas>
 </div>
 <div class="bubble {{bubCls}} {{bubHide}}" style="position: absolute; left: 240px; bottom: 322px; pointer-events: none">
@@ -278,15 +292,6 @@
 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
 </button>
 <button class="next {{nextCls}}" data-qa="next" disabled="{{nextDisabled}}" onClick="{{next}}">{{nextLabel}}<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
-</div>
-</sc-if>
-
-<!-- the Snowflake Challenge (screens 38-43): one snowflake per check, won when it is answered (gold: first try) -->
-<sc-if value="{{showFlakes}}" hint-placeholder-val="{{ false }}">
-<div class="flake-bar" role="img" aria-label="{{flakeAria}}">
-<sc-for list="{{flakes}}" as="fk" hint-placeholder-count="5">
-<div class="flake {{fk.cls}}"><svg width="46" height="46" viewBox="-23 -23 46 46" aria-hidden="true"><path d="M0,0L0.0,-16.0M5.0,-14.0L0.0,-9.0M-5.0,-14.0L0.0,-9.0M3.5,-16.5L0.0,-13.0M-3.5,-16.5L0.0,-13.0M0,0L13.9,-8.0M14.6,-2.7L7.8,-4.5M9.6,-11.3L7.8,-4.5M16.0,-5.2L11.3,-6.5M12.5,-11.3L11.3,-6.5M0,0L13.9,8.0M9.6,11.3L7.8,4.5M14.6,2.7L7.8,4.5M12.5,11.3L11.3,6.5M16.0,5.2L11.3,6.5M0,0L0.0,16.0M-5.0,14.0L0.0,9.0M5.0,14.0L0.0,9.0M-3.5,16.5L0.0,13.0M3.5,16.5L0.0,13.0M0,0L-13.9,8.0M-14.6,2.7L-7.8,4.5M-9.6,11.3L-7.8,4.5M-16.0,5.2L-11.3,6.5M-12.5,11.3L-11.3,6.5M0,0L-13.9,-8.0M-9.6,-11.3L-7.8,-4.5M-14.6,-2.7L-7.8,-4.5M-12.5,-11.3L-11.3,-6.5M-16.0,-5.2L-11.3,-6.5" fill="none" stroke-width="2.6" stroke-linecap="round"></path></svg></div>
-</sc-for>
 </div>
 </sc-if>
 
@@ -324,7 +329,7 @@
 <sc-if value="{{showCover}}" hint-placeholder-val="{{ false }}">
 <div class="{{coverCls}}">
 <div class="cover-art"><div class="cover-drift">
-<img src="assets/images/banner.webp" alt="Trapezium Adventure: Swiftee the bird beside a glowing ice trapezium in a snowy valley">
+<img src="assets/images/banner.webp" alt="Trapezium Adventure: Swiftee the bird in a red scarf beside a glowing ice trapezium by a frozen lake">
 <div class="cover-ice" aria-hidden="true"></div>
 <div class="cover-title" aria-hidden="true"></div>
 <svg class="cover-spark" style="left: 566.5px; top: 84.0px; --s: 30px; --d: 0.2s; --t: 2.6s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0 L14.2 9.8 L24 12 L14.2 14.2 L12 24 L9.8 14.2 L0 12 L9.8 9.8 Z"></path></svg>

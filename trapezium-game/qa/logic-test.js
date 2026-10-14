@@ -17,7 +17,7 @@ const realTm=c.tm.bind(c);
 c.tm=function(fn,ms){return realTm(fn,Math.max(0,ms/40));};
 // every {{binding}} in the markup; loops maps a loop variable to the list it repeats over
 const holes=[...tpl.matchAll(/\{\{\s*([^}]+?)\s*\}\}/g)].map(m=>m[1]).filter(h=>!/^(true|false)$/.test(h));
-const loops={th:'thumbs',tg:'tags',o:'opts',sl:'slots',lb:'labs',fk:'flakes',cp:'chips',wd:'words'};
+const loops={th:'thumbs',tg:'tags',o:'opts',sl:'slots',lb:'labs',cp:'chips',wd:'words'};
 const get=(o,p)=>p.split('.').reduce((a,k)=>a==null?undefined:a[k],o);
 const errs=[];
 // render the current screen's values and report any binding that comes out undefined
