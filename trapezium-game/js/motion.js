@@ -69,6 +69,16 @@
 
   const Motion = {
     ok: !!G,
+    // is something on the board animating right now? (a finite GSAP animation on the shape, its labels, the chips or
+    // the effects layer; Swiftee, her bubble and endless ambient loops don't count)
+    busy() {
+      if (!G) return false;
+      return G.globalTimeline.getChildren(true, true, false).some((t) => {
+        if (!t.isActive || !t.isActive() || t.repeat() === -1 || !t.targets) return false;
+        if (t.totalDuration() - t.totalTime() < 0.12) return false; // about to finish
+        return t.targets().some((el) => el && el.closest && !el.closest('.swiftee, .bubble, .hand-nudge') && !!el.closest('.stage svg, .stage .board, .stage .chip-row, .eq-layer, .stage .q4-wrap'));
+      });
+    },
     // run fn with every animation it starts played k times slower (default: the teaching pace)
     paced(fn, k) { const was = pace; pace = k || TEACH_PACE; try { return fn(); } finally { pace = was; } },
     reduced: reduced,

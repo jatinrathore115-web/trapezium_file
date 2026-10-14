@@ -28,6 +28,7 @@
 //   lenPre       side lengths hidden until a cue brings them in
 //   boardShiftY  px to move the shape up (-) or down (+), on a noZoom screen
 //   noZoom       keep the shape at its plain size (lesson screens are fitted to fill the panel, CONFIG.fit)
+//   fitBox       the area the shape is fitted to, when a screen has a question above and answers below it
 //   handOnce     one demo hand gesture after the line, never repeated
 //   wrongRight   { cm, side }: dragging the corner right by more than cm wiggles side, with the wrong sound
 //   tickPre      equal-leg marks hidden until a cue brings them in
@@ -187,10 +188,10 @@ const LESSON = {
     // "supplementary": DC extends past D and a copy of 120° turns onto it beside 60°, a straight angle;
     // "angles": the equation glows
     { id: 'supp', dimIn: 'BC', lines: [{ m: 'happy', t: 'That means they are\nsupplementary angles.', onStart: 'suppStart',
-      cueAt: { supplementary: 'suppAtAD', angles: { fn: 'suppConfirm', sfx: 'snap' } }, chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
+      cueAt: { supplementary: 'suppAtAD', angles: 'suppConfirmLater' }, chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
     // ∠B then ∠C get the focus as they are named, then the answers slide in. A correct answer shows
     // the real sum, and 105° turns onto the extended base beside 75° (okFx)
-    { id: 'askBC', practice: 1, noZoom: 1, optTop: 476, chipTop: 105, boardShiftY: -11, idle: 'What about ∠B and ∠C?',
+    { id: 'askBC', practice: 1, fitBox: { cy: 312, h: 300 }, optTop: 486, chipTop: 100, idle: 'What about ∠B and ∠C?',
       optsAfter: 1, okSum: ['B', 'C'], okFx: 'suppAtBC',
       lines: [{ m: 'curious', t: 'What about ∠B and ∠C?', angleCues: 1, pairEnd: ['B', 'C'], onStart: 'askIn', chips: [{ t: '∠B + ∠C = ?', k: 'white' }] }],
       ok: 'Correct! ∠B and ∠C are\nsupplementary angles too.', okChips: [{ t: '∠B + ∠C = 180°', k: 'gold' }],
@@ -216,13 +217,13 @@ const LESSON = {
       after: [{ m: 'happy', t: 'Great job!' }], f: { par: 1, arcs: 'ABCD' } },
     // the learner's right angle glows; on "another" its partner on the same leg (also 90°) joins it
     { id: 'another90', lines: [{ m: 'surprised', t: 'Woah! We got another\nright angle.', noEmph: 1, cueAt: { woah: 'anotherStart', another: 'anotherReveal' } }], f: { par: 1, arcs: 'ABCD' } },
-    // "trapezium": the outline traces in; "adjacent": the arrows pop on; "right": both 90° marks appear;
+    // "adjacent": the arrows glide on; "right": both 90° marks draw in;
     // "called": the name label. Then Swiftee asks the learner to tap the two 90° corners: every corner gets a ring
     // (so the learner has to find them), a found one stops pulsing, and finding both is cheered
     { id: 'right', shape: 'right', right90: 1, r90Pre: 1, chevPre: 1, rightTap: 1, okCheck: 1,
       hint: 'Tap the two 90° corners', idle: 'Tap the two corners with the square marks.',
       lines: [{ t: 'A trapezium with two adjacent\nright angles is called a\nright angled trapezium.', noEmph: 1,
-        holdChips: 1, cueAt: { trapezium: 'defTrace', adjacent: 'chevIn', right: 'rightBoth', called: 'showTitle', angled: 'titlePulse' }, chips: [{ t: 'Right trapezium', k: 'name' }] },
+        holdChips: 1, cueAt: { adjacent: 'chevIn', right: 'rightBoth', called: 'showTitle' }, chips: [{ t: 'Right trapezium', k: 'name' }] },
         { m: 'curious', t: 'Can you tap the two\nright angles?', holdChips: 1 }],
       f: { par: 1, right: 1 } },
     { id: 'wellDone', noBoard: 1, noPanel: 1, lines: [{ m: 'celebrating', t: 'Great job! Now you know\nall about trapeziums.' }] },

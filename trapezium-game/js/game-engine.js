@@ -265,9 +265,10 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   // named parts grow, hold briefly, then shrink back (CSS transitions do the easing)
   // An orange key word with no animation of its own: show the part it names on the shape, as it is said. Skipped
   // just after another animation (so they never pile up) and on screens without the lesson shape.
-  keyCue(w, L, words) {
+  keyCue(w, L, words, i) {
     const st = this.cur(), f = st.f || {}, P = this.state.P;
     if (st.cfu || st.noBoard || st.hero || st.summary || st.room === 'measure' || !P) return;
+    if (st.sumSteps || st.morph) return; // screens running their own animated sequence keep it uncluttered
     if (Date.now() - (this.cueT || 0) < 1800) return; // the last animation finishes before a new one starts
     const has = (re) => words.some((x) => re.test(x.toLowerCase().replace(/[^a-z]/g, '')));
     const ALL = ['AB', 'BC', 'CD', 'DA'], BASES = ['AB', 'CD'], LEGS = ['DA', 'BC'];
@@ -277,7 +278,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     let parts = null;
     if (/^(quadrilaterals?|polygon|trapeziums?|scalene|isosceles|different)$/.test(w)) parts = ALL;
     else if (/^sides?$/.test(w)) parts = L.glow || (has(/^meet$/) && !has(/^not$/) ? LEGS : has(/^(parallel|pair|not)$/) ? BASES : ALL);
-    else if (w === 'parallel') { parts = BASES; Motion.parallelShow(); }
+    else if (w === 'parallel') { parts = BASES; this.whenFree(() => Motion.parallelShow(), 1500, true); }
     else if (/^bases?$/.test(w)) parts = BASES;
     else if (w === 'legs') parts = LEGS;
     else if (w === 'leg') parts = shown.length ? angles(['A', 'D']).concat(['DA']) : ['DA'];
@@ -287,11 +288,26 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       if (right.length) { right.forEach((k) => Motion.markPing(document.querySelector('.stage .rm' + k))); this.cueT = Date.now(); return; }
       parts = ['vA', 'vB', 'vC', 'vD'];
     }
-    else if (/^(vertex|vertices)$/.test(w)) parts = ['vA', 'vB', 'vC', 'vD'];
+    else if (/^(vertex|vertices)$/.test(w)) {
+      if (/^[A-D]$/.test((words[i + 1] || '').replace(/[^A-D]/g, ''))) return; // "vertex A": that corner is named next
+      this.cueT = Date.now(); this.whenFree(() => this.vertexPulse(), 1500, true); return; // "any vertex": corner by corner
+    }
     else if (w === 'meet') { parts = has(/^not$/) ? BASES : LEGS; const ap = document.querySelector('.stage .apex-dot'); if (ap && getComputedStyle(ap).display !== 'none') Motion.markPing(ap); }
     if (!parts || !parts.length) return;
     this.cueT = Date.now();
-    this.emphasize(parts);
+    this.whenFree(() => this.emphasize(parts), 1500, true);
+  }
+  // Run fn once nothing else on the board is animating, so effects come one after another rather than all at once.
+  // Waits at most maxMs; then a cue that only decorates (dropIfBusy) is dropped, a cue that names a part runs anyway.
+  whenFree(fn, maxMs, dropIfBusy) {
+    const tok = this.stepTok, t0 = Date.now();
+    const go = () => {
+      if (tok !== this.stepTok) return;
+      if (!Motion.busy()) { fn(); return; }
+      if (Date.now() - t0 >= maxMs) { if (!dropIfBusy) fn(); return; }
+      this.tm(go, 120);
+    };
+    go();
   }
   // One focus at a time, in the order things are named: a newly named part takes over from the last one (it never
   // piles up on top of it), and is let go after holdMs unless something newer has already taken over.
@@ -299,7 +315,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const tok = this.stepTok, id = (this.emphId = (this.emphId || 0) + 1);
     this.cueT = Date.now();
     this.setState({ emph: parts.reduce((o, k) => { o[k] = 1; return o; }, {}) },
-      () => parts.forEach((k) => { if (/^(AB|BC|CD|DA)$/.test(k)) Motion.paced(() => Motion.spark(k)); }));
+      () => { const sides = parts.filter((k) => /^(AB|BC|CD|DA)$/.test(k)); if (sides.length <= 2) sides.forEach((k) => Motion.paced(() => Motion.spark(k))); });
     this.tm(() => {
       if (tok !== this.stepTok) return;
       if (id === this.emphId) this.setState({ emph: {} }, () => { if (onDone) onDone(); });
@@ -376,7 +392,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       if (lgAt >= 0 && n >= lgAt + 1) fireLegs();
       emphCues.forEach((c) => { if (!c.done && n >= c.i + 1) { c.done = true; if (tok === this.narrTok) {
         const ang = L.angleCues ? c.parts.filter((k) => /^a[A-D]$/.test(k)) : [];
-        if (ang.length) { this.sfx('pop'); ang.forEach((k) => Motion.angleFocus(k[1])); } else this.emphasize(c.parts, () => c.parts.forEach(showDelayedChips)); } } });
+        if (ang.length) { this.sfx('pop'); ang.forEach((k) => Motion.angleFocus(k[1])); } else this.whenFree(() => this.emphasize(c.parts, () => c.parts.forEach(showDelayedChips)), 1500, false); } } });
       wordCues.forEach((c) => { if (n >= c.i + 1) fireCue(c); });
       keyCues.forEach((c) => { if (n >= c.i + 1) fireKey(c); });
     });
@@ -445,7 +461,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const taken = new Set(wordCues.map((c) => c.i).concat(emphCues.map((c) => c.i), [pAt, chipsAt, fAt, lgAt, atIdx]));
     const keyCues = keep ? [] : words.map((w, i) => ({ i: i, w: w.toLowerCase().replace(/[^a-z0-9°]/g, ''), done: false }))
       .filter((c) => KEY_WORDS.test(c.w) && !taken.has(c.i));
-    const fireKey = (c) => { if (c.done || tok !== this.narrTok) return; c.done = true; this.keyCue(c.w, L, words); };
+    const fireKey = (c) => { if (c.done || tok !== this.narrTok) return; c.done = true; this.keyCue(c.w, L, words, c.i); };
     const highlight = () => {
       if (tok !== this.narrTok) return;
       if (L.glow && !glowOn) { glowOn = true; this.setState({ glow: L.glow }); }
@@ -827,7 +843,9 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       else this.maybeAdvance(true);
     });
     // voiceDelay (ms): Swiftee waits for the screen's opening animation before she speaks
-    if (st.voiceDelay) this.tm(lines, st.voiceDelay); else lines();
+    const glide = fwd && i > 0 && this.steps()[i - 1].room === 'measure' && st.room !== 'measure' ? 800 : 0; // back from the measuring slab
+    this.glideMs = glide;
+    if (st.voiceDelay || glide) this.tm(lines, Math.max(st.voiceDelay || 0, glide)); else lines();
   }
   // a short lock after each screen change, so a double tap cannot skip a screen
   navLocked() { return Date.now() - (this.navAt || 0) < CONFIG.timing.navLockMs; }
@@ -973,7 +991,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   // shape it opens with, widened to all the screen can do to it - a drag's corner range, a morph's frames, the point
   // where extended legs meet - and padded for the letters and labels round it. The board glides between fits.
   fitFor(st, P) {
-    const F = CONFIG.fit, L = CONFIG.limits;
+    const F = Object.assign({}, CONFIG.fit, st.fitBox || {}), L = CONFIG.limits; // fitBox: a screen's own area (e.g. between a question and its answers)
     let x0 = Math.min(P.A.x, P.D.x), x1 = Math.max(P.B.x, P.C.x), y0 = Math.min(P.A.y, P.B.y), y1 = Math.max(P.C.y, P.D.y);
     if (/^drag/.test(st.task || '')) { x0 = Math.min(x0, L.minX + 30); x1 = Math.max(x1, L.maxX - 30); }
     (st.morph || []).forEach((m) => { x0 = Math.min(x0, m.A, P.D.x); x1 = Math.max(x1, m.B, P.C.x); });
@@ -1110,6 +1128,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   glowLegs() { this.emphasize(['DA', 'BC']); }
   growAD() { Motion.wedgeGrow('AD'); this.emphasize(['aA', 'aD']); }
   parPulse() { this.emphasize(['AB', 'CD']); Motion.parallelShow(); } // the arrows run along both bases the same way
+  suppConfirmLater() { const tok = this.stepTok; this.tm(() => { if (tok !== this.stepTok) return; this.sfx('snap'); Motion.suppConfirm(); }, 2800); }
   vertexPulse() { ['A', 'B', 'C', 'D'].forEach((k, i) => this.tm(() => this.emphasize(['v' + k]), i * 420)); } // one corner after another
   pingA() { this.emphasize(['vA']); } // screen 19: the corner the learner is about to drag
   legsPop() { this.emphasize(['DA', 'BC']); Motion.legsPop(); }
@@ -1155,7 +1174,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (st !== this.cur()) return;
     if (st.sumSteps) this.sumSteps();
     // focusAng: the pair's wedges grow in from the start (a line with angleCues grows them one by one instead)
-    if (st.f && st.f.focusAng && !((st.lines || [])[0] || {}).angleCues) Motion.wedgeGrow(st.f.focusAng, 0.35);
+    if (st.f && st.f.focusAng && !((st.lines || [])[0] || {}).angleCues) Motion.wedgeGrow(st.f.focusAng, 0.35 + (this.glideMs || 0) / 1000);
     if (st.build) { Motion.hideFill(); this.tm(() => this.runBuild(), CONFIG.build.delayMs); }
     if (st.sideNums) Motion.sideNums((i) => this.emphasize([['AB', 'BC', 'CD', 'DA'][i]]));
     // screen 3: the side numbers fade out, then are dropped so no later redraw can flash them back; the corner
