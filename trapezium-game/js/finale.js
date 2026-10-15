@@ -51,11 +51,16 @@
       // "The End!" in Swiftee's voice as the title lands
       const sayEnd = () => {
         // the recorded voice-over (js/voice.js) when there is a clip; otherwise the device's voice
+        const speak = () => {
+          const s = eng.synth && eng.synth();
+          if (!s || eng.state.muted || typeof SpeechSynthesisUtterance === 'undefined') return;
+          try { eng.cancelSpeech(); const u = new SpeechSynthesisUtterance('The End!'); if (eng.voice) u.voice = eng.voice; u.lang = (eng.voice && eng.voice.lang) || 'en-GB'; u.pitch = 1.15; s.speak(u); } catch (e) {}
+        };
         const clip = window.Voice && !eng.state.muted ? Voice.find('The End!') : null;
-        if (clip) { eng.cancelSpeech(); Voice.play(clip, { start() {}, progress() {}, end() {} }); return; }
-        const s = eng.synth && eng.synth();
-        if (!s || eng.state.muted || typeof SpeechSynthesisUtterance === 'undefined') return;
-        try { eng.cancelSpeech(); const u = new SpeechSynthesisUtterance('The End!'); if (eng.voice) u.voice = eng.voice; u.lang = (eng.voice && eng.voice.lang) || 'en-GB'; u.pitch = 1.15; s.speak(u); } catch (e) {}
+        if (!clip) { speak(); return; }
+        // a clip that can't play (missing, refused, too slow) ends without starting: the device's voice says it instead
+        let heard = false;
+        eng.cancelSpeech(); Voice.play(clip, { start() { heard = true; }, progress() {}, end() { if (!heard && live()) speak(); } });
       };
 
       this.ctx.add(() => {

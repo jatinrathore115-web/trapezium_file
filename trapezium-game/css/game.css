@@ -124,8 +124,10 @@ a{color:#123b63}a:hover{color:#0b2742}
 .hand-nudge.down .hand-move img{transform:rotate(180deg);transform-origin:25px 22px}
 .hand-nudge.down.tap .hand-move{animation-name:handTapDown}
 @keyframes handTapDown{0%{transform:translate(-14px,-20px)}38%{transform:translate(0,0) scale(1)}48%{transform:translate(0,0) scale(.88)}60%{transform:translate(0,0) scale(1)}100%{transform:translate(-14px,-20px)}}
-/* shape board: moves smoothly when its transform changes (the board <svg> sets the same transition inline) */
-.board{transform-origin:0 0;transition:transform .7s cubic-bezier(.22,.8,.3,1)}
+/* shape board: moves smoothly when its transform changes (the board <svg> sets the same transition inline). --bz (its
+   zoom, which sizes the angle values) glides with it, so a value never jumps in size when the zoom changes */
+@property --bz{syntax:'<number>';inherits:true;initial-value:1}
+.board{transform-origin:0 0;transition:transform .7s cubic-bezier(.22,.8,.3,1),--bz .7s cubic-bezier(.22,.8,.3,1)}
 /* Swiftee fades and rises into place */
 .swiftee{left:130px;animation:swHome .45s ease-out}
 @keyframes swHome{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
@@ -317,6 +319,8 @@ a{color:#123b63}a:hover{color:#0b2742}
 /* focusAng: the pair to notice grows a little; the other angles step back, dimmed like a disabled button (engine:
    .dim), until the focus moves on. !important: a dimmed angle stays back even where an animation set its opacity */
 .arc.dim,.wedge.dim,.rmark.dim{opacity:.22!important}
+/* (not yet measured, screen 23: hidden at once, never fading out over the measuring room) */
+.tag.alab.pre,.wedge.pre,.arc.pre{transition:none}
 .tag.alab.dim{opacity:.3!important}
 .arc,.wedge,.rmark{transition:opacity .45s ease}
 .arc.glow{animation:arcGlow .7s ease-out .35s both}
@@ -666,7 +670,7 @@ svg[data-lencol] .edge{transition:stroke .4s ease}
 @media (prefers-reduced-motion: reduce){.stage .done-btn{animation:none}}
 
 /* check 4 (screen 41): the shapes, boxes and labels drawn larger as one group, filling the ice card (CONFIG.q4) */
-.q4-wrap{position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:876px 345px;transform:translate(0,10px) scale(1.12)}
+.q4-wrap{position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:876px 345px;transform:translate(0,4px) scale(1.12)} /* (translate = CONFIG.q4.ty) */
 
 .stage .lab::before{display:none}
 /* ---------- screen 41, game look: the labels are the UI kit's yellow pills (as the answer buttons; 9-slice for the
@@ -687,3 +691,5 @@ svg[data-lencol] .edge{transition:stroke .4s ease}
 .q4-strip{display:none}
 .q4-card{box-shadow:0 5px 0 #b9d3ee,0 10px 18px rgba(18,59,99,.12)}
 .q4-link{background:#5b9ee6;opacity:.9}
+/* reduced motion, last so it wins over the opacity fades above */
+@media (prefers-reduced-motion: reduce){.arc,.wedge,.rmark,.shape-fill,.tag.alab{transition:none}}

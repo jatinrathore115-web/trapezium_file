@@ -1531,7 +1531,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
         if (this.idleId) { clearTimeout(this.idleId); this.T.delete(this.idleId); this.idleId = null; }
         if (st.after) this.playLines(st.after, () => {});
       }
-    } else if (st.task === 'drag90' && !s.done && s.moved) {
+    } else if (st.task === 'drag90' && !s.done && (s.moved || this.dragMoved)) { // (small nudges onto 90° count too)
       // screen 33: snap when the dragged corner's leg is close to a right angle
       const left = k === 'A' || k === 'D', a = this.angle(P, left ? 'A' : 'B');
       if (Math.abs(a - 90) < CONFIG.snap.rightAngleDeg) {
@@ -1611,6 +1611,15 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     L.moved = true;
     const q = this.q4Pt((e.clientX - L.r.left) / L.sc, (e.clientY - L.r.top) / L.sc), px = q.x, py = q.y;
     this.setState({ c4: Object.assign({}, this.state.c4, { drag: { id: L.id, x: px - L.ox, y: py - L.oy, px: px, py: py }, sel: null }) });
+  }
+  // The browser called the drag off (a system gesture, a palm): it ends where it is, and nothing is checked or placed
+  // (a label goes back to its row)
+  rootCancel(e) {
+    if (this.drag) { if (this.samePointer(this.drag, e)) { this.drag = null; this.setState({ dragging: null }); } return; }
+    const L = this.ld;
+    if (!L || !this.samePointer(L, e)) return;
+    this.ld = null;
+    this.setState({ c4: Object.assign({}, this.state.c4, { drag: null }) });
   }
   // A label let go without moving is a tap that selects it (then slotTap places it).
   // One dropped outside a slot goes back.
@@ -1969,15 +1978,18 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       tags.push({ t: k, x: r1(Vk.x + dx * 28), y: r1(Vk.y + dy * 28), cls: 'vlab' + (vOn(k) ? '' : ' off') + (st.sideNums ? ' off' : '') + lin });
     });
     // two values at the ends of a short side can meet: the one pointing more steeply into the shape steps a little
-    // deeper into its own corner, so they stack apart (never crossing, never leaving their corners)
+    // deeper into its own corner, so they stack apart (never crossing, never leaving their corners). The values keep
+    // one size on screen (css .tag.alab), so their boxes and steps are screen px divided by the board's zoom, and a
+    // value moves at most 30 screen px
     {
-      const wd = (a) => (String(a.t).length * 10.5 + 26), on = (a) => a && !/\boff\b/.test(a.cls);
-      const touch = (a, b) => Math.abs(a.x - b.x) < (wd(a) + wd(b)) / 2 + 6 && Math.abs(a.y - b.y) < 30 + 6;
+      const z = this.boardMap().s || 1;
+      const wd = (a) => (String(a.t).length * 10.5 + 26) / z, on = (a) => a && !/\boff\b/.test(a.cls);
+      const touch = (a, b) => Math.abs(a.x - b.x) < (wd(a) + wd(b)) / 2 + 6 / z && Math.abs(a.y - b.y) < 36 / z;
       [['A', 'B'], ['D', 'C']].forEach(([p, q]) => {
         const a = aTag[p], b = aTag[q];
         if (!on(a) || !on(b)) return;
         const mv = Math.abs(a.by) >= Math.abs(b.by) ? a : b;
-        for (let it = 0; it < 22 && touch(a, b); it++) { mv.x = r1(mv.x + mv.bx * 3); mv.y = r1(mv.y + mv.by * 3); }
+        for (let it = 0; it < 10 && touch(a, b); it++) { mv.x = r1(mv.x + mv.bx * 3 / z); mv.y = r1(mv.y + mv.by * 3 / z); }
       });
     }
     ['A', 'B', 'C', 'D'].forEach((k) => tags.push(aTag[k]));
@@ -2100,6 +2112,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     return {
       rootMove: (e) => this.rootMove(e),
       rootUp: (e) => this.rootUp(e),
+      rootCancel: (e) => this.rootCancel(e),
       navNext: () => this.navNext(),
       screensLabel: 'Screen ' + (s.step + 1) + ' of ' + steps.length, // current position; tap to open the screen list
       navOpen: !!s.navOpen,

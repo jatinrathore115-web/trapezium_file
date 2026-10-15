@@ -152,25 +152,30 @@ const LESSON = {
     { id: 'defFull', legsSet: 1, chevPre: 1, lines: [{ t: 'A quadrilateral with at least\none pair of parallel sides\nis called a trapezium.', noEmph: 1, holdChips: 1,
       cueAt: { quadrilateral: 'defTrace', parallel: 'defParallel', trapezium: 'showTitle' }, chips: [{ t: 'Trapezium', k: 'name' }] }], f: { par: 1 } },
     { id: 'bases', lines: [{ t: 'The parallel sides\nare called bases.', glow: ['AB', 'CD'], focusAt: 'parallel', glowAt: 'bases', callout: 'bases' }], f: { par: 1 } },
-    { id: 'legs', lines: [{ t: 'The other two sides\nare called legs.', glow: ['DA', 'BC'], focusAt: 'other', glowAt: 'legs', callout: 'legs', cueTimes: { sides: 0.64 } }], f: { par: 1 } },
+    { id: 'legs', fitBox: { cx: 839 }, // (cx: shape and labels centred together in the card: the Leg pills reach further right than left)
+      lines: [{ t: 'The other two sides\nare called legs.', glow: ['DA', 'BC'], focusAt: 'other', glowAt: 'legs', callout: 'legs', cueTimes: { sides: 0.64 } }], f: { par: 1 } },
     // after the line Swiftee walks out and measures each side; on "sides" each length pops in its own colour
     { id: 'measure', room: 'measure', lines: [{ m: 'curious', t: "Let's measure the sides\nof this trapezium." }], task: 'measure', auto: 1,
       after: [{ m: 'surprised', t: 'Woah! All the sides of\nthis trapezium are of\ndifferent lengths.', s: 'Whoa! All the sides of this trapezium are of different lengths.', noEmph: 1, cueAt: { sides: 'lenColors' } }], hint: 'Tap the glowing side to measure it', idle: 'Tap the glowing side and I will measure it.', f: { par: 1 } },
     // "trapezium": the shape pops; "sides": the lengths pop in one by one; "scalene": the name label.
-    { id: 'scalene', lenPre: 1, lines: [{ t: 'This type of trapezium which\nhas sides of different lengths\nis called a scalene trapezium.', holdChips: 1, noEmph: 1,
+    { id: 'scalene', fitBox: { cx: 864 }, // (cx: shape and labels centred together in the card: its length labels reach further right)
+      lenPre: 1, lines: [{ t: 'This type of trapezium which\nhas sides of different lengths\nis called a scalene trapezium.', holdChips: 1, noEmph: 1,
       cueAt: { trapezium: 'shapePop', sides: 'lensSeq', scalene: 'showTitle' }, chips: [{ t: 'Scalene trapezium', k: 'name' }] }],
       f: { par: 1, legLen: 1, sideLen: 1 } },
     // a longer autoNext so the last line can be read
-    { id: 'legsDiff', autoNext: 2600, lines: [
+    { id: 'legsDiff', fitBox: { cx: 889 }, // (cx: shape and labels centred together in the card: its length labels reach further left)
+      autoNext: 2600, lines: [
       { m: 'surprised', t: 'Look! Its legs are of\ndifferent length too.', noEmph: 1, cueAt: { different: 'legsPop' } },
       { m: 'curious', t: 'What if the legs were\nthe same length?', noEmph: 1, cueAt: { legs: 'legsTogether' } },
       { m: 'excited', t: "Let's find out.", cueAt: { find: 'findOut' } }],
       f: { par: 1, legLen: 1, sideLen: 1 } },
     // a silent beat between "Let's find out." and the drag (no dialogue); it moves on by itself and Back skips it
-    { id: 'equal', skip: 1, autoNext: 900, lines: [], f: { par: 1, legLen: 1, sideLen: 1 } },
+    { id: 'equal', fitBox: { cx: 889 }, // (cx: shape and labels centred together in the card: as screen 18)
+      skip: 1, autoNext: 900, lines: [], f: { par: 1, legLen: 1, sideLen: 1 } },
     // one demo hand after the line. Dragging A right (the wrong way) wiggles BC: A has only ~0.75 cm
     // before B stops it, so the limit is 0.5 cm. Equal legs snap into place and finish the task
-    { id: 'equalDrag', lines: [{ m: 'curious', t: 'Drag vertex A so that both\nthe legs are of equal length.' }],
+    { id: 'equalDrag', fitBox: { cx: 889 }, // (cx: shape and labels centred together in the card: as screen 18)
+      lines: [{ m: 'curious', t: 'Drag vertex A so that both\nthe legs are of equal length.' }],
       task: 'dragA', handOnce: 1, wrongRight: { cm: 0.5, side: 'BC' }, hint: 'Drag point A along the top side', after: [{ m: 'happy', t: 'Perfect! Both legs are equal.' }],
       f: { par: 1, legLen: 1, sideLen: 1 } },
     // "trapezium": the shape pops; "same": both legs light up with their lengths;
@@ -231,7 +236,7 @@ const LESSON = {
     // "called": the name label. Then Swiftee asks the learner to tap the two 90° corners: every corner gets a ring
     // (so the learner has to find them), a found one stops pulsing, and finding both is cheered
     { id: 'right', shape: 'right', right90: 1, r90Pre: 1, chevPre: 1, rightTap: 1, okCheck: 1,
-      hint: 'Tap the two 90° corners', idle: 'Tap the two corners with the square marks.',
+      hint: 'Tap the two 90° corners', idle: 'Can you tap the two right angles?', // (the recorded line, so the reminder is in Swiftee's voice)
       lines: [{ t: 'A trapezium with two adjacent\nright angles is called a\nright angled trapezium.', noEmph: 1,
         holdChips: 1, cueAt: { trapezium: 'chevIn', right: 'rightBoth', called: 'showTitle' }, chips: [{ t: 'Right trapezium', k: 'name' }] },
         { m: 'curious', t: 'Can you tap the two\nright angles?', holdChips: 1 }],

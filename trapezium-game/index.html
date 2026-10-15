@@ -36,7 +36,7 @@
 <!-- game markup: the {{bindings}} come from renderVals() in js/game-engine.js -->
 <x-dc>
 <div style="position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #8fd0fb">
-<div class="stage {{sceneCls}}" style="position: absolute; left: 0px; top: 0px; width: 1280px; height: 720px; transform: scale(1.5); transform-origin: 0 0" onPointerDown="{{rootDown}}" onPointerMove="{{rootMove}}" onPointerUp="{{rootUp}}" onPointerCancel="{{rootUp}}">
+<div class="stage {{sceneCls}}" style="position: absolute; left: 0px; top: 0px; width: 1280px; height: 720px; transform: scale(1.5); transform-origin: 0 0" onPointerDown="{{rootDown}}" onPointerMove="{{rootMove}}" onPointerUp="{{rootUp}}" onPointerCancel="{{rootCancel}}">
 <img src="assets/images/winter-background.webp" alt="" style="position: absolute; left: 0px; top: 0px; width: 1280px; height: 720px; object-fit: cover; pointer-events: none">
 <canvas class="snowfall" width="1280" height="720" aria-hidden="true" style="position: absolute; left: 0px; top: 0px; width: 1280px; height: 720px; pointer-events: none"></canvas>
 <img class="panel-img" src="assets/images/ice-panel.webp" alt="" style="position: absolute; left: 108px; top: 78px; width: 1064px; height: 561px; pointer-events: none">
@@ -121,7 +121,7 @@
 </sc-if>
 
 <sc-if value="{{isCfu1}}" hint-placeholder-val="{{ false }}">
-<div class="{{fadeCls}}" style="position: absolute; left: 596px; top: 140px; width: 560px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px">
+<div class="{{fadeCls}}" style="position: absolute; left: 596px; top: 131px; width: 560px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px">
 <button data-qa="opt-A" class="opt {{c1.A.cls}}" disabled="{{c1.A.dis}}" onClick="{{c1.A.pick}}" aria-label="Shape A" style="position: relative; height: 206px; display: flex; align-items: center; justify-content: center">
 <svg width="262" height="157" viewBox="0 0 200 120" aria-hidden="true"><polygon points="28,98 172,98 138,26 62,26" fill="#ffd66b" stroke="#b5870f" stroke-width="3.5" stroke-linejoin="round"></polygon><line class="q1-par" x1="62" y1="26" x2="138" y2="26" stroke="#ff7a00" stroke-width="6" stroke-linecap="round"></line><line class="q1-par" x1="28" y1="98" x2="172" y2="98" stroke="#ff7a00" stroke-width="6" stroke-linecap="round"></line><path class="q1-chev" d="M96,20 L102,26 L96,32 M96,92 L102,98 L96,104" fill="none" stroke="#d9640a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 </button>
