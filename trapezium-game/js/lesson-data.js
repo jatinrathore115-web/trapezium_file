@@ -29,6 +29,8 @@
 //   boardShiftY  px to move the shape up (-) or down (+), on a noZoom screen
 //   noZoom       keep the shape at its plain size (lesson screens are fitted to fill the panel, CONFIG.fit)
 //   fitBox       the area the shape is fitted to, when a screen has a question above and answers below it
+//   fitShape     a drag screen fitted to the shape itself, the same size as the screen before it (not shrunk to make
+//                room for every corner position); the corners stop at the ice card's inner edge instead
 //   handOnce     one demo hand gesture after the line, never repeated
 //   wrongRight   { cm, side }: dragging the corner right by more than cm wiggles side, with the wrong sound
 //   tickPre      equal-leg marks hidden until a cue brings them in
@@ -115,7 +117,7 @@
 //   sideLen   base lengths
 //   ticks     equal-leg marks
 //   arcs      corners whose angle arc and value show, e.g. 'ABCD'
-//   focusAng  angle pair in focus (it grows a little; the others stay as they are), e.g. 'AD'
+//   focusAng  angle pair in focus (it grows a little; the other angles step back, dimmed), e.g. 'AD'
 //   sums      the two live angle-sum panels
 //   right     right-angle marks
 // =====================================================================
@@ -150,7 +152,7 @@ const LESSON = {
     { id: 'defFull', legsSet: 1, chevPre: 1, lines: [{ t: 'A quadrilateral with at least\none pair of parallel sides\nis called a trapezium.', noEmph: 1, holdChips: 1,
       cueAt: { quadrilateral: 'defTrace', parallel: 'defParallel', trapezium: 'showTitle' }, chips: [{ t: 'Trapezium', k: 'name' }] }], f: { par: 1 } },
     { id: 'bases', lines: [{ t: 'The parallel sides\nare called bases.', glow: ['AB', 'CD'], focusAt: 'parallel', glowAt: 'bases', callout: 'bases' }], f: { par: 1 } },
-    { id: 'legs', lines: [{ t: 'The other two sides\nare called legs.', glow: ['DA', 'BC'], focusAt: 'other', glowAt: 'legs', callout: 'legs' }], f: { par: 1 } },
+    { id: 'legs', lines: [{ t: 'The other two sides\nare called legs.', glow: ['DA', 'BC'], focusAt: 'other', glowAt: 'legs', callout: 'legs', cueTimes: { sides: 0.64 } }], f: { par: 1 } },
     // after the line Swiftee walks out and measures each side; on "sides" each length pops in its own colour
     { id: 'measure', room: 'measure', lines: [{ m: 'curious', t: "Let's measure the sides\nof this trapezium." }], task: 'measure', auto: 1,
       after: [{ m: 'surprised', t: 'Woah! All the sides of\nthis trapezium are of\ndifferent lengths.', s: 'Whoa! All the sides of this trapezium are of different lengths.', noEmph: 1, cueAt: { sides: 'lenColors' } }], hint: 'Tap the glowing side to measure it', idle: 'Tap the glowing side and I will measure it.', f: { par: 1 } },
@@ -191,11 +193,13 @@ const LESSON = {
     // "supplementary": DC extends past D and a copy of 120° turns onto it beside 60°, a straight angle;
     // "angles": the equation glows
     { id: 'supp', lines: [{ m: 'happy', t: 'That means they are\nsupplementary angles.', onStart: 'suppStart',
-      cueAt: { supplementary: 'suppAtAD', angles: 'suppConfirmLater' }, chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD' } },
+      cueAt: { supplementary: 'suppAtAD', angles: 'suppConfirmLater' }, chips: [{ t: '∠A + ∠D = 180°', k: 'gold' }] }], f: { par: 1, arcs: 'ABCD', focusAng: 'AD' } },
     // ∠B then ∠C get the focus as they are named, then the answers slide in. A correct answer shows
     // the real sum, and 105° turns onto the extended base beside 75° (okFx)
-    // voiceDelay: the board glides into this smaller frame first, so the question chip never meets corner A on the way
-    { id: 'askBC', practice: 1, fitBox: { cy: 326, h: 282 }, optTop: 486, chipTop: 100, voiceDelay: 750, idle: 'What about ∠B and ∠C?',
+    // the shape, then the question chip under it, centred together above the answers (shape with its letters 128-377,
+    // chip 399-454, answers from 486). voiceDelay: the board glides into this smaller frame first, so the question chip
+    // never meets a corner on the way
+    { id: 'askBC', practice: 1, fitBox: { cy: 250, h: 282 }, optTop: 486, chipTop: 375, voiceDelay: 750, idle: 'What about ∠B and ∠C?',
       optsAfter: 1, okSum: ['B', 'C'], okFx: 'suppAtBC',
       // cueTimes from the recording (vo060): "angle B" 0.90-1.66 s (B at 1.40), "angle C" 2.08-2.70 (C at 2.44)
       lines: [{ m: 'curious', t: 'What about ∠B and ∠C?', angleCues: 1, pairEnd: ['B', 'C'], onStart: 'askIn', cueTimes: { '∠B': 1.4, '∠C': 2.44 }, chips: [{ t: '∠B + ∠C = ?', k: 'white' }] }],
@@ -210,14 +214,15 @@ const LESSON = {
     { id: 'whatIf', morph: [{ A: 100, B: 300 }, { A: 215, B: 398 }, { A: 128, B: 378 }],
       lines: [{ m: 'curious', t: 'What if we change the shape\nof this trapezium?', onStart: 'whatIfStart', cueAt: { change: 'shapeMorph', trapezium: 'shapeSettle' } }], f: { par: 1, arcs: 'ABCD' } },
     // on "change" a guide hand drags A and back; on "sum" each pair pulses with its panel
-    { id: 'dragSum', entryPop: 1, lockTalk: 1, handMs: 3000, explore: 1,
+    // fitBox: the shape and the sums under it, centred together in the ice card (Done sits on the card's bottom edge)
+    { id: 'dragSum', entryPop: 1, lockTalk: 1, handMs: 3000, explore: 1, fitBox: { cx: 901, cy: 330 }, // (cx: the shape sits left of its drag range's middle)
       lines: [{ m: 'curious', t: 'Drag any vertex to change\nthe angles. Notice the\nsum of angles.', cueAt: { change: 'demoDrag', sum: 'sumPanels' } }],
       task: 'dragFree', hint: 'Drag any corner and watch the sums', idle: 'Drag any corner and watch the two sums.',
       f: { par: 1, arcs: 'ABCD', sums: 1 } },
     { id: 'always', sumSteps: 1, lines: [{ m: 'happy', t: 'No matter the shape, the angles\nalways add up to 180°.' }], f: { par: 1, arcs: 'ABCD' } },
     { id: 'rule', sumSteps: 'sym', lines: [{ t: 'So in any trapezium,\nangles on the same leg\nalways add up to 180°.' }], f: { par: 1, arcs: 'ABCD' } },
     { id: 'what90', lines: [{ m: 'curious', t: 'What if we make one of\nthe angles 90°?', cueAt: { 90: { fn: 'vertexPulse', sfx: 'chime' } } }], f: { par: 1, arcs: 'ABCD' } },
-    { id: 'make90', lines: [{ m: 'curious', t: 'Drag any vertex to make any angle 90°.' }],
+    { id: 'make90', fitShape: 1, lines: [{ m: 'curious', t: 'Drag any vertex to make any angle 90°.' }],
       task: 'drag90', hint: 'Drag a corner until an angle is 90°', idle: 'Drag a corner slowly and stop when an angle shows 90°.',
       after: [{ m: 'happy', t: 'Great job!' }], f: { par: 1, arcs: 'ABCD' } },
     // the learner's right angle glows; on "another" its partner on the same leg (also 90°) joins it
@@ -238,7 +243,8 @@ const LESSON = {
       lines: [{ m: 'happy', t: "Let's recall what\nwe learnt today." }] },
     { id: 'cfu1', cfu: 1, idle: 'Look for the shape with exactly one pair of parallel sides.', hint: 'Check 1 of 5 · Which one is a trapezium?',
       okFx: 'q1Correct',
-      lines: [{ m: 'curious', t: 'Which of these quadrilaterals is a trapezium? Look for one pair of parallel sides.', cueAt: { quadrilaterals: 'q1Cards', parallel: 'q1Look' } }],
+      // cueTimes from the recording (vo185): "quadrilaterals" 0.88 s, "trapezium" 2.24 s
+      lines: [{ m: 'curious', t: 'Which of these quadrilaterals is a trapezium?', cueAt: { quadrilaterals: 'q1Cards', trapezium: 'q1Look' }, cueTimes: { trapezium: 2.24 } }],
       ok: 'Correct! It has one pair of parallel sides, so it is a trapezium.',
       opts: [
         { id: 'A', ok: true },
@@ -255,7 +261,7 @@ const LESSON = {
         { id: 'r', t: 'Right', fb: 'There are no right angles in this shape. Look at the legs instead.' }
       ] },
     // "120" opens ∠A; "value" runs a light down AD to a "?" at D. A wrong answer brings in
-    // "120° + ? = 180°" above the shape; the right one flies 60° to D and the equation resolves
+    // "120° + ? = 180°" under the shape; the right one flies 60° to D and the equation resolves
     { id: 'cfu3', cfu: 3, idle: 'In this trapezium, ∠A = 120°. What is the value of ∠D?', hint: 'Check 3 of 5 · Find the missing angle', optTop: 482,
       enterFx: 'q3In', okFx: 'q3Correct', badFx: 'q3Wrong', idleFx: 'q3Idle', optsAfter: 1, softWrong: 1, handMs: 3000, voiceDelay: 1300,
       // cueTimes from the recording (vo193): "trapezium" 0.82 s, "angle A" 1.88-2.58, "one hundred twenty" 2.92, "value" 5.66,
@@ -275,7 +281,9 @@ const LESSON = {
       lines: [{ m: 'curious', t: 'Drag the labels to their\ncorrect place.', cueAt: { drag: 'q4Shapes', labels: 'q4LabelsIn', place: 'q4HiShapes' } }],
       ok: 'Brilliant! You labelled all three trapeziums.' },
     { id: 'cfu5', cfu: 5, idle: 'BC is a leg. What do you know about the legs of an isosceles trapezium?', hint: 'Check 5 of 5 · Find the missing side', optTop: 458, okFx: 'q5Correct', badFx: 'q5Wrong', optsAfter: 1,
-      lines: [{ m: 'curious', t: 'In an isosceles trapezium, AB = 6 cm, CD = 10 cm and AD = 5 cm. What is the length of BC?', cueAt: { ab: 'q5AB', cd: 'q5CD', ad: 'q5AD', bc: 'q5BC' } }],
+      // cueTimes from the recording (vo200, the lengths said in full): "A B" 2.06 s, "C D" 4.24, "A D" 6.84, "B C" 9.84
+      lines: [{ m: 'curious', t: 'In an isosceles trapezium, AB = 6 cm, CD = 10 cm and AD = 5 cm. What is the length of BC?', cueAt: { ab: 'q5AB', cd: 'q5CD', ad: 'q5AD', bc: 'q5BC' },
+        cueTimes: { 'AB = 6 cm': 2.06, 'CD = 10 cm': 4.24, 'AD = 5 cm': 6.84, BC: 9.84 } }],
       ok: 'Yes! In an isosceles trapezium the legs are equal, so BC = 5 cm.',
       opts: [
         { id: 'a', t: '4 cm', fb: 'BC is a leg. In an isosceles trapezium, both legs are equal.' },

@@ -63,10 +63,10 @@
 <path sc-camel-d="{{g.aB.p}}" pathLength="100" class="{{g.aB.cls}}" style="transform-origin: {{g.aB.o}}" sc-camel-display="{{g.aB.d}}" fill="none" stroke="#1fcf66" stroke-width="7" stroke-linecap="round"></path>
 <path sc-camel-d="{{g.aC.p}}" pathLength="100" class="{{g.aC.cls}}" style="transform-origin: {{g.aC.o}}" sc-camel-display="{{g.aC.d}}" fill="none" stroke="#12a4ff" stroke-width="7" stroke-linecap="round"></path>
 <path sc-camel-d="{{g.aD.p}}" pathLength="100" class="{{g.aD.cls}}" style="transform-origin: {{g.aD.o}}" sc-camel-display="{{g.aD.d}}" fill="none" stroke="#ffb800" stroke-width="7" stroke-linecap="round"></path>
-<path sc-camel-d="{{g.rA.p}}" class="fadein rmark rmA" sc-camel-display="{{g.rA.d}}" fill="rgba(255,196,0,0.5)" stroke="#123b63" stroke-width="2.5" stroke-linejoin="round"></path>
-<path sc-camel-d="{{g.rB.p}}" class="fadein rmark rmB" sc-camel-display="{{g.rB.d}}" fill="rgba(255,196,0,0.5)" stroke="#123b63" stroke-width="2.5" stroke-linejoin="round"></path>
-<path sc-camel-d="{{g.rC.p}}" class="fadein rmark rmC" sc-camel-display="{{g.rC.d}}" fill="rgba(255,196,0,0.5)" stroke="#123b63" stroke-width="2.5" stroke-linejoin="round"></path>
-<path sc-camel-d="{{g.rD.p}}" class="fadein rmark rmD" sc-camel-display="{{g.rD.d}}" fill="rgba(255,196,0,0.5)" stroke="#123b63" stroke-width="2.5" stroke-linejoin="round"></path>
+<path sc-camel-d="{{g.rA.p}}" class="fadein rmark rmA {{g.rA.cls}}" sc-camel-display="{{g.rA.d}}" fill="rgba(255,196,0,0.5)" stroke="#123b63" stroke-width="2.5" stroke-linejoin="round"></path>
+<path sc-camel-d="{{g.rB.p}}" class="fadein rmark rmB {{g.rB.cls}}" sc-camel-display="{{g.rB.d}}" fill="rgba(255,196,0,0.5)" stroke="#123b63" stroke-width="2.5" stroke-linejoin="round"></path>
+<path sc-camel-d="{{g.rC.p}}" class="fadein rmark rmC {{g.rC.cls}}" sc-camel-display="{{g.rC.d}}" fill="rgba(255,196,0,0.5)" stroke="#123b63" stroke-width="2.5" stroke-linejoin="round"></path>
+<path sc-camel-d="{{g.rD.p}}" class="fadein rmark rmD {{g.rD.cls}}" sc-camel-display="{{g.rD.d}}" fill="rgba(255,196,0,0.5)" stroke="#123b63" stroke-width="2.5" stroke-linejoin="round"></path>
 </g>
 <line class="{{g.eAB.hl}}" sc-camel-x1="{{g.eAB.h1x}}" sc-camel-y1="{{g.eAB.h1y}}" sc-camel-x2="{{g.eAB.h2x}}" sc-camel-y2="{{g.eAB.h2y}}" pathLength="100" fill="none" stroke="#ffd23f" stroke-width="16" stroke-linecap="round" pointer-events="none"></line>
 <line class="{{g.eBC.hl}}" sc-camel-x1="{{g.eBC.h1x}}" sc-camel-y1="{{g.eBC.h1y}}" sc-camel-x2="{{g.eBC.h2x}}" sc-camel-y2="{{g.eBC.h2y}}" pathLength="100" fill="none" stroke="#ffd23f" stroke-width="16" stroke-linecap="round" pointer-events="none"></line>
@@ -111,7 +111,7 @@
 <circle sc-camel-cx="{{g.kD.x}}" sc-camel-cy="{{g.kD.y}}" r="28" data-qa="vtx-D" sc-camel-display="{{g.kD.d}}" class="{{g.kD.cls}}" onClick="{{g.kD.click}}" onPointerDown="{{g.kD.down}}" fill="rgba(0,0,0,0.001)" style="cursor: {{g.kD.cur}}"></circle>
 </g>
 </svg>
-<div class="board {{boardCls}}" style="position: absolute; left: 640px; top: 104px; width: 520px; height: 420px; pointer-events: none; transform: {{boardTf}}">
+<div class="board {{boardCls}}" style="position: absolute; left: 640px; top: 104px; width: 520px; height: 420px; pointer-events: none; transform: {{boardTf}}; --bz: {{boardZ}}">
 <div class="pop-g" style="position: absolute; left: 0px; top: 0px; width: 520px; height: 420px; transform-origin: {{popO}}">
 <sc-for list="{{tags}}" as="tg" hint-placeholder-count="4">
 <div class="tag {{tg.cls}}" style="left: {{tg.x}}px; top: {{tg.y}}px">{{tg.t}}</div>
@@ -154,7 +154,7 @@
 </sc-if>
 
 <sc-if value="{{isCfu3}}" hint-placeholder-val="{{ false }}">
-<svg class="{{fadeCls}} q3" width="634" height="305" viewBox="0 0 520 250" style="position: absolute; left: 532px; top: 158px; overflow: visible" aria-label="Trapezium ABCD with angle A of 120 degrees and angle D unknown">
+<svg class="{{fadeCls}} q3" width="600" height="288.5" viewBox="0 0 520 250" style="position: absolute; left: 546px; top: 117px; overflow: visible" aria-label="Trapezium ABCD with angle A of 120 degrees and angle D unknown">
 <polygon class="q3-fill" points="208.33,50 400,50 452,203 120,203" fill="rgba(255,246,214,0.92)"></polygon>
 <path class="q3-wA" d="M208.33,50 L232.15,50 A23.82,23.82 0 0 1 196.42,70.62 Z" fill="#ff7a00" fill-opacity="1"></path>
 <path class="q3-wD" d="M120,203 L153.68,203 A33.68,33.68 0 0 0 136.84,173.83 Z" fill="#ffb800" fill-opacity="1"></path>
@@ -166,11 +166,11 @@
 <text class="q3-lab" x="404" y="36" font-family="Nunito, sans-serif" font-weight="900" font-size="21" fill="#123b63">B</text>
 <text class="q3-lab" x="460" y="232" font-family="Nunito, sans-serif" font-weight="900" font-size="21" fill="#123b63">C</text>
 <text class="q3-lab" x="98" y="232" font-family="Nunito, sans-serif" font-weight="900" font-size="21" fill="#123b63">D</text>
-<text class="q3-vA" x="234.3" y="101" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="19" fill="#e0560a">120°</text>
+<text class="q3-vA" x="234.3" y="101" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="18.2" fill="#e0560a">120°</text>
 <text class="q3-q" x="168" y="186" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="30" fill="#b8860b">?</text>
-<text class="q3-vD" x="170" y="184" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="19" fill="#123b63">60°</text>
+<text class="q3-vD" x="170" y="184" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="18.2" fill="#123b63">60°</text>
 </svg>
-<div class="q3-hint" aria-hidden="true" style="position: absolute; left: 876px; top: 124px">
+<div class="q3-hint" aria-hidden="true" style="position: absolute; left: 876px; top: 409px">
 <span class="q3h-a">120°</span><span class="q3h-op">+</span><span class="q3h-x">?</span><span class="q3h-op">=</span><span class="q3h-s">180°</span>
 </div>
 <div class="q3-fly" aria-hidden="true">60°</div>

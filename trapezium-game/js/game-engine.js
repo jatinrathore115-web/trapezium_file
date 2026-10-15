@@ -1082,12 +1082,13 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   fitFor(st, P) {
     const F = Object.assign({}, CONFIG.fit, st.fitBox || {}), L = CONFIG.limits; // fitBox: a screen's own area (e.g. between a question and its answers)
     let x0 = Math.min(P.A.x, P.D.x), x1 = Math.max(P.B.x, P.C.x), y0 = Math.min(P.A.y, P.B.y), y1 = Math.max(P.C.y, P.D.y);
-    if (/^drag/.test(st.task || '')) { x0 = Math.min(x0, L.minX + 30); x1 = Math.max(x1, L.maxX - 30); }
+    const dragRoom = /^drag/.test(st.task || '') && !st.fitShape; // room for every corner position (fitShape: the shape itself)
+    if (dragRoom) { x0 = Math.min(x0, L.minX + 30); x1 = Math.max(x1, L.maxX - 30); }
     (st.morph || []).forEach((m) => { x0 = Math.min(x0, m.A, P.D.x); x1 = Math.max(x1, m.B, P.C.x); });
     if (st.task === 'extLegs') { const ap = this.inter(P.A, P.D, P.B, P.C); if (ap) { y0 = Math.min(y0, ap.y - 12); x0 = Math.min(x0, ap.x); x1 = Math.max(x1, ap.x); } }
     const padB = F.padBottom + (st.f && st.f.sums ? 34 : 0);
     // length labels stand beside the legs, so a screen that shows them keeps more room at the sides
-    const f = st.f || {}, padX = F.padX + (st.lenPre || f.sideLen || f.legLen || /^drag/.test(st.task || '') ? 44 : 0);
+    const f = st.f || {}, padX = F.padX + (st.lenPre || f.sideLen || f.legLen || dragRoom ? 44 : 0);
     const s = Math.min(F.maxScale, F.w / (x1 - x0 + 2 * padX), F.h / (y1 - y0 + F.padTop + padB));
     const cx = (x0 + x1) / 2, cy = (y0 - F.padTop + y1 + padB) / 2;
     return { scale: +s.toFixed(3), tx: +(F.cx - CONFIG.board.x - cx * s).toFixed(1), ty: +(F.cy - CONFIG.board.y - cy * s).toFixed(1) };
@@ -1446,7 +1447,10 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (!svg) return;
     try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
     if (e.preventDefault) e.preventDefault();
-    this.drag = { k: k, svg: svg, x0: this.state.P[k].x, pid: e.pointerId };
+    // off: where the finger took hold, relative to the corner (the touch circle is wide), so the corner moves with the
+    // finger instead of jumping under it on the first move
+    const p0 = this.toSvg(svg, e);
+    this.drag = { k: k, svg: svg, x0: this.state.P[k].x, pid: e.pointerId, off: p0 ? this.state.P[k].x - p0.x : 0 };
     this.touched = true; // the learner has started: no more demo hand
     if (this.handId) { clearTimeout(this.handId); this.T.delete(this.handId); this.handId = null; }
     this.setState({ dragging: k, hand: null });
@@ -1457,13 +1461,15 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const p = this.toSvg(this.drag.svg, e);
     if (!p) return;
     const P = this.clone(this.state.P), k = this.drag.k;
-    let x = p.x;
+    let x = p.x + (this.drag.off || 0);
     // bases stay parallel (only x moves); the limits stop the shape crossing itself or going unreadably thin
     const Lm = CONFIG.limits, SL = Lm.maxLegRun;
-    if (k === 'B') x = Math.max(P.A.x + Lm.minTop, P.C.x - SL, Math.min(P.C.x, x));
+    if (k === 'B') x = Math.max(P.A.x + Lm.minTop, P.C.x - SL, Math.min(Lm.maxX, P.C.x + SL, x)); // (B may pass C, as A may pass D)
     if (k === 'A') x = Math.max(Lm.minX, P.D.x - SL, Math.min(P.B.x - Lm.minTop, P.D.x + SL, x));
     if (k === 'D') x = Math.max(Lm.minX, P.A.x - SL, Math.min(P.C.x - Lm.minBottom, P.A.x + SL, x));
     if (k === 'C') x = Math.max(P.D.x + Lm.minBottom, P.B.x - SL, Math.min(Lm.maxX, P.B.x + SL, x));
+    // fitShape: the shape fills the card, so a corner stops at the card's inner edge (room left for its letter)
+    if (this.cur().fitShape) { const eb = this.extBounds(); x = Math.max(eb.l + 36, Math.min(eb.r - 36, x)); }
     P[k].x = x;
     // screen 20: once AD matches BC (or the drag jumps past it between two moves), A locks at the
     // equal-legs point and the task is done straight away
@@ -1862,9 +1868,12 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     const unit = (p, q) => { const L = this.dist(p, q) || 1; return { x: (q.x - p.x) / L, y: (q.y - p.y) / L }; };
     const aTag = {}, em = s.emph || {}, r90 = []; // em: parts the voice-over is naming right now
     // After screen 23 the angles are already measured, so they just stay (no draw-in again). fa: the angles in
-    // focus glow and the others dim (angFocus can move during a screen, as in sumSteps).
+    // focus glow and the others step back, dimmed like a disabled button (angFocus can move during a screen, as in
+    // sumSteps). Exploring (screen 29), the dragged leg's two angles are the focus while the corner moves.
     const angIdx = this.steps().findIndex((x) => x.id === 'angles'), known = angIdx >= 0 && s.step > angIdx, fa = s.angFocus || f.focusAng;
     const livePair = s.dragging ? (s.dragging === 'A' || s.dragging === 'D' ? 'AD' : 'BC') : ''; // a corner changes the two angles on its leg
+    const dragLive = (st.explore || st.task === 'drag90') && livePair; // the two angles a dragged corner changes
+    const inFocus = fa || dragLive || '';
     ['A', 'B', 'C', 'D'].forEach((k) => {
       const n = this.nb(k), Vk = P[k], u = unit(Vk, P[n[0]]), v = unit(Vk, P[n[1]]);
       // the angle's arc: the same size on screen whatever the board's zoom (30 stage px)
@@ -1876,7 +1885,8 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       // when several angles light up together they draw in one after another
       const stag = (f.arcs || '').length > 1 ? ' d' + (f.arcs || '').indexOf(k) : '';
       const look = (known && (f.arcs || '').indexOf(k) >= 0 ? ' still' : '') + (fa && fa.indexOf(k) >= 0 ? ' glow' : '') +
-        (st.explore && s.dragging && livePair.indexOf(k) >= 0 ? ' live' : ''); // explore: the dragged leg's two angles glow while they change
+        (dragLive && livePair.indexOf(k) >= 0 ? ' live' : '') + // dragging (screens 29, 33): the dragged leg's two angles glow while they change
+        (inFocus && inFocus.indexOf(k) < 0 ? ' dim' : '');
       // at exactly 90° the arc gives way to the square right-angle mark
       g['a' + k] = { p: 'M' + r1(sx) + ',' + r1(sy) + ' A' + R + ',' + R + ' 0 0 ' + (cross > 0 ? 1 : 0) + ' ' + r1(ex) + ',' + r1(ey), d: dsp(show && !isRight && !(known || st.anglesIn)), cls: 'arc a' + k + stag + look + (em['a' + k] ? ' emph' : '') + (st.anglesIn ? ' pre' : ''), o: r1(Vk.x) + 'px ' + r1(Vk.y) + 'px' };
       // wedges (from screen 23 on): the angle filled in, out to the arc's outer edge so the arc is its rim. They follow
@@ -1888,24 +1898,28 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       g['r' + k] = {
         // a closed square from the corner itself, so the whole square fills (its edges along the sides sit under them)
         p: 'M' + r1(Vk.x) + ',' + r1(Vk.y) + ' L' + r1(Vk.x + u.x * q) + ',' + r1(Vk.y + u.y * q) + ' L' + r1(Vk.x + u.x * q + v.x * q) + ',' + r1(Vk.y + u.y * q + v.y * q) + ' L' + r1(Vk.x + v.x * q) + ',' + r1(Vk.y + v.y * q) + ' Z',
-        d: dsp(isRight && (f.right || show))
+        d: dsp(isRight && (f.right || show)),
+        cls: inFocus && inFocus.indexOf(k) < 0 ? 'dim' : ''
       };
 
       const th = this.angle(P, k) * Math.PI / 180;
-      // The value sits inside its corner on the angle's bisector, pushed out just far enough to clear the arc and
-      // both sides. It is sized by the value even when the name shows (screen 31), so names sit where values were.
-      const lbl = V[k] + '°', hw = 1.2 * (lbl.length * 11.5 + 6) / 2, hh = 1.2 * 14; // plain text (21px bold), at its 1.2x focus size
+      // The value sits inside its corner on the angle's bisector, just past the arc and clear of both sides. Like the
+      // arc it keeps one size on screen at any zoom (css: .tag.alab is 21px / --bz), so its box and gaps are screen
+      // px divided by the zoom; only the sides' own stroke (5 board units) zooms. It is sized by the value even when
+      // the name shows (screen 31), so names sit where values were.
+      const lbl = V[k] + '°', hw = 1.2 * (lbl.length * 11.5 + 6) / 2 / zs, hh = 1.2 * 14 / zs; // 21px bold text, at its 1.2x focus size
+      const sg = 2.5 + 5 / zs; // half a side's stroke, then a small gap
       const clearOf = (cx, cy) => {
         const sideGap = (w) => Math.abs((cx - Vk.x) * w.y - (cy - Vk.y) * w.x) - (hw * Math.abs(w.y) + hh * Math.abs(w.x));
         const near = Math.hypot(Math.max(0, Math.abs(cx - Vk.x) - hw), Math.max(0, Math.abs(cy - Vk.y) - hh));
-        return sideGap(u) >= 9 && sideGap(v) >= 9 && near >= R + 16; // clear of both sides (past their stroke and its own outline) and of the filled angle's rim
+        return sideGap(u) >= sg && sideGap(v) >= sg && near >= R + 8 / zs; // clear of both sides and just past the filled angle's rim
       };
       let bx0 = u.x + v.x, by0 = u.y + v.y; const bl0 = Math.hypot(bx0, by0) || 1; bx0 /= bl0; by0 /= bl0;
-      let dl = R + 12; while (dl < 140 && !clearOf(Vk.x + bx0 * dl, Vk.y + by0 * dl)) dl += 2;
+      let dl = R + 6 / zs; while (dl < 140 && !clearOf(Vk.x + bx0 * dl, Vk.y + by0 * dl)) dl += 1 / zs;
       let bx = u.x + v.x, by = u.y + v.y; const bl = Math.hypot(bx, by) || 1; bx /= bl; by /= bl;
-      // the 90° label sits just beyond the right-angle square, on the corner's diagonal: its near edge 6 units past the square
-      // (the label is about 58 x 30 board units), so it reads as the square's label without touching it
-      if (st.right90 && isRight) { const rc = (q + 21) * Math.SQRT2; r90.push({ t: '90°', x: r1(Vk.x + bx * rc), y: r1(Vk.y + by * rc), cls: 'alab r90 r90' + k }); }
+      // the 90° label sits just beyond the right-angle square, on the corner's diagonal: its near edge 6 px past the square
+      // (the label is about 58 x 30 screen px), so it reads as the square's label without touching it
+      if (st.right90 && isRight) { const rc = (q + 21 / zs) * Math.SQRT2; r90.push({ t: '90°', x: r1(Vk.x + bx * rc), y: r1(Vk.y + by * rc), cls: 'alab r90 r90' + k + (inFocus && inFocus.indexOf(k) < 0 ? ' dim' : '') }); }
       aTag[k] = { bx: bx, by: by, t: s.symAng ? '∠' + k : V[k] + '°', x: r1(Vk.x + bx * dl), y: r1(Vk.y + by * dl), cls: 'alab l' + k + stag + look + (show ? '' : ' off') + (em['a' + k] ? ' emph' : '') + (st.anglesIn ? ' pre' : '') };
     });
     // vertices: the dots and their touch targets
@@ -2127,6 +2141,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       celebrate: st.id === 'wellDone',
       labs: labs, slots: slots,
       sceneCls: 'scene' + (st.noPanel ? ' nopanel' : '') + (st.hero ? ' hero' : '') + (st.hero && st.end ? ' endhero' : '') + (st.summary ? ' summary' : '') + (st.room === 'measure' ? ' measure-room' : ''), // hero (screens 36, 43-44): Swiftee centre stage, no board
+      boardZ: this.boardMap().s || 1, // the board's zoom: angle values keep one size on screen (css .tag.alab)
       boardTf: st.room === 'measure' ? tf(CONFIG.measureRoom) : !st.noZoom ? tf(this.fit || CONFIG.lessonZoom) : 'translate(' + CONFIG.scene.boardX + 'px, ' + (st.boardShiftY || 0) + 'px)',
       // focusing: a part is being named, so the rest of the shape steps back
       boardCls: fadeV + (Object.keys(s.emph || {}).length ? ' focusing' : '') + (st.shapePre ? ' shape-pre' : '') + (st.parStrong ? ' par-strong' : '') + (st.lenPre ? ' len-pre' : '') + (st.tickPre ? ' tick-pre' : '') + (st.chevPre ? ' chev-pre' : '') + (st.legsSet ? ' legs-set' : '') + (st.right90 && st.r90Pre ? ' r90pre' : ''),

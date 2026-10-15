@@ -35,6 +35,9 @@ a{color:#123b63}a:hover{color:#0b2742}
    An angle's value is written in its angle's colour (darker, to read on the cream fill), so each number points at its angle */
 .alab,.mtag{background:none;box-shadow:none;padding:0;border:0;border-radius:0;font-family:'Nunito','Noto Sans Math',system-ui,sans-serif;font-size:21px;font-weight:900;color:#123b63;text-shadow:0 0 3px #fff,0 0 3px #fff,2px 0 0 #fff,-2px 0 0 #fff,0 2px 0 #fff,0 -2px 0 #fff,1.5px 1.5px 0 #fff,-1.5px -1.5px 0 #fff,1.5px -1.5px 0 #fff,-1.5px 1.5px 0 #fff}
 .alab.lA{color:#e0560a}.alab.lB{color:#128a44}.alab.lC{color:#0a72c4}.alab.lD{color:#a87200}
+/* angle values on the board keep one size on screen at any zoom, like their arcs (--bz: the board's zoom, set by the
+   engine), with the white outline in em so it shrinks with them */
+.tag.alab{font-size:calc(21px / var(--bz, 1));text-shadow:0 0 .14em #fff,0 0 .14em #fff,.095em 0 0 #fff,-.095em 0 0 #fff,0 .095em 0 #fff,0 -.095em 0 #fff,.07em .07em 0 #fff,-.07em -.07em 0 #fff,.07em -.07em 0 #fff,-.07em .07em 0 #fff}
 /* length labels match their side: legs teal, bases blue; they fade in (marks are drawn, never popped) */
 .mtag{color:#00806d;animation:fade .4s ease-out}
 .tag.mtag.mAB,.tag.mtag.mCD{color:#1656e0}
@@ -155,7 +158,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 .thumb{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-height:76px;padding:8px 9px;box-sizing:border-box;
   border:2px solid #d6e8f5;border-radius:10px;background:#eef8ff;cursor:pointer;overflow:hidden;text-align:left;transition:transform .12s ease,border-color .12s ease}
 .thumb-t{font-family:'Nunito','Noto Sans Math',system-ui,sans-serif;font-weight:700;font-size:12.5px;line-height:1.25;color:#123b63;
-  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;padding-top:1px;margin-top:-1px} /* (1px: tall letters' tops aren't clipped) */
 .thumb:hover{transform:translateY(-2px);border-color:#56bdf4}
 .thumb:active{transform:scale(.97)}
 .thumb.cur{border-color:#d9640a;box-shadow:0 0 0 3px rgba(217,100,10,.25)}
@@ -212,7 +215,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 @keyframes sidePulse{0%,100%{stroke-width:7px}50%{stroke-width:9px}}
 /* a value's resting size states use the scale property, so transform stays free for its animations (a transition on
    transform would smooth a 16 px hop down to under 2 px) */
-.tag.alab{transition:scale .45s cubic-bezier(.3,0,.3,1)}
+.tag.alab{transition:scale .45s cubic-bezier(.3,0,.3,1),opacity .45s ease}
 .tag.alab.emph{scale:1.2}
 .vdot{transition:r .45s cubic-bezier(.3,0,.3,1),stroke .3s ease,filter .3s ease}
 @media (prefers-reduced-motion: reduce){.arc,.edge,.tag.alab,.vdot{transition:none}.edge.emph{animation:none}}
@@ -261,13 +264,13 @@ a{color:#123b63}a:hover{color:#0b2742}
 /* a 90° value wears its angle's colour, like every other angle value (screen 34 shows the same corners) */
 .tag.r90.r90A{color:#e0560a}.tag.r90.r90B{color:#128a44}.tag.r90.r90C{color:#0a72c4}.tag.r90.r90D{color:#a87200}
 .r90pre .rmark,.r90pre .tag.r90{opacity:0;animation:none} /* hidden from the first frame until GSAP reveals them */
-/* check 3 (screen 40): parts start hidden until GSAP reveals them (Motion.q3*); the hint sits above the shape;
+/* check 3 (screen 40): parts start hidden until GSAP reveals them (Motion.q3*); the hint sits under the shape;
    a wrong answer is warm orange, not red */
 .q3 .q3-ad,.q3 .q3-vD,.q3 .q3-q,.q3 .q3-wD,.q3 .q3-wA,.q3 .q3-vA{opacity:0}
 .q3-hint{opacity:0;translate:-50% 0;display:flex;align-items:center;gap:8px;padding:6px 16px;border-radius:16px;background:#fbf8ee;border:3px solid #5cc6cf;
   font-family:'Nunito','Noto Sans Math',system-ui,sans-serif;font-weight:900;font-size:22px;color:#0b5b70;box-shadow:0 4px 12px rgba(11,91,112,.10);pointer-events:none}
 .q3-hint .q3h-a{color:#d9640a}.q3-hint .q3h-x{color:#b8860b}.q3-hint .q3h-op{color:#5b7f9c}
-.q3-fly{position:absolute;left:0;top:0;opacity:0;pointer-events:none;font-family:'Nunito','Noto Sans Math',system-ui,sans-serif;font-weight:900;font-size:22px;color:#1d6b35;
+.q3-fly{position:absolute;left:0;top:0;opacity:0;pointer-events:none;font-family:'Nunito','Noto Sans Math',system-ui,sans-serif;font-weight:900;font-size:21px;color:#1d6b35;
   background:#e3f7e7;border:2px solid #2e9e4f;border-radius:12px;padding:2px 10px;translate:-50% -50%}
 .soft-wrong .opt.bad{background:#fff3e2;border-color:#f0a020;box-shadow:0 5px 0 #e0a24a,0 10px 18px rgba(18,59,99,.10);color:#8a4b0a}
 /* check 4 (screen 41): labels and leg clues start hidden; a box glows blue under a held label and turns green
@@ -311,7 +314,11 @@ a{color:#123b63}a:hover{color:#0b2742}
 
 /* angles already measured stay put instead of drawing in again */
 .arc.still,.tag.alab.still{animation:none}
-/* focusAng: the pair to notice grows a little; the other angles stay fully coloured (never faded, never looking empty) */
+/* focusAng: the pair to notice grows a little; the other angles step back, dimmed like a disabled button (engine:
+   .dim), until the focus moves on. !important: a dimmed angle stays back even where an animation set its opacity */
+.arc.dim,.wedge.dim,.rmark.dim{opacity:.22!important}
+.tag.alab.dim{opacity:.3!important}
+.arc,.wedge,.rmark{transition:opacity .45s ease}
 .arc.glow{animation:arcGlow .7s ease-out .35s both}
 .tag.alab.glow{animation:labGlow .7s ease-out .35s both}
 @keyframes arcGlow{from{stroke-width:7px}to{stroke-width:9px}}
@@ -336,7 +343,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 .tag.sum.sumR.live{box-shadow:0 0 0 3px rgba(31,207,102,.35),0 0 14px 2px rgba(18,164,255,.30)}
 .arc.live{filter:drop-shadow(0 0 5px rgba(255,184,40,.85));transition:filter .15s ease-out}
 .tag.alab.live{scale:1.1}
-/* Done (screen 29): centred 16px under the ice panel; pops in after the first drag */
+/* Done (screen 29): centred on the ice card's bottom edge; pops in after the first drag */
 .done-btn{position:absolute;left:876px;top:600px;translate:-50% 0;min-width:140px;height:46px;font-size:21px;z-index:6;
   animation:doneIn .5s cubic-bezier(.3,1.6,.5,1) both,doneGlow 1.8s ease-in-out .6s 2}
 .done-btn:active{transform:translateY(2px) scale(.96)}
@@ -516,8 +523,6 @@ svg[data-lencol] .edge{transition:stroke .4s ease}
   background-image:url(../assets/images/crystal-l.webp),url(../assets/images/crystal-r.webp),url(../assets/images/crystal-m.webp)!important;
   background-position:left center,right center,center center!important;background-repeat:no-repeat!important;
   background-size:auto 100%,auto 100%,calc(100% - var(--bh) * .65) 100%!important}
-/* Done: pops in, then glows twice along the crystal's outline */
-@keyframes crysGlow{0%,100%{filter:drop-shadow(0 3px 0 rgba(13,64,170,.32)) drop-shadow(0 6px 10px rgba(18,59,99,.18))}50%{filter:brightness(1.08) drop-shadow(0 0 10px rgba(120,210,255,.95)) drop-shadow(0 3px 0 rgba(13,64,170,.32))}}
 /* check 2 (screen 39): the word answers stay on one line */
 .stage .opts-in:not(.quick) .opt.crys{font-size:32px;white-space:nowrap;padding:0 16px}
 /* screen 36: no ice panel; Swiftee is centre stage (.hero) */
@@ -566,7 +571,9 @@ svg[data-lencol] .edge{transition:stroke .4s ease}
 .fin-ch.sp{width:30px}
 .fin-ch b{display:block;font-weight:800}
 .fin-ch .o{color:#3b1f0a;-webkit-text-stroke:18px #3b1f0a;filter:drop-shadow(0 8px 0 rgba(59,31,10,.35))}
-.fin-ch .f{position:absolute;left:0;top:0;background:linear-gradient(180deg,#fffaf0 15%,#fbe3a0 60%,#f2c45a 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+/* (the fill's box reaches .1em past each side: a letter like T overhangs its own box, and background-clip:text would
+   leave its tips unfilled) */
+.fin-ch .f{position:absolute;left:-.1em;top:0;padding:0 .1em;background:linear-gradient(180deg,#fffaf0 15%,#fbe3a0 60%,#f2c45a 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
 .fin-spark{position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;background:#fff3d6;
   clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);filter:drop-shadow(0 0 6px rgba(255,240,200,.9))}
 .fin-again{position:absolute;left:1132px;top:572px;width:96px;height:96px;border-radius:50%;border:0;cursor:pointer;pointer-events:auto;color:#fff;
@@ -583,24 +590,31 @@ svg[data-lencol] .edge{transition:stroke .4s ease}
 .finale-on .stage .screens-scrim{z-index:42}
 .finale-on .stage .screens-panel{z-index:43}
 
-/* ---------- answer buttons (.opt.crys): orange pill buttons like the Play button - white bold text, a white rim and a
-   raised base, so they read as the things to tap (labels are flat). Hover lifts, a press pushes them down; a right
-   answer turns green, a wrong one a soft grey (never red) ---------- */
-.stage .opt.crys{position:relative;border:3px solid #fff;border-radius:999px;padding:0 22px;cursor:pointer;min-height:68px;
-  background:linear-gradient(180deg,#ffa53d 0%,#ff7f11 55%,#f26a00 100%);
-  color:#fff;font-family:'Baloo 2','Noto Sans Math',system-ui,sans-serif;font-weight:600;font-size:32px;line-height:1.05;letter-spacing:.4px;
-  /* a dark-orange outline round the white letters keeps them crisp on the orange */
-  text-shadow:-1.5px -1.5px 0 #a84400,1.5px -1.5px 0 #a84400,-1.5px 1.5px 0 #a84400,1.5px 1.5px 0 #a84400,0 3px 0 #a84400;display:flex;align-items:center;justify-content:center;text-align:center;
-  box-shadow:0 6px 0 #c95c00,0 12px 18px rgba(120,50,0,.28);
-  transition:transform .12s ease,box-shadow .12s ease,filter .12s ease,opacity .3s ease}
-.stage .opt.crys:hover:not(:disabled){transform:translateY(-3px);filter:brightness(1.06);box-shadow:0 9px 0 #c95c00,0 16px 22px rgba(120,50,0,.3)}
-.stage .opt.crys:active:not(:disabled){transform:translateY(5px);transition-duration:.06s;box-shadow:0 1px 0 #c95c00,0 4px 8px rgba(120,50,0,.25)}
-.stage .opt.crys:focus-visible{outline:4px solid #fff;outline-offset:6px}
-.stage .opt.crys.good{background:linear-gradient(180deg,#5fe39a 0%,#22c96a 55%,#17b05b 100%);text-shadow:-1.5px -1.5px 0 #0b7a3c,1.5px -1.5px 0 #0b7a3c,-1.5px 1.5px 0 #0b7a3c,1.5px 1.5px 0 #0b7a3c,0 3px 0 #0b7a3c;
-  box-shadow:0 6px 0 #0f8a45,0 0 0 5px rgba(31,207,102,.25),0 12px 18px rgba(10,90,45,.25);animation:optGood .6s ease-out both;opacity:1;filter:none}
-.stage .opt.crys.bad,.stage .opts-in .opt.crys.bad,.stage .soft-wrong .opt.crys.bad{color:#8a9bb0;text-shadow:none;cursor:not-allowed;
-  background:linear-gradient(180deg,#f7f9fc 0%,#e3eaf2 100%);box-shadow:0 4px 0 #b7c6d6;animation:shake .45s ease both;opacity:1;filter:none}
-.stage .opt.crys:disabled:not(.good):not(.bad){opacity:.45;filter:grayscale(.6);cursor:not-allowed;transform:none}
+/* ---------- answer buttons (.opt.crys): the UI kit's glossy pills (Figma POLYGON kit: p1-btn-uiPrimary, p1-btn-uiSuccess),
+   drawn as 9-slice images so the round ends and the shine keep their shape at any width (slices: left 140, right 75 of
+   the 147 px tall art, drawn at the button's 74 px). Dark text on the yellow (white would barely show), white on the
+   green. Hover lifts, a press
+   pushes them down; a right answer turns green, a wrong one grey (never red) ---------- */
+.stage .opt.crys{position:relative;padding:0 22px;cursor:pointer;min-height:68px;
+  border:0 solid transparent;border-radius:999px;border-image:url(../assets/images/pill-primary.webp) 0 75 0 140 fill/0 38px 0 70px stretch;
+  color:#4a2300;font-family:'Baloo 2','Noto Sans Math',system-ui,sans-serif;font-weight:700;font-size:32px;line-height:1.05;letter-spacing:.4px;
+  /* deep brown on the yellow, with a soft light edge below so it reads as pressed into the pill */
+  text-shadow:0 1.5px 0 rgba(255,244,200,.75);display:flex;align-items:center;justify-content:center;text-align:center;
+  filter:drop-shadow(0 6px 8px rgba(120,60,0,.22));
+  transition:transform .12s ease,filter .12s ease,opacity .3s ease}
+/* the pill art is the whole button: no box background, border or shadow in any state (older .opt rules set them) */
+.stage .opt.crys,.stage .opt.crys:hover,.stage .opt.crys:active,.stage .opt.crys:disabled,.stage .opt.crys.good,.stage .opt.crys.bad{background:none!important;box-shadow:none!important}
+.stage .opt.crys:hover:not(:disabled){transform:translateY(-3px);filter:brightness(1.05) drop-shadow(0 9px 10px rgba(120,60,0,.26))}
+.stage .opt.crys:active:not(:disabled){transform:translateY(4px);transition-duration:.06s;filter:drop-shadow(0 2px 3px rgba(120,60,0,.2))}
+.stage .opt.crys:focus-visible{outline:4px solid #fff;outline-offset:4px}
+.stage .opt.crys.good{border-image-source:url(../assets/images/pill-success.webp);
+  color:#fff;text-shadow:-2px -2px 0 #155a0c,2px -2px 0 #155a0c,-2px 2px 0 #155a0c,2px 2px 0 #155a0c,0 -2px 0 #155a0c,0 2px 0 #155a0c,-2px 0 0 #155a0c,2px 0 0 #155a0c,0 3.5px 0 #155a0c;
+  filter:drop-shadow(0 0 10px rgba(80,200,60,.55)) drop-shadow(0 6px 8px rgba(20,90,10,.25));animation:optGood .6s ease-out both;opacity:1}
+/* a wrong pick: the pill and its text turn grey and give a little shake */
+.stage .opt.crys.bad,.stage .opts-in .opt.crys.bad,.stage .soft-wrong .opt.crys.bad{cursor:not-allowed;color:#4a2300;
+  filter:grayscale(1) opacity(.7);animation:shake .45s ease both;opacity:1}
+/* answered: the answers not picked fade back */
+.stage .opt.crys:disabled:not(.good):not(.bad){opacity:.5;filter:grayscale(1);cursor:not-allowed;transform:none}
 @keyframes optGood{0%{transform:scale(1)}45%{transform:scale(1.07)}100%{transform:scale(1)}}
 @media (prefers-reduced-motion: reduce){.stage .opt.crys{transition:none}.stage .opt.crys.good,.stage .opt.crys.bad{animation:none}}
 /* check 1's shape cards: white cards on a blue 3D base */
@@ -654,21 +668,22 @@ svg[data-lencol] .edge{transition:stroke .4s ease}
 /* check 4 (screen 41): the shapes, boxes and labels drawn larger as one group, filling the ice card (CONFIG.q4) */
 .q4-wrap{position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:876px 345px;transform:translate(0,10px) scale(1.12)}
 
-/* ---------- screen 41, game look: the labels are orange tiles (like the answer buttons) to pick up and drop; the drop
-   boxes are dashed blue targets; no grip dots and no plain white row bands ---------- */
 .stage .lab::before{display:none}
-.stage .lab{justify-content:center;padding:0 12px;border:3px solid #fff;border-radius:999px;cursor:grab;
-  background:linear-gradient(180deg,#ffa53d 0%,#ff7f11 55%,#f26a00 100%);color:#fff;
-  font-family:'Baloo 2','Noto Sans Math',system-ui,sans-serif;font-weight:600;font-size:26px;letter-spacing:.4px;
-  text-shadow:-1.5px -1.5px 0 #a84400,1.5px -1.5px 0 #a84400,-1.5px 1.5px 0 #a84400,1.5px 1.5px 0 #a84400,0 2px 0 #a84400;
-  box-shadow:0 5px 0 #c95c00,0 10px 16px rgba(120,50,0,.25)}
-.stage .lab:hover{box-shadow:0 7px 0 #c95c00,0 14px 20px rgba(120,50,0,.28);filter:brightness(1.05)}
-.stage .lab.sel{transform:translateY(-3px) scale(1.04);border-color:#fff;box-shadow:0 0 0 5px rgba(255,184,0,.55),0 5px 0 #c95c00}
-.stage .lab.drag{cursor:grabbing;transform:scale(1.08) rotate(-2deg);box-shadow:0 18px 26px rgba(120,50,0,.32),0 5px 0 #c95c00}
-.stage .lab.lock{width:276px;border-color:transparent;background:transparent;box-shadow:none;color:#fff;text-shadow:0 2px 0 rgba(10,90,45,.45);padding:0 10px}
+/* ---------- screen 41, game look: the labels are the UI kit's yellow pills (as the answer buttons; 9-slice for the
+   56 px label: left 140 / right 75 of the 147 px art) to pick up and drop; a right drop turns its box into the green
+   pill; the drop boxes are dashed blue targets ---------- */
+.stage .lab{justify-content:center;padding:0 12px;border:0 solid transparent;border-radius:999px;cursor:grab;
+  border-image:url(../assets/images/pill-primary.webp) 0 75 0 140 fill/0 29px 0 53px stretch;background:none;box-shadow:none;
+  color:#4a2300;font-family:'Baloo 2','Noto Sans Math',system-ui,sans-serif;font-weight:700;font-size:26px;letter-spacing:.4px;
+  text-shadow:0 1.5px 0 rgba(255,244,200,.75);filter:drop-shadow(0 5px 7px rgba(120,60,0,.22))}
+.stage .lab:hover{box-shadow:none;filter:brightness(1.05) drop-shadow(0 7px 9px rgba(120,60,0,.26))}
+.stage .lab.sel{transform:translateY(-3px) scale(1.04);box-shadow:none;filter:drop-shadow(0 0 7px rgba(255,170,0,.95)) drop-shadow(0 5px 7px rgba(120,60,0,.22))}
+.stage .lab.drag{cursor:grabbing;transform:scale(1.08) rotate(-2deg);box-shadow:none;filter:drop-shadow(0 16px 14px rgba(120,60,0,.3))}
+.stage .lab.lock{width:276px;border-image:none;background:transparent;box-shadow:none;filter:none;color:#fff;
+  text-shadow:-2px -2px 0 #155a0c,2px -2px 0 #155a0c,-2px 2px 0 #155a0c,2px 2px 0 #155a0c,0 3px 0 #155a0c;padding:0 10px}
 .stage .slot{border:3px dashed #5b9ee6;border-radius:18px;background:rgba(232,243,255,.75);box-shadow:none}
 .stage .slot.hot{border-color:#ff7a00;border-style:solid;background:rgba(255,240,224,.95);box-shadow:0 0 0 5px rgba(255,122,0,.2)}
-.stage .slot.filled.ok{border:3px solid #fff;background:linear-gradient(180deg,#5fe39a 0%,#22c96a 55%,#17b05b 100%);box-shadow:0 5px 0 #0f8a45}
+.stage .slot.filled.ok{border:3px solid transparent;border-radius:999px;border-image:url(../assets/images/pill-success.webp) 0 75 0 140 fill/0 33px 0 61px stretch;background:none;box-shadow:none}
 .q4-strip{display:none}
 .q4-card{box-shadow:0 5px 0 #b9d3ee,0 10px 18px rgba(18,59,99,.12)}
 .q4-link{background:#5b9ee6;opacity:.9}

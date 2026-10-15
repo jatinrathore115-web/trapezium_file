@@ -72,14 +72,15 @@
       visual: { shape: 'scal', ticks: 'all' }, cue: { scalene: 'tag', sides: 'outline', different: 'ticks' } },
     { id: 'isosceles', label: 'Isosceles', tone: 'convex', t: 'An isosceles trapezium has legs of the same length.',
       visual: { shape: 'iso', ticks: 'legs' }, cue: { isosceles: 'tag', legs: 'legs', same: 'ticks' } },
+    // the third type straight after the other two (scalene, isosceles, right angled), then the angle ideas
+    { id: 'right', label: 'Right angled', tone: 'regular', t: 'A right trapezium has two adjacent right angles.',
+      visual: { shape: 'right', right: ['A', 'D'] }, cue: { right: 'tag', adjacent: 'side', angles: 'right' } },
     { id: 'angleSum', label: 'Angle sum', tone: 'concave', t: 'Angles on the same leg add up to 180°.',
       visual: { shape: 'ang', lit: ['DA'], wedges: ['A', 'D'] }, cue: { angles: 'wedges', leg: 'lit', add: 'add', 180: 'sum' },
       times: { add: 1.84, '180°': 2.36 } }, // measured in the recording (vo182): "add" 1.84 s, "one hundred eighty" 2.36 s
     { id: 'supplementary', label: 'Supplementary', tone: 'concave', t: 'Two angles that add up to 180° are supplementary.',
       visual: { shape: 'ang', lit: ['BC'], wedges: ['B', 'C'] }, cue: { angles: 'wedges', add: 'add', 180: 'sum', supplementary: 'tag' },
-      times: { add: 1.16, '180°': 1.76, supplementary: 3.44 } }, // (vo183): "add" 1.16 s, "one hundred eighty" 1.76 s, "supplementary" 3.44 s
-    { id: 'right', label: 'Right', tone: 'regular', t: 'A right trapezium has two adjacent right angles.',
-      visual: { shape: 'right', right: ['A', 'D'] }, cue: { right: 'tag', adjacent: 'side', angles: 'right' } }
+      times: { add: 1.16, '180°': 1.76, supplementary: 3.44 } } // (vo183): "add" 1.16 s, "one hundred eighty" 1.76 s, "supplementary" 3.44 s
   ];
   // the closing line (the opening line comes from lesson-data, 'recap')
   const DONE = { m: 'celebrating', t: 'Wonderful! You remember everything about trapeziums!', cue: { trapeziums: 'all' } };

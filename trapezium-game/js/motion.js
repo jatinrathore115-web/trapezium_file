@@ -167,8 +167,8 @@
       if (!G || !pair.length) return;
       // the pair is lit by the engine's focus (its sides thicken, bands draw along both): no dots
     },
-    // screens 14 and 15: the "Base" / "Leg" pills come in one after another (each connector draws out from its
-    // side, then its pill pops in), then the other two sides ease back to full strength. The pills stay.
+    // screens 14 and 15: the "Base" / "Leg" pills come in together as the word is said (each connector draws out from
+    // its side as its pill fades in), then the other two sides ease back to full strength. The pills stay.
     calloutIn(pairKeys) {
       if (!G) return;
       const keys = pairKeys || [];
@@ -178,10 +178,10 @@
         const tl = G.timeline();
         pills.forEach((p, i) => {
           const stem = p.querySelector('.cal-stem'), body = Array.from(p.children).filter((c) => c !== stem);
-          const L = (stem && stem.getTotalLength && stem.getTotalLength()) || 1, at = i * 0.5;
+          const L = (stem && stem.getTotalLength && stem.getTotalLength()) || 1, at = i * 0.12;
           tl.set(body, { opacity: 0 }, 0);
-          if (stem) tl.fromTo(stem, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.3, ease: 'sine.out' }, at);
-          tl.fromTo(body, { opacity: 0, scale: 0.9, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: reduced ? 0 : 0.4, ease: 'power2.out', immediateRender: false }, at + 0.4);
+          if (stem) tl.fromTo(stem, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: reduced ? 0 : 0.25, ease: 'sine.out' }, at);
+          tl.fromTo(body, { opacity: 0, scale: 0.9, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: reduced ? 0 : 0.3, ease: 'power2.out', immediateRender: false }, at + 0.1);
         });
         tl.to(others, { opacity: 1, duration: 0.45, ease: 'sine.inOut' }, '>+0.6').set(others, { clearProps: 'opacity' });
         return tl;
@@ -674,16 +674,16 @@
     },
 
     // ---------- screen 26 "That means they are supplementary angles." ----------
-    // as the line starts: A and D pulse gently (their filled angles grow in); B and C stay fully coloured
+    // as the line starts: A and D pulse gently (their filled angles grow in as the screen opens: focusAng); B and C
+    // step back
     suppStart() {
       if (!G) return;
       const focus = ['A', 'D'].map((k) => $('.arc.a' + k)[0]).filter(Boolean), flab = ['A', 'D'].map((k) => $('.tag.alab.l' + k)[0]).filter(Boolean);
-      this.wedgeGrow('AD', 0.1);
       add(() => G.timeline()
         .to(focus, { strokeWidth: 7, duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.1)
         .fromTo(flab, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1 }, { scale: 1.12, duration: 0.3, ease: 'sine.out', yoyo: true, repeat: 1 }, 0.1));
     },
-    // on "angles": the equation glows softly; a little later every angle returns to full strength
+    // on "angles": the equation glows softly; a little later the angles' pulses settle (B and C stay back: focusAng)
     suppConfirm() {
       if (!G) return;
       const chips = $('.chip'), chip = chips[chips.length - 1];
@@ -725,10 +725,12 @@
         fill: 'none', stroke: '#ffc400', 'stroke-width': 4, 'stroke-linecap': 'round', pathLength: 100, opacity: 0 });
       // its "180°" label: plain text (white outline, no box) beyond the half-disc on the outside of the shape, between the line and the leg
       let bx = ex.x + up.x, by = ex.y + up.y; const bl = Math.hypot(bx, by) || 1; bx /= bl; by /= bl;
-      let lx = s.x + bx * (R + 30); const ly = s.y + by * (R + 30), lbl = el('g', {});
-      if (B) lx = Math.max(B.l + 46, Math.min(B.r - 46, lx)); // the pill stays inside the card too
-      const tx = el('text', { x: lx.toFixed(1), y: (ly + 7).toFixed(1), 'text-anchor': 'middle', 'font-family': 'Nunito, sans-serif', 'font-weight': 900, 'font-size': 21, fill: '#123b63',
-        stroke: '#fff', 'stroke-width': 4, 'paint-order': 'stroke', 'stroke-linejoin': 'round' });
+      // (21 px on screen at any zoom, like every angle value: board units divided by the board's zoom)
+      const z = (window.__boardS && window.__boardS()) || 1;
+      let lx = s.x + bx * (R + 24 / z); const ly = s.y + by * (R + 24 / z), lbl = el('g', {});
+      if (B) lx = Math.max(B.l + 34 / z, Math.min(B.r - 34 / z, lx)); // the label stays inside the card too
+      const tx = el('text', { x: lx.toFixed(1), y: (ly + 7 / z).toFixed(1), 'text-anchor': 'middle', 'font-family': 'Nunito, sans-serif', 'font-weight': 900, 'font-size': (21 / z).toFixed(2), fill: '#123b63',
+        stroke: '#fff', 'stroke-width': (4 / z).toFixed(2), 'paint-order': 'stroke', 'stroke-linejoin': 'round' });
       tx.textContent = '180°'; lbl.appendChild(tx);
       [line, own, copy, rim, lbl].forEach((n) => root.appendChild(n));
       const dot = $('.vdot')[0];
@@ -808,7 +810,12 @@
     // the questions: each part lights up as Swiftee reads it out
     q1Cards() { if (G) add(() => G.fromTo($('.opt'), { y: 0 }, { y: -14, duration: 0.18, ease: 'power2.out', yoyo: true, repeat: 1, stagger: 0.14 })); },
     q1Look() { if (G) add(() => G.fromTo($('.opt svg'), { scale: 1 }, { scale: 1.12, transformOrigin: '50% 50%', duration: 0.35, ease: 'sine.inOut', yoyo: true, repeat: 1, stagger: 0.18 })); },
-    q2Shape() { if (G) add(() => G.fromTo($('.qshape'), { scale: 1 }, { scale: 1.05, transformOrigin: '50% 50%', duration: 0.4, ease: 'sine.inOut', yoyo: true, repeat: 1 })); },
+    // check 2, "type": the shape pops and its outline thickens, so the eye goes to it as the question is asked
+    q2Shape() {
+      if (G) add(() => G.timeline()
+        .fromTo($('.qshape'), { scale: 1 }, { scale: 1.08, transformOrigin: '50% 50%', duration: 0.35, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 0)
+        .fromTo($('.qshape polygon'), { strokeWidth: 5 }, { strokeWidth: 8, duration: 0.35, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 0));
+    },
     q5Say(lab, line) {
       if (!G) return;
       add(() => G.timeline()
@@ -819,12 +826,13 @@
     q5CD() { this.q5Say('.q5-cd', '.q5-hcd'); },
     q5AD() { this.q5Say('.q5-ad', '.q5-hl.ad'); },
     q5BC() { this.q5Say('.q5-q', '.q5-hl.bc'); },
-    // check 2: a wrong type - the legs and their equal marks flash, which is the clue
+    // check 2: a wrong type - the legs and their equal marks flash, which is the clue. The marks of both legs are one
+    // path, so they pulse in place (thicker, orange): scaling it would push each mark off its leg
     q2Wrong() {
       if (!G) return;
       add(() => G.timeline()
         .fromTo($('.q2-leg'), { strokeWidth: 5 }, { strokeWidth: 7, stroke: '#ff7a00', duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 0)
-        .fromTo($('.q2-tick'), { scale: 1, transformOrigin: '50% 50%' }, { scale: 1.6, stroke: '#ff7a00', duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 0));
+        .fromTo($('.q2-tick'), { strokeWidth: 3 }, { strokeWidth: 5.5, stroke: '#ff7a00', duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 0));
     },
     // check 2 right: the legs glow and "AD = BC" stamps in
     q2Correct() {
@@ -840,7 +848,7 @@
       if (!G) return;
       add(() => G.timeline()
         .to($('.q5-leg'), { opacity: 1, duration: 0.3 }, 0)
-        .fromTo($('.q5-tick'), { scale: 1, transformOrigin: '50% 50%' }, { scale: 1.6, stroke: '#ff7a00', duration: 0.3, yoyo: true, repeat: 3 }, 0.2)
+        .fromTo($('.q5-tick'), { strokeWidth: 3 }, { strokeWidth: 5.5, stroke: '#ff7a00', duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 0.2) // in place, as on check 2
         .fromTo($('.q5-ad'), { scale: 1, transformOrigin: '50% 50%' }, { scale: 1.35, fill: '#d9640a', duration: 0.3, yoyo: true, repeat: 3 }, 0.2));
     },
     // check 5 right: the 5 cm on AD flies across to BC
@@ -1002,7 +1010,7 @@
       const ad = $('.q3-ad')[0];
       add(() => G.timeline()
         .fromTo(ad, { opacity: 0, strokeDasharray: 'none' }, { opacity: 0.8, duration: 0.3, yoyo: true, repeat: 1 }, 0)
-        .fromTo($('.q3-hint'), { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.45, ease: 'back.out(1.6)' }, 0.2));
+        .fromTo($('.q3-hint'), { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.45, ease: 'back.out(1.6)' }, 0.2)); // (rises in under the shape)
     },
     // a wrong answer: once the spoken hint has played, the hint equation comes in (q3Hint); later misses pulse it again
     q3Wrong() {
@@ -1083,7 +1091,7 @@
       const run = (tl, at) => {
         if (i === 0) legs.forEach((e, j) => tl.fromTo(e, { opacity: 0.9, strokeDasharray: len(e), strokeDashoffset: len(e) }, { strokeDashoffset: 0, duration: 0.4, ease: 'sine.inOut' }, at + j * 0.5).to(e, { opacity: 0, duration: 0.3 }, at + j * 0.5 + 0.6));
         if (i === 1) tl.fromTo(legs, { opacity: 0, strokeDasharray: 'none' }, { opacity: 0.9, duration: 0.25, yoyo: true, repeat: 1, repeatDelay: 0.3 }, at)
-          .fromTo(s.querySelector('.q4-tick'), { scale: 1, transformOrigin: '50% 50%' }, { scale: 1.35, duration: 0.2, yoyo: true, repeat: 1 }, at + 0.1);
+          .fromTo(s.querySelector('.q4-tick'), { strokeWidth: 2.5 }, { strokeWidth: 4.5, stroke: '#ff7a00', duration: 0.2, yoyo: true, repeat: 1 }, at + 0.1); // in place, as on check 2
         if (i === 2) {
           const r = s.querySelector('.q4-right'), L = (r.getTotalLength && r.getTotalLength()) || 60;
           tl.fromTo(r, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: 0.45, ease: 'power2.out' }, at)
@@ -1111,8 +1119,8 @@
     q4HiShapes() {
       if (!G) return;
       add(() => G.timeline()
-        .fromTo($('.q4-card'), { scale: 1 }, { scale: 1.05, duration: 0.22, ease: 'sine.out', yoyo: true, repeat: 1, stagger: 0.15 }, 0)
-        .fromTo($('.slot'), { boxShadow: '0 0 0 0 rgba(63,163,232,0)' }, { boxShadow: '0 0 0 6px rgba(63,163,232,0.3)', duration: 0.25, yoyo: true, repeat: 1, stagger: 0.15 }, 0.1)
+        .fromTo($('.q4-card'), { scale: 1 }, { scale: 1.08, duration: 0.25, ease: 'sine.out', yoyo: true, repeat: 1, stagger: 0.15 }, 0)
+        .fromTo($('.slot'), { boxShadow: '0 0 0 0 rgba(255,122,0,0)' }, { boxShadow: '0 0 0 7px rgba(255,122,0,0.35)', duration: 0.28, yoyo: true, repeat: 1, stagger: 0.15 }, 0.1)
         .set($('.slot'), { clearProps: 'boxShadow' }));
     },
     // "labels": the three labels rise in with a soft spring, one after another

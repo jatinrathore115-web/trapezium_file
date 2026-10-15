@@ -202,7 +202,7 @@ window.AngleWalker = class AngleWalker {
       c.beginPath(); c.moveTo(tr.p.x, tr.p.y); c.arc(tr.p.x, tr.p.y, r, tr.a, end, tr.sweep < 0); c.closePath();
       c.fillStyle = tr.col; c.fill();
       if (tr.lab) { // the degrees count up as the angle is traced, where the value will land
-        c.font = '900 24px Nunito, system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+        c.font = '900 21px Nunito, system-ui, sans-serif'; // the size the value lands at (css .tag.alab) c.textAlign = 'center'; c.textBaseline = 'middle';
         c.lineWidth = 6; c.strokeStyle = '#ffffff'; c.lineJoin = 'round'; c.fillStyle = '#123b63';
         const txt = Math.round(tr.deg * tr.t) + '°';
         c.strokeText(txt, tr.lab.x, tr.lab.y); c.fillText(txt, tr.lab.x, tr.lab.y);

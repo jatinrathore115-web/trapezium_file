@@ -283,7 +283,7 @@ line (screen lines, feedback, idle reminders, the summary cards) goes through it
 | vo183 | Two angles that add up to 180° are supplementary. | Two angles that add up to one hundred and eighty degrees are supplementary. | टू एंगल्स दैट ऐड अप टू वन हंड्रेड एंड एटी डिग्रीज़ आर सप्लीमेंट्री। | 4.34 |
 | vo181 | A right trapezium has two adjacent right angles. | = | ए राइट ट्रेपीजियम हैज टू एडजसेंट राइट एंगल्स। | 3.52 |
 | vo184 | Wonderful! You remember everything about trapeziums! | = | वंडरफुल! यू रिमेंबर एवरीथिंग अबाउट ट्रेपीज़ियम्स! | 4.08 |
-| vo185 | Which of these quadrilaterals is a trapezium? Look for one pair of parallel sides. | = | विच ऑफ दीज़ क्वाड्रिलैटरल्स इज़ ए ट्रेपीजियम? लुक फॉर वन पेयर ऑफ पैरेलल साइड्स। | 6.54 |
+| vo185 | Which of these quadrilaterals is a trapezium? | = | विच ऑफ दीज़ क्वाड्रिलैटरल्स इज़ ए ट्रेपीजियम? | 3.14 |
 | vo186 | Look at each side of this shape. No two sides are parallel, so it is not a trapezium. | = | लुक एट ईच साइड ऑफ दिस शेप। नो टू साइड्स आर पैरेलल, सो इट इज नॉट अ ट्रेपेज़ियम। | 5.87 |
 | vo187 | This shape has no parallel sides at all. | = | दिस शेप हैज नो पैरेलल साइड्स एट ऑल। | 3.15 |
 | vo208 | Correct! It has one pair of parallel sides, so it is a trapezium. | = | करेक्ट! इट हैज वन पेयर ऑफ पैरेलल साइड्स, सो इट इज अ ट्रेपीजियम। | 4.58 |

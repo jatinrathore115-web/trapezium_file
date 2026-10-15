@@ -187,7 +187,7 @@ const VO_LINES = {
   "Two angles that add up to 180° are supplementary.": ["vo183", 4.34],
   "A right trapezium has two adjacent right angles.": ["vo181", 3.52],
   "Wonderful! You remember everything about trapeziums!": ["vo184", 4.08],
-  "Which of these quadrilaterals is a trapezium? Look for one pair of parallel sides.": ["vo185", 6.54],
+  "Which of these quadrilaterals is a trapezium?": ["vo185", 3.14],
   "Look at each side of this shape. No two sides are parallel, so it is not a trapezium.": ["vo186", 5.87],
   "This shape has no parallel sides at all.": ["vo187", 3.15],
   "Correct! It has one pair of parallel sides, so it is a trapezium.": ["vo208", 4.58],
