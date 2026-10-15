@@ -1,7 +1,6 @@
 // =====================================================================
-// SWIFTEE — the mascot: plays her expression sprite sheets on one canvas (swiftee-assets/atlas/swiftee.manifest.json).
+// SWIFTEE — the mascot: plays her expression sprite sheets on one canvas (listed in js/swiftee-manifest.js).
 //   play(state)     change expression (after minHoldMs, with a short cross-fade)
-//   cut(state)      change at once, for quick reactions
 //   talk(on, next)  lip-sync: beak moving while the voice plays, then `next`
 // Every sheet is a uniform grid with the same centre, so any frame can follow any other without the bird jumping.
 // The still image underneath stays visible until the first frame is drawn (or if the sheets cannot load).
@@ -20,12 +19,9 @@ window.SwifteeMascot = class SwifteeMascot {
     this.alive = true;
     this.reduced = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
     this.loop = this.loop.bind(this);
-    // use js/swiftee-manifest.js if it is loaded (it works from file://); otherwise fetch the manifest
-    if (window.SWIFTEE_MANIFEST) { setTimeout(() => { if (this.alive) this.init(window.SWIFTEE_MANIFEST); }, 0); return; }
-    fetch(this.base + 'atlas/swiftee.manifest.json')
-      .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then((m) => { if (this.alive) this.init(m); })
-      .catch(() => {}); // no manifest (e.g. opened from file://): the still image stays
+    // the sheets are listed in js/swiftee-manifest.js (a script, so it also loads from file://); without it the still
+    // image stays
+    if (window.SWIFTEE_MANIFEST) setTimeout(() => { if (this.alive) this.init(window.SWIFTEE_MANIFEST); }, 0);
   }
 
   // manifest ready: start the idle expression and the frame loop
@@ -36,8 +32,10 @@ window.SwifteeMascot = class SwifteeMascot {
     this.cur = this.enter(this.target);
     this.last = performance.now();
     requestAnimationFrame(this.loop);
+    this.onResize = () => this.regrade();
+    addEventListener('resize', this.onResize);
   }
-  destroy() { this.alive = false; }
+  destroy() { this.alive = false; if (this.onResize) removeEventListener('resize', this.onResize); }
 
   // ---------- public ----------
   // set the next expression; step() switches to it once the current one has had minHoldMs
@@ -47,13 +45,6 @@ window.SwifteeMascot = class SwifteeMascot {
     if (state === this.target) return;
     this.target = state;
     if (this.m) this.preload(state);
-  }
-  // cross-fade straight into an expression's loop, without minHoldMs or start/stop clips
-  cut(state) {
-    if (!this.m || !this.m.states[state] && this.m.standalone.indexOf(state) < 0) return;
-    this.target = state;
-    this.preload(state);
-    if (this.cur && this.cur.state !== state) this.swap(this.clip(state, 'loop', this.parts(state).loop), performance.now());
   }
   // lip-sync: talk(true) cuts to the talking loop as soon as the voice starts; talk(false, next) plays talk_stop
   // (beak closing), then `next`. Neither waits for minHoldMs
@@ -78,12 +69,26 @@ window.SwifteeMascot = class SwifteeMascot {
   warm(states) { if (!this.m) { this.pending = states; return; } states.forEach((s) => this.preload(s)); }
 
   // ---------- sheets ----------
+  // @1x cells are 256 px; load @2x only when she is drawn bigger. Her size on screen depends on the stage's fit to the
+  // window, so the stage is fitted first (before js/stage-fit.js's own timer has run, she would measure at full size)
   scale() {
     if (this.sc) return this.sc;
     const el = this.canvas();
+    if (window.fitStage) window.fitStage();
     const px = el ? el.getBoundingClientRect().width * (window.devicePixelRatio || 1) : 0;
-    this.sc = px > 300 ? '2x' : '1x'; // @1x cells are 256 px; load @2x only when she is drawn bigger
+    this.sc = px > 300 ? '2x' : '1x';
     return this.sc;
+  }
+  // the window grew (a phone turned to landscape, a window maximised): move up to the @2x sheets if she is now drawn
+  // bigger. Never back down to @1x, which would only fetch the sheets again. Both scales have the same frames, so the
+  // clip carries on; the last frame stays on screen until its @2x sheet is in
+  regrade() {
+    if (this.sc !== '1x') return;
+    this.sc = null;
+    if (this.scale() === '1x') return;
+    const anims = Object.keys(this.sheets);
+    this.sheets = {}; this.ctx = null; this.fade = null;
+    anims.forEach((a) => this.sheet(a));
   }
   // the clips an expression uses. Most sheets' own start/stop clips are pre-blended between two poses (half see-through,
   // doubled outlines), so those expressions switch by cross-fade instead. Talking keeps its start/stop: those frames

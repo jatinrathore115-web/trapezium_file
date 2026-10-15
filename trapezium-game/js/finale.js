@@ -31,7 +31,7 @@
 
       root.innerHTML = '';
       const bg = el('div', 'fin-bg', root);
-      const sun = el('div', 'fin-sun', bg), dark = el('div', 'fin-dark', bg);
+      const sun = el('div', 'fin-sun', bg), rays = el('div', 'fin-rays', sun), dark = el('div', 'fin-dark', bg);
       const ring = el('div', 'fin-ring', root);
       const title = el('div', 'fin-title', root);
       title.setAttribute('role', 'heading'); title.setAttribute('aria-label', TITLE);
@@ -45,6 +45,7 @@
       again.type = 'button'; again.setAttribute('aria-label', 'Play again');
       const againLab = el('div', 'fin-again-lab', root, 'Play again');
       again.addEventListener('click', () => { eng.sfx('tap'); setTimeout(() => location.reload(), 150); });
+      document.documentElement.classList.add('finale-on'); // css/game.css hides the bubble and top buttons under it
 
       const sw = document.querySelector('.stage .swiftee');
       // "The End!" in Swiftee's voice as the title lands
@@ -58,7 +59,7 @@
       };
 
       this.ctx.add(() => {
-        G.set(root, { '--x': CLOSE.x + 'px', '--y': CLOSE.y + 'px', '--r': '1500px', '--a': '0deg' });
+        G.set(root, { '--x': CLOSE.x + 'px', '--y': CLOSE.y + 'px', '--r': '1500px' });
         G.set([ring, again, againLab].concat(sparks), { opacity: 0 });
         G.set(sun, { opacity: 0 });
         G.set(letters, { opacity: 0 });
@@ -84,7 +85,7 @@
           .to(againLab, { opacity: 1, duration: D(0.3) }, D(5.2));
         // and then it keeps playing: the sunburst turns, the sparkles twinkle, the title wobbles
         if (!R) {
-          G.to(root, { '--a': '360deg', duration: 40, ease: 'none', repeat: -1 });
+          G.to(rays, { rotation: 360, duration: 40, ease: 'none', repeat: -1 });
           sparks.forEach((s, i) => G.fromTo(s, { opacity: 0, scale: 0.2, rotation: 0 }, { opacity: 1, scale: +s.dataset.k, rotation: 90, duration: 0.8, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 4.5 + i * 0.37, repeatDelay: 0.6 }));
           G.to(title, { rotation: 2, duration: 1.1, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 5, transformOrigin: '50% 60%' });
           G.to(again, { scale: 1.08, duration: 0.7, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 5.5 });
@@ -97,6 +98,7 @@
       this.run++;
       if (this.ctx) { this.ctx.revert(); this.ctx = null; }
       if (this.root) { this.root.innerHTML = ''; this.root.removeAttribute('style'); }
+      document.documentElement.classList.remove('finale-on');
       this.root = null;
     }
   };

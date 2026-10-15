@@ -5,7 +5,8 @@
 //   Voice.stop()          stop the current line (a new line, a screen change, a restart)
 //   Voice.unlock()        call on the first tap (Play): tablets only allow audio after a gesture
 //   Voice.prefetch()      after Play, fetch every clip quietly, one at a time
-// Off (the game falls back to the browser voice) when the browser can't play Ogg Opus, with ?vo=0, or with no clips.
+// Off (the game falls back to the browser voice) when the browser can't play Ogg Opus, with ?vo=0, or with no clips. A clip
+// that can't play (missing, refused, too slow) ends without h.start(); the engine then says that line with the browser voice.
 // ?vorate=2 plays the clips faster for testing (0.5-4).
 // =====================================================================
 window.Voice = (function () {
@@ -46,7 +47,13 @@ window.Voice = (function () {
     const tok = tokN, total = clips.reduce((t, c) => t + c.dur, 0), speak = Math.max(0.3, total - 0.35);
     let k = 0, before = 0, started = false, done = false;
     const live = () => tok === tokN;
-    const finish = () => { if (!live() || done) return; done = true; if (cur) clearInterval(cur.timer); cur = null; h.end(); };
+    const finish = () => {
+      if (!live() || done) return;
+      done = true; if (cur) clearInterval(cur.timer); cur = null;
+      // given up before it started (missing, refused, too slow): drop it, so a late clip can't start over what comes next
+      if (!started) { el.onended = el.onerror = el.onplaying = null; try { el.pause(); el.removeAttribute('src'); el.load(); } catch (e) {} }
+      h.end();
+    };
     const next = () => {
       if (!live()) return;
       if (k >= clips.length) { finish(); return; }
@@ -79,6 +86,9 @@ window.Voice = (function () {
   // play silently once inside the first tap, so later lines may start without one
   function unlock() {
     if (!ok || unlock.done) return;
+    // only inside a real activation (a touch counts when the finger lifts): a muted play outside one can succeed as
+    // autoplay without unlocking anything
+    if (navigator.userActivation && !navigator.userActivation.isActive) return;
     unlock.done = true;
     if (cur) return; // a line is already playing, so audio is allowed
     try {

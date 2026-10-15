@@ -3,9 +3,19 @@
 (function () {
   const art = new Image();
   art.decoding = 'async';
-  art.src = new URL('../assets/images/winter-scarf-flat.png', document.currentScript.src).href;
-  const costume = document.createElement('canvas');
-  const foreground = document.createElement('canvas');
+  art.src = new URL('../assets/images/winter-scarf-flat.webp', document.currentScript.src).href;
+  // working canvases, one pair per cell size: the mascot (256 or 512), the tape walk (512) and the protractor (896)
+  // draw in turn every frame, and resizing a shared pair would reallocate it each time
+  const pads = new Map();
+  const pad = (cell) => {
+    let p = pads.get(cell);
+    if (!p) {
+      p = { costume: document.createElement('canvas'), foreground: document.createElement('canvas') };
+      p.costume.width = p.costume.height = p.foreground.width = p.foreground.height = cell;
+      pads.set(cell, p);
+    }
+    return p;
+  };
   const wingPaths = new Map();
   window.WinterScarf = {
     draw(ctx, anim, frame, x, y, width, height) {
@@ -35,10 +45,7 @@
     // Composite before the caller's opacity/rotation/mirroring is applied. The
     // costume and body must fade together, not as two overlapping alpha layers.
     frame(ctx, source, sx, sy, cell, anim, frame, x, y, width, height) {
-      if (costume.width !== cell || costume.height !== cell) {
-        costume.width = costume.height = cell;
-        foreground.width = foreground.height = cell;
-      }
+      const { costume, foreground } = pad(cell);
       const c = costume.getContext('2d');
       c.clearRect(0, 0, cell, cell);
       c.drawImage(source, sx, sy, cell, cell, 0, 0, cell, cell);

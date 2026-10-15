@@ -169,11 +169,19 @@ window.AngleWalker = class AngleWalker {
     if (cv) cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
   }
   // the draw loop runs only while she is on screen
-  loop() { if (!this.loopOn) { this.loopOn = true; requestAnimationFrame(this.draw); } }
+  loop() { if (!this.loopOn) { this.loopOn = true; this.fitCanvas(); requestAnimationFrame(this.draw); } }
+  // the canvas has as many pixels as the stage shows on screen (fitted to the window, times the device pixel ratio, at
+  // most 2 per stage px), so edges stay sharp without a 2560 x 1440 canvas on every device
+  fitCanvas() {
+    const cv = this.canvas();
+    if (!cv) return;
+    const w = Math.round(1280 * Math.min(2, Math.max(0.5, cv.getBoundingClientRect().width / 1280 * (window.devicePixelRatio || 1))));
+    if (cv.width !== w) { cv.width = w; cv.height = Math.round(w * 9 / 16); }
+  }
   draw(now) {
     const cv = this.canvas();
     if (!cv) { this.loopOn = false; return; }
-    const c = cv.getContext('2d'), k = cv.width / 1280; // the canvas has more pixels than the 1280 px stage, for sharp edges
+    const c = cv.getContext('2d'), k = cv.width / 1280; // canvas px per stage px (fitCanvas)
     c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, cv.width, cv.height);
     const F = this.F, P = this.pose, im = this.img;
     if (P && this.alpha > 0 && im && im.complete && im.naturalWidth) {

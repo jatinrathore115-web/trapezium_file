@@ -43,7 +43,8 @@ trapezium-game/
 │   ├── game-engine.js    the game: narration, navigation, geometry, drags, checks, values for the markup
 │   ├── motion.js         the GSAP animations each screen plays (cleared on every screen change)
 │   ├── swiftee.js        Swiftee's expressions and lip-sync on a canvas
-│   ├── swiftee-manifest.js   generated list of Swiftee's sprite sheets
+│   ├── swiftee-manifest.js   generated list of the sprite sheets the game ships
+│   ├── winter-scarf.js   draws Swiftee's scarf on every frame (scarf-anchors.js, scarf-occlusion.js: generated data)
 │   ├── walker.js         screen 16: Swiftee measures the sides with her tape
 │   ├── angle-walker.js   screen 23: Swiftee measures the angles with one protractor
 │   ├── angle-frames.js   the protractor poses
@@ -56,9 +57,9 @@ trapezium-game/
 │   ├── images/           backgrounds, panels, the front-page banner, buttons, Swiftee extras
 │   ├── audio/            the correct / incorrect sounds
 │   └── vo/               Swiftee's voice-over: 208 Ogg Opus clips, one per line, 4.5 MB (see docs/VOICEOVER.md)
-├── swiftee-assets/       Swiftee's sprite sheets (spritesheets/1x, 2x and extra/) and their manifest
+├── swiftee-assets/       the Swiftee sprite sheets the game plays (spritesheets/1x, 2x and extra/; see its README)
 ├── docs/VOICEOVER.md     how the voice-over is made, and every clip
-├── tools/                Node scripts that rebuild Swiftee's measuring sheet and manifest, and the voice-over (vo_build.js)
+├── tools/                scripts that rebuild Swiftee's scarf data and the voice-over (vo_build.js)
 └── qa/                   logic-test.js (headless test of every screen) and fake-speech.js
 ```
 
@@ -82,8 +83,8 @@ trapezium-game/
 - **Screens.** Navigation is manual: Back and Next sit top right, and "Screen N of 44" (top left) jumps to any screen.
   Skipping an unfinished drag applies its result, so later screens still match the shape.
 - **Shapes.** The bases always stay parallel: corners only slide sideways, within limits that keep the shape readable.
-- **Front page.** The banner fills the stage; the Play button unlocks sound and starts screen 1. (The cabin intro is
-  kept as a draft in `../drafts/intro/`, with the steps to bring it back.)
+- **Front page.** The banner fills the stage; the Play button unlocks sound and starts screen 1. (The earlier cabin
+  intro is in git history: `git show 2687c66:drafts/intro/README.md`.)
 - **Board size.** On lesson screens the shape is fitted to fill the ice panel, screen by screen (`fitFor` in the
   engine, tuned by `CONFIG.fit`), allowing for everything the screen does to it (drags, morphs, extended legs); the
   board glides between fits. A screen with `noZoom` keeps the plain size. Name plates sit on the panel's bottom edge
@@ -97,11 +98,11 @@ trapezium-game/
 node qa/logic-test.js
 ```
 
-## Rebuilding Swiftee's sheets
+## Swiftee's sheets
 
-After changing the sprite sheets, regenerate the manifest with `node tools/build-swiftee-manifest.js`. To rebuild the tape
-walk from its drawing: `node tools/build-measuring-sheet.js swiftee-assets/source/drafts/swiftee-measuring-draft.png 4 2`,
-then rebuild the manifest. See `swiftee-assets/README.md`.
+The game ships only the expressions it plays (about 2.4 MB), listed in `js/swiftee-manifest.js`. After changing a
+sheet, rebuild the scarf data: `python3 tools/build-scarf-anchors.py` and `python3 tools/build-scarf-occlusion.py`.
+Swiftee's full animation library and its build tools are in git history (commit 2687c66). See `swiftee-assets/README.md`.
 
 ## Limits
 

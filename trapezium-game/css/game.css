@@ -28,6 +28,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 @keyframes halo{0%,100%{stroke-opacity:.25;stroke-width:4}50%{stroke-opacity:.7;stroke-width:10}}
 .nudge{animation:nudge 1.1s ease-in-out infinite}
 @keyframes nudge{0%,100%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
+@media (prefers-reduced-motion: reduce){.halo{animation:none;stroke-opacity:.5;stroke-width:6}.nudge{animation:none}}
 .tag{position:absolute;transform:translate(-50%,-50%);font-weight:800;font-size:18px;padding:5px 14px;border-radius:10px;background:#fff;white-space:nowrap;box-shadow:0 2px 6px rgba(18,59,99,.12)}
 .vlab{background:transparent;box-shadow:none;padding:0;font-size:21px;font-weight:900;color:#123b63}
 /* angle values and side lengths are plain text, no box: a thin white outline keeps them readable over lines and fills.
@@ -60,19 +61,13 @@ a{color:#123b63}a:hover{color:#0b2742}
 .fadeB{animation:fadeB .3s ease-out}
 @keyframes fadeA{from{opacity:0}to{opacity:1}}
 @keyframes fadeB{from{opacity:0}to{opacity:1}}
-.next{height:54px;padding:0 26px 0 30px;border-radius:999px;border:0;background:#d9640a;color:#fff;font-family:'Baloo 2','Noto Sans Math',system-ui,sans-serif;font-weight:800;font-size:24px;display:flex;align-items:center;gap:8px;box-shadow:0 5px 0 #a54a05;cursor:pointer}
-.next:disabled{background:#9fb3c4;box-shadow:0 5px 0 #7d92a4;cursor:not-allowed}
-.next.ready{animation:ready 1.8s ease-in-out infinite}
-@keyframes ready{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
-.ibtn{width:48px;height:48px;border-radius:50%;border:2px solid #cfe6f7;background:#fff;color:#123b63;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;box-shadow:0 3px 0 #a9cfe8}
-.ibtn:disabled{opacity:.45;cursor:not-allowed}
 /* answer cards: a raised button that lifts on hover and squashes when pressed */
 .opt{border:3px solid #bfe0f5;background:linear-gradient(180deg,#ffffff 0%,#f2f9ff 100%);color:#123b63;border-radius:18px;font-weight:800;font-size:20px;cursor:pointer;
   box-shadow:0 5px 0 #9ccbe8,0 10px 18px rgba(18,59,99,.12);transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease}
 .opt:hover{transform:translateY(-3px);border-color:#8cc8ef;box-shadow:0 8px 0 #9ccbe8,0 14px 22px rgba(18,59,99,.16)}
 .opt:active{transform:translateY(3px) scale(.97);box-shadow:0 2px 0 #9ccbe8,0 4px 8px rgba(18,59,99,.10);transition-duration:.06s}
 .opt.good{background:#e3f7e7;border-color:#2e9e4f;box-shadow:0 4px 0 #23803f}
-.opt.bad{background:#eef3f8;border-color:#9fb3c8;box-shadow:0 4px 0 #7f93a8;animation:shake .4s ease}
+.opt.bad{background:#eef3f8;border-color:#9fb3c8;box-shadow:0 4px 0 #7f93a8}
 .opt:disabled{cursor:default}
 .opt:disabled:hover{transform:none}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
@@ -95,7 +90,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 @keyframes slotBreathe{0%,100%{border-color:#a8d0ec;background:rgba(255,255,255,.40)}50%{border-color:#7fbbe4;background:rgba(255,255,255,.58)}}
 .slot.ready{border-color:#6fb2e2;background:rgba(236,247,255,.72)}
 /* a label is held over this box */
-.slot.hot{border-color:#f0a020;border-style:solid;background:rgba(255,246,222,.92);transform:scale(1.03);box-shadow:0 0 0 4px rgba(240,160,32,.18)}
 .slot.filled{border-color:transparent;background:transparent;box-shadow:none}
 @media (prefers-reduced-motion: reduce){.slot.empty{animation:none}.lab,.slot{transition:none}}
 /* Swiftee: sprite canvas over a still fallback; the still hides once the first frame is drawn */
@@ -140,22 +134,13 @@ a{color:#123b63}a:hover{color:#0b2742}
 .bubble{transition:opacity .35s ease,transform .35s ease,visibility 0s}
 .bubble.away{opacity:0;transform:translateY(8px) scale(.96);visibility:hidden;transition:opacity .35s ease,transform .35s ease,visibility 0s .35s}
 @media (prefers-reduced-motion: reduce){.bubble,.bubble.away{transition:none}}
-/* bottom Next / Back: hidden when CONFIG.flow turns them off or the screen moves on by itself */
-.next.auto{display:none}
-.ibtn.auto{display:none}
 /* top-right Back / Next (the crystal button rules further down restyle them) */
 .topnav{z-index:15}
-.navbtn{position:relative;min-width:92px;height:42px;padding:0 20px;border-radius:14px;border:2px solid rgba(255,255,255,.9);
-  background:linear-gradient(180deg,#9ee2ff 0%,#56bdf4 52%,#3aa7ea 100%);color:#fff;font-family:'Baloo 2','Noto Sans Math',system-ui,sans-serif;
-  font-weight:800;font-size:19px;line-height:1;letter-spacing:.2px;text-shadow:0 1px 0 rgba(16,84,140,.55),0 0 6px rgba(16,84,140,.25);
-  box-shadow:0 3px 0 #2181c4,0 6px 12px rgba(18,59,99,.18),inset 0 1px 0 rgba(255,255,255,.7);cursor:pointer;
-  transition:transform .12s ease,box-shadow .12s ease,filter .15s ease;-webkit-tap-highlight-color:transparent}
+.navbtn{position:relative;
+  background:linear-gradient(180deg,#9ee2ff 0%,#56bdf4 52%,#3aa7ea 100%);letter-spacing:.2px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .navbtn::before{content:'';position:absolute;left:8px;right:8px;top:3px;height:40%;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0));pointer-events:none}
-.navbtn:hover:not(:disabled){filter:brightness(1.05)}
-.navbtn:active:not(:disabled){transform:translateY(2px) scale(.96);box-shadow:0 1px 0 #2181c4,0 3px 6px rgba(18,59,99,.16),inset 0 1px 0 rgba(255,255,255,.7)}
-.navbtn:focus-visible{outline:3px solid #123b63;outline-offset:2px}
-.navbtn:disabled{cursor:default;filter:saturate(.35);opacity:.55}
-@media (prefers-reduced-motion: reduce){.navbtn{transition:none}}
+.navbtn:active:not(:disabled){box-shadow:0 1px 0 #2181c4,0 3px 6px rgba(18,59,99,.16),inset 0 1px 0 rgba(255,255,255,.7)}
+.navbtn:focus-visible{outline-offset:2px}
 /* forced line break inside the bubble (\n in a line) */
 .w.brk{flex-basis:100%;height:0;opacity:0}
 /* Base / Leg labels (screens 14 and 15) */
@@ -220,7 +205,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 @keyframes sideTrace{0%{opacity:0}12%{opacity:.95}35%{opacity:.95}60%,100%{opacity:0}}
 @media (prefers-reduced-motion: reduce){.opt.bad .sd{animation:none}}
 /* voice-over emphasis: the part being named (arc and its label, side, corner dot) grows, then eases back */
-.arc{transition:stroke-width .45s cubic-bezier(.3,0,.3,1)}
 /* a named angle's arc thickens in place (no scaling: it would move off its corner) */
 .arc.emph{stroke-width:10px}
 /* a part Swiftee names: thicker, with a gentle pulse (its white casing and spark come from .hl and Motion.spark) */
@@ -239,7 +223,6 @@ a{color:#123b63}a:hover{color:#0b2742}
 .opts-in .opt:nth-child(3){animation-delay:1.11s}
 .opts-in .opt:nth-child(4){animation-delay:1.29s}
 @keyframes optIn{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
-.opts-in .opt.bad{animation:shake .4s ease}
 @media (prefers-reduced-motion: reduce){.qshape{transition:none}.opts-in .opt{animation:none}}
 /* a lit side is drawn a little bolder in its own colour */
 .edge.lit{stroke-width:7px}
@@ -295,17 +278,13 @@ a{color:#123b63}a:hover{color:#0b2742}
 .slot.filled.ok{border:2.5px solid #2e9e4f;background:rgba(227,247,231,.7)}
 /* check 4 rows: the shape on its own card, a small arrow, then the answer box; waiting labels float gently */
 .q4-strip{position:absolute;width:522px;height:96px;border-radius:22px;background:rgba(255,255,255,.38);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.65),0 4px 14px rgba(18,59,99,.06);pointer-events:none}
-.q4-card{position:absolute;width:196px;height:92px;border-radius:18px;background:linear-gradient(180deg,#ffffff,#f4f9ff);box-shadow:0 4px 0 #cfe4f5,0 8px 16px rgba(18,59,99,.10);pointer-events:none}
-.q4-link{position:absolute;width:12px;height:20px;pointer-events:none;background:#8cc3e6;clip-path:polygon(0 0,100% 50%,0 100%);opacity:.75}
-.stage .slot{border:2.5px dashed #7fbbe4;background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(232,245,255,.75));box-shadow:inset 0 0 0 4px rgba(255,255,255,.55),inset 0 3px 10px rgba(43,123,214,.08)}
+.q4-card{position:absolute;width:196px;height:92px;border-radius:18px;background:linear-gradient(180deg,#ffffff,#f4f9ff);pointer-events:none}
+.q4-link{position:absolute;width:12px;height:20px;pointer-events:none;clip-path:polygon(0 0,100% 50%,0 100%)}
 .stage .slot.empty{animation:slotBreathe 2.6s ease-in-out infinite}
-.stage .slot.hot{border-color:#3fa3e8;border-style:solid;background:rgba(228,243,255,.95);transform:scale(1.04);box-shadow:0 0 0 6px rgba(63,163,232,.22),inset 0 0 0 4px rgba(255,255,255,.6)}
-.stage .lab{font-size:17px;border-radius:16px}
+.stage .slot.hot{transform:scale(1.04)}
 .stage .lab:not(.drag):not(.lock):not(.pre):not(.sel){animation:labFloat 2.8s ease-in-out infinite}
 .stage .lab:nth-of-type(2){animation-delay:-.9s}.stage .lab:nth-of-type(3){animation-delay:-1.8s}
 @keyframes labFloat{0%,100%{translate:0 0}50%{translate:0 -3px}}
-.stage .lab.sel{transform:translateY(-3px) scale(1.03);box-shadow:0 0 0 5px rgba(63,163,232,.35),0 6px 0 #d9b04c}
-.stage .lab.drag{transform:scale(1.04) rotate(-1.5deg)}
 @media (prefers-reduced-motion: reduce){.stage .lab{animation:none!important}}
 /* screen 13: the purple legs are there from the first frame, with no colour transition */
 .legs-set .eDA,.legs-set .eBC{transition:none}
@@ -349,6 +328,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 .eq-q{display:inline-block;color:#b8860b}
 .tag.alab.eq-fly{z-index:7;pointer-events:none;animation:none;transition:none}
 .eq-layer{position:fixed;width:1280px;height:720px;transform-origin:0 0;pointer-events:none;z-index:50;font-family:'Nunito','Noto Sans Math',system-ui,sans-serif;color:#123b63}
+.screens-open .eq-layer{visibility:hidden}
 
 /* screen 29: fixed-width sum boxes, so nothing shifts as the values change; the dragged leg's box and angles glow */
 .tag.sum.fixed{min-width:200px;text-align:center;transition:box-shadow .2s ease-out}
@@ -375,7 +355,7 @@ a{color:#123b63}a:hover{color:#0b2742}
 @keyframes optDisable{to{background:#eef2f6;border-color:#d5dee6;box-shadow:0 2px 0 #cfd8e0;color:#8193a4;filter:grayscale(1);opacity:.72;transform:none}}
 .opt:disabled:not(.good):not(.bad){background:#f3f6f9;border-color:#dbe3ea;box-shadow:0 2px 0 #d3dce4;color:#8193a4;filter:grayscale(.8);opacity:.68;cursor:not-allowed;transition:opacity .3s ease,filter .3s ease,box-shadow .3s ease}
 .opt:disabled{pointer-events:auto}
-@media (prefers-reduced-motion: reduce){.opt.bad,.opts-in .opt.bad,.soft-wrong .opt.bad,.opt.bad.bad:has(.sd){animation:optDisable .01s linear both}}
+@media (prefers-reduced-motion: reduce){.opt.bad,.opts-in .opt.bad,.soft-wrong .opt.bad{animation:optDisable .01s linear both}.opt.bad.bad:has(.sd){animation:optDisable .01s linear both}}
 
 /* end screen (43): the bubble sits a little higher */
 .stage.scene.hero.endhero .swiftee{top:330px!important}
@@ -489,17 +469,11 @@ svg[data-lencol] .edge{transition:stroke .4s ease}
 
 /* check 4 labels, final look (overrides the earlier .lab rules): a name card with a grip. Dropped right, it
    widens and merges into its box */
-.stage .lab{width:208px;height:56px;white-space:nowrap;border:3px solid #5cc6cf;border-radius:18px;background:linear-gradient(180deg,#fffdf6 0%,#fbf6e6 100%);
-  color:#0b5b70;font-family:'Nunito','Noto Sans Math',system-ui,sans-serif;font-weight:900;font-size:16px;letter-spacing:0;padding:0 8px 0 22px;
-  box-shadow:0 4px 0 #3aa9b3,0 9px 16px rgba(11,91,112,.16);
+.stage .lab{width:208px;height:56px;white-space:nowrap;
   transition:left .38s cubic-bezier(.22,.9,.3,1.12),top .38s cubic-bezier(.22,.9,.3,1.12),width .35s ease,transform .18s ease,box-shadow .2s ease,background-color .3s ease,border-color .3s ease,color .3s ease}
 .stage .lab::before{left:11px;width:7px;height:16px;margin-top:-8px;opacity:.7;background:radial-gradient(circle,#3aa9b3 1.3px,transparent 1.7px) 0 0/3.5px 5.3px}
-.stage .lab:hover{box-shadow:0 6px 0 #3aa9b3,0 12px 20px rgba(11,91,112,.2)}
-.stage .lab.sel{transform:translateY(-3px) scale(1.03);border-color:#d9640a;box-shadow:0 0 0 5px rgba(255,122,0,.28),0 5px 0 #c4570a}
-.stage .lab.drag{transform:scale(1.06) rotate(-2deg);box-shadow:0 18px 28px rgba(11,91,112,.3),0 4px 0 #3aa9b3}
-.stage .lab.lock{width:276px;border-color:transparent;background:transparent;box-shadow:none;color:#1d6b35;padding:0 10px;animation:labMerge .45s ease-out}
+.stage .lab.lock{animation:labMerge .45s ease-out}
 .stage .lab.lock::before{display:none}
-.stage .slot.filled.ok{border:2.5px solid #2e9e4f;background:linear-gradient(180deg,#eefbf1,#dff5e5);box-shadow:inset 0 0 0 3px rgba(255,255,255,.6),0 0 0 4px rgba(46,158,79,.12)}
 @keyframes labMerge{0%{transform:scale(1.06)}60%{transform:scale(.98)}100%{transform:none}}
 
 /* screen 22: the panel opens empty, then the trapezium fades and scales in on the voice */
@@ -518,8 +492,7 @@ svg[data-lencol] .edge{transition:stroke .4s ease}
 /* ---------- crystal buttons: Back / Next / Done (.navbtn); the answers have their own look (end of file) ----------
    Drawn as a left cap, a right cap and a middle strip under them. Not a 9-slice: once the stage is scaled its
    tiles leave hairline seams. Shadows use drop-shadow so they follow the crystal's outline. */
-.navbtn{
-  --bh:74px;border:0;border-radius:0;box-shadow:none;
+.navbtn{border-radius:0;
   color:#0d2a5c;font-family:'Baloo 2','Noto Sans Math',system-ui,sans-serif;font-weight:800;text-shadow:0 1px 0 rgba(255,255,255,.55);
   display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1;
   padding:0 calc(var(--bh) * .33);
@@ -574,15 +547,18 @@ svg[data-lencol] .edge{transition:stroke .4s ease}
 .eq-layer .fx-fly{position:absolute;padding:2px 12px;border-radius:14px;background:#fff;border:3px solid #2e9e4f;color:#1d6b35;white-space:nowrap;pointer-events:none;
   font:900 22px 'Nunito','Noto Sans Math',system-ui,sans-serif;box-shadow:0 4px 12px rgba(18,59,99,.25)}
 /* ---------- the end screen's cartoon closer (js/finale.js) ----------
-   --x / --y / --r: the iris (stage px); --a: the sunburst's turn */
+   --x / --y / --r: the iris (stage px) */
 .finale-root{position:absolute;left:0;top:0;width:1280px;height:720px;z-index:40;pointer-events:none}
 .finale-root:empty{display:none}
 .fin-bg{position:absolute;inset:0;pointer-events:auto;
   -webkit-mask-image:radial-gradient(circle var(--r) at var(--x) var(--y),transparent 99.6%,#000 100%);mask-image:radial-gradient(circle var(--r) at var(--x) var(--y),transparent 99.6%,#000 100%)}
 .fin-dark,.fin-sun{position:absolute;inset:0}
 .fin-dark{background:#24130a}
-.fin-sun{background:repeating-conic-gradient(from var(--a) at var(--x) var(--y),rgba(255,255,255,.17) 0deg 7deg,rgba(255,255,255,0) 7deg 18deg),
-  linear-gradient(100deg,#f6b252 0%,#ef8a5e 38%,#e2697a 68%,#c24b8e 100%)}
+.fin-sun{overflow:hidden;background:linear-gradient(100deg,#f6b252 0%,#ef8a5e 38%,#e2697a 68%,#c24b8e 100%)}
+/* the sunburst's rays: a square round the iris centre, big enough to reach every corner of the stage. finale.js turns
+   it with a transform, so turning it never repaints the stage */
+.fin-rays{position:absolute;left:calc(var(--x) - 980px);top:calc(var(--y) - 980px);width:1960px;height:1960px;
+  background:repeating-conic-gradient(rgba(255,255,255,.17) 0deg 7deg,rgba(255,255,255,0) 7deg 18deg);will-change:transform}
 .fin-ring{position:absolute;left:calc(var(--x) - var(--r));top:calc(var(--y) - var(--r));width:calc(var(--r) * 2);height:calc(var(--r) * 2);border-radius:50%;
   box-shadow:inset 0 0 0 4px #3b1f0a,0 0 0 11px #fdf0d5,0 0 0 16px #3b1f0a,0 10px 30px 14px rgba(80,20,40,.25)}
 .fin-title{position:absolute;left:742px;top:318px;white-space:nowrap;font:800 122px/1 'Baloo 2',system-ui,sans-serif;letter-spacing:1px}
@@ -602,10 +578,10 @@ svg[data-lencol] .edge{transition:stroke .4s ease}
   text-shadow:0 0 3px #3b1f0a,0 2px 0 #3b1f0a,2px 0 0 #3b1f0a,-2px 0 0 #3b1f0a,0 -2px 0 #3b1f0a}
 /* while it plays: the lesson's bar, buttons and bubble step aside; the screen list stays on top, to jump to any screen */
 .stage .topnav{transition:opacity .4s ease}
-.stage:has(.finale-root:not(:empty)) .topnav,.stage:has(.finale-root:not(:empty)) .bubble{opacity:0!important;pointer-events:none}
-.stage:has(.finale-root:not(:empty)) .screens-btn{z-index:41}
-.stage:has(.finale-root:not(:empty)) .screens-scrim{z-index:42}
-.stage:has(.finale-root:not(:empty)) .screens-panel{z-index:43}
+.finale-on .stage .topnav,.finale-on .stage .bubble{opacity:0!important;pointer-events:none}
+.finale-on .stage .screens-btn{z-index:41}
+.finale-on .stage .screens-scrim{z-index:42}
+.finale-on .stage .screens-panel{z-index:43}
 
 /* ---------- answer buttons (.opt.crys): orange pill buttons like the Play button - white bold text, a white rim and a
    raised base, so they read as the things to tap (labels are flat). Hover lifts, a press pushes them down; a right

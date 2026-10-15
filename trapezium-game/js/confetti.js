@@ -21,8 +21,12 @@
     ctx = null;
     return cv;
   }
+  // canvas pixels per stage px: the stage's size on screen (fitted to the window) times the device pixel ratio, so
+  // pieces stay sharp without drawing more pixels than the screen shows
+  function density(c) { return Math.min(2, Math.max(0.5, c.getBoundingClientRect().width / W * (window.devicePixelRatio || 1))); }
   function burst() {
     if (reduced || !canvas()) return;
+    if (ctx && Math.abs(density(cv) - dpr) > 0.05) ctx = null; // the window changed since the last burst
     parts = []; // a new burst replaces any pieces still falling
     for (var i = 0; i < N; i++) {
       parts.push({
@@ -38,7 +42,7 @@
     var c = canvas();
     if (!c) { running = false; return; }
     if (!ctx) {
-      dpr = Math.min(2, (window.devicePixelRatio || 1) * 1.5); // the stage is scaled 1.5x: match it so pieces stay sharp
+      dpr = density(c);
       c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
       ctx = c.getContext('2d');
     }

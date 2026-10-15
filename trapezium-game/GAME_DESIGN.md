@@ -12,8 +12,8 @@ moments, then answers five scored checks.
   swells out from it, glints twinkle on its rim and a shine crosses its face. Hover lifts and brightens it, a press squashes it; on Play it pops with a
   chime and the scene zooms softly away into Screen 1. The tap also unlocks the voice-over and sounds.
   Jumps from the screen list skip it. `CONFIG.flow.cover: false` turns it off.
-- The cabin intro (Swiftee opens her door and says hello) is kept as a draft in `drafts/intro/` at the repository
-  root, with the steps to bring it back; for launch, Play goes straight to Screen 1.
+- The cabin intro (Swiftee opens her door and says hello) was taken out for launch; Play goes straight to Screen 1.
+  It is in git history (`git show 2687c66:drafts/intro/README.md` has the steps to bring it back).
 - **Look.** Every colour comes from the game's art: the shape's bases in the winter-sky blue, its legs in Swiftee's
   teal, a warm cream fill; angles A and D (one leg) warm orange and gold, B and C (the other) green and sky blue;
   highlights gold. Name plates are white pills with a thick blue rim on a raised base, sitting on the ice panel's

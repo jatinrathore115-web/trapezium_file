@@ -14,8 +14,13 @@
   if (reduced) return;
 
   var rnd = function (a, b) { return a + Math.random() * (b - a); };
-  // one snow system per canvas, each with its own layers
-  function system(SEL, LAYERS) {
+  // canvas pixels per stage px: the stage's size on screen (fitted to the window) times the device pixel ratio, so
+  // flakes stay sharp without drawing more pixels than the screen shows. Measured again when the window changes
+  var resized = 0;
+  addEventListener('resize', function () { resized++; });
+  var density = function (c) { return Math.min(2, Math.max(0.5, c.getBoundingClientRect().width / W * (window.devicePixelRatio || 1))); };
+  // one snow system per canvas, each with its own layers; once: stop for good when its canvas goes (the front page)
+  function system(SEL, LAYERS, once) {
   var flakes = [];
   LAYERS.forEach(function (L, li) {
     for (var i = 0; i < L.n; i++) flakes.push(make(L, li, true));
@@ -30,7 +35,7 @@
     };
   }
 
-  var cv = null, ctx = null, last = 0, dpr = 1;
+  var cv = null, ctx = null, last = 0, dpr = 1, seen = 0, had = false;
   // find the canvas again if the stage re-rendered it
   function canvas() {
     if (cv && cv.isConnected) return cv;
@@ -39,11 +44,13 @@
     return cv;
   }
   function frame(now) {
-    requestAnimationFrame(frame);
     var c = canvas();
-    if (!c) { last = now; return; }
-    if (!ctx) {
-      dpr = Math.min(2, (window.devicePixelRatio || 1) * 1.5); // the stage is scaled 1.5x: match it so flakes stay sharp
+    if (!c) { if (once && had) return; last = now; requestAnimationFrame(frame); return; }
+    had = true;
+    requestAnimationFrame(frame);
+    if (!ctx || seen !== resized) {
+      seen = resized;
+      dpr = density(c);
       c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
       ctx = c.getContext('2d');
     }
@@ -81,5 +88,5 @@
     { n: 70, r: [1.2, 2.2], v: [22, 34], a: [0.65, 0.9], blur: 0 },
     { n: 45, r: [2.2, 3.4], v: [34, 50], a: [0.8, 0.95], blur: 0 },
     { n: 22, r: [3.6, 5.6], v: [50, 72], a: [0.7, 0.9], blur: 2 }
-  ]);
+  ], true);
 })();

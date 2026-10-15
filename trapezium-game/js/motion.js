@@ -306,6 +306,11 @@
       if (!stage) return null;
       let L = document.querySelector('.eq-layer');
       if (!L) { L = document.createElement('div'); L.className = 'eq-layer'; document.body.appendChild(L); }
+      // fixed to the window, so it follows the stage when the window changes (a resize, a tablet turned)
+      if (!this.eqResize) {
+        this.eqResize = () => { if (document.querySelector('.eq-layer')) { if (window.fitStage) window.fitStage(); this.eqLayer(); } };
+        addEventListener('resize', this.eqResize);
+      }
       const r = stage.getBoundingClientRect(), k = r.width / 1280 || 1;
       L.style.left = r.left + 'px'; L.style.top = r.top + 'px'; L.style.transform = 'scale(' + k + ')';
       return L;
@@ -337,7 +342,6 @@
     // (delay: the value hops first - angleJump - and its copy lifts off for the sum just as it lands)
     eqFlyA() { this.eqFlyAt(0, { only: 0, delay: 0.4, lift: 0.2, travel: 0.6 }); },
     eqFlyD() { this.eqFlyAt(0, { only: 1, delay: 0.4, lift: 0.2, travel: 0.6 }); },
-    eqFly() { this.eqFlyAt(0); },
     // o: { only (0 or 1: just that value), delay, gap (s between the two values), lift, travel } - by default both values,
     // one after the other (screen 30)
     eqFlyAt(i, o) {
@@ -664,7 +668,7 @@
         tl.fromTo(sw, { x: -440, scale: 0.9 }, { x: 0, scale: 1, duration: fly, ease: 'power2.inOut' }, 0)
           .fromTo(sw, { y: 0 }, { y: -110, duration: fly / 2, ease: 'sine.out' }, 0)
           .to(sw, { y: 0, duration: fly / 2, ease: 'sine.in' }, fly / 2)
-          .call(() => G.to(sw, { y: -12, duration: 1.4, ease: 'sine.inOut', yoyo: true, repeat: -1 }));
+          .call(() => { if (!reduced) G.to(sw, { y: -12, duration: 1.4, ease: 'sine.inOut', yoyo: true, repeat: -1 }); });
         return tl;
       });
     },

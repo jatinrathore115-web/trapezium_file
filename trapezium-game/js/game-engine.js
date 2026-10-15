@@ -58,7 +58,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (window.SwifteeMascot) {
       this.sw = new window.SwifteeMascot({ base: C.base, idle: C.idle, minHoldMs: C.minHoldMs, find: () => document.querySelector('.swiftee') });
       // preload every expression the lesson uses, so reactions never wait on the network
-      const want = ['measuring', 'flapping', 'excited', 'waving', C.talk, C.waiting, C.praise, C.correct, C.wrong, C.nudge, C.done];
+      const want = ['measuring', 'excited', 'waving', C.talk, C.waiting, C.praise, C.correct, C.wrong, C.nudge, C.done];
       LESSON.steps.forEach((st) => (st.lines || []).concat(st.after || []).forEach((L) => { if (L.m) want.push(L.m); }));
       this.sw.warm(want.filter((x, i) => want.indexOf(x) === i));
     }
@@ -74,6 +74,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     if (this.state.started || this.coverBusy) return;
     this.coverBusy = true;
     this.unlockAudio();
+    this.unlockSpeech();
     this.sfx('chime');
     this.setState({ coverLeaving: true });
     // start screen 1 underneath just after the button pops, so the cover fades into it
@@ -88,6 +89,8 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       const el = document.querySelector('.thumb.cur');
       if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
     }
+    // the equation layer (js/motion.js) sits outside the stage, above it: the screen list hides it
+    if (!!this.state.navOpen !== this.navShown && typeof document !== 'undefined') document.documentElement.classList.toggle('screens-open', !!this.state.navOpen);
     this.navShown = !!this.state.navOpen;
   }
 
@@ -575,6 +578,72 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       }
       tick();
     };
+    // a line the voice can't say (a clip that fails, a device voice that errors or is ignored): the words pace
+    // themselves as with no voice, instead of the whole line appearing at once. Cues go by their words again
+    const silentEnd = () => { if (!live()) return; if (rDone) { mouth(false); finish(); } else this.tm(silentEnd, 120); };
+    const paced = () => {
+      if (!live() || sDone) return;
+      sDone = true;
+      Object.keys(timed).forEach((k) => { delete timed[k]; });
+      if (!started) begin(); // (once begun, the word-by-word reveal is already running and now runs to the end)
+      this.tm(silentEnd, 300);
+    };
+    // the device's voice, also when a recorded clip can't play
+    const speakIt = () => {
+      const s = this.synth();
+      const canSpeak = !this.state.muted && s && typeof SpeechSynthesisUtterance !== 'undefined';
+      if (!canSpeak) {
+        sDone = true; // no voice: the words pace themselves and the beak moves while they appear
+        this.tm(() => { begin(); }, 140);
+        this.tm(silentEnd, 300);
+        return;
+      }
+      const est = words.reduce((t, w) => t + nominal(w), 0) * 1.4;
+      try {
+        const u = new SpeechSynthesisUtterance(sp);
+        if (this.voice) u.voice = this.voice;
+        u.lang = (this.voice && this.voice.lang) || 'en-GB';
+        u.rate = CONFIG.timing.speechRate; u.pitch = 1.25;
+        const end = () => {
+          if (!live() || sDone) return;
+          if (!spoke && !bMode) { paced(); return; } // never heard (an error, or a speak() the browser ignored)
+          if (started && !bMode && tStart) { // learn this voice's speed, erring slow so words never run ahead of it
+            const ratio = (performance.now() - tStart) / Math.max(1, words.reduce((t, w) => t + nominal(w), 0));
+            if (ratio > 0.4 && ratio < 3) this.paceK = Math.max(0.6, 0.5 * (this.paceK || 1.18) + 0.5 * ratio * 1.06);
+          }
+          sDone = true; begin(); mouth(false); letterCues.forEach(fireLetter); revealAll(); finish();
+        };
+        u.onstart = () => { spoke = true; begin(); };
+        u.onend = end; u.onerror = end;
+        u.onboundary = (ev) => {
+          if (!live() || (ev.name && ev.name !== 'word')) return;
+          bMode = true; begin();
+          letterCues.forEach((c) => { if ((ev.charIndex || 0) >= c.at) fireLetter(c); });
+          const k = wordAt(ev.charIndex || 0);
+          if (k > i) { i = k; setReveal(i); }
+        };
+        // Chrome can drop an utterance queued in the same tick as cancel(), so wait a moment
+        this.tm(() => { if (live()) { try { s.speak(u); } catch (e) { end(); } } }, 60);
+        // some voices never fire onstart: begin once the engine reports speaking, or after a grace period
+        const kick = (n) => {
+          if (!live() || started || sDone) return;
+          let busy = false; try { busy = s.speaking && !s.pending; } catch (e) {}
+          if (busy || n > 20) { begin(); return; }
+          this.tm(() => kick(n + 1), 80);
+        };
+        this.tm(() => kick(0), 200);
+        // watchdog for voices that never fire onend, or never start at all
+        const watch = () => {
+          if (!live() || sDone) return;
+          let busy = true;
+          try { busy = s.speaking || s.pending; } catch (e) { busy = false; }
+          if (!busy && (spoke || started)) { end(); return; }
+          this.tm(watch, 300);
+        };
+        this.tm(watch, 900);
+        this.tm(() => { if (live() && !sDone) end(); }, est * 1.8 + 2500);
+      } catch (e) { sDone = true; begin(); }
+    };
     // recorded voice (js/voice.js): the clip is the clock. Words show by their share of the spoken line, and the
     // corner letters by their place in the spoken text
     const clip = !this.state.muted && window.Voice ? Voice.find(keep ? L.s : text) : null;
@@ -583,7 +652,11 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       const wt = words.map((w) => Voice.weight(this.speechOf(w)) + (/[.!?]$/.test(w) ? 6 : /[,:;]$/.test(w) ? 3 : 0));
       const all = wt.reduce((a, b) => a + b, 0) || 1, from = []; let acc = 0;
       wt.forEach((x) => { from.push(acc / all); acc += x; });
-      const end = () => { if (!live() || sDone) return; sDone = true; begin(); mouth(false); letterCues.forEach(fireLetter); fireTimed(() => true); revealAll(); finish(); };
+      const end = () => {
+        if (!live() || sDone) return;
+        if (!spoke) { Object.keys(timed).forEach((k) => { delete timed[k]; }); speakIt(); return; } // the clip couldn't play (missing, undecodable, refused, too slow)
+        sDone = true; begin(); mouth(false); letterCues.forEach(fireLetter); fireTimed(() => true); revealAll(); finish();
+      };
       // (an equation word like "∠A = 120°" is joined with non-breaking spaces)
       Object.keys(L.cueTimes || {}).forEach((w) => { const j = words.findIndex((x) => x.replace(/[.,!?;:]+$/, '').replace(/\s+/g, ' ') === w); if (j >= 0) timed[j] = L.cueTimes[w]; });
       // (the clip's tail: anything not yet fired goes when the line ends, so a cut-short clip still completes the screen)
@@ -607,59 +680,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       });
       return;
     }
-    const s = this.synth();
-    const canSpeak = !this.state.muted && s && typeof SpeechSynthesisUtterance !== 'undefined';
-    if (!canSpeak) {
-      sDone = true; // no voice: the words pace themselves and the beak moves while they appear
-      this.tm(() => { begin(); }, 140);
-      const silentEnd = () => { if (!live()) return; if (rDone) { mouth(false); finish(); } else this.tm(silentEnd, 120); };
-      this.tm(silentEnd, 300);
-      return;
-    }
-    const est = words.reduce((t, w) => t + nominal(w), 0) * 1.4;
-    try {
-      const u = new SpeechSynthesisUtterance(sp);
-      if (this.voice) u.voice = this.voice;
-      u.lang = (this.voice && this.voice.lang) || 'en-GB';
-      u.rate = CONFIG.timing.speechRate; u.pitch = 1.25;
-      const end = () => {
-        if (!live() || sDone) return;
-        if (started && !bMode && tStart) { // learn this voice's speed, erring slow so words never run ahead of it
-          const ratio = (performance.now() - tStart) / Math.max(1, words.reduce((t, w) => t + nominal(w), 0));
-          if (ratio > 0.4 && ratio < 3) this.paceK = Math.max(0.6, 0.5 * (this.paceK || 1.18) + 0.5 * ratio * 1.06);
-        }
-        sDone = true; begin(); mouth(false); letterCues.forEach(fireLetter); revealAll(); finish();
-      };
-      u.onstart = () => { spoke = true; begin(); };
-      u.onend = end; u.onerror = end;
-      u.onboundary = (ev) => {
-        if (!live() || (ev.name && ev.name !== 'word')) return;
-        bMode = true; begin();
-        letterCues.forEach((c) => { if ((ev.charIndex || 0) >= c.at) fireLetter(c); });
-        const k = wordAt(ev.charIndex || 0);
-        if (k > i) { i = k; setReveal(i); }
-      };
-      // Chrome can drop an utterance queued in the same tick as cancel(), so wait a moment
-      this.tm(() => { if (live()) { try { s.speak(u); } catch (e) { end(); } } }, 60);
-      // some voices never fire onstart: begin once the engine reports speaking, or after a grace period
-      const kick = (n) => {
-        if (!live() || started || sDone) return;
-        let busy = false; try { busy = s.speaking && !s.pending; } catch (e) {}
-        if (busy || n > 20) { begin(); return; }
-        this.tm(() => kick(n + 1), 80);
-      };
-      this.tm(() => kick(0), 200);
-      // watchdog for voices that never fire onend, or never start at all
-      const watch = () => {
-        if (!live() || sDone) return;
-        let busy = true;
-        try { busy = s.speaking || s.pending; } catch (e) { busy = false; }
-        if (!busy && (spoke || started)) { end(); return; }
-        this.tm(watch, 300);
-      };
-      this.tm(watch, 900);
-      this.tm(() => { if (live() && !sDone) end(); }, est * 1.8 + 2500);
-    } catch (e) { sDone = true; begin(); }
+    speakIt();
   }
   preloadPose(state) { if (this.sw && this.sw.m) this.sw.preload(state); }
   // split a line into words, keeping "5 cm" and short equations like "AB = 6 cm" together
@@ -780,7 +801,6 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       if (st.cfu || st.opts) return { kind: 'opts' };
       return null;
     }
-    if (CONFIG.flow.showNext && this.state.step < this.steps().length - 1 && st.autoAdvance == null) return { qa: 'next', kind: 'tap' };
     return null;
   }
   hideHand() { if (this.state.hand) this.setState({ hand: null }); }
@@ -824,6 +844,14 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   }
   // Browsers only allow audio after a user gesture, so the first tap unlocks it.
   rootDown() { this.unlockAudio(); if (this.state.started) this.poke(); }
+  // iOS lets a page speak only once a tap has started speech: say nothing, silently, inside the Play tap, so the
+  // browser voice works later (older iPads can't play the Ogg recordings; any recording may fail to load)
+  unlockSpeech() {
+    const s = this.synth();
+    if (!s || this.speechUnlocked || typeof SpeechSynthesisUtterance === 'undefined') return;
+    this.speechUnlocked = true;
+    try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; s.speak(u); } catch (e) {}
+  }
   unlockAudio() {
     try {
       const AC = window.AudioContext || window.webkitAudioContext;
@@ -1412,20 +1440,20 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   anyCorner() { const t = this.cur().task; return (t === 'dragFree' || t === 'drag90') && !this.state.done; }
   canDrag(k) { return this.dragKey() === k || this.anyCorner(); }
   down(k, e) {
-    if (!this.canDrag(k)) return;
+    if (!this.canDrag(k) || !this.firstPointer(e)) return;
     if (this.cur().lockTalk && this.state.talking && !this.state.explored) return; // listen first: the corners respond once she has finished
     const svg = e.currentTarget && e.currentTarget.ownerSVGElement;
     if (!svg) return;
     try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
     if (e.preventDefault) e.preventDefault();
-    this.drag = { k: k, svg: svg, x0: this.state.P[k].x };
+    this.drag = { k: k, svg: svg, x0: this.state.P[k].x, pid: e.pointerId };
     this.touched = true; // the learner has started: no more demo hand
     if (this.handId) { clearTimeout(this.handId); this.T.delete(this.handId); this.handId = null; }
     this.setState({ dragging: k, hand: null });
     this.sfx('tap');
   }
   move(e) {
-    if (!this.drag) return;
+    if (!this.drag || !this.samePointer(this.drag, e)) return;
     const p = this.toSvg(this.drag.svg, e);
     if (!p) return;
     const P = this.clone(this.state.P), k = this.drag.k;
@@ -1466,8 +1494,8 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
     }
     this.overWig = over;
   }
-  up() {
-    if (!this.drag) return;
+  up(e) {
+    if (!this.drag || !this.samePointer(this.drag, e)) return;
     const k = this.drag.k;
     this.dragMoved = Math.abs(this.state.P[k].x - this.drag.x0) > 2;
     this.drag = null;
@@ -1552,22 +1580,27 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   labDown(id, e) {
     const c4 = this.state.c4;
     if (this.cur().labelsAt && !this.state.labsIn) return; // labels arrive with the instruction
-    if (c4.locked[id] || c4.checking || this.state.done || this.ld) return;
+    if (c4.locked[id] || c4.checking || this.state.done || !this.firstPointer(e)) return;
     const tgt = e.currentTarget;
     const root = tgt && tgt.closest ? tgt.closest('.stage') : null;
     if (!root) return;
     const r = root.getBoundingClientRect(), sc = r.width / 1280 || 1;
     const pos = this.labPos(id);
     const q = this.q4Pt((e.clientX - r.left) / sc, (e.clientY - r.top) / sc), px = q.x, py = q.y;
-    this.ld = { id: id, r: r, sc: sc, ox: px - pos.x, oy: py - pos.y, sx: e.clientX, sy: e.clientY, moved: false };
+    this.ld = { id: id, r: r, sc: sc, ox: px - pos.x, oy: py - pos.y, sx: e.clientX, sy: e.clientY, moved: false, pid: e.pointerId };
     try { tgt.setPointerCapture(e.pointerId); } catch (err) {}
     if (e.preventDefault) e.preventDefault();
   }
+  // One finger at a time: a drag belongs to the pointer that started it. A second finger (or a right click) can't start
+  // another drag, and its moves and lifts are ignored, so it can't take the corner or label from the first. A primary
+  // pointer only goes down when no other is down, so it may replace a drag whose lift was lost
+  firstPointer(e) { return !(e && (e.isPrimary === false || e.button > 0)); }
+  samePointer(d, e) { return d.pid == null || !e || e.pointerId == null || e.pointerId === d.pid; }
   // pointer moves on the stage: a corner drag, or a label drag once it has moved a few px
   rootMove(e) {
     if (this.drag) return this.move(e);
     const L = this.ld;
-    if (!L) return;
+    if (!L || !this.samePointer(L, e)) return;
     if (!L.moved && Math.hypot(e.clientX - L.sx, e.clientY - L.sy) < 6) return;
     L.moved = true;
     const q = this.q4Pt((e.clientX - L.r.left) / L.sc, (e.clientY - L.r.top) / L.sc), px = q.x, py = q.y;
@@ -1578,7 +1611,7 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
   rootUp(e) {
     if (this.drag) return this.up(e);
     const L = this.ld;
-    if (!L) return;
+    if (!L || !this.samePointer(L, e)) return;
     this.ld = null;
     const c4 = Object.assign({}, this.state.c4, { drag: null });
     if (!L.moved) {
@@ -2047,15 +2080,12 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       const cls = filled ? 'filled' + (okHere ? ' ok' : '') : over ? 'hot' : (c4.sel || d) ? 'ready' : 'empty';
       return { id: q.id, y: q.y, cls: cls, t: '', aria: 'Drop zone for shape ' + (i + 1), tap: () => this.slotTap(q.id) };
     });
-    const isLastCfu = st.cfu === 5;
     // scene: the ice panel on the right, Swiftee and her bubble on the left; the measuring room, summary and
     // hero screens rearrange it in CSS
     const tf = (c) => 'translate(' + c.tx + 'px, ' + c.ty + 'px) scale(' + c.scale + ')';
     return {
       rootMove: (e) => this.rootMove(e),
       rootUp: (e) => this.rootUp(e),
-      next: () => this.next(),
-      back: () => this.back(),
       navNext: () => this.navNext(),
       screensLabel: 'Screen ' + (s.step + 1) + ' of ' + steps.length, // current position; tap to open the screen list
       navOpen: !!s.navOpen,
@@ -2096,12 +2126,6 @@ window.TrapeziumGame = class TrapeziumGame extends DCLogic {
       qx: CONFIG.qFocus.cx - 305, qy: s.qc ? CONFIG.qFocus.shapeTop : CONFIG.qFocus.shapeTop0, chipTop: st.chipTop || CONFIG.scene.chipTop, chipLeft: CONFIG.scene.chipLeft,
       celebrate: st.id === 'wellDone',
       labs: labs, slots: slots,
-      showNav: s.started && !st.end,
-      backDisabled: s.step === 0 || !!st.locked || !CONFIG.flow.showBack,
-      backCls: st.locked || !CONFIG.flow.showBack ? 'auto' : '',
-      nextDisabled: !s.done,
-      nextCls: CONFIG.flow.showNext && st.autoAdvance == null ? (s.done && !s.talking ? 'ready' : '') : 'auto', // screens move on by themselves
-      nextLabel: isLastCfu ? 'Finish' : 'Next',
       sceneCls: 'scene' + (st.noPanel ? ' nopanel' : '') + (st.hero ? ' hero' : '') + (st.hero && st.end ? ' endhero' : '') + (st.summary ? ' summary' : '') + (st.room === 'measure' ? ' measure-room' : ''), // hero (screens 36, 43-44): Swiftee centre stage, no board
       boardTf: st.room === 'measure' ? tf(CONFIG.measureRoom) : !st.noZoom ? tf(this.fit || CONFIG.lessonZoom) : 'translate(' + CONFIG.scene.boardX + 'px, ' + (st.boardShiftY || 0) + 'px)',
       // focusing: a part is being named, so the rest of the shape steps back

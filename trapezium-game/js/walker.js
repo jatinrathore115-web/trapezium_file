@@ -14,8 +14,8 @@ window.SwifteeWalker = class SwifteeWalker {
     this.moves = [];
     this.loop = this.loop.bind(this);
     this.last = performance.now();
+    this.looping = false; // the frame loop runs only while she is out (run() starts it, hide() lets it stop)
     if (this.m) this.sheet('measuring');
-    requestAnimationFrame(this.loop);
   }
   // load a sheet once (always the @2x one)
   sheet(a) {
@@ -64,11 +64,11 @@ window.SwifteeWalker = class SwifteeWalker {
     const t0 = performance.now();
     this.moves = [{ t0: t0, ms: Math.max(1, ms), step: step, done: done }];
     step(0);
+    if (!this.looping) { this.looping = true; this.last = t0; requestAnimationFrame(this.loop); }
   }
 
   // ---------- frame loop ----------
   loop(now) {
-    requestAnimationFrame(this.loop);
     const mv = this.moves[0];
     if (mv) {
       const t = Math.min(1, (now - mv.t0) / mv.ms);
@@ -78,6 +78,7 @@ window.SwifteeWalker = class SwifteeWalker {
     const a = this.m && this.m.animations[this.anim], fps = (a && a.fps) || 20, sh = this.sheet(this.anim);
     if (this.playing && sh && now - this.last >= 1000 / fps) { this.frame = (this.frame + 1) % sh.info.frames; this.last = now; }
     this.draw();
+    if (this.visible || this.moves.length) requestAnimationFrame(this.loop); else this.looping = false;
   }
   // place the element so her feet are on pos (feet at 0.877 of the cell unless the manifest says otherwise), then draw
   // the frame into its 512 px canvas, mirrored when she walks left
@@ -93,8 +94,12 @@ window.SwifteeWalker = class SwifteeWalker {
     e.style.left = (this.pos.x - S / 2) + 'px'; e.style.top = (this.pos.y - S * base) + 'px';
     const cv = e.querySelector('canvas');
     if (cv.width !== 512) { cv.width = 512; cv.height = 512; this.ctx = null; }
-    const ctx = this.ctx || (this.ctx = cv.getContext('2d'));
-    const cell = sh.info.cell, cols = sh.info.cols, f = this.frame % sh.info.frames;
+    if (!this.ctx) { this.ctx = cv.getContext('2d'); this.drawn = null; }
+    const ctx = this.ctx, cell = sh.info.cell, cols = sh.info.cols, f = this.frame % sh.info.frames;
+    // the picture changes only with the frame (about 10 a second) or her direction; moving her is the element's left / top
+    const key = this.anim + ':' + f + ':' + this.flip;
+    if (key === this.drawn) return;
+    this.drawn = key;
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, 512, 512);
     ctx.setTransform(this.flip ? -1 : 1, 0, 0, 1, this.flip ? 512 : 0, 0);
     if (window.WinterScarf) WinterScarf.frame(ctx, sh.img, (f % cols) * cell, Math.floor(f / cols) * cell, cell, this.anim, f, 0, 0, 512, 512);

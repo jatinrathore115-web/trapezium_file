@@ -36,8 +36,8 @@ const CONFIG = {
   // Next / Back taps; speechRate: voice speed (1 = normal); lineGapMs: pause after each line
   timing: { idleMs: 9000, idleMaxHints: 3, navLockMs: 450, speechRate: 0.86, lineGapMs: 1100 },
   // autoAdvance false = manual navigation (a finished screen waits for Next); advanceMs = the wait when it is on;
-  // showNext / showBack: the extra Next and Back buttons (off = top-right ones only); cover: open on the front page;
-  flow: { autoAdvance: false, advanceMs: 2500, showNext: false, showBack: false, cover: true },
+  // cover: open on the front page (Play starts the lesson)
+  flow: { autoAdvance: false, advanceMs: 2500, cover: true },
   // every screen: shape nudged right to centre it in the panel (boardX, on noZoom screens); the label row sits on the
   // panel's bottom edge (chipTop: the row's top, so a name plate's middle lands on the edge)
   scene: { boardX: 11, chipTop: 571, chipLeft: 616 },
@@ -66,7 +66,7 @@ const CONFIG = {
   antics: { idleMs: 15000, list: ['sleeping', 'daydreaming', 'playful', 'reading'] },
   hand: { idleMs: 8000, showMs: 4400, maxShows: 4, // hand nudge: wait with no touch, time on screen, showings per step
     onceDelayMs: 500, onceMs: 2300 },                 // handOnce screens: delay after the line, time on screen
-  // Swiftee's expressions (state names from swiftee-assets/atlas/swiftee.manifest.json).
+  // Swiftee's expressions (state names from js/swiftee-manifest.js, which lists the sheets the game ships).
   // A line's own m wins; these cover reactions and the pose held between lines.
   swiftee: {
     base: 'swiftee-assets/',

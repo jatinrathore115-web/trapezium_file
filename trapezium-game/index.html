@@ -2,12 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Trapezium lesson game</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@600;700;800;900&amp;display=swap">
 <!-- only the ∥ and ∠ symbols, which the game fonts don't have; listed after them in the CSS font stacks -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Math&amp;text=%E2%88%A5%E2%88%A0&amp;display=swap">
+<!-- the front-page banner: fetched alongside the scripts rather than after the page has rendered -->
+<link rel="preload" as="image" href="assets/images/banner.webp" fetchpriority="high">
 <link rel="stylesheet" href="css/stage.css">
 <link rel="stylesheet" href="css/game.css">
 <script>window.__resources = {}; /* template is inline below; the runtime need not re-fetch this page */</script>
@@ -271,7 +273,7 @@
 
 <div class="{{swCls}}" style="position: absolute; top: 401px; width: 259px; height: 259px; pointer-events: none">
 <img class="{{birdCls}} swiftee-still" src="assets/images/swiftee.webp" alt="Swiftee the bird" style="position: absolute; left: 42px; top: 29px; width: 180px; height: 198px">
-<img class="swiftee-still" src="assets/images/winter-scarf-flat.png" alt="" aria-hidden="true" style="position: absolute; left: 40.3px; top: 82.6px; width: 168.8px; height: 118.2px; transform: rotate(6.61deg); transform-origin: 57.1% 54%; filter: drop-shadow(0 .4px .4px rgba(14,91,82,.2))">
+<img class="swiftee-still" src="assets/images/winter-scarf-flat.webp" alt="" aria-hidden="true" style="position: absolute; left: 40.3px; top: 82.6px; width: 168.8px; height: 118.2px; transform: rotate(6.61deg); transform-origin: 57.1% 54%; filter: drop-shadow(0 .4px .4px rgba(14,91,82,.2))">
 <canvas class="swiftee-sprite" width="256" height="256" aria-hidden="true" style="position: absolute; left: 0px; top: 0px; width: 259px; height: 259px"></canvas>
 </div>
 <div class="bubble {{bubCls}} {{bubHide}}" style="position: absolute; left: 240px; bottom: 322px; pointer-events: none">
@@ -283,15 +285,6 @@
 <svg class="bubble-tail" width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path d="M2,-1 L7.5,25 L26,-1" fill="#fdf6e4" stroke="#2a9a8c" stroke-width="3" stroke-linejoin="round" stroke-linecap="butt"></path></svg>
 
 </div>
-
-<sc-if value="{{showNav}}" hint-placeholder-val="{{ true }}">
-<div style="position: absolute; left: 860px; top: 652px; width: 312px; height: 60px; display: flex; justify-content: flex-end; align-items: center; gap: 14px">
-<button class="ibtn {{backCls}}" aria-label="Back" data-qa="back" disabled="{{backDisabled}}" onClick="{{back}}" style="width: 54px; height: 54px">
-<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
-</button>
-<button class="next {{nextCls}}" data-qa="next" disabled="{{nextDisabled}}" onClick="{{next}}">{{nextLabel}}<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
-</div>
-</sc-if>
 
 <button class="navbtn screens-btn" data-qa="screens" aria-label="{{screensLabel}}" onClick="{{toggleScreens}}" style="position: absolute; left: 24px; top: 16px">{{screensLabel}}</button>
 <sc-if value="{{navOpen}}" hint-placeholder-val="{{ false }}">
@@ -312,7 +305,7 @@
 </div>
 
 <div class="walker" aria-hidden="true" style="position: absolute; left: 0px; top: 0px; width: 120px; height: 120px; pointer-events: none; visibility: hidden; z-index: 12"><canvas width="512" height="512" style="width: 100%; height: 100%; display: block"></canvas></div>
-<canvas class="angle-walk" width="2560" height="1440" aria-hidden="true" style="position: absolute; left: 0px; top: 0px; width: 1280px; height: 720px; pointer-events: none; z-index: 12"></canvas>
+<canvas class="angle-walk" width="1280" height="720" aria-hidden="true" style="position: absolute; left: 0px; top: 0px; width: 1280px; height: 720px; pointer-events: none; z-index: 12"></canvas>
 
 <canvas class="confetti" width="1280" height="720" aria-hidden="true" style="position: absolute; left: 0px; top: 0px; width: 1280px; height: 720px; pointer-events: none; z-index: 15"></canvas>
 
@@ -351,6 +344,8 @@
 </div>
 </div>
 </x-dc>
+<!-- a touch screen held upright: the stage is a thin strip, so a hint above it suggests turning the device (css/stage.css) -->
+<div class="turn-hint"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="16" rx="2"></rect><path d="M3 15a9 9 0 0 0 9 7"></path><path d="M9.5 22H12v-2.5"></path></svg>Turn sideways for a bigger view</div>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1920,"height":1080}}'>
 var Component = window.TrapeziumGame;
 </script>
